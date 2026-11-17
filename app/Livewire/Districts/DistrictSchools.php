@@ -12,21 +12,23 @@ class DistrictSchools extends Component
 {
     use WithPagination;
 
-    public $district;
+    public District $district;
 
-    public function mount(District $district)
+    public function mount(District $district): void
     {
-        $this->district = $district;
+        $this->district = $district->load('region');
     }
 
     public function render()
     {
         $schools = $this->district->schools()
-            ->active()->verified()
-            ->with(['type', 'curricula'])
+            ->active()
+            ->verified()
+            ->with(['type', 'district', 'curricula'])
+            ->orderByDesc('is_featured')
+            ->orderBy('name')
             ->paginate(15);
 
-        $district = $this->district->load('region');
-        return view('livewire.districts.district-schools', compact('schools', 'district'));
+        return view('livewire.districts.district-schools', compact('schools'));
     }
 }

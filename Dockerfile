@@ -14,7 +14,6 @@ RUN install-php-extensions \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 
-# Install production PHP dependencies from the committed lockfile.
 FROM php-base AS vendor
 COPY composer.json composer.lock ./
 RUN composer install \
@@ -25,7 +24,6 @@ RUN composer install \
     --optimize-autoloader \
     --no-scripts
 
-# Compile the Vite/Tailwind production assets.
 FROM node:22-alpine AS frontend
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -35,7 +33,6 @@ COPY vite.config.js ./
 COPY public ./public
 RUN npm run build
 
-# Runtime image.
 FROM php-base AS runtime
 WORKDIR /app
 
@@ -57,9 +54,17 @@ RUN chmod +x /usr/local/bin/docker-entrypoint \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R ug+rwx storage bootstrap/cache
 
-ENV APP_ENV=production
-ENV APP_DEBUG=false
-ENV SERVER_NAME=:80
+ENV APP_NAME="FindurSch" \
+    APP_ENV=production \
+    APP_DEBUG=false \
+    DB_CONNECTION=pgsql \
+    DB_SSLMODE=require \
+    SESSION_DRIVER=database \
+    CACHE_STORE=database \
+    QUEUE_CONNECTION=database \
+    LOG_CHANNEL=stderr \
+    LOG_LEVEL=warning \
+    SERVER_NAME=:80
 
 EXPOSE 80
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]

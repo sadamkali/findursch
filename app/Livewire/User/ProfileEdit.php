@@ -2,27 +2,52 @@
 
 namespace App\Livewire\User;
 
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+#[Layout('layouts.app')]
 class ProfileEdit extends Component
 {
-    public $name, $email, $phone;
+    public string $name = '';
+    public string $email = '';
+    public string $phone = '';
 
-    public function mount()
+    public function mount(): void
     {
-        $u = auth()->user();
-        $this->name = $u->name;
-        $this->email = $u->email;
-        $this->phone = $u->phone;
-    }
+        $user = auth()->user();
 
-    protected $rules = ['name' => 'required|min:2', 'email' => 'required|email', 'phone' => 'nullable|string|max:30'];
+        $this->name = $user->name;
+        $this->email = $user->email;
+        $this->phone = (string) ($user->phone ?? '');
+    }
 
     public function save()
     {
-        $this->validate();
-        auth()->user()->update(['name' => $this->name, 'email' => $this->email, 'phone' => $this->phone]);
-        session()->flash('message', 'Profile updated.');
+        $user = auth()->user();
+        $originalEmail = $user->email;
+
+        $validated = $this->validate([
+            'name' => ['required', 'string', 'min:2', 'max:255'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:30'],
+        ]);
+
+        $user->forceFill([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?: null,
+        ])->save();
+
+        if ($originalEmail !== $validated['email']) {
+            $user->forceFill(['email_verified_at' => null])->save();
+            $user->sendEmailVerificationNotification();
+
+            return redirect()->route('verification.notice')
+                ->with('status', 'Your email changed. Verify the new address to continue using your account.');
+        }
+
+        session()->flash('message', 'Your profile has been updated.');
     }
 
     public function render()
