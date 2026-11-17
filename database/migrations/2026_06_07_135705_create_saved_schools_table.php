@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
             $table->foreignId("school_id")->constrained("schools")->cascadeOnDelete();
             $table->text("notes")->nullable();
-            $table->timestamp("created_at")->nullable();
+            $table->timestamps();
 
             $table->unique(["user_id", "school_id"]);
         });
