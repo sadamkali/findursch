@@ -53,6 +53,16 @@
         </div>
     </header>
 
+    <div x-data="compareBar" x-cloak x-show="schools.length > 0" class="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white/95 shadow-lg backdrop-blur">
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+            <p class="text-sm font-medium text-gray-700"><span x-text="schools.length"></span> of 3 schools selected to compare</p>
+            <div class="flex items-center gap-3">
+                <button type="button" @click="clear()" class="text-sm font-medium text-gray-500 hover:text-red-600">Clear</button>
+                <a :href="'/compare?schools=' + encodeURIComponent(schools.join(','))" class="btn-primary text-sm">Compare schools</a>
+            </div>
+        </div>
+    </div>
+
     {{-- MAIN --}}
     <main class="min-h-screen">
         {{ $slot ?? '' }}
