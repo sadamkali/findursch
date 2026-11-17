@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users;
 
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -57,6 +58,7 @@ class UserResource extends \Filament\Resources\Resource
                 ->multiple()
                 ->preload()
                 ->searchable()
+                ->disabled(fn (?User $record): bool => $record?->is(auth()->user()) ?? false)
                 ->label('Access roles'),
         ]);
     }
@@ -75,6 +77,15 @@ class UserResource extends \Filament\Resources\Resource
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('suspend')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->visible(fn (User $record): bool => $record->status === 'active' && ! $record->is(auth()->user()))
+                    ->action(fn (User $record) => $record->forceFill(['status' => 'suspended'])->save()),
+                Action::make('activate')
+                    ->color('success')
+                    ->visible(fn (User $record): bool => $record->status !== 'active')
+                    ->action(fn (User $record) => $record->forceFill(['status' => 'active'])->save()),
             ])
             ->defaultSort('created_at', 'desc');
     }
