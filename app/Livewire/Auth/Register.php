@@ -57,9 +57,12 @@ class Register extends Component
 
         auth()->login($user);
         request()->session()->regenerate();
-        $user->sendEmailVerificationNotification();
 
-        return redirect()->route('verification.notice');
+        if ($user->hasRole('school_owner')) {
+            return redirect()->route('owner.dashboard');
+        }
+
+        return redirect()->route('user.dashboard');
     }
 
     public function render()
