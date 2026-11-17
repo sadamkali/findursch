@@ -11,15 +11,16 @@ Alpine.plugin(focus);
 Alpine.plugin(anchor);
 
 window.Alpine = Alpine;
-Alpine.start();
-
 // Global Alpine components
 Alpine.data('compareBar', () => ({
     schools: JSON.parse(localStorage.getItem('compare_schools') || '[]'),
     init() {
-        window.addEventListener('storage', () => {
+        const sync = () => {
             this.schools = JSON.parse(localStorage.getItem('compare_schools') || '[]');
-        });
+        };
+
+        window.addEventListener('storage', sync);
+        window.addEventListener('findursch:compare-add', event => this.add(event.detail));
     },
     add(slug) {
         if (this.schools.length < 3 && !this.schools.includes(slug)) {
@@ -68,6 +69,8 @@ Alpine.data('searchSuggestions', () => ({
         this.loading = false;
     }
 }));
+
+Alpine.start();
 
 Alpine.data('lightbox', () => ({
     open: false,
