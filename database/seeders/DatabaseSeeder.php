@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
             PlanSeeder::class,
             ArticleCategorySeeder::class,
             SettingSeeder::class,
-            AdminUserSeeder::class,
+            AccessRoleSeeder::class,
         ]);
 
         if (app()->environment(['local', 'staging'])) {
