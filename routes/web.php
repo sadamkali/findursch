@@ -61,7 +61,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
         $request->fulfill();
 
-        return redirect()->route('user.dashboard')
+        $destination = $request->user()->hasRole('school_owner')
+            ? 'owner.dashboard'
+            : 'user.dashboard';
+
+        return redirect()->route($destination)
             ->with('status', 'Your email address has been verified.');
     })->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
 
