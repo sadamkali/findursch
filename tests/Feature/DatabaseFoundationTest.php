@@ -1,16 +1,16 @@
 <?php
 
-namespace Tests\\Feature;
+namespace Tests\Feature;
 
-use App\\Models\\District;
-use App\\Models\\Region;
-use App\\Models\\School;
-use App\\Models\\SchoolType;
-use App\\Models\\SchoolView;
-use App\\Models\\User;
-use Illuminate\\Foundation\\Testing\\RefreshDatabase;
-use Illuminate\\Support\\Facades\\Schema;
-use Tests\\TestCase;
+use App\Models\District;
+use App\Models\Region;
+use App\Models\School;
+use App\Models\SchoolType;
+use App\Models\SchoolView;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
+use Tests\TestCase;
 
 class DatabaseFoundationTest extends TestCase
 {
