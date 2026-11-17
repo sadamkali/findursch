@@ -48,8 +48,7 @@ Route::get('/api/search/suggest', function (Request $request) {
     $pattern = '%'.mb_strtolower($term).'%';
 
     $schools = School::query()
-        ->active()
-        ->verified()
+        ->publiclyVisible()
         ->whereRaw('LOWER(name) LIKE ?', [$pattern])
         ->with('district')
         ->limit(5)

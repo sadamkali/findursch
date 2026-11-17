@@ -17,14 +17,14 @@ class HomePage extends Component
             ->orderBy('order')
             ->get();
 
-        $featuredSchools = School::active()
-            ->verified()
+        $featuredSchools = School::publiclyVisible()
             ->featured()
             ->with(['district', 'type', 'curricula'])
             ->limit(6)
             ->get();
 
         $districts = District::with('region')
+            ->withCount(['schools as school_count' => fn ($query) => $query->publiclyVisible()])
             ->inRandomOrder()
             ->limit(8)
             ->get();
@@ -38,7 +38,7 @@ class HomePage extends Component
             ->get();
 
         $stats = [
-            'schools' => School::active()->verified()->count(),
+            'schools' => School::publiclyVisible()->count(),
             'districts' => District::count(),
             'parents' => \App\Models\User::where('user_type', 'parent')->count(),
             'reviews' => \App\Models\Review::where('status', 'approved')->count(),

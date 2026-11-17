@@ -13,6 +13,9 @@
                 </div>
             @endif
 
+            @if($school->is_demo)
+                <span class="absolute left-3 top-3 rounded-badge border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-xs font-bold text-sky-800">Demo data</span>
+            @endif
             @if($school->is_featured)
                 <span class="absolute right-3 top-3 rounded-badge border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700">Featured</span>
             @endif
@@ -20,7 +23,9 @@
         <div class="p-5">
             <div class="mb-2 flex items-center gap-2">
                 <span class="text-xs font-semibold uppercase tracking-wider text-primary-700">{{ $school->type?->name }}</span>
-                @if($school->verification_status === 'verified')
+                @if($school->is_demo)
+                    <span class="rounded-badge border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-bold text-sky-800">Sample listing</span>
+                @elseif($school->verification_status === 'verified')
                     <span class="rounded-badge border border-green-200 bg-green-50 px-2 py-0.5 text-xs font-bold text-green-700">✓ Verified</span>
                 @endif
             </div>

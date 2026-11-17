@@ -22,6 +22,7 @@ class ProductionReferenceDataSeeder extends Seeder
             ArticleCategorySeeder::class,
             SettingSeeder::class,
             AccessRoleSeeder::class,
+            DemoSchoolSeeder::class,
         ]);
     }
 }

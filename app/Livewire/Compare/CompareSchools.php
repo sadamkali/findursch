@@ -21,8 +21,7 @@ class CompareSchools extends Component
 
         if ($requestedSlugs->isNotEmpty()) {
             $this->schoolIds = School::query()
-                ->active()
-                ->verified()
+                ->publiclyVisible()
                 ->whereIn('slug', $requestedSlugs)
                 ->pluck('id')
                 ->all();
@@ -55,8 +54,7 @@ class CompareSchools extends Component
     public function render()
     {
         $schools = School::query()
-            ->active()
-            ->verified()
+            ->publiclyVisible()
             ->with(['type', 'district', 'curricula', 'facilities'])
             ->whereIn('id', $this->schoolIds)
             ->get();

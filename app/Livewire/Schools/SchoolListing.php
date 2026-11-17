@@ -56,7 +56,7 @@ class SchoolListing extends Component
 
     public function render()
     {
-        $query = School::active()->verified()
+        $query = School::publiclyVisible()
             ->with(['district', 'type', 'curricula']);
 
         if ($this->district) $query->inDistrict((int) $this->district);

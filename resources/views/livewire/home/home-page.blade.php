@@ -67,7 +67,7 @@
             <div class="flex items-end justify-between mb-10">
                 <div>
                     <h2 class="text-3xl font-normal mb-3" style="font-family: 'DM Serif Display', serif;">Featured Schools</h2>
-                    <p class="text-gray-600">Top-rated, verified schools across Uganda</p>
+                    <p class="text-gray-600">Explore school profiles across Uganda, including clearly labelled sample listings</p>
                 </div>
                 <a href="{{ route('schools.index') }}" class="text-primary font-semibold hover:underline">View all →</a>
             </div>

@@ -22,7 +22,7 @@ class SearchResults extends Component
         $districts = collect();
 
         if (strlen($this->q) >= 2) {
-            $schools = School::active()->verified()
+            $schools = School::publiclyVisible()
                 ->where(function ($query) {
                     $query->where('name', 'like', "%{$this->q}%")
                           ->orWhere('tagline', 'like', "%{$this->q}%")

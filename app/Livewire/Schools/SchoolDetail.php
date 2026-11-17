@@ -29,8 +29,7 @@ class SchoolDetail extends Component
     public function mount(School $school): void
     {
         $this->school = School::query()
-            ->active()
-            ->verified()
+            ->publiclyVisible()
             ->whereKey($school->id)
             ->firstOrFail();
 
@@ -119,6 +118,8 @@ class SchoolDetail extends Component
 
     public function submitReview()
     {
+        abort_if($this->school->is_demo, 404);
+
         if (! auth()->check()) {
             return redirect()->route('login');
         }

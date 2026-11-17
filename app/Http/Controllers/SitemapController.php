@@ -15,7 +15,7 @@ class SitemapController extends Controller
         $urls[] = ['url' => route('schools.index'), 'priority' => '0.9'];
         $urls[] = ['url' => route('articles.index'), 'priority' => '0.8'];
 
-        foreach (School::active()->verified()->get() as $s) {
+        foreach (School::publiclyVisible()->get() as $s) {
             $urls[] = ['url' => route('schools.show', $s), 'priority' => '0.7'];
         }
         foreach (District::all() as $d) {

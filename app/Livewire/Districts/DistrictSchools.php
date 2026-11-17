@@ -22,8 +22,7 @@ class DistrictSchools extends Component
     public function render()
     {
         $schools = $this->district->schools()
-            ->active()
-            ->verified()
+            ->publiclyVisible()
             ->with(['type', 'district', 'curricula'])
             ->orderByDesc('is_featured')
             ->orderBy('name')

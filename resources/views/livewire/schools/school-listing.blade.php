@@ -2,7 +2,7 @@
     <div class="bg-gradient-to-br from-primary-50 to-white py-12">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h1 class="text-4xl font-normal mb-3" style="font-family: 'DM Serif Display', serif;">Discover Schools</h1>
-            <p class="text-gray-600">Browse {{ $schools->total() }} verified schools across Uganda</p>
+            <p class="text-gray-600">Browse {{ $schools->total() }} school listings across Uganda</p>
         </div>
     </div>
 

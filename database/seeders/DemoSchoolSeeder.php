@@ -4,253 +4,90 @@ namespace Database\Seeders;
 
 use App\Models\Curriculum;
 use App\Models\District;
-use App\Models\Facility;
-use App\Models\Plan;
 use App\Models\School;
 use App\Models\SchoolType;
-use App\Models\Subscription;
-use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class DemoSchoolSeeder extends Seeder
 {
+    /**
+     * Fictional sample records for the public browsing experience.
+     * These have no owner or contact details and always remain unverified.
+     */
     public function run(): void
     {
-        if (! app()->environment(['local', 'staging'])) {
-            return;
-        }
+        $districts = District::all()->keyBy('slug');
+        $types = SchoolType::all()->keyBy('slug');
+        $curricula = Curriculum::all()->keyBy('slug');
 
-        $premiumPlan = Plan::where('slug', 'premium')->first();
-        $unebOl = Curriculum::where('slug', 'uneb-o-level')->first();
-        $unebAl = Curriculum::where('slug', 'uneb-a-level')->first();
-        $cambridge = Curriculum::where('slug', 'cambridge-igcse')->first();
-        $ib = Curriculum::where('slug', 'international-baccalaureate-ib')->first();
-        $stem = Curriculum::where('slug', 'stem-focus')->first();
-
-        $facilities = Facility::all()->pluck('id')->toArray();
-
-        $schools = [
-            [
-                'name' => 'Kampala Parents School',
-                'owner_email' => 'john@example.com',
-                'district' => 'Kampala',
-                'type' => 'Secondary',
-                'tagline' => 'Excellence in education since 1964',
-                'description' => 'Kampala Parents School is one of Uganda\'s most prestigious schools, providing quality education with a focus on holistic development. Our students consistently rank among the top in national examinations.',
-                'address' => 'Plot 14, Naguru Drive, Kampala',
-                'phone' => '+256 414 250 101',
-                'email' => 'info@kampalaparents.ac.ug',
-                'website' => 'https://kampalaparents.ac.ug',
-                'whatsapp' => '+256 700 250 101',
-                'founded_year' => 1964,
-                'boarding_type' => 'mixed',
-                'gender_policy' => 'mixed',
-                'student_count_approx' => 1800,
-                'latitude' => 0.3476,
-                'longitude' => 32.5825,
-                'curricula' => [$unebOl?->id, $unebAl?->id],
-                'plan' => 'premium',
-                'is_featured' => true,
-            ],
-            [
-                'name' => 'Makerere College School',
-                'owner_email' => 'mary@example.com',
-                'district' => 'Kampala',
-                'type' => 'Secondary',
-                'tagline' => 'Tradition of excellence',
-                'description' => 'Makerere College School has been a leading boys\' school in Uganda for over 70 years, producing leaders in all fields of Ugandan society.',
-                'address' => 'Makerere Hill, Kampala',
-                'phone' => '+256 414 533 522',
-                'email' => 'admin@makererecollege.ac.ug',
-                'website' => 'https://makererecollege.ac.ug',
-                'whatsapp' => '+256 700 533 522',
-                'founded_year' => 1945,
-                'boarding_type' => 'boarding',
-                'gender_policy' => 'boys',
-                'student_count_approx' => 1200,
-                'latitude' => 0.3389,
-                'longitude' => 32.5689,
-                'curricula' => [$unebOl?->id, $unebAl?->id],
-                'plan' => 'standard',
-                'is_featured' => true,
-            ],
-            [
-                'name' => 'Aga Khan Academy Kampala',
-                'owner_email' => 'peter@example.com',
-                'district' => 'Kampala',
-                'type' => 'International',
-                'tagline' => 'World-class education with a global perspective',
-                'description' => 'Aga Khan Academy Kampala delivers an internationally recognised curriculum that develops students into critical thinkers and ethical leaders.',
-                'address' => 'Kansanga, Ggaba Road, Kampala',
-                'phone' => '+256 414 234 567',
-                'email' => 'kampala@agakhanacademies.org',
-                'website' => 'https://agakhanacademies.org/kampala',
-                'whatsapp' => '+256 700 234 567',
-                'founded_year' => 2003,
-                'boarding_type' => 'mixed',
-                'gender_policy' => 'mixed',
-                'student_count_approx' => 850,
-                'latitude' => 0.2601,
-                'longitude' => 32.5956,
-                'curricula' => [$ib?->id, $cambridge?->id],
-                'plan' => 'premium',
-                'is_featured' => true,
-            ],
-            [
-                'name' => 'Loreto High School Jinja',
-                'district' => 'Jinja',
-                'type' => 'Secondary',
-                'tagline' => 'Empowering girls through quality education',
-                'description' => 'Loreto High School Jinja is one of Uganda\'s leading girls\' schools, founded by the Loreto Sisters in 1958 with a commitment to academic excellence and character formation.',
-                'address' => 'Plot 2, Nalufenya Road, Jinja',
-                'phone' => '+256 434 122 001',
-                'email' => 'info@loretojinja.ac.ug',
-                'website' => 'https://loretojinja.ac.ug',
-                'whatsapp' => '+256 700 122 001',
-                'founded_year' => 1958,
-                'boarding_type' => 'boarding',
-                'gender_policy' => 'girls',
-                'student_count_approx' => 900,
-                'latitude' => 0.4250,
-                'longitude' => 33.2041,
-                'curricula' => [$unebOl?->id, $unebAl?->id],
-                'plan' => 'standard',
-                'is_featured' => false,
-            ],
-            [
-                'name' => 'Mbarara High School',
-                'district' => 'Mbarara',
-                'type' => 'Secondary',
-                'tagline' => 'Where tradition meets excellence',
-                'description' => 'Mbarara High School is one of the oldest and most respected schools in Western Uganda, known for producing well-rounded students.',
-                'address' => 'Mbaguta Street, Mbarara',
-                'phone' => '+256 485 420 011',
-                'email' => 'admin@mbararahigh.ac.ug',
-                'website' => null,
-                'whatsapp' => '+256 700 420 011',
-                'founded_year' => 1926,
-                'boarding_type' => 'boarding',
-                'gender_policy' => 'boys',
-                'student_count_approx' => 750,
-                'latitude' => -0.6057,
-                'longitude' => 30.6486,
-                'curricula' => [$unebOl?->id, $unebAl?->id],
-                'plan' => 'standard',
-                'is_featured' => true,
-            ],
-            [
-                'name' => 'Greenhill Academy',
-                'district' => 'Wakiso',
-                'type' => 'Primary',
-                'tagline' => 'Nurturing young minds',
-                'description' => 'Greenhill Academy is a leading primary school in Kampala offering a balanced curriculum with strong emphasis on academic excellence and co-curricular activities.',
-                'address' => 'Kira Road, Kampala',
-                'phone' => '+256 414 567 890',
-                'email' => 'info@greenhillacademy.ac.ug',
-                'website' => 'https://greenhillacademy.ac.ug',
-                'whatsapp' => '+256 700 567 890',
-                'founded_year' => 1994,
-                'boarding_type' => 'day',
-                'gender_policy' => 'mixed',
-                'student_count_approx' => 1500,
-                'latitude' => 0.3556,
-                'longitude' => 32.6092,
-                'curricula' => [$cambridge?->id, $stem?->id],
-                'plan' => 'premium',
-                'is_featured' => false,
-            ],
-            [
-                'name' => 'Gulu University',
-                'district' => 'Gulu',
-                'type' => 'University',
-                'tagline' => 'Knowledge for development',
-                'description' => 'Gulu University is a public university in Northern Uganda offering undergraduate and postgraduate programmes in various fields including medicine, agriculture, education and business.',
-                'address' => 'Pece-Laroo Division, Gulu',
-                'phone' => '+256 471 432 500',
-                'email' => 'info@gu.ac.ug',
-                'website' => 'https://gu.ac.ug',
-                'whatsapp' => null,
-                'founded_year' => 2002,
-                'boarding_type' => 'mixed',
-                'gender_policy' => 'mixed',
-                'student_count_approx' => 4500,
-                'latitude' => 2.7747,
-                'longitude' => 32.2998,
-                'curricula' => [],
-                'plan' => 'standard',
-                'is_featured' => false,
-            ],
-            [
-                'name' => 'Buddo Junior School',
-                'district' => 'Wakiso',
-                'type' => 'Primary',
-                'tagline' => 'A foundation for life',
-                'description' => 'Buddo Junior School is one of the most prestigious primary schools in Uganda, providing quality education for children aged 5-12.',
-                'address' => 'Buddo, Wakiso District',
-                'phone' => '+256 414 200 411',
-                'email' => 'info@buddojunior.ac.ug',
-                'website' => null,
-                'whatsapp' => '+256 700 200 411',
-                'founded_year' => 1909,
-                'boarding_type' => 'boarding',
-                'gender_policy' => 'mixed',
-                'student_count_approx' => 950,
-                'latitude' => 0.2650,
-                'longitude' => 32.5080,
-                'curricula' => [$unebOl?->id, $cambridge?->id],
-                'plan' => 'standard',
-                'is_featured' => false,
-            ],
+        $samples = [
+            ['name' => 'Demo — Acacia Grove Primary School', 'district' => 'kampala', 'type' => 'primary', 'tagline' => 'A sample primary-school profile', 'boarding' => 'day', 'curricula' => ['uneb-o-level', 'stem-focus'], 'featured' => true],
+            ['name' => 'Demo — Lakeview Nursery and Kindergarten', 'district' => 'wakiso', 'type' => 'nursery', 'tagline' => 'A sample early-learning profile', 'boarding' => 'day', 'curricula' => [], 'featured' => true],
+            ['name' => 'Demo — Cedar Ridge Secondary School', 'district' => 'mukono', 'type' => 'secondary', 'tagline' => 'A sample lower-secondary profile', 'boarding' => 'mixed', 'curricula' => ['uneb-o-level'], 'featured' => true],
+            ['name' => 'Demo — Nilebridge International Academy', 'district' => 'jinja', 'type' => 'international', 'tagline' => 'A sample international-curriculum profile', 'boarding' => 'day', 'curricula' => ['cambridge-igcse', 'international-baccalaureate-ib'], 'featured' => false],
+            ['name' => 'Demo — Rwenzori Horizon A-Level College', 'district' => 'mbarara', 'type' => 'a-level', 'tagline' => 'A sample advanced-level profile', 'boarding' => 'boarding', 'curricula' => ['uneb-a-level', 'cambridge-a-level'], 'featured' => false],
+            ['name' => 'Demo — Northern Star Community School', 'district' => 'gulu', 'type' => 'primary', 'tagline' => 'A sample community-school profile', 'boarding' => 'day', 'curricula' => ['uneb-o-level'], 'featured' => false],
+            ['name' => 'Demo — Eastern Skills and Technology Institute', 'district' => 'mbale', 'type' => 'vocational', 'tagline' => 'A sample technical-training profile', 'boarding' => 'mixed', 'curricula' => ['stem-focus'], 'featured' => false],
+            ['name' => 'Demo — Masaka Greenfield Academy', 'district' => 'masaka', 'type' => 'secondary', 'tagline' => 'A sample secondary-school profile', 'boarding' => 'boarding', 'curricula' => ['uneb-o-level', 'uneb-a-level'], 'featured' => false],
+            ['name' => 'Demo — Westgate Early Learning Centre', 'district' => 'arua', 'type' => 'nursery', 'tagline' => 'A sample early-years profile', 'boarding' => 'day', 'curricula' => [], 'featured' => false],
+            ['name' => 'Demo — Lira University of Applied Studies', 'district' => 'lira', 'type' => 'university', 'tagline' => 'A sample higher-education profile', 'boarding' => 'day', 'curricula' => ['stem-focus'], 'featured' => false],
         ];
 
-        foreach ($schools as $data) {
-            $owner = null;
-            if (! empty($data['owner_email'])) {
-                $owner = User::where('email', $data['owner_email'])->first();
+        foreach ($samples as $sample) {
+            $district = $districts->get($sample['district']);
+            $type = $types->get($sample['type']);
+
+            if (! $district || ! $type) {
+                throw new RuntimeException('FindurSch demo school reference data is incomplete.');
             }
-            unset($data['owner_email']);
 
-            $district = District::where('slug', Str::slug($data['district']))->first();
-            $type = SchoolType::where('slug', Str::slug($data['type']))->first();
-            $curriculaIds = $data['curricula'];
-            $planSlug = $data['plan'];
-            unset($data['curricula'], $data['plan'], $data['district'], $data['type']);
+            $slug = Str::slug($sample['name']);
+            $description = 'DEMO LISTING — This is fictional sample content created to demonstrate FindurSch. '
+                .$sample['name'].' is not a real institution. Its name and profile details must not be used '
+                .'for admissions or school-selection decisions.';
 
-            $data['district_id'] = $district?->id;
-            $data['type_id'] = $type?->id;
-            $data['owner_id'] = $owner?->id;
-            $data['status'] = 'active';
-            $data['verification_status'] = 'verified';
-            $data['verified_at'] = now();
-            $data['submitted_at'] = now()->subDays(rand(30, 365));
-
-            $school = School::firstOrCreate(
-                ['name' => $data['name']],
-                $data
+            $school = School::updateOrCreate(
+                ['slug' => $slug],
+                [
+                    'owner_id' => null,
+                    'type_id' => $type->id,
+                    'district_id' => $district->id,
+                    'name' => $sample['name'],
+                    'slug' => $slug,
+                    'tagline' => $sample['tagline'],
+                    'description' => $description,
+                    'boarding_type' => $sample['boarding'],
+                    'gender_policy' => 'mixed',
+                    'status' => 'active',
+                    'verification_status' => 'unverified',
+                    'verified_at' => null,
+                    'verified_by' => null,
+                    'is_demo' => true,
+                    'is_featured' => $sample['featured'],
+                    'meta_title' => $sample['name'].' | FindurSch Demo Listing',
+                    'meta_description' => 'Fictional demonstration listing. Not a real school and not verified.',
+                ]
             );
 
-            // Attach curricula
-            if (! empty($curriculaIds)) {
-                $school->curricula()->syncWithoutDetaching(array_filter($curriculaIds));
-            }
+            // Insert-only pivot rows avoid duplicate-key races during simultaneous Vercel cold starts.
+            $curriculumIds = collect($sample['curricula'])
+                ->map(fn (string $curriculumSlug) => $curricula->get($curriculumSlug)?->id)
+                ->filter()
+                ->values()
+                ->all();
 
-            // Attach 3-5 random facilities
-            if (! empty($facilities)) {
-                $facilitySample = (array) array_rand(array_flip($facilities), min(5, count($facilities)));
-                $school->facilities()->syncWithoutDetaching($facilitySample);
-            }
-
-            // Subscription
-            $plan = Plan::where('slug', $planSlug)->first();
-            if ($plan && $school->activeSubscription === null) {
-                Subscription::firstOrCreate(
-                    ['school_id' => $school->id, 'plan_id' => $plan->id, 'status' => 'active'],
-                    [
-                        'start_date' => now()->subDays(rand(1, 90)),
-                        'end_date' => now()->addDays(rand(30, 365)),
-                        'auto_renew' => true,
-                    ]
+            if ($curriculumIds !== []) {
+                DB::table('school_curriculum')->insertOrIgnore(
+                    array_map(
+                        fn (int $curriculumId) => [
+                            'school_id' => $school->id,
+                            'curriculum_id' => $curriculumId,
+                        ],
+                        $curriculumIds
+                    )
                 );
             }
         }

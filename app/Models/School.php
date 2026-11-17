@@ -29,12 +29,13 @@ class School extends Model implements HasMedia
         'boarding_type', 'gender_policy', 'student_count_approx',
         'status', 'verification_status',
         'verified_at', 'verified_by', 'submitted_at', 'rejection_reason',
-        'is_featured', 'featured_until',
+        'is_featured', 'featured_until', 'is_demo',
         'meta_title', 'meta_description',
     ];
 
     protected $casts = [
         'is_featured' => 'boolean',
+        'is_demo' => 'boolean',
         'featured_until' => 'date',
         'rating_average' => 'decimal:2',
         'submitted_at' => 'datetime',
@@ -189,6 +190,20 @@ class School extends Model implements HasMedia
         return $query->where('verification_status', 'verified');
     }
 
+    /**
+     * Public listings include verified schools and explicitly labelled demo profiles.
+     * Demo profiles remain unverified and cannot receive inquiries or reviews.
+     */
+    public function scopePubliclyVisible(Builder $query): Builder
+    {
+        return $query->where('status', 'active')
+            ->where(function (Builder $visibilityQuery) {
+                $visibilityQuery
+                    ->where('verification_status', 'verified')
+                    ->orWhere('is_demo', true);
+            });
+    }
+
     public function scopeFeatured(Builder $query): Builder
     {
         return $query->where('is_featured', true)
@@ -227,7 +242,9 @@ class School extends Model implements HasMedia
 
     public function canReceiveInquiries(): bool
     {
-        return $this->status === 'active' && $this->verification_status === 'verified';
+        return ! $this->is_demo
+            && $this->status === 'active'
+            && $this->verification_status === 'verified';
     }
 
     public function updateRatingCache(): void
