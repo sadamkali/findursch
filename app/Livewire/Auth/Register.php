@@ -37,6 +37,7 @@ class Register extends Component
         }
 
         RateLimiter::hit($key, 600);
+        $this->email = Str::lower(trim($this->email));
         $validated = $this->validate();
 
         $user = User::create([
