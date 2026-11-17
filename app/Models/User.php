@@ -5,8 +5,6 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
-use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -15,14 +13,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements MustVerifyEmail, FilamentUser
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, MustVerifyEmailTrait, HasRoles;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * Profile fields users may safely update through mass assignment.
-     * Account type, status, verification and login metadata stay system-controlled.
+     * Account type, status and login metadata stay system-controlled.
      *
      * @var list<string>
      */
@@ -63,7 +61,6 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
     {
         return $panel->getId() === 'admin'
             && $this->status === 'active'
-            && $this->hasVerifiedEmail()
             && $this->hasRole('admin');
     }
 
