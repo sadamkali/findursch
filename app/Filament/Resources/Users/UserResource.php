@@ -84,7 +84,7 @@ class UserResource extends \Filament\Resources\Resource
                     ->action(fn (User $record) => $record->forceFill(['status' => 'suspended'])->save()),
                 Action::make('activate')
                     ->color('success')
-                    ->visible(fn (User $record): bool => $record->status !== 'active')
+                    ->visible(fn (User $record): bool => in_array($record->status, ['inactive', 'suspended'], true))
                     ->action(fn (User $record) => $record->forceFill(['status' => 'active'])->save()),
             ])
             ->defaultSort('created_at', 'desc');
