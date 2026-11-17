@@ -24,13 +24,15 @@ class Reviews extends Component
             ->firstOrFail();
 
         $validated = Validator::make([
-            'responses.'.$reviewId => $this->responses[$reviewId] ?? '',
+            'responses' => [
+                $reviewId => $this->responses[$reviewId] ?? '',
+            ],
         ], [
             'responses.'.$reviewId => ['required', 'string', 'min:2', 'max:5000'],
         ])->validate();
 
         $review->forceFill([
-            'owner_response' => $validated['response'],
+            'owner_response' => $validated['responses'][$reviewId],
             'owner_responded_at' => now(),
         ])->save();
 
