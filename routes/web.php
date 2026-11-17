@@ -1,23 +1,27 @@
 <?php
 
-use App\Livewire\Home\HomePage;
-use App\Livewire\Schools\SchoolListing;
-use App\Livewire\Schools\SchoolDetail;
-use App\Livewire\Districts\DistrictSchools;
-use App\Livewire\Search\SearchResults;
-use App\Livewire\Compare\CompareSchools;
 use App\Livewire\Articles\ArticleListing;
 use App\Livewire\Articles\ArticleShow;
+use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
+use App\Livewire\Auth\ResetPassword;
+use App\Livewire\Compare\CompareSchools;
+use App\Livewire\Districts\DistrictSchools;
+use App\Livewire\Home\HomePage;
+use App\Livewire\Schools\SchoolDetail;
+use App\Livewire\Schools\SchoolListing;
+use App\Livewire\Search\SearchResults;
 use App\Livewire\User\Dashboard as UserDashboard;
-use App\Livewire\User\SavedSchools;
 use App\Livewire\User\MyInquiries;
 use App\Livewire\User\MyReviews;
 use App\Livewire\User\ProfileEdit;
-use App\Http\Controllers\PageController;
+use App\Livewire\User\SavedSchools;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\SitemapController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // =============== PUBLIC ROUTES ===============
@@ -37,22 +41,48 @@ Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('legal.p
 Route::get('/terms-and-conditions', [PageController::class, 'terms'])->name('legal.terms');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
-// =============== AUTH ===============
+// =============== GUEST AUTHENTICATION ===============
 Route::middleware('guest')->group(function () {
     Route::get('/login', Login::class)->name('login');
     Route::get('/register', Register::class)->name('register');
-    Route::get('/forgot-password', [PageController::class, 'forgotPassword'])->name('password.request');
+    Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
+    Route::get('/reset-password/{token}', ResetPassword::class)->name('password.reset');
+});
+
+// =============== EMAIL VERIFICATION ===============
+Route::middleware('auth')->group(function () {
+    Route::get('/email/verify', function () {
+        return view('livewire.auth.verify-email');
+    })->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+
+        return redirect()->route('user.dashboard')
+            ->with('status', 'Your email address has been verified.');
+    })->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
+
+    Route::post('/email/verification-notification', function (Request $request) {
+        if ($request->user()->hasVerifiedEmail()) {
+            return back()->with('status', 'Your email address is already verified.');
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('status', 'A fresh verification link has been sent to your email address.');
+    })->middleware('throttle:6,1')->name('verification.send');
 });
 
 Route::post('/logout', function () {
     auth()->logout();
     request()->session()->invalidate();
     request()->session()->regenerateToken();
+
     return redirect()->route('home');
 })->name('logout')->middleware('auth');
 
-// =============== USER (auth) ===============
-Route::middleware(['auth'])->prefix('account')->name('user.')->group(function () {
+// =============== VERIFIED USER ACCOUNT ===============
+Route::middleware(['auth', 'verified'])->prefix('account')->name('user.')->group(function () {
     Route::get('/', UserDashboard::class)->name('dashboard');
     Route::get('/saved-schools', SavedSchools::class)->name('saved-schools');
     Route::get('/inquiries', MyInquiries::class)->name('inquiries');
@@ -60,8 +90,8 @@ Route::middleware(['auth'])->prefix('account')->name('user.')->group(function ()
     Route::get('/profile', ProfileEdit::class)->name('profile');
 });
 
-// =============== POST ACTIONS (auth) ===============
-Route::middleware('auth')->group(function () {
+// =============== VERIFIED USER ACTIONS ===============
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/schools/{school}/inquire', [\App\Http\Controllers\InquiryController::class, 'store'])->name('inquiry.store');
     Route::post('/schools/{school}/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('review.store');
     Route::post('/schools/{school}/save', [\App\Http\Controllers\SavedSchoolController::class, 'toggle'])->name('school.save.toggle');
