@@ -23,15 +23,16 @@ Add these in **Project → Settings → Environment Variables**, with the
 | Name | Value |
 | --- | --- |
 | `APP_KEY` | A Laravel application key generated with `php artisan key:generate --show`. Keep it secret and stable; do not regenerate it on every deployment. |
+| `APP_URL` | The canonical public HTTPS URL, for example `https://findursch.vercel.app`. |
 | `DB_URL` | The Supabase PostgreSQL **Session Pooler** connection URI, including its database username, password, host, port, database, and `sslmode=require`. |
 
-The entrypoint also accepts `DATABASE_URL` or `POSTGRES_URL` as an alternative
-to `DB_URL`. If more than one is present, `DB_URL` takes precedence.
+The entrypoint also accepts `DATABASE_URL` or `POSTGRES_URL` as an
+alternative to `DB_URL`. If more than one is present, `DB_URL` takes
+precedence.
 
 The container sets `APP_ENV=production`, `APP_DEBUG=false`,
-`DB_CONNECTION=pgsql`, and `DB_SSLMODE=require`. Set `APP_URL` to the
-production domain when known; otherwise the entrypoint derives it from
-Vercel's `VERCEL_URL`.
+`DB_CONNECTION=pgsql`, and `DB_SSLMODE=require`. If `APP_URL` is absent,
+the entrypoint derives it from Vercel's `VERCEL_URL`.
 
 Never put real credentials in this repository, source files, or commit
 messages. Do not paste secret values into support chats.
@@ -45,12 +46,34 @@ granting the Vercel GitHub App access to the repository is not the same as
 linking the GitHub login identity. Team invitations are not required for this
 single-owner setup.
 
-The current repository author is `sadamkali` with
-`propipspath@gmail.com`; connect that GitHub account to the Vercel account
-that owns the project.
+## Database release procedure
 
-## Startup behavior
+**Do not run migrations or seeders from `docker-entrypoint.sh`.** Vercel can
+start several isolated instances concurrently and expects the container to
+listen on `$PORT` within a short startup window. Running migrations and
+reference seeders during every cold start caused repeated work, migration
+races, and startup timeouts.
 
-The container validates `APP_KEY` and a PostgreSQL URL, runs Laravel
-migrations, seeds only production reference data, and then starts FrankenPHP.
-Demo users, demo schools, and demo reviews are not seeded in production.
+Run database changes as a **single, one-off release step** before switching
+traffic to the new application version:
+
+```sh
+php artisan migrate --force
+php artisan db:seed --class=ProductionReferenceDataSeeder --force
+```
+
+Run those commands from a trusted release runner that has the same production
+environment variables and network access to the Supabase Session Pooler. Do
+not run them per web request or per Vercel container instance.
+
+The production reference seeder is idempotent and includes ten clearly marked
+fictional demo school profiles. Demo records remain unverified and have no
+real contact, owner, inquiry, or review data. Run the reference seeder once
+when initializing a new database or when its reference data is intentionally
+being updated; the web server does not reseed on startup.
+
+## Container startup
+
+The entrypoint only validates required secrets, normalizes the database URL,
+sets the fallback application URL, and starts FrankenPHP immediately. This
+keeps Vercel cold starts within the platform's port startup deadline.
