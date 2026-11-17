@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
+<div>
 <div class="bg-gray-50 py-8">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h1 class="text-3xl font-normal mb-4" style="font-family: 'DM Serif Display', serif;">
@@ -16,9 +14,7 @@
         <aside class="space-y-6">
             <div class="bg-white rounded-card border border-gray-100 p-5">
                 <h3 class="font-semibold mb-3">Search</h3>
-                <form wire:submit.prevent="search">
-                    <input wire:model.live.debounce.300ms="q" type="text" placeholder="Search schools..." class="w-full rounded-input border border-gray-300 px-3 py-2 text-sm" />
-                </form>
+                <input wire:model.live.debounce.300ms="q" type="text" placeholder="Search schools..." class="w-full rounded-input border border-gray-300 px-3 py-2 text-sm" />
             </div>
         </aside>
 
@@ -60,4 +56,4 @@
         </div>
     </div>
 </div>
-@endsection
+</div>
