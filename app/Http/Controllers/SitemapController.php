@@ -21,7 +21,10 @@ class SitemapController extends Controller
         foreach (District::all() as $d) {
             $urls[] = ['url' => route('district.show', $d), 'priority' => '0.6'];
         }
-        foreach (Article::where('status', 'published')->get() as $a) {
+        foreach (Article::where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->get() as $a) {
             $urls[] = ['url' => route('articles.show', $a), 'priority' => '0.5'];
         }
 
