@@ -57,8 +57,11 @@ class Login extends Component
             return redirect('/admin');
         }
 
-        // School-owner management is introduced in Phase 4.
-        return redirect()->intended('/account');
+        if ($user->hasRole('school_owner')) {
+            return redirect()->intended(route('owner.dashboard'));
+        }
+
+        return redirect()->intended(route('user.dashboard'));
     }
 
     public function render()
