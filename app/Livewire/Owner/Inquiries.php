@@ -29,9 +29,9 @@ class Inquiries extends Component
         $inquiry = $this->ownedInquiry($inquiryId);
 
         $validated = Validator::make([
-            'response' => $this->responses[$inquiryId] ?? '',
+            'responses.'.$inquiryId => $this->responses[$inquiryId] ?? '',
         ], [
-            'response' => ['required', 'string', 'min:2', 'max:5000'],
+            'responses.'.$inquiryId => ['required', 'string', 'min:2', 'max:5000'],
         ])->validate();
 
         $inquiry->forceFill([
