@@ -20,6 +20,9 @@ use App\Livewire\User\SavedSchools;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Middleware\EnsureSchoolOwner;
+use App\Livewire\Owner\Dashboard as OwnerDashboard;
+use App\Livewire\Owner\SchoolEditor;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -96,3 +99,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/schools/{school}/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('review.store');
     Route::post('/schools/{school}/save', [\App\Http\Controllers\SavedSchoolController::class, 'toggle'])->name('school.save.toggle');
 });
+
+// =============== SCHOOL OWNER AREA ===============
+Route::middleware(['auth', 'verified', EnsureSchoolOwner::class])
+    ->prefix('owner')
+    ->name('owner.')
+    ->group(function () {
+        Route::get('/', OwnerDashboard::class)->name('dashboard');
+        Route::get('/schools/create', SchoolEditor::class)->name('schools.create');
+        Route::get('/schools/{school}/edit', SchoolEditor::class)->name('schools.edit');
+    });
