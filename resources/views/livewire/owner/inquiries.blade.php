@@ -37,7 +37,6 @@
                     <div class="mt-4">
                         <label for="response-{{ $inquiry->id }}" class="mb-1.5 block text-sm font-medium text-gray-700">Response to the parent or guardian</label>
                         <textarea id="response-{{ $inquiry->id }}" wire:model="responses.{{ $inquiry->id }}" rows="3" maxlength="5000" class="w-full rounded-lg border border-gray-300 px-3.5 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Write a clear response..."></textarea>
-                        @error('response') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                         @error('responses.'.$inquiry->id) <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                         <div class="mt-3 flex flex-wrap gap-2">
                             <button type="button" wire:click="respond({{ $inquiry->id }})" wire:loading.attr="disabled" class="btn-primary">Save response</button>
