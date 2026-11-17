@@ -31,6 +31,11 @@
         </div>
     </div>
 
+    <div class="mt-6 flex flex-wrap gap-3">
+        <a href="{{ route('owner.inquiries') }}" class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:border-primary hover:text-primary">View school inquiries</a>
+        <a href="{{ route('owner.reviews') }}" class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:border-primary hover:text-primary">Respond to reviews</a>
+    </div>
+
     <div class="mt-8 rounded-xl border border-blue-200 bg-blue-50 p-5">
         <h2 class="font-semibold text-blue-950">Listing plans</h2>
         <p class="mt-1 text-sm leading-6 text-blue-900">
@@ -62,7 +67,10 @@
                     @endif
                     <p class="mt-2 text-xs text-gray-500">{{ $school->programs_count }} programmes · {{ $school->inquiries_count }} inquiries</p>
                 </div>
-                <a href="{{ route('owner.schools.edit', $school->id) }}" class="inline-flex shrink-0 justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:border-primary hover:text-primary">Manage listing</a>
+                <div class="flex shrink-0 flex-wrap gap-2">
+                    <a href="{{ route('owner.schools.edit', $school->id) }}" class="inline-flex justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:border-primary hover:text-primary">Edit profile</a>
+                    <a href="{{ route('owner.schools.details', $school->id) }}" class="inline-flex justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:border-primary hover:text-primary">Programmes & fees</a>
+                </div>
             </div>
         @empty
             <div class="px-5 py-12 text-center">
