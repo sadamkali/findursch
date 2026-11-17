@@ -44,10 +44,7 @@ class SchoolResource extends \Filament\Resources\Resource
         return 1;
     }
 
-    public static function getRecordTitleAttribute(): ?string
-    {
-        return 'name';
-    }
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
     {
