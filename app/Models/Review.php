@@ -35,6 +35,19 @@ class Review extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::saved(function (Review $review): void {
+            if ($review->wasRecentlyCreated || $review->wasChanged(['rating', 'status'])) {
+                $review->school?->updateRatingCache();
+            }
+        });
+
+        static::deleted(function (Review $review): void {
+            $review->school?->updateRatingCache();
+        });
+    }
+
     public function school(): BelongsTo
     {
         return $this->belongsTo(School::class);
