@@ -163,10 +163,6 @@ class SchoolEditor extends Component
             ]);
         }
 
-        if (! $submit) {
-            return $school->refresh();
-        }
-
         return $school->refresh();
     }
 
