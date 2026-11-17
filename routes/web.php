@@ -112,4 +112,7 @@ Route::middleware(['auth', 'verified', EnsureSchoolOwner::class])
         Route::get('/', OwnerDashboard::class)->name('dashboard');
         Route::get('/schools/create', SchoolEditor::class)->name('schools.create');
         Route::get('/schools/{school}/edit', SchoolEditor::class)->name('schools.edit');
+        Route::get('/schools/{school}/details', \\App\\Livewire\\Owner\\SchoolDetails::class)->name('schools.details');
+        Route::get('/inquiries', \\App\\Livewire\\Owner\\Inquiries::class)->name('inquiries');
+        Route::get('/reviews', \\App\\Livewire\\Owner\\Reviews::class)->name('reviews');
     });
