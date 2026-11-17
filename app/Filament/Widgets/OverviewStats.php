@@ -1,13 +1,13 @@
 <?php
 
-namespace App\\Filament\\Widgets;
+namespace App\Filament\Widgets;
 
-use App\\Models\\Inquiry;
-use App\\Models\\Review;
-use App\\Models\\School;
-use App\\Models\\User;
-use Filament\\Widgets\\StatsOverviewWidget as BaseWidget;
-use Filament\\Widgets\\StatsOverviewWidget\\Stat;
+use App\Models\Inquiry;
+use App\Models\Review;
+use App\Models\School;
+use App\Models\User;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class OverviewStats extends BaseWidget
 {
