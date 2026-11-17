@@ -70,8 +70,6 @@ Alpine.data('searchSuggestions', () => ({
     }
 }));
 
-Alpine.start();
-
 Alpine.data('lightbox', () => ({
     open: false,
     activeIndex: 0,
@@ -93,3 +91,5 @@ Alpine.data('lightbox', () => ({
         this.activeIndex = (this.activeIndex - 1 + this.images.length) % this.images.length;
     }
 }));
+ 
+Alpine.start();
