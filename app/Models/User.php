@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace App\\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Database\\Factories\\UserFactory;
+use Illuminate\\Database\\Eloquent\\Factories\\HasFactory;
+use Illuminate\\Database\\Eloquent\\Relations\\BelongsTo;
+use Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany;
+use Illuminate\\Database\\Eloquent\\Relations\\HasMany;
+use Illuminate\\Foundation\\Auth\\User as Authenticatable;
+use Illuminate\\Notifications\\Notifiable;
 
 class User extends Authenticatable
 {
@@ -14,7 +16,8 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * Profile fields users may safely update through mass assignment.
+     * Account type, status, verification and login metadata stay system-controlled.
      *
      * @var list<string>
      */
@@ -22,6 +25,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'profile_photo',
+        'district_id',
     ];
 
     /**
@@ -43,7 +49,35 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function district(): BelongsTo
+    {
+        return $this->belongsTo(District::class);
+    }
+
+    public function ownedSchools(): HasMany
+    {
+        return $this->hasMany(School::class, 'owner_id');
+    }
+
+    public function savedSchools(): BelongsToMany
+    {
+        return $this->belongsToMany(School::class, 'saved_schools')
+            ->withPivot('notes')
+            ->withTimestamps();
+    }
+
+    public function inquiries(): HasMany
+    {
+        return $this->hasMany(Inquiry::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 }
