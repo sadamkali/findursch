@@ -25,7 +25,11 @@ class SchoolService
     {
         $school->update([
             'status' => 'pending',
+            'verification_status' => 'pending',
+            'verified_at' => null,
+            'verified_by' => null,
             'submitted_at' => now(),
+            'rejection_reason' => null,
         ]);
     }
 
