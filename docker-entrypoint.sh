@@ -20,4 +20,4 @@ echo "Seeding FindurSch reference data..."
 php artisan db:seed --class=ProductionReferenceDataSeeder --force
 
 echo "Starting FindurSch web server..."
-exec frankenphp run --config /etc/caddy/Caddyfile
+exec frankenphp run --config /etc/caddy/Caddyfile --adapter caddyfile
