@@ -44,8 +44,8 @@ class SchoolDetails extends Component
 
         $this->schoolId = School::query()
             ->where('owner_id', auth()->id())
-            ->whereKey($school)
-            ->valueOrFail('id');
+            ->findOrFail($school)
+            ->id;
     }
 
     private function ownedSchool(): School
