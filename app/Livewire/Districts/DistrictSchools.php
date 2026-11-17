@@ -26,6 +26,7 @@ class DistrictSchools extends Component
             ->with(['type', 'curricula'])
             ->paginate(15);
 
-        return view('livewire.districts.district-schools', compact('schools'));
+        $district = $this->district->load('region');
+        return view('livewire.districts.district-schools', compact('schools', 'district'));
     }
 }
