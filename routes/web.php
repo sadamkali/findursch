@@ -113,9 +113,9 @@ Route::middleware(['auth'])->prefix('account')->name('user.')->group(function ()
 
 // =============== AUTHENTICATED USER ACTIONS ===============
 Route::middleware(['auth'])->group(function () {
-    Route::post('/schools/{school}/inquire', [\\App\\Http\\Controllers\\InquiryController::class, 'store'])->name('inquiry.store');
-    Route::post('/schools/{school}/reviews', [\\App\\Http\\Controllers\\ReviewController::class, 'store'])->name('review.store');
-    Route::post('/schools/{school}/save', [\\App\\Http\\Controllers\\SavedSchoolController::class, 'toggle'])->name('school.save.toggle');
+    Route::post('/schools/{school}/inquire', [\App\Http\Controllers\InquiryController::class, 'store'])->name('inquiry.store');
+    Route::post('/schools/{school}/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('review.store');
+    Route::post('/schools/{school}/save', [\App\Http\Controllers\SavedSchoolController::class, 'toggle'])->name('school.save.toggle');
 });
 
 // =============== SCHOOL OWNER AREA ===============
