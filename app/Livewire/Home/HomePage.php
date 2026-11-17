@@ -18,8 +18,9 @@ class HomePage extends Component
             ->get();
 
         $featuredSchools = School::publiclyVisible()
-            ->featured()
             ->with(['district', 'type', 'curricula'])
+            ->orderByDesc('is_featured')
+            ->latest('created_at')
             ->limit(6)
             ->get();
 
