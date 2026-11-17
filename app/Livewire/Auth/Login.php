@@ -49,10 +49,6 @@ class Login extends Component
 
         $user = auth()->user();
 
-        if (! $user->hasVerifiedEmail()) {
-            return redirect()->route('verification.notice');
-        }
-
         if ($user->hasRole('admin')) {
             return redirect('/admin');
         }
