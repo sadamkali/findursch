@@ -24,9 +24,9 @@ class Reviews extends Component
             ->firstOrFail();
 
         $validated = Validator::make([
-            'response' => $this->responses[$reviewId] ?? '',
+            'responses.'.$reviewId => $this->responses[$reviewId] ?? '',
         ], [
-            'response' => ['required', 'string', 'min:2', 'max:5000'],
+            'responses.'.$reviewId => ['required', 'string', 'min:2', 'max:5000'],
         ])->validate();
 
         $review->forceFill([
