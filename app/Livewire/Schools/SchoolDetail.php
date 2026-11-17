@@ -5,6 +5,9 @@ namespace App\Livewire\Schools;
 use App\Models\Review;
 use App\Models\School;
 use App\Models\SchoolView;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -15,8 +18,14 @@ class SchoolDetail extends Component
 
     public function mount(School $school)
     {
-        $this->school = $school;
-        $this->school->load(['type', 'district.region', 'curricula', 'programs.fees', 'facilities', 'contacts', 'approvedReviews.user', 'activeSubscription.plan']);
+        $this->school = School::query()
+            ->active()
+            ->verified()
+            ->whereKey($school->id)
+            ->firstOrFail();
+
+        $this->school->load(['type', 'district.region', 'curricula', 'programs.fees', 'facilities', 'contacts', 'approvedReviews.user']);
+
 
         // Track view
         SchoolView::create([
@@ -34,15 +43,34 @@ class SchoolDetail extends Component
             return redirect()->route('login');
         }
 
+        abort_unless($this->school->canReceiveInquiries(), 404);
+
+        $key = 'school-inquiry:'.auth()->id();
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $this->addError('message', 'You have sent several inquiries recently. Please try again later.');
+
+            return;
+        }
+
+        $validated = Validator::make($data, [
+            'phone' => ['nullable', 'string', 'max:30'],
+            'student_name' => ['nullable', 'string', 'max:255'],
+            'student_age' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'intended_level' => ['nullable', 'string', 'max:120'],
+            'message' => ['required', 'string', 'min:10', 'max:5000'],
+        ])->validate();
+
+        RateLimiter::hit($key, 3600);
+
         $this->school->inquiries()->create([
             'user_id' => auth()->id(),
             'parent_name' => auth()->user()->name,
             'parent_email' => auth()->user()->email,
-            'parent_phone' => $data['phone'] ?? null,
-            'student_name' => $data['student_name'] ?? null,
-            'student_age' => $data['student_age'] ?? null,
-            'intended_level' => $data['intended_level'] ?? null,
-            'message' => $data['message'],
+            'parent_phone' => $validated['phone'] ?? null,
+            'student_name' => $validated['student_name'] ?? null,
+            'student_age' => $validated['student_age'] ?? null,
+            'intended_level' => $validated['intended_level'] ?? null,
+            'message' => $validated['message'],
             'source' => 'web',
         ]);
 
@@ -67,17 +95,33 @@ class SchoolDetail extends Component
     {
         if (! auth()->check()) return redirect()->route('login');
 
-        Review::create([
-            'school_id' => $this->school->id,
+        $validated = Validator::make($data, [
+            'reviewer_type' => ['required', 'in:parent,student,alumni,staff,other'],
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
+            'title' => ['required', 'string', 'max:255'],
+            'body' => ['required', 'string', 'min:20', 'max:5000'],
+            'academic_rating' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'facilities_rating' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'staff_rating' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'environment_rating' => ['nullable', 'integer', 'min:1', 'max:5'],
+        ])->validate();
+
+        if ($this->school->reviews()->where('user_id', auth()->id())->exists()) {
+            $this->addError('review', 'You have already submitted a review for this school.');
+
+            return;
+        }
+
+        $this->school->reviews()->create([
             'user_id' => auth()->id(),
-            'reviewer_type' => $data['reviewer_type'],
-            'rating' => $data['rating'],
-            'title' => $data['title'],
-            'body' => $data['body'],
-            'academic_rating' => $data['academic_rating'] ?? null,
-            'facilities_rating' => $data['facilities_rating'] ?? null,
-            'staff_rating' => $data['staff_rating'] ?? null,
-            'environment_rating' => $data['environment_rating'] ?? null,
+            'reviewer_type' => $validated['reviewer_type'],
+            'rating' => $validated['rating'],
+            'title' => $validated['title'],
+            'body' => $validated['body'],
+            'academic_rating' => $validated['academic_rating'] ?? null,
+            'facilities_rating' => $validated['facilities_rating'] ?? null,
+            'staff_rating' => $validated['staff_rating'] ?? null,
+            'environment_rating' => $validated['environment_rating'] ?? null,
             'status' => 'pending',
         ]);
 
