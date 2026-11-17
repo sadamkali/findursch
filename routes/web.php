@@ -26,6 +26,8 @@ use App\Livewire\Owner\SchoolEditor;
 use App\Livewire\Owner\SchoolDetails;
 use App\Livewire\Owner\Inquiries as OwnerInquiries;
 use App\Livewire\Owner\Reviews as OwnerReviews;
+use App\Models\School;
+use App\Models\District;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +38,45 @@ Route::get('/schools', SchoolListing::class)->name('schools.index');
 Route::get('/schools/{school:slug}', SchoolDetail::class)->name('schools.show');
 Route::get('/district/{district:slug}', DistrictSchools::class)->name('district.show');
 Route::get('/search', SearchResults::class)->name('search');
+Route::get('/api/search/suggest', function (Request $request) {
+    $term = trim((string) $request->query('q', ''));
+
+    if (mb_strlen($term) < 2 || mb_strlen($term) > 100) {
+        return response()->json(['data' => []]);
+    }
+
+    $pattern = '%'.mb_strtolower($term).'%';
+
+    $schools = School::query()
+        ->active()
+        ->verified()
+        ->whereRaw('LOWER(name) LIKE ?', [$pattern])
+        ->with('district')
+        ->limit(5)
+        ->get(['id', 'name', 'slug', 'district_id'])
+        ->map(fn (School $school) => [
+            'type' => 'school',
+            'label' => $school->name,
+            'detail' => $school->district?->name,
+            'url' => route('schools.show', $school),
+        ]);
+
+    $districts = District::query()
+        ->whereRaw('LOWER(name) LIKE ?', [$pattern])
+        ->limit(4)
+        ->get(['id', 'name', 'slug'])
+        ->map(fn (District $district) => [
+            'type' => 'district',
+            'label' => $district->name,
+            'detail' => 'District',
+            'url' => route('district.show', $district),
+        ]);
+
+    return response()->json([
+        'data' => $schools->concat($districts)->values(),
+    ]);
+})->middleware('throttle:30,1')->name('search.suggest');
+
 Route::get('/compare', CompareSchools::class)->name('compare');
 Route::get('/articles', ArticleListing::class)->name('articles.index');
 Route::get('/articles/{article:slug}', ArticleShow::class)->name('articles.show');
