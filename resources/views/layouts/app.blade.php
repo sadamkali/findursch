@@ -34,7 +34,13 @@
                 </div>
                 <div class="flex items-center gap-3">
                     @auth
-                        <a href="{{ route('user.dashboard') }}" class="text-sm font-medium text-gray-600 hover:text-primary">My Account</a>
+                        @if (auth()->user()->hasRole('admin'))
+                            <a href="{{ url('/admin') }}" class="text-sm font-medium text-gray-600 hover:text-primary">Admin</a>
+                        @elseif (auth()->user()->hasRole('school_owner'))
+                            <a href="{{ route('owner.dashboard') }}" class="text-sm font-medium text-gray-600 hover:text-primary">School dashboard</a>
+                        @else
+                            <a href="{{ route('user.dashboard') }}" class="text-sm font-medium text-gray-600 hover:text-primary">My Account</a>
+                        @endif
                         <form method="POST" action="{{ route('logout') }}" class="inline">@csrf
                             <button type="submit" class="text-sm text-gray-500 hover:text-primary">Logout</button>
                         </form>
