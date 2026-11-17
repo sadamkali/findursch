@@ -2,30 +2,51 @@
 
 namespace App\Livewire\Compare;
 
+use App\Models\School;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
 class CompareSchools extends Component
 {
-    public $schoolIds = [];
+    public array $schoolIds = [];
 
-    public function mount()
+    public function mount(): void
     {
-        $this->schoolIds = session('compare_schools', []);
-        if (empty($this->schoolIds) && request('schools')) {
-            $this->schoolIds = array_slice((array) request('schools'), 0, 3);
+        $requestedSlugs = collect(explode(',', (string) request('schools', '')))
+            ->filter()
+            ->unique()
+            ->take(3)
+            ->values();
+
+        if ($requestedSlugs->isNotEmpty()) {
+            $this->schoolIds = School::query()
+                ->active()
+                ->verified()
+                ->whereIn('slug', $requestedSlugs)
+                ->pluck('id')
+                ->all();
+
             session(['compare_schools' => $this->schoolIds]);
+
+            return;
         }
+
+        $this->schoolIds = collect(session('compare_schools', []))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->take(3)
+            ->values()
+            ->all();
     }
 
-    public function remove($id)
+    public function remove(int $id): void
     {
         $this->schoolIds = array_values(array_diff($this->schoolIds, [$id]));
         session(['compare_schools' => $this->schoolIds]);
     }
 
-    public function clear()
+    public function clear(): void
     {
         $this->schoolIds = [];
         session()->forget('compare_schools');
@@ -33,7 +54,16 @@ class CompareSchools extends Component
 
     public function render()
     {
-        $schools = \App\Models\School::with(['type', 'district', 'curricula', 'facilities'])->whereIn('id', $this->schoolIds)->get();
+        $schools = School::query()
+            ->active()
+            ->verified()
+            ->with(['type', 'district', 'curricula', 'facilities'])
+            ->whereIn('id', $this->schoolIds)
+            ->get();
+
+        $this->schoolIds = $schools->pluck('id')->all();
+        session(['compare_schools' => $this->schoolIds]);
+
         return view('livewire.compare.compare-schools', compact('schools'));
     }
 }
