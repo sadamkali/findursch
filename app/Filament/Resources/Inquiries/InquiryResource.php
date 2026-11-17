@@ -58,12 +58,6 @@ class InquiryResource extends \Filament\Resources\Resource
                 'api' => 'API',
                 'admin' => 'Admin',
             ])->required(),
-            Select::make('status')->options([
-                'new' => 'New',
-                'read' => 'Read',
-                'responded' => 'Responded',
-                'archived' => 'Archived',
-            ])->required(),
         ]);
     }
 
