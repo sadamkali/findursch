@@ -8,6 +8,7 @@ RUN install-php-extensions \
     zip \
     exif \
     pcntl \
+    posix \
     opcache
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -34,7 +35,7 @@ COPY vite.config.js ./
 COPY public ./public
 RUN npm run build
 
-# Runtime image. Vercel supplies PORT; Caddy listens on that port.
+# Runtime image.
 FROM php-base AS runtime
 WORKDIR /app
 
@@ -42,14 +43,17 @@ COPY . .
 COPY --from=vendor /app/vendor ./vendor
 COPY --from=frontend /app/public/build ./public/build
 COPY Caddyfile /etc/caddy/Caddyfile
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 
-RUN mkdir -p \
+RUN chmod +x /usr/local/bin/docker-entrypoint \
+    && mkdir -p \
       storage/framework/cache \
       storage/framework/sessions \
       storage/framework/views \
       storage/logs \
       bootstrap/cache \
-    && composer dump-autoload --no-dev --optimize --no-interaction \
+    && composer dump-autoload --no-dev --optimize --no-interaction --no-scripts \
+    && php artisan package:discover --ansi \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R ug+rwx storage bootstrap/cache
 
@@ -58,4 +62,4 @@ ENV APP_DEBUG=false
 ENV SERVER_NAME=:80
 
 EXPOSE 80
-CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]
