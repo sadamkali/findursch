@@ -1,0 +1,72 @@
+@import 'tailwindcss';
+
+@theme {
+    --color-primary: #4F46E5;
+    --color-primary-50: color-mix(in srgb, #4F46E5, white 95%);
+    --color-primary-100: color-mix(in srgb, #4F46E5, white 90%);
+    --color-primary-200: color-mix(in srgb, #4F46E5, white 80%);
+    --color-primary-500: #4F46E5;
+    --color-primary-600: color-mix(in srgb, #4F46E5, black 10%);
+    --color-primary-700: color-mix(in srgb, #4F46E5, black 20%);
+
+    --color-accent: #F59E0B;
+    --color-accent-50: color-mix(in srgb, #F59E0B, white 95%);
+    --color-accent-100: color-mix(in srgb, #F59E0B, white 90%);
+    --color-accent-500: #F59E0B;
+    --color-accent-600: color-mix(in srgb, #F59E0B, black 10%);
+    --color-accent-700: color-mix(in srgb, #F59E0B, black 20%);
+
+    --font-display: 'DM Serif Display', serif;
+    --font-body: 'Inter', sans-serif;
+
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    --shadow-card-hover: 0 4px 8px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.06);
+    --shadow-modal: 0 20px 60px rgba(0,0,0,0.15);
+
+    --radius-card: 16px;
+    --radius-btn: 10px;
+    --radius-input: 10px;
+    --radius-badge: 999px;
+}
+
+@layer components {
+    .btn-primary {
+        @apply bg-primary text-white rounded-btn px-5 py-2.5 font-semibold hover:bg-primary-700 transition;
+    }
+    .btn-secondary {
+        @apply border border-primary text-primary rounded-btn px-5 py-2.5 font-semibold hover:bg-primary-50 transition;
+    }
+    .btn-accent {
+        @apply bg-accent text-white rounded-btn px-5 py-2.5 font-semibold hover:bg-accent-600 transition;
+    }
+    .btn-ghost {
+        @apply text-gray-600 hover:text-primary hover:bg-primary-50 rounded-btn px-4 py-2 transition;
+    }
+    .shadow-card {
+        box-shadow: var(--shadow-card);
+    }
+    .shadow-card-hover {
+        box-shadow: var(--shadow-card-hover);
+    }
+    .rounded-card {
+        border-radius: var(--radius-card);
+    }
+    .rounded-badge {
+        border-radius: var(--radius-badge);
+    }
+    .rounded-btn {
+        border-radius: var(--radius-btn);
+    }
+    .rounded-input {
+        border-radius: var(--radius-input);
+    }
+    .prose h1 { @apply text-4xl font-normal mb-4; font-family: var(--font-display); }
+    .prose h2 { @apply text-3xl font-normal mb-3 mt-8; font-family: var(--font-display); }
+    .prose h3 { @apply text-2xl font-semibold mb-2 mt-6; }
+    .prose p { @apply mb-4 leading-relaxed; }
+    .prose a { @apply text-primary underline; }
+    .prose ul { @apply list-disc pl-6 mb-4; }
+    .prose ol { @apply list-decimal pl-6 mb-4; }
+}
+
+[x-cloak] { display: none !important; }
