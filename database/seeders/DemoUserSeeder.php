@@ -58,5 +58,8 @@ class DemoUserSeeder extends Seeder
             'status' => 'active',
             'email_verified_at' => now(),
         ])->save();
+
+        \\Spatie\\Permission\\Models\\Role::findOrCreate($userType, 'web');
+        $user->syncRoles([$userType]);
     }
 }
