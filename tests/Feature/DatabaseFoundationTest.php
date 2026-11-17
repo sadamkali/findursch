@@ -33,6 +33,9 @@ class DatabaseFoundationTest extends TestCase
         ] as $table) {
             $this->assertTrue(Schema::hasTable($table), "Expected [{$table}] table to exist.");
         }
+
+        $this->assertTrue(Schema::hasColumn('saved_schools', 'created_at'));
+        $this->assertTrue(Schema::hasColumn('saved_schools', 'updated_at'));
     }
 
     public function test_user_school_relationships_and_school_view_records_work(): void
@@ -102,6 +105,15 @@ class DatabaseFoundationTest extends TestCase
         $this->assertSame($school->id, $view->school()->value('id'));
         $this->assertSame($user->id, $view->user()->value('id'));
         $this->assertSame('Shortlisted', $user->savedSchools()->firstOrFail()->pivot->notes);
+    }
+
+    public function test_school_moderation_metadata_is_mass_assignable(): void
+    {
+        $school = new School();
+
+        foreach (['verified_at', 'verified_by', 'submitted_at', 'rejection_reason'] as $metadataField) {
+            $this->assertTrue($school->isFillable($metadataField), "[{$metadataField}] must be persistable by the school approval workflow.");
+        }
     }
 
     public function test_account_privilege_and_verification_fields_are_not_mass_assignable(): void
