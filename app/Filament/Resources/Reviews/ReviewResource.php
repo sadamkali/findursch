@@ -55,12 +55,6 @@ class ReviewResource extends \Filament\Resources\Resource
             TextInput::make('rating')->numeric()->minValue(1)->maxValue(5)->required(),
             TextInput::make('title')->required()->maxLength(255),
             Textarea::make('body')->required()->rows(5)->columnSpanFull(),
-            Select::make('status')->options([
-                'pending' => 'Pending',
-                'approved' => 'Approved',
-                'rejected' => 'Rejected',
-                'flagged' => 'Flagged',
-            ])->required(),
         ]);
     }
 
