@@ -1,77 +1,66 @@
 <div>
-    {{-- HERO --}}
-    <section class="relative overflow-hidden bg-gradient-to-br from-primary-50 via-white to-accent-50">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <span class="inline-block bg-primary-50 text-primary-700 rounded-badge px-3 py-1 text-xs font-bold uppercase tracking-wider mb-5">Uganda's #1 School Platform</span>
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-normal leading-tight mb-6" style="font-family: 'DM Serif Display', serif;">
-                        Find the <em class="text-primary">perfect school</em> for your child
-                    </h1>
-                    <p class="text-lg text-gray-600 mb-8 max-w-xl">
-                        Discover, compare, and connect with the best nurseries, primary, secondary, and international schools across Uganda.
-                    </p>
-                    <form action="{{ route('search') }}" method="GET" class="flex gap-2 max-w-xl">
-                        <input type="text" name="q" placeholder="Search schools, districts, curricula..." class="flex-1 rounded-input border border-gray-300 px-4 py-3 focus:border-primary focus:ring-primary" />
-                        <button type="submit" class="btn-primary whitespace-nowrap">Search</button>
-                    </form>
-                    <div class="mt-8 flex flex-wrap gap-6 text-sm text-gray-600">
-                        <div><span class="font-bold text-2xl text-gray-900 block">{{ $stats['schools'] }}</span> schools</div>
-                        <div><span class="font-bold text-2xl text-gray-900 block">{{ $stats['districts'] }}</span> districts</div>
-                        <div><span class="font-bold text-2xl text-gray-900 block">{{ $stats['reviews'] }}</span> reviews</div>
-                    </div>
+    {{-- SCHOOL DISCOVERY INTRO + SEARCH --}}
+    <section class="border-b border-gray-100 bg-gradient-to-b from-primary-50/70 to-white">
+        <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+            <div class="max-w-3xl">
+                <p class="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-primary">Uganda school directory</p>
+                <h1 class="text-4xl font-semibold leading-tight tracking-tight text-gray-950 sm:text-5xl" style="font-family: 'DM Serif Display', serif;">
+                    Discover schools.<br class="hidden sm:block"> Find the right fit.
+                </h1>
+                <p class="mt-4 max-w-2xl text-base leading-7 text-gray-600 sm:text-lg">
+                    Explore school profiles across Uganda, compare your options and find the information you need in one place.
+                </p>
+            </div>
+
+            <form action="{{ route('schools.index') }}" method="GET" class="mt-8 grid gap-3 rounded-2xl border border-gray-200 bg-white p-3 shadow-card sm:grid-cols-2 lg:grid-cols-[minmax(0,1.6fr)_minmax(150px,1fr)_minmax(150px,1fr)_auto]">
+                <label class="block sm:col-span-2 lg:col-span-1">
+                    <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">School or keyword</span>
+                    <input type="search" name="search" placeholder="Search by school name..." class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-3 text-sm text-gray-900 outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15">
+                </label>
+                <label class="block">
+                    <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">School type</span>
+                    <select name="type" class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-3 text-sm text-gray-700 outline-none focus:border-primary focus:bg-white">
+                        <option value="">All types</option>
+                        @foreach($schoolTypes as $type)
+                            <option value="{{ $type->id }}">{{ $type->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">District</span>
+                    <select name="district" class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-3 text-sm text-gray-700 outline-none focus:border-primary focus:bg-white">
+                        <option value="">All districts</option>
+                        @foreach($districts as $district)
+                            <option value="{{ $district->id }}">{{ $district->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <div class="flex items-end">
+                    <button type="submit" class="btn-primary w-full justify-center px-6 py-3 lg:w-auto">Find schools</button>
                 </div>
-                <div class="hidden lg:block">
-                    <div class="relative">
-                        <div class="absolute -top-8 -left-8 w-72 h-72 bg-primary-100 rounded-full blur-3xl opacity-60"></div>
-                        <div class="absolute -bottom-8 -right-8 w-72 h-72 bg-accent-100 rounded-full blur-3xl opacity-60"></div>
-                        <div class="relative bg-white rounded-card shadow-card p-8 border border-gray-100">
-                            <h3 class="font-semibold mb-4">Why FindURSCH?</h3>
-                            <ul class="space-y-3 text-sm text-gray-700">
-                                <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-xs">✓</span> Verified schools only</li>
-                                <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-xs">✓</span> Real parent reviews</li>
-                                <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-xs">✓</span> Side-by-side comparison</li>
-                                <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-xs">✓</span> Direct inquiry to schools</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+            </form>
+
+            <div class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500">
+                <span><strong class="font-semibold text-gray-900">{{ number_format($stats['schools']) }}</strong> public listings</span>
+                <span><strong class="font-semibold text-gray-900">{{ number_format($stats['districts']) }}</strong> districts</span>
+                <span><strong class="font-semibold text-gray-900">{{ number_format($stats['reviews']) }}</strong> approved reviews</span>
             </div>
         </div>
     </section>
 
-    {{-- SCHOOL TYPES --}}
-    <section class="py-16">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-10">
-                <h2 class="text-3xl font-normal mb-3" style="font-family: 'DM Serif Display', serif;">Browse by School Type</h2>
-                <p class="text-gray-600">Find the right level of education for your child</p>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                @foreach($schoolTypes as $type)
-                    <a href="{{ route('schools.index', ['type' => $type->id]) }}" class="group text-center p-5 rounded-card bg-white border border-gray-100 hover:border-primary hover:shadow-card transition">
-                        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-primary-50 flex items-center justify-center text-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 10 3 12 0v-5"/></svg>
-                        </div>
-                        <h3 class="font-semibold text-sm group-hover:text-primary">{{ $type->name }}</h3>
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    {{-- FEATURED SCHOOLS --}}
+    {{-- SCHOOL DISCOVERY GRID --}}
     @if($featuredSchools->count() > 0)
-    <section class="py-16 bg-gray-50">
+    <section class="py-12 sm:py-16">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="flex items-end justify-between mb-10">
+            <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
                 <div>
-                    <h2 class="text-3xl font-normal mb-3" style="font-family: 'DM Serif Display', serif;">Featured Schools</h2>
-                    <p class="text-gray-600">Explore school profiles across Uganda, including clearly labelled sample listings</p>
+                    <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">Start exploring</p>
+                    <h2 class="text-3xl font-semibold tracking-tight text-gray-900" style="font-family: 'DM Serif Display', serif;">Schools to discover</h2>
+                    <p class="mt-2 text-sm text-gray-600">A selection of public school profiles from across Uganda.</p>
                 </div>
-                <a href="{{ route('schools.index') }}" class="text-primary font-semibold hover:underline">View all →</a>
+                <a href="{{ route('schools.index') }}" class="text-sm font-semibold text-primary hover:underline">Browse all schools <span aria-hidden="true">→</span></a>
             </div>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 @foreach($featuredSchools as $school)
                     @include('components.school-card', ['school' => $school])
                 @endforeach
@@ -80,19 +69,41 @@
     </section>
     @endif
 
-    {{-- DISTRICTS --}}
-    <section class="py-16">
+    {{-- BROWSE BY SCHOOL TYPE --}}
+    <section class="border-y border-gray-100 bg-gray-50 py-12 sm:py-14">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-10">
-                <h2 class="text-3xl font-normal mb-3" style="font-family: 'DM Serif Display', serif;">Browse by District</h2>
-                <p class="text-gray-600">Find schools in your area</p>
+            <div class="mb-7">
+                <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">Browse by category</p>
+                <h2 class="text-2xl font-semibold tracking-tight text-gray-900" style="font-family: 'DM Serif Display', serif;">Find schools by education level</h2>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+                @foreach($schoolTypes as $type)
+                    <a href="{{ route('schools.index', ['type' => $type->id]) }}" class="group flex min-h-20 items-center justify-between gap-3 border border-gray-200 bg-white px-4 py-4 transition hover:border-primary hover:shadow-card">
+                        <span class="text-sm font-semibold text-gray-800 group-hover:text-primary">{{ $type->name }}</span>
+                        <span class="text-lg text-gray-300 transition group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true">→</span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- BROWSE BY DISTRICT --}}
+    <section class="py-12 sm:py-16">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-7 flex items-end justify-between gap-4">
+                <div>
+                    <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">Explore locations</p>
+                    <h2 class="text-2xl font-semibold tracking-tight text-gray-900" style="font-family: 'DM Serif Display', serif;">Browse by district</h2>
+                    <p class="mt-2 text-sm text-gray-600">Discover school listings in different parts of Uganda.</p>
+                </div>
+                <a href="{{ route('schools.index') }}" class="hidden text-sm font-semibold text-primary hover:underline sm:inline">All districts →</a>
+            </div>
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 @foreach($districts as $district)
-                    <a href="{{ route('district.show', $district) }}" class="group p-5 rounded-card bg-white border border-gray-100 hover:border-primary hover:shadow-card transition">
-                        <h3 class="font-semibold group-hover:text-primary">{{ $district->name }}</h3>
-                        <p class="text-sm text-gray-500 mt-1">{{ $district->region?->name }} Region</p>
-                        <p class="text-xs text-gray-400 mt-2">{{ $district->school_count }} {{ Str::plural('school', $district->school_count) }}</p>
+                    <a href="{{ route('district.show', $district) }}" class="border border-gray-200 bg-white p-4 transition hover:border-primary hover:shadow-card">
+                        <h3 class="font-semibold text-gray-900">{{ $district->name }}</h3>
+                        <p class="mt-1 text-xs text-gray-500">{{ $district->region?->name }} Region</p>
+                        <p class="mt-3 text-xs text-gray-500">{{ number_format($district->school_count) }} {{ Str::plural('school listing', $district->school_count) }}</p>
                     </a>
                 @endforeach
             </div>
@@ -101,25 +112,26 @@
 
     {{-- ARTICLES --}}
     @if($articles->count() > 0)
-    <section class="py-16 bg-gray-50">
+    <section class="border-t border-gray-100 bg-gray-50 py-12 sm:py-16">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="flex items-end justify-between mb-10">
+            <div class="mb-7 flex items-end justify-between gap-4">
                 <div>
-                    <h2 class="text-3xl font-normal mb-3" style="font-family: 'DM Serif Display', serif;">Latest Articles</h2>
-                    <p class="text-gray-600">Education insights, tips, and news</p>
+                    <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">Helpful reading</p>
+                    <h2 class="text-2xl font-semibold tracking-tight text-gray-900" style="font-family: 'DM Serif Display', serif;">Education news and guides</h2>
+                    <p class="mt-2 text-sm text-gray-600">Useful information for parents, guardians and school communities.</p>
                 </div>
-                <a href="{{ route('articles.index') }}" class="text-primary font-semibold hover:underline">View all →</a>
+                <a href="{{ route('articles.index') }}" class="text-sm font-semibold text-primary hover:underline">All articles →</a>
             </div>
-            <div class="grid md:grid-cols-3 gap-6">
+            <div class="grid gap-5 md:grid-cols-3">
                 @foreach($articles as $article)
-                    <article class="bg-white rounded-card border border-gray-100 overflow-hidden hover:shadow-card transition">
+                    <article class="overflow-hidden border border-gray-200 bg-white transition hover:shadow-card">
                         <a href="{{ route('articles.show', $article) }}" class="block">
-                            <div class="aspect-video bg-gradient-to-br from-primary-100 to-accent-50"></div>
+                            <div class="aspect-[16/9] bg-gradient-to-br from-primary-100 to-accent-50"></div>
                             <div class="p-5">
-                                <span class="text-xs font-semibold text-primary uppercase tracking-wider">{{ $article->category?->name }}</span>
-                                <h3 class="font-semibold mt-2 line-clamp-2">{{ $article->title }}</h3>
-                                <p class="text-sm text-gray-500 mt-2 line-clamp-2">{{ $article->excerpt }}</p>
-                                <p class="text-xs text-gray-400 mt-3">{{ $article->read_time_minutes }} min read</p>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-primary">{{ $article->category?->name }}</span>
+                                <h3 class="mt-2 line-clamp-2 font-semibold text-gray-900">{{ $article->title }}</h3>
+                                <p class="mt-2 line-clamp-2 text-sm leading-6 text-gray-600">{{ $article->excerpt }}</p>
+                                <p class="mt-4 text-xs text-gray-400">{{ $article->read_time_minutes }} min read</p>
                             </div>
                         </a>
                     </article>
@@ -129,12 +141,15 @@
     </section>
     @endif
 
-    {{-- CTA --}}
-    <section class="py-16 bg-gradient-to-br from-primary to-primary-700 text-white">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl sm:text-4xl font-normal mb-4" style="font-family: 'DM Serif Display', serif;">Own a school? Get listed today</h2>
-            <p class="text-lg opacity-90 mb-8">Reach thousands of Ugandan parents actively searching for schools</p>
-            <a href="{{ route('register') }}" class="inline-block bg-accent text-white rounded-btn px-8 py-3 font-semibold hover:bg-accent-600 transition">List Your School</a>
+    {{-- LIST YOUR SCHOOL --}}
+    <section class="bg-primary py-12 text-white sm:py-14">
+        <div class="mx-auto flex max-w-7xl flex-col gap-5 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.16em] text-white/70">For school communities</p>
+                <h2 class="mt-2 text-2xl font-semibold" style="font-family: 'DM Serif Display', serif;">Help families discover your school</h2>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-white/80">Create a school profile and share the information families need to learn about your institution.</p>
+            </div>
+            <a href="{{ route('register') }}" class="inline-flex shrink-0 items-center justify-center border border-white/50 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-primary">List your school <span class="ml-3" aria-hidden="true">→</span></a>
         </div>
     </section>
 </div>
