@@ -28,6 +28,7 @@ class School extends Model implements HasMedia
         'phone', 'email', 'website', 'whatsapp',
         'boarding_type', 'gender_policy', 'student_count_approx',
         'status', 'verification_status',
+        'verified_at', 'verified_by', 'submitted_at', 'rejection_reason',
         'is_featured', 'featured_until',
         'meta_title', 'meta_description',
     ];
