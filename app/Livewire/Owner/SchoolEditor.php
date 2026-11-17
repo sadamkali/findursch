@@ -19,21 +19,21 @@ class SchoolEditor extends Component
     public ?int $schoolId = null;
 
     public string $name = '';
-    public string $tagline = '';
-    public string $description = '';
+    public $tagline = '';
+    public $description = '';
     public $type_id = '';
     public $district_id = '';
     public $sub_county_id = '';
-    public string $address = '';
-    public string $phone = '';
-    public string $email = '';
-    public string $website = '';
-    public string $whatsapp = '';
+    public $address = '';
+    public $phone = '';
+    public $email = '';
+    public $website = '';
+    public $whatsapp = '';
     public string $boarding_type = 'day';
     public string $gender_policy = 'mixed';
-    public string $founded_year = '';
-    public string $registration_number = '';
-    public string $student_count_approx = '';
+    public $founded_year = '';
+    public $registration_number = '';
+    public $student_count_approx = '';
 
     public function mount(?int $school = null): void
     {
@@ -104,7 +104,7 @@ class SchoolEditor extends Component
 
     public function saveDraft()
     {
-        $school = $this->persistSchool(submit: false);
+        $this->persistSchool();
 
         session()->flash('message', 'Your school details have been saved as a draft.');
 
@@ -113,7 +113,7 @@ class SchoolEditor extends Component
 
     public function submitForReview()
     {
-        $school = $this->persistSchool(submit: true);
+        $school = $this->persistSchool();
 
         app(SchoolService::class)->submit($school);
 
@@ -122,8 +122,26 @@ class SchoolEditor extends Component
         return redirect()->route('owner.dashboard');
     }
 
-    private function persistSchool(bool $submit): School
+    private function persistSchool(): School
     {
+        foreach ([
+            'tagline',
+            'description',
+            'sub_county_id',
+            'address',
+            'phone',
+            'email',
+            'website',
+            'whatsapp',
+            'founded_year',
+            'registration_number',
+            'student_count_approx',
+        ] as $field) {
+            if ($this->{$field} === '') {
+                $this->{$field} = null;
+            }
+        }
+
         $data = $this->validate();
 
         if ($this->schoolId === null) {
