@@ -28,7 +28,6 @@ use App\Livewire\Owner\Inquiries as OwnerInquiries;
 use App\Livewire\Owner\Reviews as OwnerReviews;
 use App\Models\School;
 use App\Models\District;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -95,34 +94,6 @@ Route::middleware('guest')->group(function () {
     Route::get('/reset-password/{token}', ResetPassword::class)->name('password.reset');
 });
 
-// =============== EMAIL VERIFICATION ===============
-Route::middleware('auth')->group(function () {
-    Route::get('/email/verify', function () {
-        return view('livewire.auth.verify-email');
-    })->name('verification.notice');
-
-    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-        $request->fulfill();
-
-        $destination = $request->user()->hasRole('school_owner')
-            ? 'owner.dashboard'
-            : 'user.dashboard';
-
-        return redirect()->route($destination)
-            ->with('status', 'Your email address has been verified.');
-    })->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
-
-    Route::post('/email/verification-notification', function (Request $request) {
-        if ($request->user()->hasVerifiedEmail()) {
-            return back()->with('status', 'Your email address is already verified.');
-        }
-
-        $request->user()->sendEmailVerificationNotification();
-
-        return back()->with('status', 'A fresh verification link has been sent to your email address.');
-    })->middleware('throttle:6,1')->name('verification.send');
-});
-
 Route::post('/logout', function () {
     auth()->logout();
     request()->session()->invalidate();
@@ -131,8 +102,8 @@ Route::post('/logout', function () {
     return redirect()->route('home');
 })->name('logout')->middleware('auth');
 
-// =============== VERIFIED USER ACCOUNT ===============
-Route::middleware(['auth', 'verified'])->prefix('account')->name('user.')->group(function () {
+// =============== AUTHENTICATED USER ACCOUNT ===============
+Route::middleware(['auth'])->prefix('account')->name('user.')->group(function () {
     Route::get('/', UserDashboard::class)->name('dashboard');
     Route::get('/saved-schools', SavedSchools::class)->name('saved-schools');
     Route::get('/inquiries', MyInquiries::class)->name('inquiries');
@@ -140,15 +111,15 @@ Route::middleware(['auth', 'verified'])->prefix('account')->name('user.')->group
     Route::get('/profile', ProfileEdit::class)->name('profile');
 });
 
-// =============== VERIFIED USER ACTIONS ===============
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::post('/schools/{school}/inquire', [\App\Http\Controllers\InquiryController::class, 'store'])->name('inquiry.store');
-    Route::post('/schools/{school}/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('review.store');
-    Route::post('/schools/{school}/save', [\App\Http\Controllers\SavedSchoolController::class, 'toggle'])->name('school.save.toggle');
+// =============== AUTHENTICATED USER ACTIONS ===============
+Route::middleware(['auth'])->group(function () {
+    Route::post('/schools/{school}/inquire', [\\App\\Http\\Controllers\\InquiryController::class, 'store'])->name('inquiry.store');
+    Route::post('/schools/{school}/reviews', [\\App\\Http\\Controllers\\ReviewController::class, 'store'])->name('review.store');
+    Route::post('/schools/{school}/save', [\\App\\Http\\Controllers\\SavedSchoolController::class, 'toggle'])->name('school.save.toggle');
 });
 
 // =============== SCHOOL OWNER AREA ===============
-Route::middleware(['auth', 'verified', EnsureSchoolOwner::class])
+Route::middleware(['auth', EnsureSchoolOwner::class])
     ->prefix('owner')
     ->name('owner.')
     ->group(function () {
