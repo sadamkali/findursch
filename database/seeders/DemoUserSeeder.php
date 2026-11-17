@@ -6,7 +6,6 @@ use App\Models\District;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class DemoUserSeeder extends Seeder
 {
@@ -21,26 +20,16 @@ class DemoUserSeeder extends Seeder
         $mbarara = District::where('slug', 'mbarara')->first();
         $gulu = District::where('slug', 'gulu')->first();
 
-        // School owners
         $owners = [
             ['name' => 'John Mukasa', 'email' => 'john@example.com', 'phone' => '+256 700 100 001', 'district_id' => $kampala?->id],
             ['name' => 'Mary Nakato', 'email' => 'mary@example.com', 'phone' => '+256 700 100 002', 'district_id' => $kampala?->id],
             ['name' => 'Peter Ochieng', 'email' => 'peter@example.com', 'phone' => '+256 700 100 003', 'district_id' => $wakiso?->id],
         ];
 
-        foreach ($owners as $o) {
-            User::firstOrCreate(
-                ['email' => $o['email']],
-                array_merge($o, [
-                    'password' => Hash::make('password'),
-                    'user_type' => 'school_owner',
-                    'status' => 'active',
-                    'email_verified_at' => now(),
-                ])
-            );
+        foreach ($owners as $owner) {
+            $this->upsertDemoUser($owner, 'school_owner');
         }
 
-        // Parents
         $parents = [
             ['name' => 'Sarah Achieng', 'email' => 'parent1@example.com', 'phone' => '+256 700 200 001', 'district_id' => $kampala?->id],
             ['name' => 'David Ssali', 'email' => 'parent2@example.com', 'phone' => '+256 700 200 002', 'district_id' => $wakiso?->id],
@@ -49,16 +38,25 @@ class DemoUserSeeder extends Seeder
             ['name' => 'Esther Namugga', 'email' => 'parent5@example.com', 'phone' => '+256 700 200 005', 'district_id' => $kampala?->id],
         ];
 
-        foreach ($parents as $p) {
-            User::firstOrCreate(
-                ['email' => $p['email']],
-                array_merge($p, [
-                    'password' => Hash::make('password'),
-                    'user_type' => 'parent',
-                    'status' => 'active',
-                    'email_verified_at' => now(),
-                ])
-            );
+        foreach ($parents as $parent) {
+            $this->upsertDemoUser($parent, 'parent');
         }
+    }
+
+    /**
+     * These values are deliberately assigned from trusted development seed data.
+     * Public registration cannot mass-assign account type, status or verification.
+     */
+    private function upsertDemoUser(array $attributes, string $userType): void
+    {
+        $user = User::firstOrNew(['email' => $attributes['email']]);
+
+        $user->forceFill([
+            ...$attributes,
+            'password' => Hash::make('password'),
+            'user_type' => $userType,
+            'status' => 'active',
+            'email_verified_at' => now(),
+        ])->save();
     }
 }
