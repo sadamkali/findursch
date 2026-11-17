@@ -53,7 +53,11 @@ class SchoolResource extends \Filament\Resources\Resource
             TextInput::make('tagline')->maxLength(255),
             Select::make('owner_id')
                 ->label('School owner')
-                ->relationship('owner', 'name')
+                ->relationship(
+                    'owner',
+                    'name',
+                    modifyQueryUsing: fn (Builder $query): Builder => $query->where('user_type', 'school_owner')->where('status', 'active'),
+                )
                 ->searchable()
                 ->preload(),
             Select::make('type_id')
@@ -87,18 +91,6 @@ class SchoolResource extends \Filament\Resources\Resource
                 'boys' => 'Boys',
                 'girls' => 'Girls',
                 'mixed' => 'Mixed',
-            ])->required(),
-            Select::make('status')->options([
-                'draft' => 'Draft',
-                'pending' => 'Pending review',
-                'active' => 'Active',
-                'suspended' => 'Suspended',
-                'rejected' => 'Rejected',
-            ])->required(),
-            Select::make('verification_status')->options([
-                'unverified' => 'Not verified',
-                'pending' => 'Verification pending',
-                'verified' => 'Verified',
             ])->required(),
             Toggle::make('is_featured')->label('Featured school'),
             DatePicker::make('featured_until')->label('Featured until'),
@@ -153,6 +145,18 @@ class SchoolResource extends \Filament\Resources\Resource
                             'rejection_reason' => null,
                         ])->save();
                     }),
+                Action::make('suspend')
+                    ->label('Suspend listing')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->visible(fn (School $record): bool => $record->status === 'active')
+                    ->action(fn (School $record) => $record->update(['status' => 'suspended'])),
+                Action::make('restore')
+                    ->label('Restore listing')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (School $record): bool => $record->status === 'suspended' && $record->verification_status === 'verified')
+                    ->action(fn (School $record) => $record->update(['status' => 'active'])),
                 Action::make('reject')
                     ->color('danger')
                     ->icon('heroicon-o-x-circle')
