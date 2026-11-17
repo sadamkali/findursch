@@ -31,6 +31,29 @@ class SchoolListing extends Component
     #[Url]
     public $search = '';
 
+    public function resetFilters(): void
+    {
+        $this->reset([
+            'district',
+            'type',
+            'curriculum',
+            'boarding',
+            'verified_only',
+            'sort',
+            'search',
+        ]);
+
+        $this->sort = 'featured';
+        $this->resetPage();
+    }
+
+    public function updated($property): void
+    {
+        if (in_array($property, ['district', 'type', 'curriculum', 'boarding', 'verified_only', 'sort', 'search'], true)) {
+            $this->resetPage();
+        }
+    }
+
     public function render()
     {
         $query = School::active()->verified()
