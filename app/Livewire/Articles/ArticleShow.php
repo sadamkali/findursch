@@ -13,14 +13,22 @@ class ArticleShow extends Component
 
     public function mount(Article $article)
     {
-        $this->article = $article;
+        $this->article = Article::query()
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->whereKey($article->id)
+            ->firstOrFail();
+
         $this->article->load('category', 'author');
         $this->article->increment('views_count');
     }
 
     public function render()
     {
-        $related = \App\Models\Article::where('status', 'published')
+        $related = Article::where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
             ->where('category_id', $this->article->category_id)
             ->where('id', '!=', $this->article->id)
             ->latest('published_at')
