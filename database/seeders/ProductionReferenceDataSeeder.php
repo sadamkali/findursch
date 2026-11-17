@@ -21,6 +21,7 @@ class ProductionReferenceDataSeeder extends Seeder
             PlanSeeder::class,
             ArticleCategorySeeder::class,
             SettingSeeder::class,
+            AccessRoleSeeder::class,
         ]);
     }
 }
