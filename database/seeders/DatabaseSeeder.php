@@ -19,13 +19,5 @@ class DatabaseSeeder extends Seeder
             SettingSeeder::class,
             AccessRoleSeeder::class,
         ]);
-
-        if (app()->environment(['local', 'staging'])) {
-            $this->call([
-                DemoUserSeeder::class,
-                DemoSchoolSeeder::class,
-                DemoReviewSeeder::class,
-            ]);
-        }
     }
 }

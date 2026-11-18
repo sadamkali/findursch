@@ -107,10 +107,6 @@ class SchoolResource extends \Filament\Resources\Resource
         return $table
             ->columns([
                 TextColumn::make('name')->searchable()->sortable()->limit(40),
-                TextColumn::make('is_demo')
-                    ->label('Listing')
-                    ->formatStateUsing(fn (bool $state): string => $state ? 'Demo sample' : 'School listing')
-                    ->badge(),
                 TextColumn::make('district.name')->label('District')->sortable(),
                 TextColumn::make('type.name')->label('Type'),
                 TextColumn::make('status')->badge(),
@@ -134,13 +130,13 @@ class SchoolResource extends \Filament\Resources\Resource
             ])
             ->recordActions([
                 EditAction::make()
-                    ->visible(fn (School $record): bool => ! $record->is_demo),
+                    ->visible(fn (School $record): bool => true),
                 Action::make('approve')
                     ->label('Approve & verify')
                     ->color('success')
                     ->icon('heroicon-o-check-circle')
                     ->requiresConfirmation()
-                    ->visible(fn (School $record): bool => ! $record->is_demo && ($record->status !== 'active' || $record->verification_status !== 'verified'))
+                    ->visible(fn (School $record): bool => ($record->status !== 'active' || $record->verification_status !== 'verified'))
                     ->action(function (School $record): void {
                         $record->forceFill([
                             'status' => 'active',
@@ -154,18 +150,18 @@ class SchoolResource extends \Filament\Resources\Resource
                     ->label('Suspend listing')
                     ->color('warning')
                     ->requiresConfirmation()
-                    ->visible(fn (School $record): bool => ! $record->is_demo && $record->status === 'active')
+                    ->visible(fn (School $record): bool => $record->status === 'active')
                     ->action(fn (School $record) => $record->update(['status' => 'suspended'])),
                 Action::make('restore')
                     ->label('Restore listing')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (School $record): bool => ! $record->is_demo && $record->status === 'suspended' && $record->verification_status === 'verified')
+                    ->visible(fn (School $record): bool => $record->status === 'suspended' && $record->verification_status === 'verified')
                     ->action(fn (School $record) => $record->update(['status' => 'active'])),
                 Action::make('reject')
                     ->color('danger')
                     ->icon('heroicon-o-x-circle')
-                    ->visible(fn (School $record): bool => ! $record->is_demo)
+                    ->visible(fn (School $record): bool => true)
                     ->requiresConfirmation()
                     ->form([
                         Textarea::make('reason')->label('Reason for rejection')->required()->maxLength(2000),

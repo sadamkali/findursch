@@ -199,9 +199,7 @@
                                 <div class="directory-school-card__content">
                                     <div class="directory-school-card__tags">
                                         <span class="directory-tag directory-tag--type">{{ $school->type?->name ?? 'School' }}</span>
-                                        @if($school->is_demo)
-                                            <span class="directory-tag directory-tag--sample">Sample listing</span>
-                                        @elseif($school->verification_status === 'verified')
+                                        @if($school->verification_status === 'verified')
                                             <span class="directory-tag directory-tag--verified">✓ Verified</span>
                                         @endif
                                     </div>

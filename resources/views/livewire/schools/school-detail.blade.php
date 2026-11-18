@@ -20,10 +20,9 @@
     $districtName = $school->district?->name;
     $subCountyName = $school->subCounty?->name;
     $locationText = collect([$districtName, $regionName])->filter()->unique()->implode(', ');
-    // Keep the reference contact card complete on demo listings without presenting placeholders as real contacts.
-    $displayPhone = $primaryPhone ?: ($school->is_demo ? '0700 000 000' : 'Not provided');
-    $displayEmail = $primaryEmail ?: ($school->is_demo ? 'info@school.example' : 'Not provided');
-    $displayLocation = $locationText !== '' ? $locationText.', Uganda' : ($school->is_demo ? 'Kampala, Central, Uganda' : 'Not provided');
+    $displayPhone = $primaryPhone ?: 'Not provided';
+    $displayEmail = $primaryEmail ?: 'Not provided';
+    $displayLocation = $locationText !== '' ? $locationText.', Uganda' : 'Not provided';
     $mapQuery = filled($school->latitude) && filled($school->longitude)
         ? $school->latitude.','.$school->longitude
         : trim(collect([$school->address, $subCountyName, $districtName, $regionName, 'Uganda'])->filter()->implode(', '));
@@ -111,11 +110,7 @@
                             <h1>{{ $school->name }}</h1>
                             <div class="sref-tags">
                                 <?php if ($school->type): ?><span class="sref-tag sref-tag--gold">{{ $school->type->name }}</span><?php endif; ?>
-                                <?php if ($school->is_demo): ?>
-                                    <span class="sref-tag">Demo sample · Not verified</span>
-                                <?php else: ?>
-                                    <span class="sref-tag sref-tag--green">✓ Verified</span>
-                                <?php endif; ?>
+                                <span class="sref-tag sref-tag--green">✓ Verified</span>
                                 <?php foreach ($school->curricula->take(2) as $curriculum): ?>
                                     <span class="sref-tag sref-tag--green">{{ $curriculum->abbreviation }}</span>
                                 <?php endforeach; ?>
@@ -131,21 +126,15 @@
                     </div>
 
                     <div class="sref-actions">
-                        <?php if ($school->is_demo): ?>
-                            <button type="button" class="sref-btn sref-btn--brand" disabled>Admissions disabled for sample</button>
-                        <?php else: ?>
-                            <button type="button" class="sref-btn sref-btn--brand sref-btn--sm" x-on:click="$refs.enquiryDialog.showModal()">Apply for admission</button>
-                            <?php if ($whatsappDigits !== ''): ?>
-                                <a class="sref-btn sref-btn--wa sref-btn--sm" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp</a>
-                            <?php endif; ?>
+                        <button type="button" class="sref-btn sref-btn--brand sref-btn--sm" x-on:click="$refs.enquiryDialog.showModal()">Apply for admission</button>
+                        <?php if ($whatsappDigits !== ''): ?>
+                            <a class="sref-btn sref-btn--wa sref-btn--sm" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp</a>
                         <?php endif; ?>
                         <button type="button" class="sref-btn sref-btn--line sref-btn--sm" x-data="{copied:false}" x-on:click="navigator.clipboard.writeText(window.location.href).then(() => copied = true).catch(() => copied = false)" x-text="copied ? 'Link copied' : 'Share'">Share</button>
                         <?php if (auth()->check()): ?>
-                            <?php if (!$school->is_demo): ?>
-                                <button type="button" class="sref-btn sref-btn--line sref-btn--sm" wire:click="toggleSave">{{ $this->isSaved() ? '♥ Saved' : '♡ Save' }}</button>
-                            <?php endif; ?>
+                            <button type="button" class="sref-btn sref-btn--line sref-btn--sm" wire:click="toggleSave">{{ $this->isSaved() ? '♥ Saved' : '♡ Save' }}</button>
                         <?php else: ?>
-                            <?php if (!$school->is_demo): ?><a href="{{ route('login') }}" class="sref-btn sref-btn--line sref-btn--sm">♡ Save</a><?php endif; ?>
+                            <a href="{{ route('login') }}" class="sref-btn sref-btn--line sref-btn--sm">♡ Save</a>
                         <?php endif; ?>
                     </div>
 
@@ -242,7 +231,6 @@
                 </div>
 
                 {{-- Existing moderated review feature is retained after the reference layout. --}}
-                <?php if (!$school->is_demo): ?>
                     <section class="sref-card sref-pad sref-reviews" id="reviews">
                         <h2>Parent and student <span>reviews</span></h2>
                         <p class="sref-review-count">{{ number_format($school->reviews_count) }} approved reviews</p>
@@ -281,7 +269,6 @@
                             <p class="sref-empty"><a href="{{ route('login') }}">Sign in</a> to leave a review.</p>
                         <?php endif; ?>
                     </section>
-                <?php endif; ?>
             </div>
 
             {{-- RIGHT SIDEBAR: same card types and item order as the uploaded HTML --}}
@@ -291,7 +278,6 @@
                     <p>Applications are open. Apply today and secure a place for your child.</p>
                     <button type="button" class="sref-btn sref-btn--gold sref-btn--block" x-on:click="$refs.enquiryDialog.showModal()">Apply for admission</button>
                     <button type="button" class="sref-btn sref-btn--ghost sref-btn--block" x-on:click="$refs.enquiryDialog.showModal()">Send enquiry</button>
-                    <?php if ($school->is_demo): ?><span class="sref-sample-note">Demo listing · Enquiries are not sent</span><?php endif; ?>
                 </section>
 
                 <section class="sref-contact">
@@ -301,13 +287,12 @@
                     <div class="sref-contact-item"><i>⌂</i><div><small>Location</small><b>{{ $displayLocation }}</b></div></div>
                     <div class="sref-contact-actions">
                         <button type="button" class="sref-btn sref-btn--gold sref-btn--sm" x-on:click="$refs.enquiryDialog.showModal()">Apply now</button>
-                        <?php if ($whatsappDigits !== '' && !$school->is_demo): ?>
+                        <?php if ($whatsappDigits !== ''): ?>
                             <a class="sref-btn sref-btn--ghost sref-btn--sm" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp us</a>
                         <?php else: ?>
-                            <button type="button" class="sref-btn sref-btn--ghost sref-btn--sm" x-on:click="$refs.enquiryDialog.showModal()">WhatsApp us</button>
+                            <span class="sref-btn sref-btn--ghost sref-btn--sm is-disabled">WhatsApp us</span>
                         <?php endif; ?>
                     </div>
-                    <?php if ($school->is_demo): ?><p class="sref-sample-contact">Sample contact details for layout preview only.</p><?php endif; ?>
                 </section>
 
                 <section class="sref-box">
@@ -340,7 +325,7 @@
                     <div class="sref-social">
                         <?php if ($facebook): ?><a class="sref-btn sref-btn--facebook" href="{{ $facebook }}" target="_blank" rel="noopener">Facebook</a><?php else: ?><span class="sref-btn sref-btn--inactive">Facebook</span><?php endif; ?>
                         <?php if ($twitter): ?><a class="sref-btn sref-btn--x" href="{{ $twitter }}" target="_blank" rel="noopener">Twitter / X</a><?php else: ?><span class="sref-btn sref-btn--inactive">Twitter / X</span><?php endif; ?>
-                        <?php if ($whatsappDigits && !$school->is_demo): ?><a class="sref-btn sref-btn--wa" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp</a><?php else: ?><span class="sref-btn sref-btn--inactive">WhatsApp</span><?php endif; ?>
+                        <?php if ($whatsappDigits): ?><a class="sref-btn sref-btn--wa" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp</a><?php else: ?><span class="sref-btn sref-btn--inactive">WhatsApp</span><?php endif; ?>
                         <button type="button" class="sref-btn sref-btn--line" x-data="{copied:false}" x-on:click="navigator.clipboard.writeText(window.location.href).then(() => copied = true)" x-text="copied ? 'Link copied' : 'Copy link'">Copy link</button>
                     </div>
                 </section>
@@ -365,7 +350,6 @@
     </main>
 
     {{-- Admission dialog: preserves FindurSch sign-in, verification and inquiry rules --}}
-    <?php if (!$school->is_demo): ?>
         <dialog x-ref="enquiryDialog" class="sref-dialog">
             <div class="sref-dialog-heading">
                 <div><h3>Admission enquiry</h3><p>{{ $school->name }}. Send your details to the school.</p></div>
@@ -401,20 +385,6 @@
                 <div class="sref-dialog-actions"><a class="sref-btn sref-btn--brand" href="{{ route('login') }}">Sign in</a><a class="sref-btn sref-btn--line" href="{{ route('register') }}">Create an account</a></div>
             <?php endif; ?>
         </dialog>
-    <?php endif; ?>
-
-    <?php if ($school->is_demo): ?>
-        <dialog x-ref="enquiryDialog" class="sref-dialog">
-            <div class="sref-dialog-heading">
-                <div><h3>Demo school listing</h3><p>{{ $school->name }}</p></div>
-                <button type="button" x-on:click="$refs.enquiryDialog.close()" aria-label="Close">×</button>
-            </div>
-            <p class="sref-dialog-note">This is a sample school profile used to preview the FindurSch layout. Admission enquiries and WhatsApp messages are not sent from demo listings.</p>
-            <div class="sref-dialog-actions">
-                <button type="button" class="sref-btn sref-btn--brand" x-on:click="$refs.enquiryDialog.close()">Close</button>
-            </div>
-        </dialog>
-    <?php endif; ?>
 
     <div x-cloak x-show="open" x-transition.opacity class="sref-lightbox" role="dialog" aria-modal="true" aria-label="School photo gallery" x-on:keydown.escape.window="close()" x-on:click.self="close()">
         <button type="button" class="sref-lightbox__close" x-on:click="close()" aria-label="Close gallery">×</button>

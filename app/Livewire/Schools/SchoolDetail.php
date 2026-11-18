@@ -155,8 +155,6 @@ class SchoolDetail extends Component
 
     public function submitReview()
     {
-        abort_if($this->school->is_demo, 404);
-
         if (! auth()->check()) {
             return redirect()->route('login');
         }
