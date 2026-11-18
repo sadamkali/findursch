@@ -1,8 +1,8 @@
 @props(['school'])
 
-<article class="group overflow-hidden rounded-card border border-gray-100 bg-white transition hover:shadow-card-hover">
+<article data-reveal class="school-card group overflow-hidden rounded-card border border-gray-100 bg-white">
     <a href="{{ route('schools.show', $school) }}" class="block">
-        <div class="relative aspect-[16/10] bg-gradient-to-br from-primary-50 to-accent-50">
+        <div class="school-card__media relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-primary-50 to-accent-50">
             @if($school->getFirstMediaUrl('cover'))
                 <img src="{{ $school->getFirstMediaUrl('cover') }}" alt="{{ $school->name }}" class="h-full w-full object-cover" loading="lazy" />
             @else

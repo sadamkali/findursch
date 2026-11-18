@@ -16,7 +16,7 @@
 <body class="h-full bg-white text-gray-900 antialiased" style="font-family: 'Inter', sans-serif;">
 
     {{-- NAV --}}
-    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-100">
+    <header x-data="{ mobileMenuOpen: false }" @keydown.escape.window="mobileMenuOpen = false" class="site-header sticky top-0 z-40 border-b border-gray-100 bg-white/95 backdrop-blur">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="flex h-16 items-center justify-between">
                 <div class="flex items-center gap-8">
@@ -25,11 +25,11 @@
                         <span class="font-semibold text-lg" style="font-family: 'DM Serif Display', serif;">FindURSCH</span>
                     </a>
                     <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-                        <a href="{{ route('schools.index') }}" class="hover:text-primary">Schools</a>
-                        <a href="{{ route('articles.index') }}" class="hover:text-primary">Articles</a>
-                        <a href="{{ route('compare') }}" class="hover:text-primary">Compare</a>
-                        <a href="{{ route('about') }}" class="hover:text-primary">About</a>
-                        <a href="{{ route('contact') }}" class="hover:text-primary">Contact</a>
+                        <a href="{{ route('schools.index') }}" class="transition-colors duration-200 hover:text-primary">Schools</a>
+                        <a href="{{ route('articles.index') }}" class="transition-colors duration-200 hover:text-primary">Articles</a>
+                        <a href="{{ route('compare') }}" class="transition-colors duration-200 hover:text-primary">Compare</a>
+                        <a href="{{ route('about') }}" class="transition-colors duration-200 hover:text-primary">About</a>
+                        <a href="{{ route('contact') }}" class="transition-colors duration-200 hover:text-primary">Contact</a>
                     </nav>
                 </div>
                 <div class="flex items-center gap-3">
@@ -48,7 +48,31 @@
                         <a href="{{ route('login') }}" class="text-sm font-medium text-gray-600 hover:text-primary">Login</a>
                         <a href="{{ route('register') }}" class="btn-primary text-sm">Sign up</a>
                     @endauth
+
+                    <button type="button"
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-700 transition-colors hover:border-primary hover:text-primary md:hidden"
+                        @click="mobileMenuOpen = !mobileMenuOpen"
+                        :aria-expanded="mobileMenuOpen"
+                        aria-controls="mobile-primary-navigation"
+                        aria-label="Toggle navigation">
+                        <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
+                        <svg x-cloak x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="m6 6 12 12M18 6 6 18"/></svg>
+                    </button>
                 </div>
+            </div>
+
+            <div id="mobile-primary-navigation" x-cloak x-show="mobileMenuOpen" x-transition class="border-t border-gray-100 py-3 md:hidden">
+                <nav aria-label="Mobile navigation" class="grid gap-1 text-sm font-medium text-gray-700">
+                    <a @click="mobileMenuOpen = false" href="{{ route('schools.index') }}" class="rounded-lg px-3 py-2.5 hover:bg-primary-50 hover:text-primary">Schools</a>
+                    <a @click="mobileMenuOpen = false" href="{{ route('articles.index') }}" class="rounded-lg px-3 py-2.5 hover:bg-primary-50 hover:text-primary">Articles</a>
+                    <a @click="mobileMenuOpen = false" href="{{ route('compare') }}" class="rounded-lg px-3 py-2.5 hover:bg-primary-50 hover:text-primary">Compare schools</a>
+                    <a @click="mobileMenuOpen = false" href="{{ route('about') }}" class="rounded-lg px-3 py-2.5 hover:bg-primary-50 hover:text-primary">About FindurSch</a>
+                    <a @click="mobileMenuOpen = false" href="{{ route('contact') }}" class="rounded-lg px-3 py-2.5 hover:bg-primary-50 hover:text-primary">Contact</a>
+                    @guest
+                        <a @click="mobileMenuOpen = false" href="{{ route('login') }}" class="rounded-lg px-3 py-2.5 hover:bg-primary-50 hover:text-primary">Login</a>
+                        <a @click="mobileMenuOpen = false" href="{{ route('register') }}" class="rounded-lg px-3 py-2.5 hover:bg-primary-50 hover:text-primary">Create account</a>
+                    @endguest
+                </nav>
             </div>
         </div>
     </header>

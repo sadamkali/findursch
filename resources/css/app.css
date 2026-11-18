@@ -31,16 +31,16 @@
 
 @layer components {
     .btn-primary {
-        @apply bg-primary text-white rounded-btn px-5 py-2.5 font-semibold hover:bg-primary-700 transition;
+        @apply inline-flex items-center justify-center gap-2 bg-primary text-white rounded-btn px-5 py-2.5 font-semibold transition-all duration-200 hover:bg-primary-700;
     }
     .btn-secondary {
-        @apply border border-primary text-primary rounded-btn px-5 py-2.5 font-semibold hover:bg-primary-50 transition;
+        @apply inline-flex items-center justify-center gap-2 border border-primary text-primary rounded-btn px-5 py-2.5 font-semibold transition-all duration-200 hover:bg-primary-50;
     }
     .btn-accent {
-        @apply bg-accent text-white rounded-btn px-5 py-2.5 font-semibold hover:bg-accent-600 transition;
+        @apply inline-flex items-center justify-center gap-2 bg-accent text-white rounded-btn px-5 py-2.5 font-semibold transition-all duration-200 hover:bg-accent-600;
     }
     .btn-ghost {
-        @apply text-gray-600 hover:text-primary hover:bg-primary-50 rounded-btn px-4 py-2 transition;
+        @apply inline-flex items-center justify-center gap-2 text-gray-600 hover:text-primary hover:bg-primary-50 rounded-btn px-4 py-2 transition-colors duration-200;
     }
     .shadow-card {
         box-shadow: var(--shadow-card);
@@ -70,3 +70,132 @@
 }
 
 [x-cloak] { display: none !important; }
+
+
+/* Public-site layout: keep desktop content readable instead of stretching edge to edge. */
+.max-w-7xl {
+    max-width: 72rem;
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+}
+
+body {
+    overflow-x: clip;
+}
+
+.site-header {
+    box-shadow: 0 1px 10px rgba(15, 23, 42, 0.035);
+}
+
+.home-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 88% 14%, rgba(79, 70, 229, 0.11), transparent 23rem),
+        linear-gradient(180deg, rgba(238, 242, 255, 0.82), #ffffff 94%);
+}
+
+.home-hero::after {
+    position: absolute;
+    z-index: -1;
+    top: -12rem;
+    right: -9rem;
+    width: 31rem;
+    height: 31rem;
+    content: "";
+    border: 1px solid rgba(79, 70, 229, 0.09);
+    border-radius: 9999px;
+    box-shadow: 0 0 0 3.5rem rgba(79, 70, 229, 0.025), 0 0 0 7rem rgba(79, 70, 229, 0.018);
+    pointer-events: none;
+}
+
+.home-hero__inner {
+    position: relative;
+    z-index: 1;
+}
+
+.school-card {
+    box-shadow: var(--shadow-card);
+    transition: transform 260ms cubic-bezier(0.2, 0.75, 0.25, 1), box-shadow 260ms ease, border-color 260ms ease;
+}
+
+.school-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+}
+
+.school-card__media img {
+    transition: transform 650ms cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+.school-card:hover .school-card__media img {
+    transform: scale(1.045);
+}
+
+.directory-filters {
+    transition: box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.directory-filters:focus-within {
+    border-color: rgba(79, 70, 229, 0.28);
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.055);
+}
+
+/* Scroll reveals are enabled only when JavaScript and motion preferences allow them. */
+.motion-enabled [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    transition:
+        opacity 620ms cubic-bezier(0.2, 0.7, 0.25, 1),
+        transform 620ms cubic-bezier(0.2, 0.7, 0.25, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+}
+
+.motion-enabled [data-reveal].is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    will-change: auto;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .btn-primary:hover,
+    .btn-secondary:hover,
+    .btn-accent:hover {
+        transform: translateY(-1px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .motion-enabled [data-reveal] {
+        opacity: 1;
+        transform: none;
+    }
+
+    .school-card:hover { transform: none; }
+}
+
+a,
+button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.32);
+    outline-offset: 3px;
+}
