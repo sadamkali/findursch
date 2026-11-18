@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\\Database\\Eloquent\\Model;
+use Illuminate\\Database\\Eloquent\\Relations\\HasMany;
 
 class SchoolType extends Model
 {
@@ -23,8 +23,13 @@ class SchoolType extends Model
         ];
     }
 
+    /**
+     * School records store their school type in schools.type_id.
+     * Specify the foreign key explicitly so relationship counts and eager
+     * loading never assume the conventional school_type_id column.
+     */
     public function schools(): HasMany
     {
-        return $this->hasMany(School::class);
+        return $this->hasMany(School::class, 'type_id');
     }
 }
