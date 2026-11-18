@@ -20,6 +20,7 @@ Route::middleware(['auth:sanctum', 'role:school_owner'])
         Route::get('/account', [OwnerWorkspaceController::class, 'account']);
         Route::put('/account', [OwnerWorkspaceController::class, 'account']);
         Route::post('/account/password', [OwnerWorkspaceController::class, 'password']);
+        Route::post('/account/deletion-request', [OwnerWorkspaceController::class, 'requestDeletion']);
 
         Route::get('/schools/{school}/profile', [OwnerWorkspaceController::class, 'profile']);
         Route::put('/schools/{school}/profile', [OwnerWorkspaceController::class, 'profile']);

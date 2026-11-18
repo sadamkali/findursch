@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AccountDeletionRequest;
 use App\Models\Facility;
+use App\Models\Inquiry;
 use App\Models\Plan;
 use App\Models\School;
 use App\Models\SchoolAdvertisement;
@@ -363,12 +365,28 @@ class OwnerWorkspaceController extends Controller
                 'message' => ['required', 'string', 'min:1', 'max:10000'],
             ]);
 
-            $recipients = collect(preg_split('/\r\n|\r|\n/', $validated['recipients'] ?? ''))
-                ->map(fn ($value) => trim($value))
-                ->filter()
-                ->unique()
-                ->values()
-                ->all();
+            if (($validated['audience'] ?? 'manual') === 'enquiries') {
+                $contactColumn = $validated['channel'] === 'email' ? 'parent_email' : 'parent_phone';
+                $recipients = Inquiry::query()
+                    ->where('school_id', $record->id)
+                    ->whereNotNull($contactColumn)
+                    ->where($contactColumn, '!=', '')
+                    ->distinct()
+                    ->pluck($contactColumn)
+                    ->map(fn ($value) => trim((string) $value))
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->all();
+            } else {
+                $recipients = $this->parseRecipients($validated['recipients'] ?? '', $validated['channel']);
+            }
+            if (count($recipients) > 5000) {
+                return response()->json(['message' => 'A message campaign can contain up to 5,000 recipients.'], 422);
+            }
+            if ($recipients === []) {
+                return response()->json(['message' => 'Choose parents who enquired or add at least one valid contact.'], 422);
+            }
 
             $created = SchoolMessageCampaign::create([
                 'school_id' => $record->id,
@@ -391,8 +409,19 @@ class OwnerWorkspaceController extends Controller
             return response()->json(['message' => 'Message draft removed.']);
         }
 
+        $enquiryPhoneCount = $record->inquiries()
+            ->whereNotNull('parent_phone')->where('parent_phone', '!=', '')
+            ->distinct()->count('parent_phone');
+        $enquiryEmailCount = $record->inquiries()
+            ->whereNotNull('parent_email')->where('parent_email', '!=', '')
+            ->distinct()->count('parent_email');
+
         return response()->json([
-            'data' => ['records' => SchoolMessageCampaign::query()->where('school_id', $record->id)->latest()->get()],
+            'data' => [
+                'records' => SchoolMessageCampaign::query()->where('school_id', $record->id)->latest()->get(),
+                'enquiries_phone_count' => $enquiryPhoneCount,
+                'enquiries_email_count' => $enquiryEmailCount,
+            ],
         ]);
     }
 
@@ -424,9 +453,50 @@ class OwnerWorkspaceController extends Controller
             $user->update($validated);
         }
 
+        $deletionRequest = AccountDeletionRequest::query()
+            ->where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
+
         return response()->json([
-            'data' => ['user' => $user->only(['id', 'name', 'email', 'phone'])],
+            'data' => [
+                'user' => $user->only(['id', 'name', 'email', 'phone', 'status', 'created_at']),
+                'deletion_request' => $deletionRequest,
+            ],
         ]);
+    }
+
+    public function requestDeletion(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $existing = AccountDeletionRequest::query()
+            ->where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'message' => 'You already have an account deletion request awaiting review.',
+                'data' => ['request' => $existing],
+            ], 409);
+        }
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $deletionRequest = AccountDeletionRequest::create([
+            'user_id' => $user->id,
+            'reason' => $validated['reason'] ?? null,
+            'status' => 'pending',
+            'requested_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Your account deletion request has been submitted for review.',
+            'data' => ['request' => $deletionRequest],
+        ], 201);
     }
 
     public function password(Request $request): JsonResponse
@@ -443,6 +513,32 @@ class OwnerWorkspaceController extends Controller
         $request->user()->update(['password' => Hash::make($validated['password'])]);
 
         return response()->json(['message' => 'Password updated.']);
+    }
+
+    private function parseRecipients(string $raw, string $channel): array
+    {
+        $recipients = [];
+
+        foreach (preg_split('/\\r\\n|\\r|\\n/', $raw) ?: [] as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+
+            $cells = str_contains($line, ',') ? str_getcsv($line) : [$line];
+            foreach ($cells as $cell) {
+                $value = trim((string) $cell);
+                if ($channel === 'email') {
+                    if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        $recipients[] = strtolower($value);
+                    }
+                } elseif (preg_match('/^\\+?[0-9][0-9\\s()\\-]{6,}$/', $value)) {
+                    $recipients[] = preg_replace('/[\\s()\\-]+/', '', $value);
+                }
+            }
+        }
+
+        return array_values(array_unique($recipients));
     }
 
     private function school(Request $request, int $id): School
