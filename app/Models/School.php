@@ -24,9 +24,11 @@ class School extends Model implements HasMedia
         'owner_id', 'type_id', 'district_id', 'sub_county_id',
         'name', 'slug', 'tagline', 'description',
         'founded_year', 'registration_number',
-        'latitude', 'longitude', 'address',
-        'phone', 'email', 'website', 'whatsapp',
+        'latitude', 'longitude', 'address', 'town', 'po_box',
+        'nearest_landmark', 'maps_url', 'ownership', 'religious_affiliation',
+        'phone', 'email', 'website', 'whatsapp', 'facebook_url', 'instagram_url',
         'boarding_type', 'gender_policy', 'student_count_approx',
+        'fees_from', 'fees_to', 'activities', 'referral_source',
         'status', 'verification_status',
         'verified_at', 'verified_by', 'submitted_at', 'rejection_reason',
         'is_featured', 'featured_until',
@@ -62,8 +64,6 @@ class School extends Model implements HasMedia
     {
         return 'slug';
     }
-
-    // ==================== RELATIONSHIPS ====================
 
     public function type(): BelongsTo
     {
@@ -102,7 +102,7 @@ class School extends Model implements HasMedia
 
     public function facilities(): BelongsToMany
     {
-        return $this->belongsToMany(Facility::class, 'school_facilities')->withPivot('notes');
+        return $this->belongsToMany(Facility::class)->withPivot('notes');
     }
 
     public function reviews(): HasMany
@@ -145,8 +145,6 @@ class School extends Model implements HasMedia
         return $this->hasMany(SchoolView::class);
     }
 
-    // ==================== SCOUT SEARCH ====================
-
     public function toSearchableArray(): array
     {
         $this->loadMissing(['district', 'type', 'curricula']);
@@ -177,8 +175,6 @@ class School extends Model implements HasMedia
         return $this->status === 'active' && $this->verification_status === 'verified';
     }
 
-    // ==================== SCOPES ====================
-
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
@@ -189,9 +185,6 @@ class School extends Model implements HasMedia
         return $query->where('verification_status', 'verified');
     }
 
-    /**
-     * Only active, verified schools are visible in public search and profile routes.
-     */
     public function scopePubliclyVisible(Builder $query): Builder
     {
         return $query->where('status', 'active')
@@ -225,8 +218,6 @@ class School extends Model implements HasMedia
     {
         return $query->where('status', 'pending');
     }
-
-    // ==================== METHODS ====================
 
     public function isPremium(): bool
     {
@@ -269,9 +260,7 @@ class School extends Model implements HasMedia
             ->orderBy('amount')
             ->first();
 
-        if (! $fee) {
-            return null;
-        }
+        if (! $fee) return null;
 
         return match ($fee->period) {
             'per_term' => $fee->amount * 3,
@@ -284,18 +273,8 @@ class School extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('gallery')
-            
-            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
-
-        $this->addMediaCollection('cover')
-            
-            ->singleFile()
-            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
-
-        $this->addMediaCollection('logo')
-            
-            ->singleFile()
-            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']);
+        $this->addMediaCollection('gallery')->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+        $this->addMediaCollection('cover')->singleFile()->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+        $this->addMediaCollection('logo')->singleFile()->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']);
     }
 }

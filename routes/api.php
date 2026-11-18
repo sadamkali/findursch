@@ -5,9 +5,12 @@ use App\Http\Controllers\Api\DashboardAuthController;
 use App\Http\Controllers\Api\OwnerWorkspaceController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/registration/options', [DashboardAuthController::class, 'registrationOptions'])->middleware('throttle:30,1');
+
 Route::prefix('auth')->group(function () {
     Route::post('/login', [DashboardAuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('/register', [DashboardAuthController::class, 'register'])->middleware('throttle:5,1');
+    Route::post('/register-school', [DashboardAuthController::class, 'registerSchool'])->middleware('throttle:5,1');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [DashboardAuthController::class, 'me']);
