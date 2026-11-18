@@ -1,521 +1,411 @@
 @php
     $coverMedia = $school->getFirstMedia('cover');
     $galleryMedia = $school->getMedia('gallery');
-    $profileImages = collect([$coverMedia])
-        ->filter()
-        ->concat($galleryMedia)
-        ->unique('id')
-        ->values();
+    $profileImages = collect([$coverMedia])->filter()->concat($galleryMedia)->unique('id')->values();
     $lightboxImages = $profileImages->map(fn ($media) => [
         'url' => $media->getUrl(),
         'alt' => $school->name.' school photograph',
     ])->values()->all();
 
-    $primaryWhatsapp = $school->whatsapp
-        ?: $school->contacts->firstWhere('type', 'whatsapp')?->value;
+    $primaryPhone = $school->phone ?: $school->contacts->firstWhere('type', 'phone')?->value;
+    $primaryEmail = $school->email ?: $school->contacts->firstWhere('type', 'email')?->value;
+    $primaryWhatsapp = $school->whatsapp ?: $school->contacts->firstWhere('type', 'whatsapp')?->value;
     $whatsappDigits = preg_replace('/\D+/', '', (string) $primaryWhatsapp);
+    $website = $school->website ?: $school->contacts->firstWhere('type', 'website')?->value;
+    $websiteUrl = $website
+        ? (\Illuminate\Support\Str::startsWith($website, ['http://', 'https://']) ? $website : 'https://'.$website)
+        : null;
 
-    $locationText = collect([
-        $school->subCounty?->name,
-        $school->district?->name,
-        $school->district?->region?->name,
-    ])->filter()->unique()->implode(', ');
-
+    $regionName = $school->district?->region?->name;
+    $districtName = $school->district?->name;
+    $subCountyName = $school->subCounty?->name;
+    $locationText = collect([$districtName, $regionName])->filter()->unique()->implode(', ');
     $mapQuery = filled($school->latitude) && filled($school->longitude)
         ? $school->latitude.','.$school->longitude
-        : trim(collect([$school->address, $locationText])->filter()->implode(', '));
+        : trim(collect([$school->address, $subCountyName, $districtName, $regionName, 'Uganda'])->filter()->implode(', '));
     $mapUrl = $mapQuery !== ''
         ? 'https://www.google.com/maps/search/?api=1&query='.urlencode($mapQuery)
         : null;
 
-    $socialLinks = $school->contacts->whereIn('type', ['facebook', 'twitter', 'instagram']);
+    $facebook = $school->contacts->firstWhere('type', 'facebook')?->value;
+    $twitter = $school->contacts->firstWhere('type', 'twitter')?->value;
+    $instagram = $school->contacts->firstWhere('type', 'instagram')?->value;
     $activeFees = $school->fees->where('is_active', true);
-    $tuitionFees = $activeFees->where('category', 'tuition');
+    $tuitionFees = $activeFees->where('category', 'tuition')->sortBy('amount');
+    $lowestTuition = $tuitionFees->first();
+
+    $quickFacts = [
+        ['label' => 'Type', 'value' => $school->type?->name ?: 'Not provided', 'color' => '#d33'],
+        ['label' => 'Ownership', 'value' => 'Not provided', 'color' => '#d33'],
+        ['label' => 'Gender', 'value' => match($school->gender_policy) { 'boys' => 'Boys only', 'girls' => 'Girls only', default => 'Mixed (boys & girls)' }, 'color' => '#2f9e5a'],
+        ['label' => 'Religion', 'value' => 'Not provided', 'color' => '#6b5bd2'],
+        ['label' => 'Residence', 'value' => match($school->boarding_type) { 'boarding' => 'Boarding', 'mixed' => 'Day & boarding', default => 'Day school' }, 'color' => '#f0b030'],
+        ['label' => 'Curriculum', 'value' => $school->curricula->pluck('abbreviation')->filter()->implode(', ') ?: 'Not provided', 'color' => '#f0b030'],
+    ];
 @endphp
 
-<div class="school-profile-page" x-data="lightbox" x-init="images = @js($lightboxImages)">
-    {{-- School photo mosaic --}}
-    <section class="profile-mosaic {{ $profileImages->count() > 1 ? 'has-side' : 'is-single' }}" aria-label="School photographs">
+<div class="school-detail-reference" x-data="lightbox" x-init="images = @js($lightboxImages)" @inquiry-sent.window="$refs.enquiryDialog?.close()">
+    {{-- Same full-width photo mosaic composition as findursch-school.html --}}
+    <section class="sref-mosaic" aria-label="School photos">
         @if($profileImages->isNotEmpty())
-            <button type="button" class="profile-mosaic__main" @click="show(images, 0)" aria-label="Open school photograph gallery">
-                <img src="{{ $profileImages->first()->getUrl() }}" alt="{{ $school->name }} school" fetchpriority="high">
-                <span class="profile-mosaic__chip">View all {{ $profileImages->count() }} {{ \Illuminate\Support\Str::plural('photo', $profileImages->count()) }}</span>
+            <button type="button" class="sref-mosaic__main" @click="show(images, 0)" aria-label="View school photos">
+                <img src="{{ $profileImages->first()->getUrl() }}" alt="{{ $school->name }}" fetchpriority="high">
+                <span class="sref-chip">View all {{ $profileImages->count() }} {{ \Illuminate\Support\Str::plural('photo', $profileImages->count()) }}</span>
             </button>
             @if($profileImages->count() > 1)
-                <div class="profile-mosaic__side">
+                <div class="sref-mosaic__side">
                     @foreach($profileImages->skip(1)->take(3) as $media)
-                        <button type="button" class="profile-mosaic__tile" @click="show(images, {{ $loop->index + 1 }})" aria-label="Open school photograph {{ $loop->iteration + 1 }}">
-                            <img src="{{ $media->getUrl() }}" alt="{{ $school->name }} school photograph {{ $loop->iteration + 1 }}" loading="lazy">
+                        <button type="button" class="sref-mosaic__tile" @click="show(images, {{ $loop->index + 1 }})" aria-label="View school photograph {{ $loop->iteration + 1 }}">
+                            <img src="{{ $media->getUrl() }}" alt="{{ $school->name }} photograph {{ $loop->iteration + 1 }}" loading="lazy">
                             @if($loop->last && $profileImages->count() > 4)
-                                <span class="profile-mosaic__more">+{{ $profileImages->count() - 4 }} more</span>
+                                <span class="sref-more-photo">+{{ $profileImages->count() - 4 }} more</span>
                             @endif
                         </button>
                     @endforeach
+                    @for($placeholder = $profileImages->count(); $placeholder < 4; $placeholder++)
+                        <div class="sref-mosaic__tile sref-mosaic__tile--empty" aria-hidden="true"></div>
+                    @endfor
                 </div>
             @endif
         @else
-            <div class="profile-mosaic__placeholder">
+            <div class="sref-mosaic__placeholder">
                 <span>{{ strtoupper(mb_substr($school->name, 0, 2)) }}</span>
-                <small>School photographs have not been added yet</small>
+                <small>School photos will appear here when uploaded</small>
             </div>
         @endif
     </section>
 
-    <nav class="profile-crumbs" aria-label="Breadcrumb">
+    <div class="sref-crumbs">
         <div class="site-wrap">
-            <a href="{{ route('home') }}">Home</a><span aria-hidden="true">›</span>
-            <a href="{{ route('schools.index') }}">Schools</a><span aria-hidden="true">›</span>
-            @if($school->type)<a href="{{ route('schools.index', ['type' => $school->type->id]) }}">{{ $school->type->name }}</a><span aria-hidden="true">›</span>@endif
-            <span aria-current="page">{{ $school->name }}</span>
+            <a href="{{ route('home') }}">Home</a>
+            <a href="{{ route('schools.index') }}">Schools</a>
+            @if($school->type)<a href="{{ route('schools.index', ['type' => $school->type->id]) }}">{{ $school->type->name }}</a>@endif
+            <span>{{ $school->name }}</span>
         </div>
-    </nav>
+    </div>
 
-    <main class="site-wrap profile-page-wrap">
-        <div class="profile-layout">
-            <div class="profile-main">
-                {{-- School identity and primary actions --}}
-                <section class="profile-identity">
-                    <div class="profile-identity__top">
-                        <div class="profile-logo">
+    <main class="site-wrap sref-page">
+        <div class="sref-cols">
+            {{-- LEFT COLUMN: exact order and card arrangement from the supplied HTML --}}
+            <div class="sref-stack">
+                <div class="sref-school-heading">
+                    <div class="sref-school-top">
+                        <div class="sref-school-logo">
                             @if($school->getFirstMediaUrl('logo'))
                                 <img src="{{ $school->getFirstMediaUrl('logo') }}" alt="{{ $school->name }} logo">
                             @else
-                                <span>{{ strtoupper(mb_substr($school->name, 0, 2)) }}</span>
+                                {{ strtoupper(mb_substr($school->name, 0, 2)) }}
                             @endif
                         </div>
-                        <div class="profile-identity__copy">
-                            <div class="profile-tags">
-                                @if($school->type)<span class="profile-tag profile-tag--type">{{ $school->type->name }}</span>@endif
-                                @if($school->is_demo)
-                                    <span class="profile-tag profile-tag--sample">Demo sample · Not verified</span>
-                                @else
-                                    <span class="profile-tag profile-tag--verified">✓ Verified listing</span>
-                                @endif
-                                @if($school->is_featured)<span class="profile-tag profile-tag--featured">Featured</span>@endif
-                                @foreach($school->curricula->take(2) as $curriculum)
-                                    <span class="profile-tag">{{ $curriculum->abbreviation }}</span>
-                                @endforeach
-                            </div>
+                        <div class="sref-school-copy">
                             <h1>{{ $school->name }}</h1>
-                            @if($school->tagline)<p class="profile-tagline">{{ $school->tagline }}</p>@endif
-                            <div class="profile-contact-line">
-                                @if($school->phone)<a href="tel:{{ $school->phone }}">☎ {{ $school->phone }}</a>@endif
-                                @if($school->email)<a href="mailto:{{ $school->email }}">✉ {{ $school->email }}</a>@endif
-                                @if($locationText !== '')<span>⌖ {{ $locationText }}</span>@endif
+                            <div class="sref-tags">
+                                @if($school->type)<span class="sref-tag sref-tag--gold">{{ $school->type->name }}</span>@endif
+                                @if($school->is_demo)
+                                    <span class="sref-tag">Demo sample · Not verified</span>
+                                @else
+                                    <span class="sref-tag sref-tag--green">✓ Verified</span>
+                                @endif
+                                @foreach($school->curricula->take(2) as $curriculum)
+                                    <span class="sref-tag sref-tag--green">{{ $curriculum->abbreviation }}</span>
+                                @endforeach
+                                <span class="sref-tag">{{ match($school->boarding_type) { 'boarding' => 'Boarding', 'mixed' => 'Day & boarding', default => 'Day school' } }}</span>
+                                <span class="sref-tag">{{ match($school->gender_policy) { 'boys' => 'Boys', 'girls' => 'Girls', default => 'Mixed' } }}</span>
+                            </div>
+                            <div class="sref-contact-line">
+                                @if($primaryPhone)<span>{{ $primaryPhone }}</span>@endif
+                                @if($primaryEmail)<span>{{ $primaryEmail }}</span>@endif
+                                @if($locationText !== '')<span>{{ $locationText }}@if($regionName), Uganda@endif</span>@endif
                             </div>
                         </div>
                     </div>
 
-                    <div class="profile-actions">
+                    <div class="sref-actions">
                         @if($school->is_demo)
-                            <span class="profile-action-note">Sample profile — admission enquiries and reviews are disabled.</span>
+                            <button type="button" class="sref-btn sref-btn--brand" disabled>Admissions disabled for sample</button>
                         @else
-                            <button type="button" class="btn btn-brand" @click="$refs.admissionDialog.showModal()">Apply for admission</button>
+                            <button type="button" class="sref-btn sref-btn--brand sref-btn--sm" @click="$refs.enquiryDialog.showModal()">Apply for admission</button>
                             @if($whatsappDigits !== '')
-                                <a class="btn btn-wa" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp</a>
+                                <a class="sref-btn sref-btn--wa sref-btn--sm" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp</a>
                             @endif
                         @endif
-                        <button type="button" class="btn btn-line" x-data="{copied:false}" @click="navigator.clipboard.writeText(window.location.href).then(() => copied = true)" x-text="copied ? 'Link copied' : 'Share school'">Share school</button>
+                        <button type="button" class="sref-btn sref-btn--line sref-btn--sm" x-data="{copied:false}" @click="navigator.clipboard.writeText(window.location.href).then(() => copied = true).catch(() => copied = false)" x-text="copied ? 'Link copied' : 'Share'">Share</button>
                         @auth
                             @if(!$school->is_demo)
-                                <button type="button" wire:click="toggleSave" class="btn btn-line">{{ $this->isSaved() ? '♥ Saved' : '♡ Save school' }}</button>
+                                <button type="button" class="sref-btn sref-btn--line sref-btn--sm" wire:click="toggleSave">{{ $this->isSaved() ? '♥ Saved' : '♡ Save' }}</button>
                             @endif
                         @else
-                            @if(!$school->is_demo)<a class="btn btn-line" href="{{ route('login') }}">♡ Save school</a>@endif
+                            @if(!$school->is_demo)<a href="{{ route('login') }}" class="sref-btn sref-btn--line sref-btn--sm">♡ Save</a>@endif
                         @endauth
                     </div>
-                </section>
 
-                {{-- In-page profile navigation --}}
-                <nav class="profile-tabs" aria-label="School profile sections">
-                    <a class="is-active" href="#about">About</a>
-                    <a href="#programmes">Programmes</a>
-                    <a href="#facilities">Facilities</a>
-                    <a href="#fees">Fees</a>
-                    <a href="#gallery">Gallery</a>
-                    <a href="#events">Events</a>
-                    <a href="#news">News</a>
-                    <a href="#reviews">Reviews</a>
-                </nav>
+                    <nav class="sref-tabs" aria-label="Profile sections" x-data="{active:'about'}">
+                        <a href="#about" @click="active='about'" :class="active === 'about' ? 'is-active' : ''">About</a>
+                        <a href="#facilities" @click="active='facilities'" :class="active === 'facilities' ? 'is-active' : ''">Facilities</a>
+                        <a href="#events" @click="active='events'" :class="active === 'events' ? 'is-active' : ''">Events</a>
+                        <a href="#gallery" @click="active='gallery'" :class="active === 'gallery' ? 'is-active' : ''">Gallery</a>
+                        <a href="#news" @click="active='news'" :class="active === 'news' ? 'is-active' : ''">News</a>
+                    </nav>
+                </div>
 
-                {{-- About --}}
-                <section class="profile-card profile-pad profile-section" id="about">
-                    <h2>About <span>{{ $school->name }}</span></h2>
+                <section class="sref-card sref-pad sref-about" id="about">
+                    <h2>About {{ $school->name }}</h2>
                     @if($school->tagline)
-                        <div class="profile-quote">{{ $school->tagline }}</div>
+                        <div class="sref-quote">{{ $school->tagline }}</div>
                     @endif
                     @if($school->description)
-                        <div class="profile-prose">{{ $school->description }}</div>
+                        <div class="sref-description">{{ $school->description }}</div>
                     @else
-                        <p class="profile-empty-inline">This school has not added an about description yet.</p>
+                        <p class="sref-empty">The school has not added an introduction yet.</p>
                     @endif
-                    <div class="profile-about-facts">
-                        @if($school->founded_year)
-                            <div><small>Established</small><strong>{{ $school->founded_year }}</strong></div>
-                        @endif
-                        @if($school->student_count_approx)
-                            <div><small>Approximate learners</small><strong>{{ number_format($school->student_count_approx) }}</strong></div>
-                        @endif
-                        @if($school->registration_number)
-                            <div><small>Registration number</small><strong>{{ $school->registration_number }}</strong></div>
-                        @endif
-                        <div><small>Boarding arrangement</small><strong>{{ match($school->boarding_type) { 'boarding' => 'Boarding', 'mixed' => 'Day and boarding', default => 'Day school' } }}</strong></div>
-                        <div><small>Gender</small><strong>{{ match($school->gender_policy) { 'boys' => 'Boys', 'girls' => 'Girls', default => 'Mixed' } }}</strong></div>
-                    </div>
-                </section>
-
-                {{-- Curriculum --}}
-                <section class="profile-card profile-pad profile-section" id="curriculum">
-                    <h2>Learning <span>curriculum</span></h2>
-                    @if($school->curricula->isNotEmpty())
-                        <div class="profile-chip-list">
-                            @foreach($school->curricula as $curriculum)
-                                <span class="profile-chip">{{ $curriculum->name }} <b>{{ $curriculum->abbreviation }}</b></span>
-                            @endforeach
+                    @if($school->founded_year || $school->student_count_approx)
+                        <div class="sref-about-meta">
+                            @if($school->founded_year)<span>Established {{ $school->founded_year }}</span>@endif
+                            @if($school->student_count_approx)<span>Approximately {{ number_format($school->student_count_approx) }} learners</span>@endif
                         </div>
-                    @else
-                        <p class="profile-empty-inline">Curriculum information has not been added yet.</p>
                     @endif
                 </section>
 
-                {{-- Programmes --}}
-                <section class="profile-card profile-pad profile-section" id="programmes">
-                    <h2>School <span>programmes</span></h2>
-                    @if($school->programs->isNotEmpty())
-                        <div class="profile-programme-grid">
-                            @foreach($school->programs as $program)
-                                <article class="profile-programme">
-                                    <h3>{{ $program->name }}</h3>
-                                    <p class="profile-programme__meta">
-                                        @if($program->level){{ $program->level }}@endif
-                                        @if($program->duration) · {{ $program->duration }}@endif
-                                    </p>
-                                    @if($program->curriculum)<p class="profile-programme__curriculum">{{ $program->curriculum->name }}</p>@endif
-                                    @if($program->description)<p>{{ $program->description }}</p>@endif
-                                </article>
-                            @endforeach
-                        </div>
-                    @else
-                        <p class="profile-empty-inline">This school has not published its programmes yet.</p>
-                    @endif
-                </section>
-
-                {{-- Facilities --}}
-                <section class="profile-card profile-pad profile-section" id="facilities">
+                <section class="sref-card sref-pad" id="facilities">
                     <h2>Our <span>facilities</span></h2>
                     @if($school->facilities->isNotEmpty())
-                        <div class="profile-facilities">
+                        <div class="sref-facilities">
                             @foreach($school->facilities as $facility)
-                                <span><i aria-hidden="true"></i>{{ $facility->name }}</span>
+                                <span><i></i>{{ $facility->name }}</span>
                             @endforeach
                         </div>
                     @else
-                        <p class="profile-empty-inline">Facility information has not been added yet.</p>
+                        <p class="sref-empty">No facilities have been added to this school's profile yet.</p>
                     @endif
                 </section>
 
-                {{-- School fees --}}
-                <section class="profile-card profile-pad profile-section" id="fees">
-                    <h2>School <span>fees</span></h2>
-                    @if($activeFees->isNotEmpty())
-                        <p class="profile-section-intro">Fee information is supplied by the school. Confirm the current fee structure directly before making an admission decision.</p>
-                        <div class="profile-table-wrap">
-                            <table class="profile-fee-table">
-                                <thead><tr><th>Description</th><th>Period</th><th class="text-right">Amount</th></tr></thead>
-                                <tbody>
-                                    @foreach($activeFees as $fee)
-                                        <tr>
-                                            <td><strong>{{ $fee->label }}</strong><small>{{ ucfirst($fee->category) }}@if($fee->program) · {{ $fee->program->name }}@endif</small></td>
-                                            <td>{{ str_replace('_', ' ', $fee->period) }}</td>
-                                            <td class="text-right"><strong>{{ $fee->currency }} {{ number_format((float) $fee->amount) }}</strong></td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="profile-fee-contact"><strong>Contact the school</strong><span>for its current fee structure.</span></div>
-                        <p class="profile-section-intro">No active fee schedule has been published on this profile.</p>
-                    @endif
-                </section>
-
-                {{-- Photo gallery --}}
-                <section class="profile-card profile-pad profile-section" id="gallery">
-                    <div class="profile-section-heading">
-                        <h2>Photo <span>gallery</span></h2>
-                        @if($profileImages->isNotEmpty())<span>{{ $profileImages->count() }} {{ \Illuminate\Support\Str::plural('photo', $profileImages->count()) }}</span>@endif
-                    </div>
+                <section class="sref-card sref-pad" id="gallery">
+                    <h2>Photo <span>gallery</span></h2>
                     @if($profileImages->isNotEmpty())
-                        <div class="profile-gallery-grid">
-                            @foreach($profileImages as $media)
-                                <button type="button" @class(['profile-gallery-image', 'profile-gallery-image--big' => $loop->first]) @click="show(images, {{ $loop->index }})" aria-label="View photograph {{ $loop->iteration }}">
+                        <div class="sref-gallery-primary">
+                            @foreach($profileImages->take(3) as $media)
+                                <button type="button" class="{{ $loop->first ? 'is-large' : '' }}" @click="show(images, {{ $loop->index }})" aria-label="Open photo {{ $loop->iteration }}">
                                     <img src="{{ $media->getUrl() }}" alt="{{ $school->name }} photograph {{ $loop->iteration }}" loading="lazy">
                                 </button>
                             @endforeach
                         </div>
-                    @else
-                        <p class="profile-empty-inline">This school has not uploaded gallery photographs yet.</p>
-                    @endif
-                </section>
-
-                {{-- Events have no school-event data model in the current application --}}
-                <section class="profile-card profile-pad profile-section" id="events">
-                    <h2>Upcoming and past <span>events</span></h2>
-                    <div class="profile-empty-state">
-                        <span class="profile-empty-state__icon">▦</span>
-                        <strong>No school events posted yet</strong>
-                        <p>Events will appear here when this school publishes them on FindurSch.</p>
-                    </div>
-                </section>
-
-                {{-- School-specific news is kept separate from general education articles --}}
-                <section class="profile-card profile-pad profile-section" id="news">
-                    <h2>School <span>news</span></h2>
-                    <div class="profile-empty-state">
-                        <span class="profile-empty-state__icon">▤</span>
-                        <strong>No school news posted yet</strong>
-                        <p>Updates published specifically for this school will appear here.</p>
-                        <a href="{{ route('articles.index') }}" class="profile-text-link">Browse education news and guides →</a>
-                    </div>
-                </section>
-
-                {{-- Approved reviews --}}
-                <section class="profile-card profile-pad profile-section" id="reviews">
-                    <div class="profile-section-heading">
-                        <h2>Parent and student <span>reviews</span></h2>
-                        <span>{{ number_format($school->reviews_count) }} approved</span>
-                    </div>
-                    @if((float) $school->rating_average > 0)
-                        <div class="profile-rating-summary"><strong>★ {{ number_format((float) $school->rating_average, 1) }}</strong><span>out of 5 based on {{ number_format($school->reviews_count) }} approved reviews</span></div>
-                    @endif
-
-                    @forelse($school->approvedReviews as $review)
-                        <article class="profile-review">
-                            <div class="profile-review__top">
-                                <div><h3>{{ $review->title }}</h3><small>{{ $review->user?->name ?? 'FindurSch user' }} · {{ ucfirst($review->reviewer_type) }}</small></div>
-                                <strong>★ {{ $review->rating }}/5</strong>
+                        @if($profileImages->count() > 3)
+                            <div class="sref-gallery-secondary">
+                                @foreach($profileImages->skip(3)->take(4) as $media)
+                                    <button type="button" @click="show(images, {{ $loop->index + 3 }})" aria-label="Open photo {{ $loop->index + 4 }}">
+                                        <img src="{{ $media->getUrl() }}" alt="{{ $school->name }} photograph {{ $loop->index + 4 }}" loading="lazy">
+                                        @if($loop->last && $profileImages->count() > 7)
+                                            <span>+{{ $profileImages->count() - 7 }} more</span>
+                                        @endif
+                                    </button>
+                                @endforeach
                             </div>
-                            <p>{{ $review->body }}</p>
-                            @if($review->owner_response)
-                                <div class="profile-owner-response"><strong>School response</strong><p>{{ $review->owner_response }}</p></div>
-                            @endif
-                        </article>
-                    @empty
-                        <p class="profile-empty-inline">No approved reviews have been published yet.</p>
-                    @endforelse
+                        @endif
+                    @else
+                        <p class="sref-empty">No photographs have been uploaded by this school yet.</p>
+                    @endif
                 </section>
 
-                {{-- Review submission --}}
-                @if($school->is_demo)
-                    <section class="profile-card profile-pad"><h2>Reviews are disabled for <span>sample profiles</span></h2><p class="profile-empty-inline">Reviews are available on eligible real school listings.</p></section>
-                @else
-                    <section class="profile-card profile-pad profile-section" id="write-review">
-                        <h2>Share your <span>experience</span></h2>
-                        @if(session('review_submitted'))<p class="profile-success-message">{{ session('review_submitted') }}</p>@endif
+                <section class="sref-card sref-pad" id="events">
+                    <h2>Upcoming <span>and past events</span></h2>
+                    <p class="sref-empty sref-empty--center">No events posted yet.</p>
+                </section>
+
+                <section class="sref-card sref-pad" id="news">
+                    <h2>School <span>news</span></h2>
+                    <p class="sref-empty">No school news posted yet. <a href="{{ route('articles.index') }}">Browse education news and guides</a>.</p>
+                </section>
+
+                <div class="sref-band">
+                    <div>
+                        <small>Opportunities</small>
+                        <h3>Explore education news and school guides</h3>
+                        <p>Read education updates, guidance and useful information for families.</p>
+                    </div>
+                    <a class="sref-btn sref-btn--gold" href="{{ route('articles.index') }}">Explore resources</a>
+                </div>
+
+                {{-- Existing moderated review feature is retained after the reference layout. --}}
+                @if(!$school->is_demo)
+                    <section class="sref-card sref-pad sref-reviews" id="reviews">
+                        <h2>Parent and student <span>reviews</span></h2>
+                        <p class="sref-review-count">{{ number_format($school->reviews_count) }} approved reviews</p>
+                        @if((float) $school->rating_average > 0)
+                            <p class="sref-review-average">★ {{ number_format((float) $school->rating_average, 1) }} / 5</p>
+                        @endif
+                        @forelse($school->approvedReviews as $review)
+                            <article class="sref-review">
+                                <div><strong>{{ $review->title }}</strong><b>★ {{ $review->rating }}/5</b></div>
+                                <p>{{ $review->body }}</p>
+                                <small>{{ $review->user?->name ?? 'FindurSch user' }} · {{ ucfirst($review->reviewer_type) }}</small>
+                                @if($review->owner_response)<blockquote><strong>School response</strong>{{ $review->owner_response }}</blockquote>@endif
+                            </article>
+                        @empty
+                            <p class="sref-empty">No approved reviews have been published yet.</p>
+                        @endforelse
+
+                        @if(session('review_submitted'))<p class="sref-success">{{ session('review_submitted') }}</p>@endif
                         @if($alreadyReviewed)
-                            <p class="profile-empty-inline">You have already submitted a review for this school.</p>
+                            <p class="sref-empty">You have already submitted a review for this school.</p>
                         @elseif(auth()->check() && auth()->user()->hasVerifiedEmail())
-                            <form wire:submit="submitReview" class="profile-form">
-                                <div class="profile-form-grid">
-                                    <label>I am a
-                                        <select wire:model="reviewerType">
-                                            <option value="parent">Parent / Guardian</option><option value="student">Student</option><option value="alumni">Alumni</option><option value="staff">Staff</option><option value="other">Other</option>
-                                        </select>
-                                    </label>
-                                    <label>Rating
-                                        <select wire:model="reviewRating">@for($rating = 5; $rating >= 1; $rating--)<option value="{{ $rating }}">{{ $rating }} out of 5</option>@endfor</select>
-                                    </label>
-                                    <label class="profile-form-full">Review title
-                                        <input wire:model="reviewTitle" required maxlength="255">
-                                        @error('reviewTitle')<small class="profile-field-error">{{ $message }}</small>@enderror
-                                    </label>
-                                    <label class="profile-form-full">Your experience
-                                        <textarea wire:model="reviewBody" required minlength="20" maxlength="5000" rows="5"></textarea>
-                                        @error('reviewBody')<small class="profile-field-error">{{ $message }}</small>@enderror
-                                    </label>
+                            <form wire:submit="submitReview" class="sref-form">
+                                <div class="sref-form-grid">
+                                    <label>I am a<select wire:model="reviewerType"><option value="parent">Parent / Guardian</option><option value="student">Student</option><option value="alumni">Alumni</option><option value="staff">Staff</option><option value="other">Other</option></select></label>
+                                    <label>Rating<select wire:model="reviewRating">@for($rating = 5; $rating >= 1; $rating--)<option value="{{ $rating }}">{{ $rating }} out of 5</option>@endfor</select></label>
+                                    <label class="full">Review title<input wire:model="reviewTitle" required maxlength="255">@error('reviewTitle')<small class="sref-error">{{ $message }}</small>@enderror</label>
+                                    <label class="full">Your experience<textarea wire:model="reviewBody" required minlength="20" maxlength="5000" rows="4"></textarea>@error('reviewBody')<small class="sref-error">{{ $message }}</small>@enderror</label>
                                 </div>
-                                <button type="submit" class="btn btn-brand" wire:loading.attr="disabled" wire:target="submitReview">Submit review</button>
+                                <button class="sref-btn sref-btn--brand" type="submit" wire:loading.attr="disabled" wire:target="submitReview">Submit review</button>
                             </form>
                         @elseif(auth()->check())
-                            <p class="profile-empty-inline">Verify your email address before submitting a review. <a href="{{ route('verification.notice') }}" class="profile-text-link">Verify email →</a></p>
+                            <p class="sref-empty">Verify your email before submitting a review. <a href="{{ route('verification.notice') }}">Verify email</a>.</p>
                         @else
-                            <p class="profile-empty-inline"><a href="{{ route('login') }}" class="profile-text-link">Sign in</a> to leave a review.</p>
+                            <p class="sref-empty"><a href="{{ route('login') }}">Sign in</a> to leave a review.</p>
                         @endif
                     </section>
                 @endif
             </div>
 
-            {{-- Profile sidebar --}}
-            <aside class="profile-sidebar">
-                @if($school->is_demo)
-                    <section class="profile-join profile-join--sample">
-                        <h2>Sample school profile</h2>
-                        <p>This is demonstration data. Admission enquiries, reviews and direct school actions are disabled.</p>
-                        <span class="profile-sample-pill">For preview only</span>
-                    </section>
-                @else
-                    <section class="profile-join">
-                        <small>Admissions</small>
-                        <h2>Ready to join {{ $school->name }}?</h2>
-                        <p>Send an admission enquiry to ask the school about availability, requirements and the next intake.</p>
-                        <button type="button" class="btn btn-gold btn-block" @click="$refs.admissionDialog.showModal()">Apply for admission</button>
-                        <button type="button" class="btn btn-ghost btn-block" @click="$refs.admissionDialog.showModal()">Send an enquiry</button>
-                    </section>
-                @endif
+            {{-- RIGHT SIDEBAR: same card types and item order as the uploaded HTML --}}
+            <aside class="sref-sidebar">
+                <section class="sref-join">
+                    @if($school->is_demo)
+                        <h3>Sample school profile</h3>
+                        <p>This is demonstration information. Admission enquiries and direct contact actions are disabled for this sample listing.</p>
+                        <span class="sref-sample-note">Preview only · Not a real school</span>
+                    @else
+                        <h3>Ready to join {{ $school->name }}?</h3>
+                        <p>Ask the school about available places, admission requirements and the next intake.</p>
+                        <button type="button" class="sref-btn sref-btn--gold sref-btn--block" @click="$refs.enquiryDialog.showModal()">Apply for admission</button>
+                        <button type="button" class="sref-btn sref-btn--ghost sref-btn--block" @click="$refs.enquiryDialog.showModal()">Send enquiry</button>
+                    @endif
+                </section>
 
-                <section class="profile-contact-card">
-                    <h2>Contact the school</h2>
-                    @if($school->phone)
-                        <div class="profile-contact-item"><i>☎</i><div><small>Phone</small><a href="tel:{{ $school->phone }}">{{ $school->phone }}</a></div></div>
+                <section class="sref-contact">
+                    <h3>Contact the school</h3>
+                    @if($primaryPhone)
+                        <div class="sref-contact-item"><i>☎</i><div><small>Phone</small><b>{{ $primaryPhone }}</b></div></div>
                     @endif
-                    @if($school->email)
-                        <div class="profile-contact-item"><i>✉</i><div><small>Email</small><a href="mailto:{{ $school->email }}">{{ $school->email }}</a></div></div>
+                    @if($primaryEmail)
+                        <div class="sref-contact-item"><i>✉</i><div><small>Email</small><b>{{ $primaryEmail }}</b></div></div>
                     @endif
-                    @if($school->website)
-                        <div class="profile-contact-item"><i>↗</i><div><small>Website</small><a href="{{ \Illuminate\Support\Str::startsWith($school->website, ['http://', 'https://']) ? $school->website : 'https://'.$school->website }}" target="_blank" rel="noopener">{{ $school->website }}</a></div></div>
-                    @endif
-                    @if($primaryWhatsapp && $whatsappDigits !== '')
-                        <div class="profile-contact-item"><i>◉</i><div><small>WhatsApp</small><a href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">{{ $primaryWhatsapp }}</a></div></div>
-                    @endif
-                    @if($school->address)
-                        <div class="profile-contact-address">{{ $school->address }}</div>
+                    @if($locationText !== '')
+                        <div class="sref-contact-item"><i>⌂</i><div><small>Location</small><b>{{ $locationText }}</b></div></div>
                     @endif
                     @if($school->is_demo)
-                        <p class="profile-sidebar-note">Contact details are sample data and are not active.</p>
-                    @elseif(!$school->phone && !$school->email && !$school->website && !$primaryWhatsapp)
-                        <p class="profile-sidebar-note">Contact information has not been provided yet.</p>
+                        <p class="sref-sample-contact">Sample details only. Contact links are disabled.</p>
+                    @else
+                        <div class="sref-contact-actions">
+                            <button type="button" class="sref-btn sref-btn--gold sref-btn--sm" @click="$refs.enquiryDialog.showModal()">Apply now</button>
+                            @if($whatsappDigits !== '')
+                                <a class="sref-btn sref-btn--ghost sref-btn--sm" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp us</a>
+                            @else
+                                <span class="sref-btn sref-btn--ghost sref-btn--sm is-disabled">WhatsApp us</span>
+                            @endif
+                        </div>
+                    @endif
+                    @if(!$primaryPhone && !$primaryEmail && !$locationText)
+                        <p class="sref-sample-contact">Contact details have not been provided yet.</p>
                     @endif
                 </section>
 
-                <section class="profile-facts-card">
-                    <h2>Quick facts</h2>
-                    <div class="profile-facts-grid">
-                        <div><small>School type</small><b>{{ $school->type?->name ?? 'Not provided' }}</b></div>
-                        <div><small>Gender</small><b>{{ match($school->gender_policy) { 'boys' => 'Boys', 'girls' => 'Girls', default => 'Mixed' } }}</b></div>
-                        <div><small>Boarding</small><b>{{ match($school->boarding_type) { 'boarding' => 'Boarding', 'mixed' => 'Day & boarding', default => 'Day' } }}</b></div>
-                        <div><small>Curriculum</small><b>{{ $school->curricula->pluck('abbreviation')->filter()->implode(', ') ?: 'Not provided' }}</b></div>
-                        @if($school->founded_year)<div><small>Established</small><b>{{ $school->founded_year }}</b></div>@endif
-                        @if($school->student_count_approx)<div><small>Learners</small><b>{{ number_format($school->student_count_approx) }}</b></div>@endif
+                <section class="sref-box">
+                    <h5>Quick facts</h5>
+                    <div class="sref-quick-facts">
+                        @foreach($quickFacts as $fact)
+                            <div><small>{{ $fact['label'] }}</small><b><i style="--fact-color:{{ $fact['color'] }}"></i>{{ $fact['value'] }}</b></div>
+                        @endforeach
                     </div>
-                    @if($tuitionFees->isNotEmpty())
-                        <div class="profile-fee-highlight"><strong>{{ $tuitionFees->sortBy('amount')->first()->currency }} {{ number_format((float) $tuitionFees->min('amount')) }}</strong><small>Lowest listed tuition amount · {{ str_replace('_', ' ', $tuitionFees->sortBy('amount')->first()->period) }}</small></div>
+                </section>
+
+                <section class="sref-box">
+                    <h5>School fees</h5>
+                    @if($lowestTuition)
+                        <div class="sref-fee">
+                            <b>{{ $lowestTuition->currency }} {{ number_format((float) $lowestTuition->amount) }}</b>
+                            <small>Lowest listed tuition · {{ str_replace('_', ' ', $lowestTuition->period) }}</small>
+                        </div>
+                    @else
+                        <div class="sref-fee"><b>Contact school</b><small>for current fee structure</small></div>
                     @endif
                 </section>
 
-                <section class="profile-contact-card">
-                    <h2>Find the school</h2>
-                    <dl class="profile-location-list">
-                        @if($school->district?->region)<div><dt>Region</dt><dd>{{ $school->district->region->name }}</dd></div>@endif
-                        @if($school->district)<div><dt>District</dt><dd>{{ $school->district->name }}</dd></div>@endif
-                        @if($school->subCounty)<div><dt>Sub-county</dt><dd>{{ $school->subCounty->name }}</dd></div>@endif
-                        @if($school->address)<div><dt>Address</dt><dd>{{ $school->address }}</dd></div>@endif
+                <div class="sref-advert">
+                    <div>Your advert here<small>300 × 250</small></div>
+                </div>
+
+                <section class="sref-box">
+                    <h5>Find us on social media</h5>
+                    <div class="sref-social">
+                        @if($facebook)<a class="sref-btn sref-btn--facebook" href="{{ $facebook }}" target="_blank" rel="noopener">Facebook</a>@else<span class="sref-btn sref-btn--inactive">Facebook</span>@endif
+                        @if($twitter)<a class="sref-btn sref-btn--x" href="{{ $twitter }}" target="_blank" rel="noopener">Twitter / X</a>@else<span class="sref-btn sref-btn--inactive">Twitter / X</span>@endif
+                        @if($whatsappDigits && !$school->is_demo)<a class="sref-btn sref-btn--wa" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp</a>@else<span class="sref-btn sref-btn--inactive">WhatsApp</span>@endif
+                        <button type="button" class="sref-btn sref-btn--line" x-data="{copied:false}" @click="navigator.clipboard.writeText(window.location.href).then(() => copied = true)" x-text="copied ? 'Link copied' : 'Copy link'">Copy link</button>
+                    </div>
+                </section>
+
+                <section class="sref-box">
+                    <h5>Location</h5>
+                    <dl class="sref-location-list">
+                        <div><dt>Region</dt><dd class="is-link">{{ $regionName ?: 'Not provided' }}</dd></div>
+                        <div><dt>District</dt><dd class="is-link">{{ $districtName ?: 'Not provided' }}</dd></div>
+                        <div><dt>County</dt><dd>Not provided</dd></div>
+                        <div><dt>Sub-county</dt><dd>{{ $subCountyName ?: 'Not provided' }}</dd></div>
+                        <div><dt>Village</dt><dd>Not provided</dd></div>
                     </dl>
                     @if($mapUrl)
-                        <a class="profile-map-link" href="{{ $mapUrl }}" target="_blank" rel="noopener"><span>⌖</span><span><strong>View on Google Maps</strong><small>Open directions to this school</small></span></a>
+                        <div class="sref-map"><div><a href="{{ $mapUrl }}" target="_blank" rel="noopener">View on Google Maps</a>{{ $locationText ?: 'Uganda' }}</div></div>
                     @else
-                        <p class="profile-sidebar-note">A map location has not been added to this profile.</p>
-                    @endif
-                </section>
-
-                @if($socialLinks->isNotEmpty())
-                    <section class="profile-contact-card">
-                        <h2>Find us on social media</h2>
-                        <div class="profile-social-links">
-                            @foreach($socialLinks as $social)
-                                <a href="{{ $social->value }}" target="_blank" rel="noopener">{{ $social->label ?: ucfirst($social->type) }}</a>
-                            @endforeach
-                        </div>
-                    </section>
-                @endif
-
-                <section class="profile-listing-note">
-                    <h2>About this listing</h2>
-                    @if($school->is_demo)
-                        <p>This is a fictional demonstration profile created to preview FindurSch. It is not a real school, is not verified and has no real admissions information.</p>
-                    @else
-                        <p>This profile is marked as verified by FindurSch. School details and fees can change, so confirm current information directly with the school.</p>
-                        @if($school->verified_at)<small>Verified {{ $school->verified_at->format('d M Y') }}</small>@endif
+                        <div class="sref-map"><div>Map location has not been provided.</div></div>
                     @endif
                 </section>
             </aside>
         </div>
     </main>
 
-    {{-- Admission enquiry dialog keeps the existing verified-account workflow --}}
+    {{-- Admission dialog: preserves FindurSch sign-in, verification and inquiry rules --}}
     @if(!$school->is_demo)
-        <dialog x-ref="admissionDialog" class="profile-enquiry-dialog" aria-labelledby="profile-enquiry-title">
-            <div class="profile-dialog-heading">
-                <div><small>Admissions enquiry</small><h2 id="profile-enquiry-title">Contact {{ $school->name }}</h2></div>
-                <button type="button" @click="$refs.admissionDialog.close()" aria-label="Close enquiry form">×</button>
+        <dialog x-ref="enquiryDialog" class="sref-dialog">
+            <div class="sref-dialog-heading">
+                <div><h3>Admission enquiry</h3><p>{{ $school->name }}. Send your details to the school.</p></div>
+                <button type="button" @click="$refs.enquiryDialog.close()" aria-label="Close">×</button>
             </div>
-            @if(session('inquiry_sent'))<p class="profile-success-message">{{ session('inquiry_sent') }}</p>@endif
-
+            @if(session('inquiry_sent'))<p class="sref-success">{{ session('inquiry_sent') }}</p>@endif
             @auth
                 @if(auth()->user()->hasVerifiedEmail())
-                    <p class="profile-dialog-intro">Your name and email will be shared with the school using your FindurSch account.</p>
-                    <div class="profile-account-summary"><strong>{{ auth()->user()->name }}</strong><span>{{ auth()->user()->email }}</span></div>
-                    <form wire:submit="submitInquiry" class="profile-form">
-                        <div class="profile-form-grid">
-                            <label>Phone number
-                                <input type="tel" wire:model="inquiryPhone" maxlength="30" placeholder="+256…">
-                                @error('inquiryPhone')<small class="profile-field-error">{{ $message }}</small>@enderror
+                    <p class="sref-dialog-note">Your name and email are taken from your verified FindurSch account.</p>
+                    <div class="sref-account"><b>{{ auth()->user()->name }}</b><span>{{ auth()->user()->email }}</span></div>
+                    <form wire:submit="submitInquiry" class="sref-form">
+                        <div class="sref-form-grid">
+                            <label>Phone<input type="tel" wire:model="inquiryPhone" required maxlength="30">@error('inquiryPhone')<small class="sref-error">{{ $message }}</small>@enderror</label>
+                            <label>Student name<input wire:model="inquiryStudentName" maxlength="255"></label>
+                            <label>Class applying for<input wire:model="inquiryLevel" maxlength="120" placeholder="e.g. Primary 1"></label>
+                            <label>Student age<input type="number" min="1" max="100" wire:model="inquiryStudentAge"></label>
+                            <label class="full">Preferred intake
+                                <select wire:model="inquiryIntake"><option value="">Select intake</option><option value="Term 1">Term 1</option><option value="Term 2">Term 2</option><option value="Term 3">Term 3</option><option value="Next available intake">Next available intake</option></select>
                             </label>
-                            <label>Student name
-                                <input wire:model="inquiryStudentName" maxlength="255" placeholder="Optional">
-                                @error('inquiryStudentName')<small class="profile-field-error">{{ $message }}</small>@enderror
-                            </label>
-                            <label>Student age
-                                <input type="number" min="1" max="100" wire:model="inquiryStudentAge" placeholder="Optional">
-                                @error('inquiryStudentAge')<small class="profile-field-error">{{ $message }}</small>@enderror
-                            </label>
-                            <label>Class or level applying for
-                                <input wire:model="inquiryLevel" maxlength="120" placeholder="e.g. Primary 1">
-                                @error('inquiryLevel')<small class="profile-field-error">{{ $message }}</small>@enderror
-                            </label>
-                            <label class="profile-form-full">Preferred intake
-                                <select wire:model="inquiryIntake">
-                                    <option value="">Not sure yet</option>
-                                    <option value="Next available intake">Next available intake</option>
-                                    <option value="Term 1">Term 1</option>
-                                    <option value="Term 2">Term 2</option>
-                                    <option value="Term 3">Term 3</option>
-                                </select>
-                                @error('inquiryIntake')<small class="profile-field-error">{{ $message }}</small>@enderror
-                            </label>
-                            <label class="profile-form-full">Message
-                                <textarea wire:model="inquiryMessage" required minlength="10" maxlength="4800" rows="4" placeholder="Tell the school what you would like to know…"></textarea>
-                                @error('inquiryMessage')<small class="profile-field-error">{{ $message }}</small>@enderror
-                            </label>
+                            <label class="full">Message<textarea rows="3" wire:model="inquiryMessage" required minlength="10" maxlength="4800"></textarea>@error('inquiryMessage')<small class="sref-error">{{ $message }}</small>@enderror</label>
                         </div>
-                        <div class="profile-dialog-actions">
-                            <button type="button" class="btn btn-line" @click="$refs.admissionDialog.close()">Cancel</button>
-                            <button type="submit" class="btn btn-brand" wire:loading.attr="disabled" wire:target="submitInquiry">
-                                <span wire:loading.remove wire:target="submitInquiry">Send enquiry</span>
-                                <span wire:loading wire:target="submitInquiry">Sending…</span>
-                            </button>
+                        <div class="sref-dialog-actions">
+                            <button type="button" class="sref-btn sref-btn--line" @click="$refs.enquiryDialog.close()">Cancel</button>
+                            <button type="submit" class="sref-btn sref-btn--brand" wire:loading.attr="disabled" wire:target="submitInquiry"><span wire:loading.remove wire:target="submitInquiry">Send enquiry</span><span wire:loading wire:target="submitInquiry">Sending…</span></button>
                         </div>
                     </form>
                 @else
-                    <p class="profile-dialog-intro">Verify your email address before sending an admission enquiry.</p>
-                    <a class="btn btn-brand btn-block" href="{{ route('verification.notice') }}">Verify email address</a>
+                    <p class="sref-dialog-note">Verify your email address before sending an admission enquiry.</p>
+                    <a class="sref-btn sref-btn--brand" href="{{ route('verification.notice') }}">Verify email</a>
                 @endif
             @else
-                <p class="profile-dialog-intro">Sign in to send an admission enquiry. Your contact details will be shared with the school from your FindurSch account.</p>
-                <div class="profile-dialog-actions"><a class="btn btn-brand" href="{{ route('login') }}">Sign in</a><a class="btn btn-line" href="{{ route('register') }}">Create an account</a></div>
+                <p class="sref-dialog-note">Sign in to send an admission enquiry. Your name and email will be shared with the school from your account.</p>
+                <div class="sref-dialog-actions"><a class="sref-btn sref-btn--brand" href="{{ route('login') }}">Sign in</a><a class="sref-btn sref-btn--line" href="{{ route('register') }}">Create an account</a></div>
             @endauth
         </dialog>
     @endif
 
-    {{-- Accessible photo lightbox --}}
-    <div x-cloak x-show="open" x-transition.opacity class="profile-lightbox" role="dialog" aria-modal="true" aria-label="School photo gallery" @keydown.escape.window="close()" @click.self="close()">
-        <button type="button" class="profile-lightbox__close" @click="close()" aria-label="Close gallery">×</button>
-        <button type="button" class="profile-lightbox__prev" @click="prev()" aria-label="Previous photograph">‹</button>
-        <template x-if="images.length">
-            <figure class="profile-lightbox__figure">
-                <img :src="images[activeIndex].url" :alt="images[activeIndex].alt">
-                <figcaption><span x-text="images[activeIndex].alt"></span><small><span x-text="activeIndex + 1"></span> / <span x-text="images.length"></span></small></figcaption>
-            </figure>
-        </template>
-        <button type="button" class="profile-lightbox__next" @click="next()" aria-label="Next photograph">›</button>
+    <div x-cloak x-show="open" x-transition.opacity class="sref-lightbox" role="dialog" aria-modal="true" aria-label="School photo gallery" @keydown.escape.window="close()" @click.self="close()">
+        <button type="button" class="sref-lightbox__close" @click="close()" aria-label="Close gallery">×</button>
+        <button type="button" class="sref-lightbox__prev" @click="prev()" aria-label="Previous photo">‹</button>
+        <template x-if="images.length"><figure><img :src="images[activeIndex].url" :alt="images[activeIndex].alt"><figcaption><span x-text="images[activeIndex].alt"></span><small><span x-text="activeIndex + 1"></span> / <span x-text="images.length"></span></small></figcaption></figure></template>
+        <button type="button" class="sref-lightbox__next" @click="next()" aria-label="Next photo">›</button>
     </div>
 </div>

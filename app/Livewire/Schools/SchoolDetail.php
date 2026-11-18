@@ -89,7 +89,7 @@ class SchoolDetail extends Component
         }
 
         $validated = $this->validate([
-            'inquiryPhone' => ['nullable', 'string', 'max:30'],
+            'inquiryPhone' => ['required', 'string', 'max:30'],
             'inquiryStudentName' => ['nullable', 'string', 'max:255'],
             'inquiryStudentAge' => ['nullable', 'integer', 'min:1', 'max:100'],
             'inquiryLevel' => ['nullable', 'string', 'max:120'],
@@ -131,6 +131,7 @@ class SchoolDetail extends Component
         );
 
         session()->flash('inquiry_sent', 'Your admission enquiry has been sent to the school.');
+        $this->dispatch('inquiry-sent');
     }
 
     public function toggleSave()
