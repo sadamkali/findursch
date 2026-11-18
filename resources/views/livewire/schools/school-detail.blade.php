@@ -130,13 +130,13 @@
                             @endif
                         @endif
                         <button type="button" class="sref-btn sref-btn--line sref-btn--sm" x-data="{copied:false}" @click="navigator.clipboard.writeText(window.location.href).then(() => copied = true).catch(() => copied = false)" x-text="copied ? 'Link copied' : 'Share'">Share</button>
-                        @auth
+                        @if(auth()->check())
                             @if(!$school->is_demo)
                                 <button type="button" class="sref-btn sref-btn--line sref-btn--sm" wire:click="toggleSave">{{ $this->isSaved() ? '♥ Saved' : '♡ Save' }}</button>
                             @endif
                         @else
                             @if(!$school->is_demo)<a href="{{ route('login') }}" class="sref-btn sref-btn--line sref-btn--sm">♡ Save</a>@endif
-                        @endauth
+                        @endif
                     </div>
 
                     <nav class="sref-tabs" aria-label="Profile sections" x-data="{active:'about'}">
@@ -233,16 +233,18 @@
                         @if((float) $school->rating_average > 0)
                             <p class="sref-review-average">★ {{ number_format((float) $school->rating_average, 1) }} / 5</p>
                         @endif
-                        @forelse($school->approvedReviews as $review)
+                        @if($school->approvedReviews->isNotEmpty())
+                        @foreach($school->approvedReviews as $review)
                             <article class="sref-review">
                                 <div><strong>{{ $review->title }}</strong><b>★ {{ $review->rating }}/5</b></div>
                                 <p>{{ $review->body }}</p>
                                 <small>{{ $review->user?->name ?? 'FindurSch user' }} · {{ ucfirst($review->reviewer_type) }}</small>
                                 @if($review->owner_response)<blockquote><strong>School response</strong>{{ $review->owner_response }}</blockquote>@endif
                             </article>
-                        @empty
+                        @endforeach
+                        @else
                             <p class="sref-empty">No approved reviews have been published yet.</p>
-                        @endforelse
+                        @endif
 
                         @if(session('review_submitted'))<p class="sref-success">{{ session('review_submitted') }}</p>@endif
                         @if($alreadyReviewed)
@@ -371,7 +373,7 @@
                 <button type="button" @click="$refs.enquiryDialog.close()" aria-label="Close">×</button>
             </div>
             @if(session('inquiry_sent'))<p class="sref-success">{{ session('inquiry_sent') }}</p>@endif
-            @auth
+            @if(auth()->check())
                 @if(auth()->user()->hasVerifiedEmail())
                     <p class="sref-dialog-note">Your name and email are taken from your verified FindurSch account.</p>
                     <div class="sref-account"><b>{{ auth()->user()->name }}</b><span>{{ auth()->user()->email }}</span></div>
@@ -398,7 +400,7 @@
             @else
                 <p class="sref-dialog-note">Sign in to send an admission enquiry. Your name and email will be shared with the school from your account.</p>
                 <div class="sref-dialog-actions"><a class="sref-btn sref-btn--brand" href="{{ route('login') }}">Sign in</a><a class="sref-btn sref-btn--line" href="{{ route('register') }}">Create an account</a></div>
-            @endauth
+            @endif
         </dialog>
     @endif
 
