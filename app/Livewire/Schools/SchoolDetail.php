@@ -19,6 +19,7 @@ class SchoolDetail extends Component
     public string $inquiryStudentName = '';
     public string $inquiryStudentAge = '';
     public string $inquiryLevel = '';
+    public string $inquiryIntake = '';
     public string $inquiryMessage = '';
 
     public string $reviewerType = 'parent';
@@ -34,10 +35,23 @@ class SchoolDetail extends Component
             ->firstOrFail();
 
         $this->school->load([
-            'type', 'district.region', 'subCounty', 'curricula',
-            'programs.curriculum', 'programs.fees', 'fees.program',
-            'facilities', 'contacts', 'approvedReviews.user',
+            'type',
+            'district.region',
+            'subCounty',
+            'curricula',
+            'programs' => fn ($query) => $query->where('is_active', true)->orderBy('name'),
+            'programs.curriculum',
+            'programs.fees' => fn ($query) => $query->where('is_active', true)->orderBy('amount'),
+            'fees' => fn ($query) => $query->where('is_active', true)->orderBy('category')->orderBy('amount'),
+            'facilities' => fn ($query) => $query->where('is_active', true)->orderBy('category')->orderBy('name'),
+            'contacts',
+            'approvedReviews' => fn ($query) => $query->latest()->with('user'),
+            'media',
         ]);
+
+        if (auth()->check()) {
+            $this->inquiryPhone = (string) (auth()->user()->phone ?? '');
+        }
 
         SchoolView::create([
             'school_id' => $this->school->id,
@@ -50,19 +64,24 @@ class SchoolDetail extends Component
         $this->school->incrementViews();
     }
 
-    public function submitInquiry()
+    public function submitInquiry(): void
     {
         if (! auth()->check()) {
-            return redirect()->route('login');
+            $this->redirectRoute('login');
+
+            return;
         }
 
         if (! auth()->user()->hasVerifiedEmail()) {
-            return redirect()->route('verification.notice');
+            $this->redirectRoute('verification.notice');
+
+            return;
         }
 
         abort_unless($this->school->canReceiveInquiries(), 404);
 
         $key = 'school-inquiry:'.auth()->id();
+
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $this->addError('inquiryMessage', 'You have sent several inquiries recently. Please try again later.');
 
@@ -74,10 +93,19 @@ class SchoolDetail extends Component
             'inquiryStudentName' => ['nullable', 'string', 'max:255'],
             'inquiryStudentAge' => ['nullable', 'integer', 'min:1', 'max:100'],
             'inquiryLevel' => ['nullable', 'string', 'max:120'],
-            'inquiryMessage' => ['required', 'string', 'min:10', 'max:5000'],
+            'inquiryIntake' => ['nullable', 'string', 'max:120'],
+            'inquiryMessage' => ['required', 'string', 'min:10', 'max:4800'],
         ]);
 
         RateLimiter::hit($key, 3600);
+
+        $messageParts = [];
+
+        if (! empty($validated['inquiryIntake'])) {
+            $messageParts[] = 'Preferred intake: '.$validated['inquiryIntake'];
+        }
+
+        $messageParts[] = $validated['inquiryMessage'];
 
         $this->school->inquiries()->create([
             'user_id' => auth()->id(),
@@ -87,14 +115,22 @@ class SchoolDetail extends Component
             'student_name' => $validated['inquiryStudentName'] ?: null,
             'student_age' => $validated['inquiryStudentAge'] ?: null,
             'intended_level' => $validated['inquiryLevel'] ?: null,
-            'message' => $validated['inquiryMessage'],
+            'message' => mb_substr(implode("\n\n", $messageParts), 0, 5000),
             'source' => 'web',
         ]);
 
         $this->school->incrementInquiries();
-        $this->reset('inquiryPhone', 'inquiryStudentName', 'inquiryStudentAge', 'inquiryLevel', 'inquiryMessage');
 
-        session()->flash('inquiry_sent', 'Your inquiry has been sent to the school.');
+        $this->reset(
+            'inquiryPhone',
+            'inquiryStudentName',
+            'inquiryStudentAge',
+            'inquiryLevel',
+            'inquiryIntake',
+            'inquiryMessage'
+        );
+
+        session()->flash('inquiry_sent', 'Your admission enquiry has been sent to the school.');
     }
 
     public function toggleSave()
