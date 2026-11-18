@@ -1,16 +1,31 @@
 <?php
 
+use App\Http\Controllers\Api\AdminWorkspaceController;
 use App\Http\Controllers\Api\DashboardAuthController;
 use App\Http\Controllers\Api\OwnerWorkspaceController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
     Route::post('/login', [DashboardAuthController::class, 'login'])->middleware('throttle:10,1');
+    Route::post('/register', [DashboardAuthController::class, 'register'])->middleware('throttle:5,1');
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [DashboardAuthController::class, 'me']);
         Route::post('/logout', [DashboardAuthController::class, 'logout']);
+        Route::post('/handoff', [DashboardAuthController::class, 'handoff']);
     });
 });
+
+Route::middleware(['auth:sanctum', 'role:admin'])
+    ->prefix('admin')
+    ->group(function () {
+        Route::get('/overview', [AdminWorkspaceController::class, 'overview']);
+        Route::get('/{resource}', [AdminWorkspaceController::class, 'index'])
+            ->whereIn('resource', ['schools', 'verification', 'owners', 'parents', 'enquiries', 'reviews', 'articles', 'settings', 'plans', 'payments', 'activity', 'contacts', 'locations']);
+        Route::post('/articles', [AdminWorkspaceController::class, 'storeArticle']);
+        Route::patch('/{resource}/{id}', [AdminWorkspaceController::class, 'update'])
+            ->whereIn('resource', ['schools', 'verification', 'owners', 'parents', 'enquiries', 'reviews', 'articles', 'settings', 'plans', 'contacts']);
+    });
 
 Route::middleware(['auth:sanctum', 'role:school_owner'])
     ->prefix('owner')

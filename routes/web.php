@@ -2,10 +2,6 @@
 
 use App\Livewire\Articles\ArticleListing;
 use App\Livewire\Articles\ArticleShow;
-use App\Livewire\Auth\ForgotPassword;
-use App\Livewire\Auth\Login;
-use App\Livewire\Auth\Register;
-use App\Livewire\Auth\ResetPassword;
 use App\Livewire\Compare\CompareSchools;
 use App\Livewire\Districts\DistrictSchools;
 use App\Livewire\Home\HomePage;
@@ -20,18 +16,17 @@ use App\Livewire\User\SavedSchools;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SitemapController;
-use App\Http\Middleware\EnsureSchoolOwner;
-use App\Livewire\Owner\Dashboard as OwnerDashboard;
-use App\Livewire\Owner\SchoolEditor;
-use App\Livewire\Owner\SchoolDetails;
-use App\Livewire\Owner\Inquiries as OwnerInquiries;
-use App\Livewire\Owner\Reviews as OwnerReviews;
 use App\Models\School;
 use App\Models\District;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\PersonalAccessToken;
 
-// =============== PUBLIC ROUTES ===============
+$dashboardUrl = static fn (): string => rtrim((string) config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/');
+
+// =============== PUBLIC WEBSITE ===============
 Route::get('/', HomePage::class)->name('home');
 Route::get('/schools', SchoolListing::class)->name('schools.index');
 Route::get('/schools/{school:slug}', SchoolDetail::class)->name('schools.show');
@@ -70,9 +65,7 @@ Route::get('/api/search/suggest', function (Request $request) {
             'url' => route('district.show', $district),
         ]);
 
-    return response()->json([
-        'data' => $schools->concat($districts)->values(),
-    ]);
+    return response()->json(['data' => $schools->concat($districts)->values()]);
 })->middleware('throttle:30,1')->name('search.suggest');
 
 Route::get('/compare', CompareSchools::class)->name('compare');
@@ -86,13 +79,59 @@ Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('legal.p
 Route::get('/terms-and-conditions', [PageController::class, 'terms'])->name('legal.terms');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
-// =============== GUEST AUTHENTICATION ===============
-Route::middleware('guest')->group(function () {
-    Route::get('/login', Login::class)->name('login');
-    Route::get('/register', Register::class)->name('register');
-    Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
-    Route::get('/reset-password/{token}', ResetPassword::class)->name('password.reset');
-});
+// =============== CENTRALIZED AUTHENTICATION ===============
+Route::get('/login', function (Request $request) use ($dashboardUrl) {
+    $intended = (string) $request->session()->pull('url.intended', '/account');
+    $path = parse_url($intended, PHP_URL_PATH) ?: '/account';
+
+    if (! str_starts_with($path, '/') || str_starts_with($path, '//') ||
+        preg_match('#^/(login|register|auth/dashboard-callback)(/|$)#', $path)) {
+        $path = '/account';
+    }
+
+    return redirect()->away($dashboardUrl().'/login?returnTo='.rawurlencode($path));
+})->name('login');
+
+Route::get('/register', function (Request $request) use ($dashboardUrl) {
+    $type = $request->query('type') === 'school_owner' ? 'school_owner' : 'parent';
+
+    return redirect()->away($dashboardUrl().'/register?type='.$type.'&returnTo=%2Faccount');
+})->name('register');
+
+Route::get('/forgot-password', fn () => redirect()->away($dashboardUrl().'/login'))->name('password.request');
+Route::get('/reset-password/{token}', fn () => redirect()->away($dashboardUrl().'/login'))->name('password.reset');
+
+// A short-lived, single-use Sanctum token transfers the parent session back to this origin.
+Route::get('/auth/dashboard-callback', function (Request $request) {
+    $plainTextToken = (string) $request->query('code', '');
+    abort_if ($plainTextToken === '', 403);
+
+    $accessToken = PersonalAccessToken::findToken($plainTextToken);
+    abort_unless(
+        $accessToken &&
+        $accessToken->can('public-session-handoff') &&
+        $accessToken->expires_at &&
+        $accessToken->expires_at->isFuture(),
+        403
+    );
+
+    $user = $accessToken->tokenable;
+    abort_unless($user instanceof User && $user->status === 'active' && $user->hasRole('parent'), 403);
+
+    $accessToken->delete();
+    Auth::login($user);
+    $request->session()->regenerate();
+
+    $redirect = (string) $request->query('redirect', '/account');
+    if (! str_starts_with($redirect, '/') || str_starts_with($redirect, '//') ||
+        str_contains($redirect, "\r") || str_contains($redirect, "\n")) {
+        $redirect = '/account';
+    }
+
+    return redirect()->to($redirect)
+        ->header('Referrer-Policy', 'no-referrer')
+        ->header('Cache-Control', 'no-store, private');
+})->name('auth.dashboard-callback');
 
 Route::post('/logout', function () {
     auth()->logout();
@@ -102,7 +141,7 @@ Route::post('/logout', function () {
     return redirect()->route('home');
 })->name('logout')->middleware('auth');
 
-// =============== AUTHENTICATED USER ACCOUNT ===============
+// =============== PARENT ACCOUNT FEATURES ===============
 Route::middleware(['auth'])->prefix('account')->name('user.')->group(function () {
     Route::get('/', UserDashboard::class)->name('dashboard');
     Route::get('/saved-schools', SavedSchools::class)->name('saved-schools');
@@ -111,22 +150,18 @@ Route::middleware(['auth'])->prefix('account')->name('user.')->group(function ()
     Route::get('/profile', ProfileEdit::class)->name('profile');
 });
 
-// =============== AUTHENTICATED USER ACTIONS ===============
 Route::middleware(['auth'])->group(function () {
     Route::post('/schools/{school}/inquire', [\App\Http\Controllers\InquiryController::class, 'store'])->name('inquiry.store');
     Route::post('/schools/{school}/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('review.store');
     Route::post('/schools/{school}/save', [\App\Http\Controllers\SavedSchoolController::class, 'toggle'])->name('school.save.toggle');
 });
 
-// =============== SCHOOL OWNER AREA ===============
-Route::middleware(['auth', EnsureSchoolOwner::class])
-    ->prefix('owner')
-    ->name('owner.')
-    ->group(function () {
-        Route::get('/', OwnerDashboard::class)->name('dashboard');
-        Route::get('/schools/create', SchoolEditor::class)->name('schools.create');
-        Route::get('/schools/{school}/edit', SchoolEditor::class)->name('schools.edit');
-        Route::get('/schools/{school}/details', SchoolDetails::class)->name('schools.details');
-        Route::get('/inquiries', OwnerInquiries::class)->name('inquiries');
-        Route::get('/reviews', OwnerReviews::class)->name('reviews');
-    });
+// Legacy dashboard URLs are permanent entry-point redirects to the dedicated Next.js app.
+Route::get('/admin/{path?}', function (?string $path = null) use ($dashboardUrl) {
+    $target = '/admin'.($path ? '/'.ltrim($path, '/') : '');
+    return redirect()->away($dashboardUrl().$target);
+})->where('path', '.*');
+
+Route::get('/owner/{path?}', function (?string $path = null) use ($dashboardUrl) {
+    return redirect()->away($dashboardUrl().'/owner');
+})->where('path', '.*');
