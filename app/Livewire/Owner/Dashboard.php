@@ -6,7 +6,7 @@ use App\Models\School;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.dashboard')]
 class Dashboard extends Component
 {
     public function render()

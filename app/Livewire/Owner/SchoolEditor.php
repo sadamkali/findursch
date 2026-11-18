@@ -12,7 +12,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.dashboard')]
 class SchoolEditor extends Component
 {
     #[Locked]

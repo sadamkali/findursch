@@ -6,7 +6,7 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.dashboard')]
 class ProfileEdit extends Component
 {
     public string $name = '';
