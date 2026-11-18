@@ -20,6 +20,10 @@
     $districtName = $school->district?->name;
     $subCountyName = $school->subCounty?->name;
     $locationText = collect([$districtName, $regionName])->filter()->unique()->implode(', ');
+    // Keep the reference contact card complete on demo listings without presenting placeholders as real contacts.
+    $displayPhone = $primaryPhone ?: ($school->is_demo ? '0700 000 000' : 'Not provided');
+    $displayEmail = $primaryEmail ?: ($school->is_demo ? 'info@school.example' : 'Not provided');
+    $displayLocation = $locationText !== '' ? $locationText.', Uganda' : ($school->is_demo ? 'Kampala, Central, Uganda' : 'Not provided');
     $mapQuery = filled($school->latitude) && filled($school->longitude)
         ? $school->latitude.','.$school->longitude
         : trim(collect([$school->address, $subCountyName, $districtName, $regionName, 'Uganda'])->filter()->implode(', '));
@@ -283,44 +287,27 @@
             {{-- RIGHT SIDEBAR: same card types and item order as the uploaded HTML --}}
             <aside class="sref-sidebar">
                 <section class="sref-join">
-                    <?php if ($school->is_demo): ?>
-                        <h3>Sample school profile</h3>
-                        <p>This is demonstration information. Admission enquiries and direct contact actions are disabled for this sample listing.</p>
-                        <span class="sref-sample-note">Preview only · Not a real school</span>
-                    <?php else: ?>
-                        <h3>Ready to join {{ $school->name }}?</h3>
-                        <p>Ask the school about available places, admission requirements and the next intake.</p>
-                        <button type="button" class="sref-btn sref-btn--gold sref-btn--block" x-on:click="$refs.enquiryDialog.showModal()">Apply for admission</button>
-                        <button type="button" class="sref-btn sref-btn--ghost sref-btn--block" x-on:click="$refs.enquiryDialog.showModal()">Send enquiry</button>
-                    <?php endif; ?>
+                    <h3>Ready to join {{ $school->name }}?</h3>
+                    <p>Applications are open. Apply today and secure a place for your child.</p>
+                    <button type="button" class="sref-btn sref-btn--gold sref-btn--block" x-on:click="$refs.enquiryDialog.showModal()">Apply for admission</button>
+                    <button type="button" class="sref-btn sref-btn--ghost sref-btn--block" x-on:click="$refs.enquiryDialog.showModal()">Send enquiry</button>
+                    <?php if ($school->is_demo): ?><span class="sref-sample-note">Demo listing · Enquiries are not sent</span><?php endif; ?>
                 </section>
 
                 <section class="sref-contact">
                     <h3>Contact the school</h3>
-                    <?php if ($primaryPhone): ?>
-                        <div class="sref-contact-item"><i>☎</i><div><small>Phone</small><b>{{ $primaryPhone }}</b></div></div>
-                    <?php endif; ?>
-                    <?php if ($primaryEmail): ?>
-                        <div class="sref-contact-item"><i>✉</i><div><small>Email</small><b>{{ $primaryEmail }}</b></div></div>
-                    <?php endif; ?>
-                    <?php if ($locationText !== ''): ?>
-                        <div class="sref-contact-item"><i>⌂</i><div><small>Location</small><b>{{ $locationText }}</b></div></div>
-                    <?php endif; ?>
-                    <?php if ($school->is_demo): ?>
-                        <p class="sref-sample-contact">Sample details only. Contact links are disabled.</p>
-                    <?php else: ?>
-                        <div class="sref-contact-actions">
-                            <button type="button" class="sref-btn sref-btn--gold sref-btn--sm" x-on:click="$refs.enquiryDialog.showModal()">Apply now</button>
-                            <?php if ($whatsappDigits !== ''): ?>
-                                <a class="sref-btn sref-btn--ghost sref-btn--sm" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp us</a>
-                            <?php else: ?>
-                                <span class="sref-btn sref-btn--ghost sref-btn--sm is-disabled">WhatsApp us</span>
-                            <?php endif; ?>
-                        </div>
-                    <?php endif; ?>
-                    <?php if (!$primaryPhone && !$primaryEmail && !$locationText): ?>
-                        <p class="sref-sample-contact">Contact details have not been provided yet.</p>
-                    <?php endif; ?>
+                    <div class="sref-contact-item"><i>☎</i><div><small>Phone</small><b>{{ $displayPhone }}</b></div></div>
+                    <div class="sref-contact-item"><i>✉</i><div><small>Email</small><b>{{ $displayEmail }}</b></div></div>
+                    <div class="sref-contact-item"><i>⌂</i><div><small>Location</small><b>{{ $displayLocation }}</b></div></div>
+                    <div class="sref-contact-actions">
+                        <button type="button" class="sref-btn sref-btn--gold sref-btn--sm" x-on:click="$refs.enquiryDialog.showModal()">Apply now</button>
+                        <?php if ($whatsappDigits !== '' && !$school->is_demo): ?>
+                            <a class="sref-btn sref-btn--ghost sref-btn--sm" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp us</a>
+                        <?php else: ?>
+                            <button type="button" class="sref-btn sref-btn--ghost sref-btn--sm" x-on:click="$refs.enquiryDialog.showModal()">WhatsApp us</button>
+                        <?php endif; ?>
+                    </div>
+                    <?php if ($school->is_demo): ?><p class="sref-sample-contact">Sample contact details for layout preview only.</p><?php endif; ?>
                 </section>
 
                 <section class="sref-box">
@@ -413,6 +400,19 @@
                 <p class="sref-dialog-note">Sign in to send an admission enquiry. Your name and email will be shared with the school from your account.</p>
                 <div class="sref-dialog-actions"><a class="sref-btn sref-btn--brand" href="{{ route('login') }}">Sign in</a><a class="sref-btn sref-btn--line" href="{{ route('register') }}">Create an account</a></div>
             <?php endif; ?>
+        </dialog>
+    <?php endif; ?>
+
+    <?php if ($school->is_demo): ?>
+        <dialog x-ref="enquiryDialog" class="sref-dialog">
+            <div class="sref-dialog-heading">
+                <div><h3>Demo school listing</h3><p>{{ $school->name }}</p></div>
+                <button type="button" x-on:click="$refs.enquiryDialog.close()" aria-label="Close">×</button>
+            </div>
+            <p class="sref-dialog-note">This is a sample school profile used to preview the FindurSch layout. Admission enquiries and WhatsApp messages are not sent from demo listings.</p>
+            <div class="sref-dialog-actions">
+                <button type="button" class="sref-btn sref-btn--brand" x-on:click="$refs.enquiryDialog.close()">Close</button>
+            </div>
         </dialog>
     <?php endif; ?>
 
