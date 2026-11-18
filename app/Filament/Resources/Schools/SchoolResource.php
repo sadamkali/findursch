@@ -129,8 +129,7 @@ class SchoolResource extends \Filament\Resources\Resource
                 ]),
             ])
             ->recordActions([
-                EditAction::make()
-                    ->visible(fn (School $record): bool => true),
+                EditAction::make(),
                 Action::make('approve')
                     ->label('Approve & verify')
                     ->color('success')

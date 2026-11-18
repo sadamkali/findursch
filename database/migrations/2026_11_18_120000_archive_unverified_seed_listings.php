@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\\Database\\Migrations\\Migration;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Support\\Facades\\Schema;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -12,8 +12,20 @@ return new class extends Migration
             return;
         }
 
-        DB::table('schools')
+        $schoolIds = DB::table('schools')
             ->where('is_demo', true)
+            ->pluck('id');
+
+        if ($schoolIds->isEmpty()) {
+            return;
+        }
+
+        DB::table('school_curriculum')
+            ->whereIn('school_id', $schoolIds)
+            ->delete();
+
+        DB::table('schools')
+            ->whereIn('id', $schoolIds)
             ->update([
                 'status' => 'suspended',
                 'verification_status' => 'unverified',
@@ -42,6 +54,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Archived records intentionally remain unpublished on rollback.
+        // Retired records intentionally remain unpublished on rollback.
     }
 };
