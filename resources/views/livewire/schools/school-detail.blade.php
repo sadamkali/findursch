@@ -45,34 +45,40 @@
 @endphp
 
 <div class="school-detail-reference" x-data="lightbox" x-init="images = @js($lightboxImages)" x-on:inquiry-sent.window="$refs.enquiryDialog?.close()">
-    {{-- Same full-width photo mosaic composition as findursch-school.html --}}
+    {{-- Reference photo mosaic: one large image and three stacked holders. Empty slots keep the same geometry. --}}
+    <?php
+        $registerSchoolUrl = auth()->check()
+            ? (auth()->user()->hasRole('admin') ? url('/admin') : (auth()->user()->hasRole('school_owner') ? route('owner.schools.create') : route('contact')))
+            : route('register');
+    ?>
+    <a class="sref-register-tab" href="{{ $registerSchoolUrl }}">REGISTER YOUR SCHOOL</a>
     <section class="sref-mosaic" aria-label="School photos">
         <?php if ($profileImages->isNotEmpty()): ?>
             <button type="button" class="sref-mosaic__main" x-on:click="show(images, 0)" aria-label="View school photos">
-                <img src="{{ $profileImages->first()->getUrl() }}" alt="{{ $school->name }}" fetchpriority="high">
+                <img src="{{ $profileImages->first()->getUrl() }}" alt="{{ $school->name }} school photograph" fetchpriority="high">
                 <span class="sref-chip">View all {{ $profileImages->count() }} {{ \Illuminate\Support\Str::plural('photo', $profileImages->count()) }}</span>
             </button>
-            <?php if ($profileImages->count() > 1): ?>
-                <div class="sref-mosaic__side">
-                    <?php foreach ($profileImages->skip(1)->take(3) as $media): ?>
-                        <button type="button" class="sref-mosaic__tile" x-on:click="show(images, {{ $loop->index + 1 }})" aria-label="View school photograph {{ $loop->iteration + 1 }}">
-                            <img src="{{ $media->getUrl() }}" alt="{{ $school->name }} photograph {{ $loop->iteration + 1 }}" loading="lazy">
-                            <?php if ($loop->last && $profileImages->count() > 4): ?>
-                                <span class="sref-more-photo">+{{ $profileImages->count() - 4 }} more</span>
-                            <?php endif; ?>
-                        </button>
-                    <?php endforeach; ?>
-                    <?php for ($placeholder = $profileImages->count(); $placeholder < 4; $placeholder++): ?>
-                        <div class="sref-mosaic__tile sref-mosaic__tile--empty" aria-hidden="true"></div>
-                    <?php endfor; ?>
-                </div>
-            <?php endif; ?>
         <?php else: ?>
-            <div class="sref-mosaic__placeholder">
+            <div class="sref-mosaic__main sref-photo-placeholder sref-photo-placeholder--c" aria-label="School photographs coming soon">
                 <span>{{ strtoupper(mb_substr($school->name, 0, 2)) }}</span>
-                <small>School photos will appear here when uploaded</small>
+                <small>School photos coming soon</small>
             </div>
         <?php endif; ?>
+        <div class="sref-mosaic__side">
+            <?php for ($tileIndex = 1; $tileIndex < 4; $tileIndex++): ?>
+                <?php $media = $profileImages->get($tileIndex); ?>
+                <?php if ($media): ?>
+                    <button type="button" class="sref-mosaic__tile" x-on:click="show(images, {{ $tileIndex }})" aria-label="View school photograph {{ $tileIndex + 1 }}">
+                        <img src="{{ $media->getUrl() }}" alt="{{ $school->name }} photograph {{ $tileIndex + 1 }}" loading="lazy">
+                        <?php if ($tileIndex === 3 && $profileImages->count() > 4): ?>
+                            <span class="sref-more-photo">+{{ $profileImages->count() - 4 }} more</span>
+                        <?php endif; ?>
+                    </button>
+                <?php else: ?>
+                    <div class="sref-mosaic__tile sref-photo-placeholder sref-photo-placeholder--{{ ['d', 'b', 'a'][$tileIndex - 1] }}" aria-hidden="true"></div>
+                <?php endif; ?>
+            <?php endfor; ?>
+        </div>
     </section>
 
     <div class="sref-crumbs">
@@ -181,29 +187,35 @@
 
                 <section class="sref-card sref-pad" id="gallery">
                     <h2>Photo <span>gallery</span></h2>
-                    <?php if ($profileImages->isNotEmpty()): ?>
-                        <div class="sref-gallery-primary">
-                            <?php foreach ($profileImages->take(3) as $media): ?>
-                                <button type="button" class="{{ $loop->first ? 'is-large' : '' }}" x-on:click="show(images, {{ $loop->index }})" aria-label="Open photo {{ $loop->iteration }}">
-                                    <img src="{{ $media->getUrl() }}" alt="{{ $school->name }} photograph {{ $loop->iteration }}" loading="lazy">
+                    <div class="sref-gallery-primary">
+                        <?php for ($galleryIndex = 0; $galleryIndex < 3; $galleryIndex++): ?>
+                            <?php $media = $profileImages->get($galleryIndex); ?>
+                            <?php if ($media): ?>
+                                <button type="button" class="{{ $galleryIndex === 0 ? 'is-large' : '' }}" x-on:click="show(images, {{ $galleryIndex }})" aria-label="Open photo {{ $galleryIndex + 1 }}">
+                                    <img src="{{ $media->getUrl() }}" alt="{{ $school->name }} photograph {{ $galleryIndex + 1 }}" loading="lazy">
                                 </button>
-                            <?php endforeach; ?>
-                        </div>
-                        <?php if ($profileImages->count() > 3): ?>
-                            <div class="sref-gallery-secondary">
-                                <?php foreach ($profileImages->skip(3)->take(4) as $media): ?>
-                                    <button type="button" x-on:click="show(images, {{ $loop->index + 3 }})" aria-label="Open photo {{ $loop->index + 4 }}">
-                                        <img src="{{ $media->getUrl() }}" alt="{{ $school->name }} photograph {{ $loop->index + 4 }}" loading="lazy">
-                                        <?php if ($loop->last && $profileImages->count() > 7): ?>
-                                            <span>+{{ $profileImages->count() - 7 }} more</span>
-                                        <?php endif; ?>
-                                    </button>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-                    <?php else: ?>
-                        <p class="sref-empty">No photographs have been uploaded by this school yet.</p>
-                    <?php endif; ?>
+                            <?php else: ?>
+                                <div class="sref-gallery-placeholder sref-photo-placeholder sref-photo-placeholder--{{ ['c', 'b', 'd'][$galleryIndex] }} {{ $galleryIndex === 0 ? 'is-large' : '' }}" aria-hidden="true">
+                                    <?php if ($galleryIndex === 0 && $profileImages->isEmpty()): ?><span>Gallery photos will appear here</span><?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+                    </div>
+                    <div class="sref-gallery-secondary">
+                        <?php for ($galleryIndex = 3; $galleryIndex < 7; $galleryIndex++): ?>
+                            <?php $media = $profileImages->get($galleryIndex); ?>
+                            <?php if ($media): ?>
+                                <button type="button" x-on:click="show(images, {{ $galleryIndex }})" aria-label="Open photo {{ $galleryIndex + 1 }}">
+                                    <img src="{{ $media->getUrl() }}" alt="{{ $school->name }} photograph {{ $galleryIndex + 1 }}" loading="lazy">
+                                    <?php if ($galleryIndex === 6 && $profileImages->count() > 7): ?>
+                                        <span>+{{ $profileImages->count() - 7 }} more</span>
+                                    <?php endif; ?>
+                                </button>
+                            <?php else: ?>
+                                <div class="sref-gallery-placeholder sref-photo-placeholder sref-photo-placeholder--{{ ['a', 'd', 'b', 'c'][$galleryIndex - 3] }}" aria-hidden="true"></div>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+                    </div>
                 </section>
 
                 <section class="sref-card sref-pad" id="events">

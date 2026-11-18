@@ -36,9 +36,9 @@
 
             <nav class="site-nav" aria-label="Primary navigation">
                 <a href="{{ route('home') }}" @class(['is-active' => request()->routeIs('home')])>Home</a>
-                <a href="{{ route('schools.index') }}" @class(['is-active' => request()->routeIs('schools.*', 'district.*', 'search')])>Find a school</a>
+                <a href="{{ route('schools.index') }}" @class(['is-active' => request()->routeIs('schools.*', 'district.*', 'search')])>Schools</a>
                 <a href="{{ route('compare') }}" @class(['is-active' => request()->routeIs('compare')])>Compare</a>
-                <a href="{{ route('articles.index') }}" @class(['is-active' => request()->routeIs('articles.*')])>News &amp; guides</a>
+                <a href="{{ route('articles.index') }}" @class(['is-active' => request()->routeIs('articles.*')])>News</a>
                 <a href="{{ route('about') }}" @class(['is-active' => request()->routeIs('about')])>About</a>
                 <a href="{{ route('contact') }}" @class(['is-active' => request()->routeIs('contact')])>Contact</a>
             </nav>
@@ -118,8 +118,8 @@
             <div class="site-footer__grid">
                 <div class="site-footer__brand">
                     <a href="{{ route('home') }}" class="site-logo site-logo--footer">Find<b>UR</b>SCH</a>
-                    <p>Uganda's school discovery, comparison and admissions platform. Explore school profiles and make informed education choices.</p>
-                    <p class="site-footer__location">Uganda</p>
+                    <p>Uganda's school discovery, comparison and admissions platform, with school profiles, news, events, jobs and scholarships.</p>
+                    <p class="site-footer__location">Kampala, Uganda</p>
                 </div>
                 <div>
                     <h2>Explore schools</h2>
@@ -131,33 +131,32 @@
                     </ul>
                 </div>
                 <div>
-                    <h2>Education resources</h2>
+                    <h2>Resources</h2>
                     <ul>
-                        <li><a href="{{ route('articles.index') }}">Latest news &amp; guides</a></li>
+                        <li><a href="{{ route('articles.index') }}">Latest news</a></li>
                         <li><a href="{{ route('about') }}">About FindurSch</a></li>
-                        <li><a href="{{ route('contact') }}">Contact us</a></li>
+                        <li><a href="{{ route('contact') }}">Contact</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h2>For schools &amp; support</h2>
+                    <h2>Support</h2>
                     <ul>
                         <li><a href="{{ route('register') }}">List your school</a></li>
                         <li><a href="{{ route('login') }}">School owner login</a></li>
                         <li><a href="{{ route('contact') }}">Get in touch</a></li>
-                        <li><a href="{{ route('legal.terms') }}">Terms &amp; conditions</a></li>
+                        <li><a href="{{ route('legal.terms') }}">Terms and conditions</a></li>
                         <li><a href="{{ route('legal.privacy') }}">Privacy policy</a></li>
                     </ul>
                 </div>
             </div>
-
             <div class="site-footer__bar">
                 <div>
-                    <span>© {{ date('Y') }} FindurSch. All rights reserved.</span>
+                    <span>© {{ date('Y') }} FindURSCH. All rights reserved.</span>
                     <span class="site-footer__legal"><a href="{{ route('legal.privacy') }}">Privacy</a><a href="{{ route('legal.terms') }}">Terms</a></span>
                 </div>
                 <div class="site-footer__promo">
-                    <span>Want families to discover your school?</span>
-                    <a class="btn btn-footer" href="{{ route('register') }}">List your school</a>
+                    <span>Want to reach parents and students every month?</span>
+                    <a class="btn btn-footer" href="{{ route('contact') }}">Advertise with us</a>
                 </div>
             </div>
         </div>
