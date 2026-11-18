@@ -1,1 +1,0 @@
-function Write-F { param($p,$c) [IO.File]::WriteAllText($p,$c,[Text.Encoding]::UTF8); Write-Host "Wrote: $p ($($c.Length) bytes)" }; Write-F 'd:\FInd your school\findursch\_test_marker.txt' 'marker'

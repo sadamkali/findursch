@@ -14,24 +14,19 @@ class OverviewStats extends BaseWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Verified schools', School::query()
-                ->where('is_demo', false)
-                ->where('status', 'active')
-                ->where('verification_status', 'verified')
-                ->count())
-                ->description('Real school listings approved for the public')
+            Stat::make('Published schools', School::query()->publiclyVisible()->count())
+                ->description('Listings currently visible to families')
                 ->descriptionIcon('heroicon-m-academic-cap'),
 
-            Stat::make('Demo listings', School::query()->where('is_demo', true)->count())
-                ->description('Fictional sample profiles, not verified')
-                ->descriptionIcon('heroicon-m-beaker'),
-
-            Stat::make('Pending school reviews', School::query()
-                ->where('is_demo', false)
+            Stat::make('Pending school submissions', School::query()
                 ->where('status', 'pending')
                 ->count())
-                ->description('Real school listings awaiting an admin decision')
+                ->description('School listings waiting for an admin decision')
                 ->descriptionIcon('heroicon-m-clock'),
+
+            Stat::make('Suspended schools', School::query()->where('status', 'suspended')->count())
+                ->description('Listings currently unavailable to the public')
+                ->descriptionIcon('heroicon-m-no-symbol'),
 
             Stat::make('Pending reviews', Review::query()->where('status', 'pending')->count())
                 ->description('Parent and student reviews awaiting moderation')
