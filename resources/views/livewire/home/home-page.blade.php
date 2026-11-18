@@ -139,7 +139,7 @@
                     <h2>Explore popular districts</h2>
                     <ul>
                         @forelse($districts as $district)
-                            <li><a href="{{ route('district.show', $district) }}"><span class="home-side-icon home-side-icon--pin">⌖</span><span>{{ $district->name }}</span><em>{{ $district->school_count }}</em></a></li>
+                            <li><a href="{{ route('district.show', $district) }}"><span class="home-side-icon home-side-icon--pin">⌖</span><span>{{ $district->name }}</span><em>{{ $district->public_listing_count }}</em></a></li>
                         @empty
                             <li class="home-side-empty">District listings will appear here.</li>
                         @endforelse

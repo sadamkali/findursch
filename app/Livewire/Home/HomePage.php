@@ -46,8 +46,8 @@ class HomePage extends Component
 
         $districts = District::query()
             ->with('region')
-            ->withCount(['schools as school_count' => $publicSchools])
-            ->orderByDesc('school_count')
+            ->withCount(['schools as public_listing_count' => $publicSchools])
+            ->orderByDesc('public_listing_count')
             ->orderBy('name')
             ->limit(5)
             ->get();
