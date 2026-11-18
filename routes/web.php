@@ -8,7 +8,7 @@ use App\Livewire\Home\HomePage;
 use App\Livewire\Schools\SchoolDetail;
 use App\Livewire\Schools\SchoolListing;
 use App\Livewire\Search\SearchResults;
-use App\Livewire\User\Dashboard as UserDashboard;
+use App\Livewire\User\AccountHome;
 use App\Livewire\User\MyInquiries;
 use App\Livewire\User\MyReviews;
 use App\Livewire\User\ProfileEdit;
@@ -143,7 +143,7 @@ Route::post('/logout', function () {
 
 // =============== PARENT ACCOUNT FEATURES ===============
 Route::middleware(['auth'])->prefix('account')->name('user.')->group(function () {
-    Route::get('/', UserDashboard::class)->name('dashboard');
+    Route::get('/', AccountHome::class)->name('home');
     Route::get('/saved-schools', SavedSchools::class)->name('saved-schools');
     Route::get('/inquiries', MyInquiries::class)->name('inquiries');
     Route::get('/reviews', MyReviews::class)->name('reviews');

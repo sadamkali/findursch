@@ -6,7 +6,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Layout('layouts.dashboard')]
+#[Layout('layouts.account')]
 class SavedSchools extends Component
 {
     use WithPagination;

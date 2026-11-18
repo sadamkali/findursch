@@ -5,8 +5,8 @@ namespace App\Livewire\User;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.dashboard')]
-class Dashboard extends Component
+#[Layout('layouts.account')]
+class AccountHome extends Component
 {
     public function render()
     {
@@ -15,6 +15,6 @@ class Dashboard extends Component
         $inquiries = $user->inquiries()->with('school')->latest()->limit(5)->get();
         $reviews = $user->reviews()->with('school')->latest()->limit(5)->get();
 
-        return view('livewire.user.dashboard', compact('saved', 'inquiries', 'reviews'));
+        return view('livewire.user.account-home', compact('saved', 'inquiries', 'reviews'));
     }
 }
