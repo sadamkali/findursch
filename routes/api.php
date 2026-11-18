@@ -27,19 +27,15 @@ Route::middleware(['auth:sanctum', 'role:admin'])
             ->whereIn('resource', ['schools', 'verification', 'owners', 'parents', 'enquiries', 'reviews', 'articles', 'settings', 'plans', 'contacts']);
     });
 
-Route::middleware(['auth:sanctum', 'role:school_owner'])
+// Owners can manage only their own schools. Administrators can use the same
+// school tools across the platform, but cannot edit another user's personal account.
+Route::middleware(['auth:sanctum', 'role:admin|school_owner'])
     ->prefix('owner')
     ->group(function () {
         Route::get('/workspace', [OwnerWorkspaceController::class, 'workspace']);
 
-        Route::get('/account', [OwnerWorkspaceController::class, 'account']);
-        Route::put('/account', [OwnerWorkspaceController::class, 'account']);
-        Route::post('/account/password', [OwnerWorkspaceController::class, 'password']);
-        Route::post('/account/deletion-request', [OwnerWorkspaceController::class, 'requestDeletion']);
-
         Route::get('/schools/{school}/profile', [OwnerWorkspaceController::class, 'profile']);
         Route::put('/schools/{school}/profile', [OwnerWorkspaceController::class, 'profile']);
-
         Route::get('/schools/{school}/facilities', [OwnerWorkspaceController::class, 'facilities']);
         Route::put('/schools/{school}/facilities', [OwnerWorkspaceController::class, 'facilities']);
 
@@ -72,4 +68,13 @@ Route::middleware(['auth:sanctum', 'role:school_owner'])
         Route::delete('/schools/{school}/message-campaigns/{campaign}', [OwnerWorkspaceController::class, 'messageCampaigns']);
 
         Route::get('/schools/{school}/subscription', [OwnerWorkspaceController::class, 'subscription']);
+    });
+
+Route::middleware(['auth:sanctum', 'role:school_owner'])
+    ->prefix('owner')
+    ->group(function () {
+        Route::get('/account', [OwnerWorkspaceController::class, 'account']);
+        Route::put('/account', [OwnerWorkspaceController::class, 'account']);
+        Route::post('/account/password', [OwnerWorkspaceController::class, 'password']);
+        Route::post('/account/deletion-request', [OwnerWorkspaceController::class, 'requestDeletion']);
     });

@@ -25,10 +25,13 @@ class OwnerWorkspaceController extends Controller
     public function workspace(Request $request): JsonResponse
     {
         $user = $request->user();
-        $schools = $user->ownedSchools()
+        $isAdmin = $user->hasRole('admin');
+        $schoolsQuery = $isAdmin ? School::query() : $user->ownedSchools();
+        $schools = $schoolsQuery
             ->with(['type', 'district', 'activeSubscription.plan'])
             ->withCount(['inquiries', 'approvedReviews'])
             ->latest()
+            ->limit($isAdmin ? 500 : 100)
             ->get()
             ->map(fn (School $school) => [
                 'id' => $school->id,
@@ -48,6 +51,7 @@ class OwnerWorkspaceController extends Controller
                 'user' => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
                 'schools' => $schools,
                 'plan' => $schools->first()['plan'] ?? null,
+                'is_admin' => $isAdmin,
             ],
         ]);
     }
@@ -68,15 +72,23 @@ class OwnerWorkspaceController extends Controller
                 'whatsapp' => ['nullable', 'string', 'max:30'],
             ]);
 
-            $record->update([
-                ...$validated,
-                'status' => 'draft',
-                'verification_status' => 'unverified',
-                'verified_at' => null,
-                'verified_by' => null,
-                'submitted_at' => null,
-                'rejection_reason' => null,
-            ]);
+            $changes = $validated;
+
+            // Owners must re-submit material profile edits for review. Administrators
+            // can correct public data without silently resetting verification status.
+            if (! $request->user()->hasRole('admin')) {
+                $changes = [
+                    ...$changes,
+                    'status' => 'draft',
+                    'verification_status' => 'unverified',
+                    'verified_at' => null,
+                    'verified_by' => null,
+                    'submitted_at' => null,
+                    'rejection_reason' => null,
+                ];
+            }
+
+            $record->update($changes);
         }
 
         $record->load(['type', 'district', 'subCounty']);
@@ -543,10 +555,13 @@ class OwnerWorkspaceController extends Controller
 
     private function school(Request $request, int $id): School
     {
-        return School::query()
-            ->where('owner_id', $request->user()->id)
-            ->whereKey($id)
-            ->firstOrFail();
+        $query = School::query()->whereKey($id);
+
+        if (! $request->user()->hasRole('admin')) {
+            $query->where('owner_id', $request->user()->id);
+        }
+
+        return $query->firstOrFail();
     }
 
     private function youtubeId(string $url): ?string
