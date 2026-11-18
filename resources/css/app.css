@@ -431,3 +431,207 @@ a, button { -webkit-tap-highlight-color: transparent; }
     .motion-enabled [data-reveal] { opacity: 1; transform: none; }
     .home-school-card:hover, .home-guide-card:hover { transform: none; }
 }
+
+
+/* Schools directory page */
+.directory-page { color: var(--ink); }
+.directory-heading { background: var(--tint); }
+.directory-heading__inner { display: grid; grid-template-columns: minmax(0,1fr) minmax(300px,728px); align-items: center; gap: 32px; padding-top: 31px; padding-bottom: 31px; }
+.directory-crumbs { display: flex; align-items: center; gap: 7px; margin-bottom: 11px; color: var(--muted); font-size: 11px; }
+.directory-crumbs a:hover { color: var(--brand); }
+.directory-crumbs span[aria-current] { color: var(--brand); font-weight: 600; }
+.directory-eyebrow { margin-bottom: 5px; color: var(--brand); font-size: 10px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.directory-heading h1 { margin-bottom: 9px; color: var(--ink); font: 700 clamp(28px,3vw,37px)/1.15 var(--display-font); letter-spacing: -.02em; }
+.directory-heading__copy > p:last-child { max-width: 590px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.directory-heading__copy strong { color: var(--brand); }
+.directory-ad { display: flex; overflow: hidden; flex-direction: column; justify-content: center; align-items: flex-start; color: #fff; background: linear-gradient(125deg,#75482a,#ad7733 58%,#234d3d); }
+.directory-ad--top { min-height: 90px; padding: 15px 24px; border-radius: var(--radius-card); }
+.directory-ad--top > span, .directory-ad--side > span { color: var(--gold); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.directory-ad--top strong { margin: 2px 0; color: #fff; font: 700 19px/1.15 var(--display-font); }
+.directory-ad--top small, .directory-ad--side small { color: rgba(255,255,255,.84); font-size: 10px; }
+.directory-ad--side { min-height: 230px; padding: 22px; border-radius: var(--radius-card); background: linear-gradient(145deg,#80512a,#bd8534 62%,#184b3a); }
+.directory-ad--side strong { max-width: 220px; margin: 8px 0; color: #fff; font: 700 25px/1.15 var(--display-font); }
+.directory-ad--side .btn { margin-top: 15px; }
+
+.directory-search-band { padding: 25px 0; background: var(--brand); }
+.directory-search { display: flex; align-items: center; gap: 0; max-width: 980px; min-height: 60px; margin: 0 auto; padding: 6px 7px 6px 21px; border-radius: 999px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.2); }
+.directory-search__keyword { position: relative; display: flex; min-width: 180px; flex: 1 1 34%; align-items: center; gap: 10px; }
+.directory-search__keyword svg { width: 17px; height: 17px; flex: none; color: var(--brand); }
+.directory-search__keyword input { width: 100%; min-width: 0; padding: 10px 4px; border: 0; outline: 0; color: var(--ink); background: transparent; font: 13px 'Inter',sans-serif; }
+.directory-search__keyword input:focus { outline: 0; box-shadow: none; }
+.directory-search__select { display: flex; min-width: 0; flex: 0 1 160px; align-items: center; border-left: 1px solid var(--line); }
+.directory-search__select select { width: 100%; min-width: 0; padding: 11px 12px; border: 0; outline: 0; color: #36443d; background: transparent; font: 12px 'Inter',sans-serif; }
+.directory-search .btn-search { min-height: 46px; margin-left: 5px; }
+
+.directory-content { padding-top: 28px; padding-bottom: 45px; }
+.directory-layout { display: grid; grid-template-columns: 260px minmax(0,1fr); align-items: start; gap: 24px; }
+.directory-sidebar { display: flex; min-width: 0; flex-direction: column; gap: 20px; }
+.directory-filter-card { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-card); background: #fff; }
+.directory-filter-card__heading { display: flex; min-height: 39px; align-items: center; justify-content: space-between; padding: 10px 15px; color: #fff; background: var(--brand); }
+.directory-filter-card__heading h2 { color: #fff; font-size: 10px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+.directory-clear { color: rgba(255,255,255,.88); font-size: 10px; font-weight: 600; }
+.directory-clear:hover { color: var(--gold); }
+.directory-category-list { padding: 6px 0; }
+.directory-category-list button { display: flex; width: 100%; min-height: 39px; align-items: center; gap: 10px; padding: 8px 14px; color: #35413b; font-size: 11.5px; text-align: left; transition: background 150ms ease; }
+.directory-category-list button:hover, .directory-category-list button.is-active { background: var(--tint); }
+.directory-category-list button.is-active { color: var(--brand-dark); font-weight: 700; }
+.directory-category-list i { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: var(--category-color,var(--brand)); }
+.directory-category-list button span { min-width: 0; flex: 1; }
+.directory-category-list em, .directory-district-list em { min-width: 25px; padding: 1px 7px; border-radius: 99px; color: var(--muted); background: #eff2f0; font-size: 10px; font-style: normal; text-align: center; }
+.directory-category-list button.is-active em { color: #fff; background: var(--brand); }
+.directory-district-list { max-height: 245px; overflow-y: auto; padding: 7px 0; }
+.directory-district-list label { display: flex; min-height: 42px; align-items: center; gap: 9px; padding: 6px 13px; cursor: pointer; }
+.directory-district-list label:hover, .directory-district-list label.is-active { background: var(--tint); }
+.directory-district-list input, .directory-fee-filter input[type=range], .directory-verified-option input { accent-color: var(--brand); }
+.directory-district-list label > span { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 1px; }
+.directory-district-list strong { color: #344039; font-size: 11px; font-weight: 600; }
+.directory-district-list small { color: #89938e; font-size: 9.5px; }
+.directory-filter-footer { display: block; width: 100%; padding: 10px 13px; border-top: 1px solid #edf0ee; color: var(--brand); font-size: 10.5px; font-weight: 700; text-align: center; }
+.directory-filter-footer:hover { background: var(--tint); }
+.directory-empty-note { padding: 14px; color: var(--muted); font-size: 11px; }
+.directory-simple-filter { display: flex; flex-direction: column; gap: 9px; padding: 14px; }
+.directory-simple-filter > label:first-child { color: #425048; font-size: 11px; font-weight: 600; }
+.directory-simple-filter select { width: 100%; height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 7px; color: #39453f; background: #fff; font-size: 11px; }
+.directory-verified-option { display: flex; align-items: center; gap: 8px; margin-top: 4px; color: #4c5a52; font-size: 11px; cursor: pointer; }
+.directory-fee-filter { padding: 15px; }
+.directory-fee-filter__scale { display: flex; justify-content: space-between; gap: 5px; color: var(--muted); font-size: 9.5px; }
+.directory-fee-filter input[type=range] { width: 100%; margin: 13px 0 4px; }
+.directory-fee-filter p { margin: 6px 0 13px; color: var(--muted); font-size: 11px; text-align: center; }
+.directory-fee-filter p strong { color: var(--ink); }
+.directory-fee-filter > small { display: block; margin-top: 9px; color: #89938e; font-size: 9.5px; line-height: 1.5; }
+.directory-promo-card { position: relative; overflow: hidden; padding: 21px; border-radius: var(--radius-card); color: #fff; background: var(--brand); }
+.directory-promo-card::before { position: absolute; top: -50px; right: -55px; width: 170px; height: 170px; border-radius: 50%; content: ''; background: rgba(255,255,255,.07); }
+.directory-promo-card > * { position: relative; }
+.directory-promo-card > small { color: var(--gold); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.directory-promo-card h2 { margin: 7px 0 9px; color: #fff; font: 700 24px/1.14 var(--display-font); }
+.directory-promo-card p { margin-bottom: 11px; color: rgba(255,255,255,.86); font-size: 10.5px; line-height: 1.6; }
+.directory-promo-card ul { margin-bottom: 14px; }
+.directory-promo-card li { display: flex; align-items: center; gap: 8px; margin: 5px 0; color: rgba(255,255,255,.9); font-size: 10px; }
+.directory-promo-card li::before { width: 6px; height: 6px; flex: none; border-radius: 50%; content: ''; background: var(--gold); }
+
+.directory-results { min-width: 0; }
+.directory-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 16px; padding-bottom: 13px; border-bottom: 1px solid var(--line); }
+.directory-result-count { color: var(--ink); font-size: 13px; }
+.directory-result-count strong { font-weight: 800; }
+.directory-result-subtitle { margin-top: 3px; color: var(--muted); font-size: 10px; }
+.directory-toolbar__controls { display: flex; align-items: center; gap: 10px; }
+.directory-sort { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 10.5px; }
+.directory-sort select { max-width: 170px; height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 7px; color: #35413b; background: #fff; font: 10.5px 'Inter',sans-serif; }
+.directory-view-toggle { display: flex; gap: 4px; }
+.directory-view-toggle button { display: grid; width: 35px; height: 35px; place-items: center; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: #fff; transition: background 150ms ease,color 150ms ease; }
+.directory-view-toggle button svg { width: 15px; height: 15px; }
+.directory-view-toggle button.is-active { color: #fff; border-color: var(--brand); background: var(--brand); }
+.directory-school-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: stretch; gap: 17px; }
+.directory-school-card { display: flex; min-width: 0; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-card); background: #fff; transition: transform 200ms ease,box-shadow 200ms ease,border-color 200ms ease; }
+.directory-school-card:hover { transform: translateY(-3px); border-color: #cad9d1; box-shadow: var(--shadow-card-hover); }
+.directory-school-card__image { position: relative; display: block; height: 150px; overflow: hidden; background: linear-gradient(135deg,#dce9e1,#c2d2c8); }
+.directory-school-card__image img { width: 100%; height: 100%; object-fit: cover; transition: transform 450ms ease; }
+.directory-school-card:hover .directory-school-card__image img { transform: scale(1.04); }
+.directory-school-placeholder { display: grid; width: 100%; height: 100%; place-items: center; color: rgba(12,90,73,.4); background: linear-gradient(135deg,#dce9e1,#b7ccbf); font: 700 36px var(--display-font); }
+.directory-image-badge { position: absolute; top: 10px; left: 0; padding: 5px 10px; border-radius: 0 6px 6px 0; color: #291d00; background: var(--gold); font-size: 9px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.directory-school-card__content { display: flex; min-height: 0; flex: 1; flex-direction: column; padding: 13px 14px 12px; }
+.directory-school-card__tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.directory-tag { display: inline-flex; align-items: center; min-height: 19px; padding: 2px 8px; border: 1px solid #c4ddd2; border-radius: 99px; color: var(--brand); font-size: 8.5px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }
+.directory-tag--sample { border-color: #cbdff5; color: #315f91; background: #f1f7ff; }
+.directory-tag--verified { border-color: #c9e4d1; color: #247342; background: #f0faf2; }
+.directory-school-card__content h2 { margin-bottom: 5px; color: #202a24; font-size: 13px; font-weight: 700; line-height: 1.35; }
+.directory-school-card__content h2 a:hover { color: var(--brand); }
+.directory-school-tagline { margin-bottom: 6px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+.directory-location { display: flex; align-items: center; gap: 6px; margin-bottom: 11px; color: var(--muted); font-size: 10px; }
+.directory-location::before { width: 6px; height: 6px; flex: none; border-radius: 50%; content: ''; background: var(--brand); }
+.directory-school-facts { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; padding-top: 8px; }
+.directory-school-facts span { display: inline-flex; padding: 3px 7px; border-radius: 99px; color: #66736c; background: #f0f3f1; font-size: 8.5px; }
+.directory-school-facts strong { width: 100%; color: #76520e; font-size: 10.5px; font-weight: 800; }
+.directory-school-card__footer { display: flex; flex-direction: column; gap: 9px; padding: 10px 13px; border-top: 1px solid #edf0ee; }
+.directory-rating { color: #876014; font-size: 10px; }
+.directory-rating b { color: var(--gold-dark); }
+.directory-rating small { color: #8b9690; font-size: 9px; }
+.directory-card-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.directory-compare-button { color: var(--brand); font-size: 9.5px; font-weight: 700; }
+.directory-compare-button:hover { text-decoration: underline; text-underline-offset: 3px; }
+.directory-profile-link { display: inline-flex; align-items: center; min-height: 29px; padding: 0 11px; border: 1px solid var(--brand); border-radius: 99px; color: var(--brand); font-size: 9.5px; font-weight: 700; transition: color 150ms ease,background 150ms ease; }
+.directory-profile-link:hover { color: #fff; background: var(--brand); }
+.directory-school-grid.is-list { grid-template-columns: 1fr; }
+.directory-school-grid.is-list .directory-school-card { display: grid; grid-template-columns: 230px minmax(0,1fr); flex-direction: row; }
+.directory-school-grid.is-list .directory-school-card__image { height: 100%; min-height: 180px; }
+.directory-school-grid.is-list .directory-school-card__content { display: flex; flex-direction: column; }
+.directory-school-grid.is-list .directory-school-card__footer { flex-direction: row; align-items: center; justify-content: space-between; }
+.directory-inline-promo { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 3px auto; padding: 17px 22px; width: 94%; border-radius: 8px; color: #fff; background: var(--brand-deep); }
+.directory-inline-promo--alt { background: var(--brand); }
+.directory-inline-promo small { color: var(--gold); font-size: 8.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.directory-inline-promo h3 { margin: 3px 0; color: #fff; font: 700 18px/1.2 var(--display-font); }
+.directory-inline-promo p { color: rgba(255,255,255,.8); font-size: 9.5px; }
+.directory-inline-promo .btn { min-height: 35px; padding-inline: 13px; font-size: 10px; }
+.directory-pagination { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 27px; padding-top: 20px; border-top: 1px solid var(--line); }
+.directory-pagination__summary { color: var(--muted); font-size: 10px; }
+.directory-pagination nav { display: flex; align-items: center; gap: 5px; margin: 0; }
+.directory-pagination nav a, .directory-pagination nav span[aria-current] > span { display: grid; min-width: 33px; height: 33px; place-items: center; padding: 0 9px; border: 1px solid var(--line); border-radius: 7px; color: #344039; background: #fff; font-size: 10px; }
+.directory-pagination nav a:hover { border-color: var(--brand); color: var(--brand); }
+.directory-pagination nav span[aria-current] > span { border-color: var(--brand); color: #fff; background: var(--brand); }
+.directory-no-results { padding: 50px 20px; border: 1px dashed #cbd8d0; border-radius: var(--radius-card); background: #fbfdfb; text-align: center; }
+.directory-no-results > span { color: var(--brand); font-size: 38px; }
+.directory-no-results h2 { margin: 8px 0 5px; color: var(--ink); font: 700 22px var(--display-font); }
+.directory-no-results p { margin-bottom: 17px; color: var(--muted); font-size: 11px; }
+.directory-bottom-banner { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 40px; padding: 25px 28px; border-radius: var(--radius-card); color: #fff; background: var(--brand); }
+.directory-bottom-banner small { color: var(--gold); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.directory-bottom-banner h2 { margin: 4px 0; color: #fff; font: 700 23px/1.2 var(--display-font); }
+.directory-bottom-banner p { max-width: 560px; color: rgba(255,255,255,.84); font-size: 10px; line-height: 1.6; }
+.directory-bottom-banner .btn { flex: none; }
+.directory-register-tab { position: fixed; z-index: 35; top: 35%; right: 0; padding: 15px 9px; border-radius: 9px 0 0 9px; color: #2a1d00; background: var(--gold); box-shadow: -3px 3px 12px rgba(0,0,0,.18); font-size: 10px; font-weight: 800; letter-spacing: .05em; writing-mode: vertical-rl; }
+.directory-register-tab:hover { background: var(--gold-dark); }
+.directory-school-grid.is-loading { opacity: .55; pointer-events: none; transition: opacity 120ms ease; }
+
+@media (max-width: 1100px) {
+    .directory-school-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 1000px) {
+    .directory-heading__inner { grid-template-columns: 1fr; }
+    .directory-ad--top { display: none; }
+    .directory-layout { grid-template-columns: 1fr; }
+    .directory-sidebar { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; }
+    .directory-ad--side, .directory-promo-card { min-height: 100%; }
+    .directory-search { flex-wrap: wrap; border-radius: 18px; padding: 10px; }
+    .directory-search__keyword { min-height: 42px; flex-basis: 100%; padding: 0 8px; border-bottom: 1px solid var(--line); }
+    .directory-search__select { flex: 1 1 25%; border-left: 0; }
+    .directory-search__select select { padding-inline: 8px; }
+    .directory-search .btn-search { flex: 1 1 100%; margin: 7px 0 0; }
+    .directory-register-tab { display: none; }
+}
+@media (max-width: 640px) {
+    .directory-heading__inner { padding-top: 23px; padding-bottom: 23px; }
+    .directory-heading h1 { font-size: 29px; }
+    .directory-heading__copy > p:last-child { font-size: 11px; }
+    .directory-search-band { padding: 17px 0; }
+    .directory-search { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 9px; }
+    .directory-search__keyword { grid-column: 1 / -1; min-height: 40px; }
+    .directory-search__select { min-height: 38px; border-top: 1px solid var(--line); }
+    .directory-search__select:nth-of-type(3) { border-left: 1px solid var(--line); }
+    .directory-search .btn-search { grid-column: 1 / -1; min-height: 40px; }
+    .directory-content { padding-top: 20px; }
+    .directory-sidebar { grid-template-columns: 1fr; gap: 13px; }
+    .directory-toolbar { align-items: flex-start; flex-direction: column; }
+    .directory-toolbar__controls { width: 100%; justify-content: space-between; }
+    .directory-sort { flex: 1; }
+    .directory-sort select { max-width: none; flex: 1; }
+    .directory-school-grid { grid-template-columns: 1fr; gap: 13px; }
+    .directory-school-card { display: grid; grid-template-columns: 112px minmax(0,1fr); }
+    .directory-school-card__image { height: 100%; min-height: 165px; }
+    .directory-school-card__content { padding: 11px; }
+    .directory-school-card__content h2 { font-size: 12px; }
+    .directory-school-card__tags { gap: 4px; margin-bottom: 6px; }
+    .directory-tag { font-size: 7.5px; }
+    .directory-school-card__footer { grid-column: 1 / -1; padding: 8px 10px; }
+    .directory-school-facts strong { font-size: 9px; }
+    .directory-school-grid.is-list { grid-template-columns: 1fr; }
+    .directory-school-grid.is-list .directory-school-card { display: grid; grid-template-columns: 112px minmax(0,1fr); }
+    .directory-school-grid.is-list .directory-school-card__image { width: auto; min-height: 165px; }
+    .directory-school-grid.is-list .directory-school-card__footer { flex-direction: column; align-items: flex-start; }
+    .directory-inline-promo { width: 100%; align-items: flex-start; flex-direction: column; padding: 17px; }
+    .directory-inline-promo h3 { font-size: 17px; }
+    .directory-bottom-banner { align-items: flex-start; flex-direction: column; margin-top: 28px; padding: 20px; }
+    .directory-bottom-banner h2 { font-size: 21px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .directory-school-card:hover { transform: none; }
+    .directory-school-card__image img { transition: none; }
+}
