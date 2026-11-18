@@ -27,7 +27,7 @@ class OwnerDashboardAccessTest extends TestCase
         $user = User::factory()->create(['email' => $email]);
         $user->forceFill([
             'status' => 'active',
-            'email_verified_at' => now(),
+            'email_verified_at' => null,
             'user_type' => 'school_owner',
         ])->save();
         $user->assignRole('school_owner');
@@ -35,14 +35,14 @@ class OwnerDashboardAccessTest extends TestCase
         return $user;
     }
 
-    public function test_only_school_owner_accounts_can_open_the_owner_dashboard(): void
+    public function test_only_school_owner_accounts_can_open_the_owner_dashboard_without_email_verification(): void
     {
         Role::findOrCreate('parent', 'web');
 
         $parent = User::factory()->create();
         $parent->forceFill([
             'status' => 'active',
-            'email_verified_at' => now(),
+            'email_verified_at' => null,
         ])->save();
         $parent->assignRole('parent');
 
@@ -101,7 +101,6 @@ class OwnerDashboardAccessTest extends TestCase
             'verification_status' => 'pending',
         ]);
     }
-
 
     public function test_school_owner_can_add_programmes_fees_and_contacts_to_their_listing(): void
     {

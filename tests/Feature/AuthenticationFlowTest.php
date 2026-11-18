@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Livewire\Auth\Register;
+use App\Livewire\User\ProfileEdit;
 use App\Models\User;
-use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
@@ -15,7 +15,7 @@ class AuthenticationFlowTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_registration_creates_an_unverified_parent_and_sends_verification_email(): void
+    public function test_registration_creates_an_active_parent_without_an_email_verification_step(): void
     {
         Notification::fake();
         Role::findOrCreate('parent', 'web');
@@ -27,14 +27,43 @@ class AuthenticationFlowTest extends TestCase
             ->set('password_confirmation', 'a-secure-password')
             ->set('account_type', 'parent')
             ->call('register')
-            ->assertRedirect(route('verification.notice'));
+            ->assertRedirect(route('user.dashboard'));
 
         $user = User::where('email', 'parent@example.test')->firstOrFail();
 
         $this->assertSame('parent', $user->user_type);
-        $this->assertFalse($user->hasVerifiedEmail());
+        $this->assertSame('active', $user->status);
+        $this->assertNull($user->email_verified_at);
         $this->assertTrue($user->hasRole('parent'));
-        Notification::assertSentTo($user, VerifyEmail::class);
+        Notification::assertNothingSent();
+    }
+
+    public function test_profile_email_can_be_changed_without_a_verification_prompt_or_email(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create([
+            'email' => 'old-address@example.test',
+            'email_verified_at' => now(),
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(ProfileEdit::class)
+            ->set('name', $user->name)
+            ->set('email', 'new-address@example.test')
+            ->set('phone', '')
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertSee('Your profile has been updated.');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'email' => 'new-address@example.test',
+            'email_verified_at' => null,
+        ]);
+
+        Notification::assertNothingSent();
     }
 
     public function test_registration_cannot_assign_the_admin_account_type(): void

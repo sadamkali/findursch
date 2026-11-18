@@ -33,19 +33,19 @@ class ProfileEdit extends Component
             'phone' => ['nullable', 'string', 'max:30'],
         ]);
 
-        $user->forceFill([
+        $changes = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?: null,
-        ])->save();
+        ];
 
+        // Verification is not required to use FindurSch. A changed address
+        // simply clears its historical verification timestamp without blocking the account.
         if ($originalEmail !== $validated['email']) {
-            $user->forceFill(['email_verified_at' => null])->save();
-            $user->sendEmailVerificationNotification();
-
-            return redirect()->route('verification.notice')
-                ->with('status', 'Your email changed. Verify the new address to continue using your account.');
+            $changes['email_verified_at'] = null;
         }
+
+        $user->forceFill($changes)->save();
 
         session()->flash('message', 'Your profile has been updated.');
     }
