@@ -13,7 +13,11 @@ return new class extends Migration
         }
 
         $schoolIds = DB::table('schools')
-            ->where('is_demo', true)
+            ->where(function ($query): void {
+                $query->where('is_demo', true)
+                    ->orWhere('name', 'like', 'Demo — %')
+                    ->orWhere('slug', 'like', 'demo-%');
+            })
             ->pluck('id');
 
         if ($schoolIds->isEmpty()) {
@@ -27,6 +31,8 @@ return new class extends Migration
         DB::table('schools')
             ->whereIn('id', $schoolIds)
             ->update([
+                'name' => DB::raw("'Archived school record ' || id"),
+                'slug' => DB::raw("'archived-school-record-' || id"),
                 'status' => 'suspended',
                 'verification_status' => 'unverified',
                 'verified_at' => null,
