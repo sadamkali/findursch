@@ -14,16 +14,17 @@
     @livewireStyles
 </head>
 <body class="h-full bg-white text-gray-900 antialiased">
+    @php($dashboardUrl = rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/'))
     <div class="site-topbar">
         <div class="site-wrap site-topbar__inner">
             <a href="{{ route('schools.index') }}">Explore schools</a>
             <a href="{{ route('articles.index') }}">Education news &amp; guides</a>
             <a href="{{ route('compare') }}">Compare schools</a>
             @guest
-                <a href="{{ route('login') }}">Log in</a>
-                <a href="{{ route('register') }}">Sign up</a>
+                <a href="{{ $dashboardUrl }}/login?returnTo=%2Faccount">Log in</a>
+                <a href="{{ $dashboardUrl }}/register?type=parent&returnTo=%2Faccount">Sign up</a>
             @else
-                <a href="{{ auth()->user()->hasRole('school_owner') ? route('owner.dashboard') : (auth()->user()->hasRole('admin') ? url('/admin') : route('user.dashboard')) }}">My account</a>
+                <a href="{{ auth()->user()->hasRole('school_owner') ? ($dashboardUrl.'/owner') : (auth()->user()->hasRole('admin') ? ($dashboardUrl.'/admin') : route('user.dashboard')) }}">My account</a>
             @endguest
         </div>
     </div>
@@ -46,9 +47,9 @@
             <div class="site-header__actions">
                 @auth
                     @if (auth()->user()->hasRole('admin'))
-                        <a class="site-account-link" href="{{ url('/admin') }}">Admin</a>
+                        <a class="site-account-link" href="{{ $dashboardUrl }}/admin">Admin</a>
                     @elseif (auth()->user()->hasRole('school_owner'))
-                        <a class="site-account-link" href="{{ route('owner.dashboard') }}">School dashboard</a>
+                        <a class="site-account-link" href="{{ $dashboardUrl }}/owner">School dashboard</a>
                     @else
                         <a class="site-account-link" href="{{ route('user.dashboard') }}">My account</a>
                     @endif
@@ -56,9 +57,9 @@
                         <button type="submit" class="site-account-link">Log out</button>
                     </form>
                 @else
-                    <a class="site-account-link" href="{{ route('login') }}">Log in</a>
+                    <a class="site-account-link" href="{{ $dashboardUrl }}/login?returnTo=%2Faccount">Log in</a>
                 @endauth
-                <a href="{{ route('register') }}" class="site-header__cta">List your school</a>
+                <a href="{{ $dashboardUrl }}/register?type=school_owner" class="site-header__cta">List your school</a>
                 <button type="button"
                     class="site-menu-toggle"
                     @click="mobileMenuOpen = !mobileMenuOpen"
@@ -80,12 +81,12 @@
                 <a @click="mobileMenuOpen = false" href="{{ route('about') }}">About FindurSch</a>
                 <a @click="mobileMenuOpen = false" href="{{ route('contact') }}">Contact</a>
                 @guest
-                    <a @click="mobileMenuOpen = false" href="{{ route('login') }}">Log in</a>
+                    <a @click="mobileMenuOpen = false" href="{{ $dashboardUrl }}/login?returnTo=%2Faccount">Log in</a>
                 @else
                     @if (auth()->user()->hasRole('admin'))
-                        <a @click="mobileMenuOpen = false" href="{{ url('/admin') }}">Admin dashboard</a>
+                        <a @click="mobileMenuOpen = false" href="{{ $dashboardUrl }}/admin">Admin dashboard</a>
                     @elseif (auth()->user()->hasRole('school_owner'))
-                        <a @click="mobileMenuOpen = false" href="{{ route('owner.dashboard') }}">School dashboard</a>
+                        <a @click="mobileMenuOpen = false" href="{{ $dashboardUrl }}/owner">School dashboard</a>
                     @else
                         <a @click="mobileMenuOpen = false" href="{{ route('user.dashboard') }}">My account</a>
                     @endif
@@ -93,7 +94,7 @@
                         <button type="submit" class="site-mobile-nav__logout">Log out</button>
                     </form>
                 @endguest
-                <a @click="mobileMenuOpen = false" href="{{ route('register') }}" class="site-mobile-nav__cta">List your school</a>
+                <a @click="mobileMenuOpen = false" href="{{ $dashboardUrl }}/register?type=school_owner" class="site-mobile-nav__cta">List your school</a>
             </nav>
         </div>
     </header>
@@ -141,8 +142,8 @@
                 <div>
                     <h2>Support</h2>
                     <ul>
-                        <li><a href="{{ route('register') }}">List your school</a></li>
-                        <li><a href="{{ route('login') }}">School owner login</a></li>
+                        <li><a href="{{ $dashboardUrl }}/register?type=school_owner">List your school</a></li>
+                        <li><a href="{{ $dashboardUrl }}/login?returnTo=%2Faccount">School owner login</a></li>
                         <li><a href="{{ route('contact') }}">Get in touch</a></li>
                         <li><a href="{{ route('legal.terms') }}">Terms and conditions</a></li>
                         <li><a href="{{ route('legal.privacy') }}">Privacy policy</a></li>

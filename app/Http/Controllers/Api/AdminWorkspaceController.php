@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -119,7 +120,7 @@ class AdminWorkspaceController extends Controller
                     $query->where(function ($builder) use ($search) {
                         $builder->where('parent_name', 'ilike', '%'.$search.'%')
                             ->orWhere('parent_email', 'ilike', '%'.$search.'%')
-                            ->orWhereHas('school', fn ($school) => $school->where('name', 'ilike', '%'.$search.'%'));
+                            ->orWhereHas('school', fn ($school) => $school->whereRaw('LOWER(name) LIKE ?', ['%'.mb_strtolower($search).'%']));
                     });
                 }
                 $items = $query->limit(100)->get();
@@ -144,6 +145,19 @@ class AdminWorkspaceController extends Controller
             case 'plans':
                 $items = DB::table('plans')->orderBy('order')->orderBy('price')
                     ->get(['id', 'name', 'slug', 'tagline', 'description', 'price', 'currency', 'duration_days', 'billing_cycle', 'features', 'is_active', 'includes_featured_slot', 'featured_slot_count', 'order']);
+                break;
+
+            case 'subscriptions':
+                $items = DB::table('subscriptions')
+                    ->leftJoin('schools', 'schools.id', '=', 'subscriptions.school_id')
+                    ->leftJoin('plans', 'plans.id', '=', 'subscriptions.plan_id')
+                    ->orderByDesc('subscriptions.created_at')
+                    ->limit(100)
+                    ->get([
+                        'subscriptions.id', 'subscriptions.start_date', 'subscriptions.end_date',
+                        'subscriptions.status', 'subscriptions.auto_renew', 'subscriptions.created_at',
+                        'schools.name as school_name', 'plans.name as plan_name', 'plans.price as plan_price',
+                    ]);
                 break;
 
             case 'payments':
@@ -193,6 +207,21 @@ class AdminWorkspaceController extends Controller
             case 'verification':
                 $school = School::query()->findOrFail($id);
                 $data = $request->validate([
+                    'name' => ['sometimes', 'string', 'max:255'],
+                    'tagline' => ['sometimes', 'nullable', 'string', 'max:255'],
+                    'description' => ['sometimes', 'nullable', 'string', 'max:10000'],
+                    'address' => ['sometimes', 'nullable', 'string', 'max:255'],
+                    'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
+                    'email' => ['sometimes', 'nullable', 'email', 'max:255'],
+                    'website' => ['sometimes', 'nullable', 'url', 'max:255'],
+                    'whatsapp' => ['sometimes', 'nullable', 'string', 'max:30'],
+                    'boarding_type' => ['sometimes', 'in:boarding,day,mixed'],
+                    'gender_policy' => ['sometimes', 'in:boys,girls,mixed'],
+                    'type_id' => ['sometimes', 'integer', 'exists:school_types,id'],
+                    'district_id' => ['sometimes', 'integer', 'exists:districts,id'],
+                    'sub_county_id' => ['sometimes', 'nullable', 'integer', 'exists:sub_counties,id'],
+                    'student_count_approx' => ['sometimes', 'nullable', 'integer', 'min:0'],
+                    'founded_year' => ['sometimes', 'nullable', 'integer', 'min:1800', 'max:'.date('Y')],
                     'status' => ['sometimes', 'in:draft,pending,active,suspended,rejected'],
                     'verification_status' => ['sometimes', 'in:unverified,pending,verified'],
                     'is_featured' => ['sometimes', 'boolean'],
@@ -217,19 +246,32 @@ class AdminWorkspaceController extends Controller
             case 'parents':
                 $user = User::query()->findOrFail($id);
                 $data = $request->validate([
-                    'status' => ['required', 'in:active,inactive,suspended,banned'],
+                    'status' => ['sometimes', 'in:active,inactive,suspended,banned'],
+                    'account_type' => ['sometimes', 'in:parent,school_owner,student'],
                 ]);
+                abort_unless($data !== [], 422);
 
-                if ($user->is($request->user()) && $data['status'] !== 'active') {
-                    throw ValidationException::withMessages(['status' => ['You cannot suspend your own administrator account.']]);
+                if ($user->is($request->user()) && (($data['status'] ?? 'active') !== 'active' || isset($data['account_type']))) {
+                    throw ValidationException::withMessages(['status' => ['You cannot disable or downgrade your own administrator account.']]);
                 }
-                if ($user->hasRole('admin') && $data['status'] !== 'active') {
+                if ($user->hasRole('admin') && ($data['status'] ?? 'active') !== 'active') {
                     $activeAdmins = User::query()->role('admin')->where('status', 'active')->count();
                     if ($activeAdmins <= 1) {
                         throw ValidationException::withMessages(['status' => ['At least one active administrator must remain.']]);
                     }
                 }
-                $user->forceFill($data)->save();
+                if (isset($data['account_type'])) {
+                    if ($user->hasRole('admin')) {
+                        throw ValidationException::withMessages(['account_type' => ['Administrator accounts cannot be changed here.']]);
+                    }
+                    Role::findOrCreate($data['account_type'], 'web');
+                    $user->forceFill(['user_type' => $data['account_type']])->save();
+                    $user->syncRoles([$data['account_type']]);
+                    unset($data['account_type']);
+                }
+                if ($data !== []) {
+                    $user->forceFill($data)->save();
+                }
                 return response()->json(['data' => [
                     'id' => $user->id, 'name' => $user->name, 'email' => $user->email,
                     'user_type' => $user->user_type, 'status' => $user->status,
