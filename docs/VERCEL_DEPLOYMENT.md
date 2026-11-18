@@ -66,11 +66,15 @@ Run those commands from a trusted release runner that has the same production
 environment variables and network access to the Supabase Session Pooler. Do
 not run them per web request or per Vercel container instance.
 
-The production reference seeder is idempotent and includes ten clearly marked
-fictional demo school profiles. Demo records remain unverified and have no
-real contact, owner, inquiry, or review data. Run the reference seeder once
-when initializing a new database or when its reference data is intentionally
-being updated; the web server does not reseed on startup.
+The production reference seeder is idempotent and creates shared
+reference data only: regions, districts, school types, curricula, facilities,
+plans, article categories, settings, and access roles. It does not create
+school listings, school owners, or reviews. Public directory results are
+restricted to schools with an active status and verified status. New school
+profiles must be submitted and approved through the school-management workflow
+before they appear in public search. Run the reference seeder when initializing
+a database or intentionally updating reference data; the web server does not
+reseed on startup.
 
 ## Container startup
 
