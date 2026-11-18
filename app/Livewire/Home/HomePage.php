@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Livewire\Home;
 
 use App\Models\Article;
 use App\Models\District;
+use App\Models\Review;
 use App\Models\School;
 use App\Models\SchoolType;
+use App\Models\User;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -13,40 +16,100 @@ class HomePage extends Component
 {
     public function render()
     {
-        $schoolTypes = SchoolType::where('is_active', true)
+        $publicSchools = fn ($query) => $query->publiclyVisible();
+
+        $schoolTypes = SchoolType::query()
+            ->where('is_active', true)
+            ->withCount(['schools as public_schools_count' => $publicSchools])
             ->orderBy('order')
             ->get();
 
-        $featuredSchools = School::publiclyVisible()
-            ->with(['district', 'type', 'curricula'])
+        $featuredSchools = School::query()
+            ->publiclyVisible()
+            ->with(['district', 'type', 'curricula', 'media'])
             ->orderByDesc('is_featured')
             ->latest('created_at')
-            ->limit(6)
-            ->get();
-
-        $districts = District::with('region')
-            ->withCount(['schools as school_count' => fn ($query) => $query->publiclyVisible()])
-            ->inRandomOrder()
-            ->limit(8)
-            ->get();
-
-        $articles = Article::where('status', 'published')
-            ->where('published_at', '<=', now())
-            ->where('is_featured', true)
-            ->with('category')
-            ->latest('published_at')
             ->limit(3)
             ->get();
 
+        $spotlightSchool = School::query()
+            ->publiclyVisible()
+            ->with(['district', 'type', 'curricula', 'media'])
+            ->whereNotIn('id', $featuredSchools->pluck('id'))
+            ->orderByDesc('is_featured')
+            ->latest('created_at')
+            ->first();
+
+        if (! $spotlightSchool) {
+            $spotlightSchool = $featuredSchools->first();
+        }
+
+        $districts = District::query()
+            ->with('region')
+            ->withCount(['schools as school_count' => $publicSchools])
+            ->orderByDesc('school_count')
+            ->orderBy('name')
+            ->limit(5)
+            ->get();
+
+        $searchDistricts = District::query()
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        $publishedArticles = Article::query()
+            ->published()
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
+
+        $leadArticle = (clone $publishedArticles)
+            ->with(['category', 'author'])
+            ->orderByDesc('is_featured')
+            ->latest('published_at')
+            ->first();
+
+        $newsArticlesQuery = (clone $publishedArticles)
+            ->with(['category', 'author'])
+            ->latest('published_at');
+
+        if ($leadArticle) {
+            $newsArticlesQuery->where('id', '!=', $leadArticle->id);
+        }
+
+        $newsArticles = $newsArticlesQuery->limit(3)->get();
+
+        $insightArticlesQuery = (clone $publishedArticles)
+            ->with(['category', 'author'])
+            ->latest('published_at');
+
+        $excludedArticleIds = collect([$leadArticle?->id])
+            ->merge($newsArticles->pluck('id'))
+            ->filter()
+            ->values()
+            ->all();
+
+        if ($excludedArticleIds !== []) {
+            $insightArticlesQuery->whereNotIn('id', $excludedArticleIds);
+        }
+
+        $insightArticles = $insightArticlesQuery->limit(4)->get();
+
         $stats = [
-            'schools' => School::publiclyVisible()->count(),
-            'districts' => District::count(),
-            'parents' => \App\Models\User::where('user_type', 'parent')->count(),
-            'reviews' => \App\Models\Review::where('status', 'approved')->count(),
+            'schools' => School::query()->publiclyVisible()->count(),
+            'districts' => District::query()->count(),
+            'parents' => User::query()->where('user_type', 'parent')->count(),
+            'reviews' => Review::query()->where('status', 'approved')->count(),
         ];
 
         return view('livewire.home.home-page', compact(
-            'schoolTypes', 'featuredSchools', 'districts', 'articles', 'stats'
+            'schoolTypes',
+            'featuredSchools',
+            'spotlightSchool',
+            'districts',
+            'searchDistricts',
+            'leadArticle',
+            'newsArticles',
+            'insightArticles',
+            'stats',
         ));
     }
 }

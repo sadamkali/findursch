@@ -1,155 +1,298 @@
-<div>
-    {{-- SCHOOL DISCOVERY INTRO + SEARCH --}}
-    <section class="home-hero border-b border-gray-100">
-        <div class="home-hero__inner mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-            <div class="max-w-3xl">
-                <p class="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-primary">Uganda school directory</p>
-                <h1 data-reveal class="text-4xl font-semibold leading-tight tracking-tight text-gray-950 sm:text-5xl" style="font-family: 'DM Serif Display', serif;">
-                    Discover schools.<br class="hidden sm:block"> Find the right fit.
-                </h1>
-                <p class="mt-4 max-w-2xl text-base leading-7 text-gray-600 sm:text-lg">
-                    Explore school profiles across Uganda, compare your options and find the information you need in one place.
-                </p>
-            </div>
+<div class="home-page">
+    @php
+        $heroImage = $spotlightSchool?->getFirstMediaUrl('cover') ?: $featuredSchools->first()?->getFirstMediaUrl('cover');
+    @endphp
 
-            <form data-reveal action="{{ route('schools.index') }}" method="GET" class="mt-8 grid gap-3 rounded-2xl border border-gray-200 bg-white p-3 shadow-card sm:grid-cols-2 lg:grid-cols-[minmax(0,1.6fr)_minmax(150px,1fr)_minmax(150px,1fr)_auto]">
-                <label class="block sm:col-span-2 lg:col-span-1">
-                    <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">School or keyword</span>
-                    <input type="search" name="search" placeholder="Search by school name..." class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-3 text-sm text-gray-900 outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15">
-                </label>
-                <label class="block">
-                    <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">School type</span>
-                    <select name="type" class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-3 text-sm text-gray-700 outline-none focus:border-primary focus:bg-white">
+    <section class="home-hero">
+        @if($heroImage)<div class="home-hero__photo" style="background-image:url('{{ $heroImage }}')" aria-hidden="true"></div>@endif
+        <div class="site-wrap home-hero__content">
+            <p class="home-eyebrow">Uganda's school discovery platform</p>
+            <h1>Find the <em>right school</em><br class="hidden sm:block"> for your child</h1>
+            <p class="home-hero__intro">Explore nursery, primary, secondary, vocational and university listings across Uganda, and compare your options side by side.</p>
+            <form action="{{ route('schools.index') }}" method="GET" class="home-search" x-data="searchSuggestions" @submit="if (!q) $el.querySelector('[name=search]').disabled = true">
+                <div class="home-search__query">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+                    <input type="search" name="search" x-model="q" @input.debounce.350ms="search()" @focus="if (q.length >= 2) open = true" placeholder="Search by name, location or district" aria-label="Search schools" autocomplete="off">
+                    <div class="home-search__suggestions" x-cloak x-show="open && results.length" @click.outside="open = false">
+                        <template x-for="result in results" :key="result.type + '-' + result.url">
+                            <a :href="result.url" class="home-search__suggestion"><span x-text="result.label"></span><small x-text="result.detail || (result.type === 'district' ? 'District' : 'School')"></small></a>
+                        </template>
+                    </div>
+                </div>
+                <label class="home-search__select"><span class="sr-only">School type</span>
+                    <select name="type" aria-label="School type">
                         <option value="">All types</option>
-                        @foreach($schoolTypes as $type)
-                            <option value="{{ $type->id }}">{{ $type->name }}</option>
-                        @endforeach
+                        @foreach($schoolTypes as $type)<option value="{{ $type->id }}">{{ $type->name }}</option>@endforeach
                     </select>
                 </label>
-                <label class="block">
-                    <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">District</span>
-                    <select name="district" class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-3 text-sm text-gray-700 outline-none focus:border-primary focus:bg-white">
+                <label class="home-search__select home-search__district"><span class="sr-only">District</span>
+                    <select name="district" aria-label="District">
                         <option value="">All districts</option>
-                        @foreach($districts as $district)
-                            <option value="{{ $district->id }}">{{ $district->name }}</option>
-                        @endforeach
+                        @foreach($searchDistricts as $district)<option value="{{ $district->id }}">{{ $district->name }}</option>@endforeach
                     </select>
                 </label>
-                <div class="flex items-end">
-                    <button type="submit" class="btn-primary w-full justify-center px-6 py-3 lg:w-auto">Find schools</button>
-                </div>
+                <button class="btn btn-search" type="submit">Search <span aria-hidden="true">→</span></button>
             </form>
-
-            <div data-reveal class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500">
-                <span><strong class="font-semibold text-gray-900">{{ number_format($stats['schools']) }}</strong> public listings</span>
-                <span><strong class="font-semibold text-gray-900">{{ number_format($stats['districts']) }}</strong> districts</span>
-                <span><strong class="font-semibold text-gray-900">{{ number_format($stats['reviews']) }}</strong> approved reviews</span>
+            <div class="home-hero__stats" aria-label="FindurSch platform statistics">
+                <span><strong>{{ number_format($stats['schools']) }}</strong> school listings</span>
+                <span><strong>{{ number_format($stats['districts']) }}</strong> districts</span>
+                <span><strong>{{ number_format($stats['reviews']) }}</strong> approved reviews</span>
             </div>
         </div>
+        <div class="home-hero__dots" aria-hidden="true"><i class="is-active"></i><i></i><i></i></div>
     </section>
 
-    {{-- SCHOOL DISCOVERY GRID --}}
-    @if($featuredSchools->count() > 0)
-    <section class="py-12 sm:py-16">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div data-reveal class="mb-7 flex flex-wrap items-end justify-between gap-4">
-                <div>
-                    <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">Start exploring</p>
-                    <h2 class="text-3xl font-semibold tracking-tight text-gray-900" style="font-family: 'DM Serif Display', serif;">Schools to discover</h2>
-                    <p class="mt-2 text-sm text-gray-600">A selection of public school profiles from across Uganda.</p>
+    <main class="site-wrap">
+        {{-- Featured schools with a discovery sidebar --}}
+        <div class="home-cols home-section home-featured-layout">
+            <section class="home-main-column" aria-labelledby="featured-schools-title">
+                <div class="home-section-heading">
+                    <h2 id="featured-schools-title">Featured <span>schools</span></h2>
+                    <a class="home-more" href="{{ route('schools.index') }}">View all →</a>
                 </div>
-                <a href="{{ route('schools.index') }}" class="text-sm font-semibold text-primary hover:underline">Browse all schools <span aria-hidden="true">→</span></a>
-            </div>
-            <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                @foreach($featuredSchools as $school)
-                    @include('components.school-card', ['school' => $school])
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
+                @if($featuredSchools->isNotEmpty())
+                    <div class="home-school-grid">
+                        @foreach($featuredSchools as $school)
+                            <article class="home-school-card" data-reveal>
+                                <a href="{{ route('schools.show', $school) }}" class="home-school-card__link">
+                                    <div class="home-school-card__image">
+                                        @if($school->getFirstMediaUrl('cover'))
+                                            <img src="{{ $school->getFirstMediaUrl('cover') }}" alt="{{ $school->name }}" loading="lazy">
+                                        @else
+                                            <div class="home-image-placeholder" aria-hidden="true">{{ strtoupper(mb_substr($school->name, 0, 2)) }}</div>
+                                        @endif
+                                        @if($school->is_featured)<span class="home-image-flag">Featured</span>@endif
+                                    </div>
+                                    <div class="home-school-card__body">
+                                        <span class="home-kicker">{{ $school->type?->name ?? 'School' }}</span>
+                                        <h3>{{ $school->name }}</h3>
+                                        <p>{{ $school->district?->name ?? 'Uganda' }} District</p>
+                                        <div class="home-card-tags">
+                                            @if($school->verification_status === 'verified')<span class="home-tag home-tag--verified">Verified</span>@endif
+                                            @if($school->is_demo)<span class="home-tag">Sample profile</span>@endif
+                                            @foreach($school->curricula->take(1) as $curriculum)<span class="home-tag">{{ $curriculum->abbreviation }}</span>@endforeach
+                                        </div>
+                                    </div>
+                                </a>
+                                <div class="home-school-card__footer">
+                                    @if((float) $school->rating_average > 0)
+                                        <span><b>★</b> {{ number_format((float) $school->rating_average, 1) }} <small>({{ $school->reviews_count }} reviews)</small></span>
+                                    @else
+                                        <span class="home-muted">No reviews yet</span>
+                                    @endif
+                                    <button type="button" x-data @click.stop="$dispatch('findursch:compare-add', '{{ $school->slug }}')" aria-label="Add {{ $school->name }} to compare">+ Compare</button>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="home-empty-state"><h3>School listings are being prepared</h3><p>New school profiles will appear here as they are approved.</p><a href="{{ route('schools.index') }}" class="home-more">Browse the directory →</a></div>
+                @endif
 
-    {{-- BROWSE BY SCHOOL TYPE --}}
-    <section class="border-y border-gray-100 bg-gray-50 py-12 sm:py-14">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div data-reveal class="mb-7">
-                <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">Browse by category</p>
-                <h2 class="text-2xl font-semibold tracking-tight text-gray-900" style="font-family: 'DM Serif Display', serif;">Find schools by education level</h2>
-            </div>
-            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
-                @foreach($schoolTypes as $type)
-                    <a href="{{ route('schools.index', ['type' => $type->id]) }}" class="group flex min-h-20 items-center justify-between gap-3 border border-gray-200 bg-white px-4 py-4 transition hover:border-primary hover:shadow-card">
-                        <span class="text-sm font-semibold text-gray-800 group-hover:text-primary">{{ $type->name }}</span>
-                        <span class="text-lg text-gray-300 transition group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true">→</span>
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    </section>
+                @if($spotlightSchool)
+                    <article class="home-spotlight" data-reveal>
+                        <a class="home-spotlight__media" href="{{ route('schools.show', $spotlightSchool) }}" aria-label="View {{ $spotlightSchool->name }}">
+                            @if($spotlightSchool->getFirstMediaUrl('cover'))
+                                <img src="{{ $spotlightSchool->getFirstMediaUrl('cover') }}" alt="{{ $spotlightSchool->name }}" loading="lazy">
+                            @else
+                                <span class="home-image-placeholder" aria-hidden="true">{{ strtoupper(mb_substr($spotlightSchool->name, 0, 2)) }}</span>
+                            @endif
+                        </a>
+                        <div class="home-spotlight__body">
+                            <span class="home-kicker">School spotlight</span>
+                            <h3>{{ $spotlightSchool->name }}</h3>
+                            <p>{{ \Illuminate\Support\Str::limit($spotlightSchool->tagline ?: $spotlightSchool->description ?: 'Explore this school profile and learn more about its programmes and facilities.', 145) }}</p>
+                            <div class="home-spotlight__meta">
+                                @if($spotlightSchool->phone)<span><b>Tel</b> {{ $spotlightSchool->phone }}</span>@endif
+                                <span><b>Location</b> {{ $spotlightSchool->district?->name ?? 'Uganda' }}</span>
+                            </div>
+                            <a class="home-more" href="{{ route('schools.show', $spotlightSchool) }}">Learn more about this school →</a>
+                        </div>
+                    </article>
+                @endif
 
-    {{-- BROWSE BY DISTRICT --}}
-    <section class="py-12 sm:py-16">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div data-reveal class="mb-7 flex items-end justify-between gap-4">
-                <div>
-                    <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">Explore locations</p>
-                    <h2 class="text-2xl font-semibold tracking-tight text-gray-900" style="font-family: 'DM Serif Display', serif;">Browse by district</h2>
-                    <p class="mt-2 text-sm text-gray-600">Discover school listings in different parts of Uganda.</p>
+                <div class="home-strip" data-reveal>
+                    <div><h3>Is your school on FindurSch?</h3><p>Create a school profile and help families discover your institution.</p></div>
+                    <a href="{{ route('register') }}" class="btn btn-gold">List your school</a>
                 </div>
-                <a href="{{ route('schools.index') }}" class="hidden text-sm font-semibold text-primary hover:underline sm:inline">All districts →</a>
-            </div>
-            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                @foreach($districts as $district)
-                    <a href="{{ route('district.show', $district) }}" class="border border-gray-200 bg-white p-4 transition hover:border-primary hover:shadow-card">
-                        <h3 class="font-semibold text-gray-900">{{ $district->name }}</h3>
-                        <p class="mt-1 text-xs text-gray-500">{{ $district->region?->name }} Region</p>
-                        <p class="mt-3 text-xs text-gray-500">{{ number_format($district->school_count) }} {{ Str::plural('school listing', $district->school_count) }}</p>
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    </section>
+            </section>
 
-    {{-- ARTICLES --}}
-    @if($articles->count() > 0)
-    <section class="border-t border-gray-100 bg-gray-50 py-12 sm:py-16">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div data-reveal class="mb-7 flex items-end justify-between gap-4">
-                <div>
-                    <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">Helpful reading</p>
-                    <h2 class="text-2xl font-semibold tracking-tight text-gray-900" style="font-family: 'DM Serif Display', serif;">Education news and guides</h2>
-                    <p class="mt-2 text-sm text-gray-600">Useful information for parents, guardians and school communities.</p>
-                </div>
-                <a href="{{ route('articles.index') }}" class="text-sm font-semibold text-primary hover:underline">All articles →</a>
-            </div>
-            <div class="grid gap-5 md:grid-cols-3">
-                @foreach($articles as $article)
-                    <article data-reveal class="overflow-hidden border border-gray-200 bg-white transition hover:-translate-y-1 hover:shadow-card">
-                        <a href="{{ route('articles.show', $article) }}" class="block">
-                            <div class="aspect-[16/9] bg-gradient-to-br from-primary-100 to-accent-50"></div>
-                            <div class="p-5">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-primary">{{ $article->category?->name }}</span>
-                                <h3 class="mt-2 line-clamp-2 font-semibold text-gray-900">{{ $article->title }}</h3>
-                                <p class="mt-2 line-clamp-2 text-sm leading-6 text-gray-600">{{ $article->excerpt }}</p>
-                                <p class="mt-4 text-xs text-gray-400">{{ $article->read_time_minutes }} min read</p>
+            <aside class="home-sidebar" aria-label="School discovery resources">
+                <a href="{{ route('register') }}" class="home-sidebar-ad" data-reveal>
+                    <span>For school communities</span>
+                    <strong>Put your school in front of families</strong>
+                    <small>Create a school profile on FindurSch</small>
+                    <b class="btn btn-gold">List your school →</b>
+                </a>
+                <section class="home-sidebox" data-reveal>
+                    <h2>Browse by category</h2>
+                    <ul>
+                        @forelse($schoolTypes as $type)
+                            <li><a href="{{ route('schools.index', ['type' => $type->id]) }}"><span class="home-side-icon">{{ mb_substr($type->name, 0, 1) }}</span><span>{{ $type->name }}</span><em>{{ $type->public_schools_count }}</em></a></li>
+                        @empty
+                            <li class="home-side-empty">School categories will appear here.</li>
+                        @endforelse
+                    </ul>
+                    <a class="home-sidebox__foot" href="{{ route('schools.index') }}">All school categories →</a>
+                </section>
+                <section class="home-sidebox" data-reveal>
+                    <h2>Explore popular districts</h2>
+                    <ul>
+                        @forelse($districts as $district)
+                            <li><a href="{{ route('district.show', $district) }}"><span class="home-side-icon home-side-icon--pin">⌖</span><span>{{ $district->name }}</span><em>{{ $district->school_count }}</em></a></li>
+                        @empty
+                            <li class="home-side-empty">District listings will appear here.</li>
+                        @endforelse
+                    </ul>
+                    <a class="home-sidebox__foot" href="{{ route('schools.index') }}">Explore all schools →</a>
+                </section>
+            </aside>
+        </div>
+
+        {{-- Editorial education news --}}
+        <section class="home-section home-news-section" aria-labelledby="home-news-title">
+            <div class="home-section-heading"><h2 id="home-news-title">Education <span>news headlines</span></h2><a class="home-more" href="{{ route('articles.index') }}">All news →</a></div>
+            @if($leadArticle || $newsArticles->isNotEmpty())
+                <div class="home-news-grid">
+                    @if($leadArticle)
+                        <a href="{{ route('articles.show', $leadArticle) }}" class="home-news-lead" data-reveal>
+                            @if($leadArticle->cover_image)<img src="{{ $leadArticle->cover_image }}" alt="" loading="lazy">@endif
+                            <span class="home-news-lead__shade"></span>
+                            <div class="home-news-lead__caption">
+                                <small>{{ $leadArticle->category?->name ?? 'Education' }} · {{ $leadArticle->published_at?->format('d M Y') }}</small>
+                                <h3>{{ $leadArticle->title }}</h3>
+                                @if($leadArticle->excerpt)<p>{{ \Illuminate\Support\Str::limit($leadArticle->excerpt, 115) }}</p>@endif
                             </div>
                         </a>
-                    </article>
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
+                    @endif
+                    <div class="home-news-list" data-reveal>
+                        @forelse($newsArticles as $article)
+                            <a href="{{ route('articles.show', $article) }}" class="home-news-row">
+                                <div class="home-news-row__image">
+                                    @if($article->cover_image)<img src="{{ $article->cover_image }}" alt="" loading="lazy">@else<span>F</span>@endif
+                                </div>
+                                <div><h3>{{ $article->title }}</h3><small>{{ $article->published_at?->format('d M Y') }}</small></div>
+                            </a>
+                        @empty
+                            <p class="home-side-empty">More education headlines will appear here.</p>
+                        @endforelse
+                        <a class="home-news-list__more" href="{{ route('articles.index') }}">Browse all headlines →</a>
+                    </div>
+                    @if($spotlightSchool)
+                        <a href="{{ route('schools.show', $spotlightSchool) }}" class="home-news-school" data-reveal>
+                            <div class="home-news-school__image">
+                                @if($spotlightSchool->getFirstMediaUrl('cover'))<img src="{{ $spotlightSchool->getFirstMediaUrl('cover') }}" alt="{{ $spotlightSchool->name }}" loading="lazy">@else<span>{{ strtoupper(mb_substr($spotlightSchool->name, 0, 2)) }}</span>@endif
+                                <b>School spotlight</b>
+                            </div>
+                            <div class="home-news-school__body"><h3>{{ $spotlightSchool->name }}</h3><p>{{ \Illuminate\Support\Str::limit($spotlightSchool->tagline ?: $spotlightSchool->description ?: 'Discover this school profile on FindurSch.', 115) }}</p><small>{{ $spotlightSchool->district?->name ?? 'Uganda' }} · View profile →</small></div>
+                        </a>
+                    @endif
+                </div>
+            @else
+                <div class="home-empty-state"><h3>Education news is coming soon</h3><p>Published education stories and guides will appear here.</p><a class="home-more" href="{{ route('articles.index') }}">Visit news &amp; guides →</a></div>
+            @endif
+        </section>
 
-    {{-- LIST YOUR SCHOOL --}}
-    <section data-reveal class="bg-primary py-12 text-white sm:py-14">
-        <div class="mx-auto flex max-w-7xl flex-col gap-5 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-            <div>
-                <p class="text-xs font-bold uppercase tracking-[0.16em] text-white/70">For school communities</p>
-                <h2 class="mt-2 text-2xl font-semibold" style="font-family: 'DM Serif Display', serif;">Help families discover your school</h2>
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-white/80">Create a school profile and share the information families need to learn about your institution.</p>
+        {{-- Lower resources and owner callouts --}}
+        <div class="home-cols home-section home-resources-layout">
+            <section class="home-main-column home-stack">
+                <div class="home-band" data-reveal>
+                    <div><small>Make an informed choice</small><h2>Compare schools before you decide</h2><p>Review school details side by side and build a shortlist that suits your family.</p></div>
+                    <a href="{{ route('compare') }}" class="btn btn-gold">Compare schools →</a>
+                </div>
+                <section aria-labelledby="home-guides-title">
+                    <div class="home-section-heading"><h2 id="home-guides-title">Education <span>guides &amp; updates</span></h2><a class="home-more" href="{{ route('articles.index') }}">All articles →</a></div>
+                    @if($insightArticles->isNotEmpty())
+                        <div class="home-guide-grid">
+                            @foreach($insightArticles->take(2) as $article)
+                                <a href="{{ route('articles.show', $article) }}" class="home-guide-card" data-reveal>
+                                    <div class="home-guide-card__image">@if($article->cover_image)<img src="{{ $article->cover_image }}" alt="" loading="lazy">@else<span>FindurSch</span>@endif</div>
+                                    <div class="home-guide-card__body"><small>{{ $article->category?->name ?? 'Education' }}</small><h3>{{ $article->title }}</h3><p>{{ \Illuminate\Support\Str::limit($article->excerpt, 105) }}</p><span>{{ $article->published_at?->format('d M Y') }} · {{ $article->read_time_minutes }} min read</span></div>
+                                </a>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="home-empty-state home-empty-state--compact"><p>New education guides will be published here.</p><a class="home-more" href="{{ route('articles.index') }}">Browse articles →</a></div>
+                    @endif
+                </section>
+                <div class="home-band home-band--light" data-reveal>
+                    <div><small>Find schools across Uganda</small><h2>Start with the school type that fits your needs</h2>
+                        <div class="home-chips">@foreach($schoolTypes->take(5) as $type)<a href="{{ route('schools.index', ['type' => $type->id]) }}">{{ $type->name }}</a>@endforeach</div>
+                    </div>
+                    <a href="{{ route('schools.index') }}" class="btn btn-outline-light">Browse schools</a>
+                </div>
+            </section>
+
+            <aside class="home-sidebar" aria-label="More education resources">
+                <section class="home-sidebox home-jobs-box" data-reveal>
+                    <h2>Schools to explore</h2>
+                    <ul>
+                        @forelse($featuredSchools as $school)
+                            <li><a href="{{ route('schools.show', $school) }}"><span>{{ $school->name }}</span><em>{{ $school->district?->name }}</em></a></li>
+                        @empty
+                            <li class="home-side-empty">School profiles will appear here.</li>
+                        @endforelse
+                    </ul>
+                    <a class="home-sidebox__foot" href="{{ route('schools.index') }}">View school directory →</a>
+                </section>
+                <a href="{{ route('register') }}" class="home-sidebar-promo" data-reveal>
+                    <small>For school owners</small><h2>Help families discover your school</h2><p>Build a profile with your school's details, programmes and contact information.</p><span class="btn btn-gold">Register your school</span>
+                </a>
+                <section class="home-sidebox home-help-box" data-reveal>
+                    <h2>Need help choosing?</h2>
+                    <div class="home-help-box__body"><p>Explore school profiles, compare key details and contact schools directly for current admissions information.</p><a class="home-sidebox__foot" href="{{ route('schools.index') }}">Start exploring →</a></div>
+                </section>
+            </aside>
+        </div>
+    </main>
+
+    {{-- Tinted editorial insights band --}}
+    <section class="home-insights">
+        <div class="site-wrap">
+            <div class="home-section-heading"><h2>Educational <span>insights</span></h2><a class="home-more" href="{{ route('articles.index') }}">All articles →</a></div>
+            <div class="home-insights-grid">
+                @if($insightArticles->first())
+                    @php($primaryInsight = $insightArticles->first())
+                    <a href="{{ route('articles.show', $primaryInsight) }}" class="home-insight-feature" data-reveal>
+                        <div class="home-insight-feature__image">@if($primaryInsight->cover_image)<img src="{{ $primaryInsight->cover_image }}" alt="" loading="lazy">@else<span>FindurSch</span>@endif</div>
+                        <div class="home-insight-feature__body"><small>{{ $primaryInsight->category?->name ?? 'Education' }}</small><h3>{{ $primaryInsight->title }}</h3><p>{{ \Illuminate\Support\Str::limit($primaryInsight->excerpt, 125) }}</p><span>{{ $primaryInsight->published_at?->format('M Y') }} · {{ $primaryInsight->read_time_minutes }} min read</span></div>
+                    </a>
+                @else
+                    <div class="home-insight-feature home-empty-state" data-reveal><h3>Education insights</h3><p>Helpful stories and guides will appear here when published.</p></div>
+                @endif
+
+                <div class="home-insight-list" data-reveal>
+                    @forelse($insightArticles->skip(1)->take(3) as $article)
+                        <a href="{{ route('articles.show', $article) }}" class="home-news-row">
+                            <div class="home-news-row__image">@if($article->cover_image)<img src="{{ $article->cover_image }}" alt="" loading="lazy">@else<span>F</span>@endif</div>
+                            <div><h3>{{ $article->title }}</h3><small>{{ $article->published_at?->format('d M Y') }}</small></div>
+                        </a>
+                    @empty
+                        <p class="home-side-empty">More articles will appear here as they are published.</p>
+                    @endforelse
+                    <a class="home-news-list__more" href="{{ route('articles.index') }}">Read more articles →</a>
+                </div>
+
+                @if($spotlightSchool)
+                    <a href="{{ route('schools.show', $spotlightSchool) }}" class="home-insight-spotlight" data-reveal>
+                        @if($spotlightSchool->getFirstMediaUrl('cover'))<img src="{{ $spotlightSchool->getFirstMediaUrl('cover') }}" alt="" loading="lazy">@endif
+                        <span class="home-insight-spotlight__shade"></span>
+                        <div><small>School spotlight</small><h3>{{ $spotlightSchool->name }}</h3><p>{{ \Illuminate\Support\Str::limit($spotlightSchool->tagline ?: $spotlightSchool->description ?: 'Explore this school on FindurSch.', 95) }}</p><span class="btn btn-gold btn-block">Learn more about this school</span></div>
+                    </a>
+                @else
+                    <div class="home-insight-spotlight home-insight-spotlight--empty" data-reveal><div><small>School discovery</small><h3>Find a school that fits</h3><p>Explore school profiles from across Uganda.</p><a class="btn btn-gold btn-block" href="{{ route('schools.index') }}">Browse schools</a></div></div>
+                @endif
             </div>
-            <a href="{{ route('register') }}" class="inline-flex shrink-0 items-center justify-center border border-white/50 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-primary">List your school <span class="ml-3" aria-hidden="true">→</span></a>
         </div>
     </section>
+
+    <section class="home-final-cta">
+        <div class="site-wrap">
+            <p class="home-eyebrow">For schools and education communities</p>
+            <h2>Is your school listed?</h2>
+            <p>Join schools across Uganda helping parents, students and educators find the information they need.</p>
+            <div class="home-final-cta__actions"><a href="{{ route('register') }}" class="btn btn-white">Register your school</a><a href="{{ route('about') }}" class="btn btn-ghost">Learn about FindurSch</a></div>
+        </div>
+    </section>
+    <a href="{{ route('register') }}" class="home-register-tab">Register your school</a>
 </div>
