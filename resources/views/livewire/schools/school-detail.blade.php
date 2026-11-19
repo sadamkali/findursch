@@ -213,22 +213,57 @@
 
                 <section class="sref-card sref-pad" id="events">
                     <h2>Upcoming <span>and past events</span></h2>
-                    <p class="sref-empty sref-empty--center">No events posted yet.</p>
+                    @if($schoolEvents->isNotEmpty())
+                        <div class="sref-post-list">
+                            @foreach($schoolEvents as $event)
+                                <a class="sref-post-row" href="{{ route('events.show', $event) }}">
+                                    <span class="sref-post-date">{{ $event->starts_at?->format('d M Y') ?? 'Event' }}</span>
+                                    <span class="sref-post-copy"><strong>{{ $event->title }}</strong><small>{{ $event->venue ?: 'School event' }} @if($event->starts_at) · {{ $event->starts_at->format('g:i A') }} @endif</small><span>{{ \Illuminate\Support\Str::limit(strip_tags($event->description), 150) }}</span></span>
+                                    <b aria-hidden="true">→</b>
+                                </a>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="sref-empty sref-empty--center">No events have been published by this school yet. Check back for open days and school activities.</p>
+                    @endif
                 </section>
 
                 <section class="sref-card sref-pad" id="news">
                     <h2>School <span>news</span></h2>
-                    <p class="sref-empty">No school news posted yet. <a href="{{ route('articles.index') }}">Browse education news and guides</a>.</p>
+                    @if($schoolNews->isNotEmpty())
+                        <div class="sref-post-list">
+                            @foreach($schoolNews as $newsPost)
+                                <a class="sref-post-row" href="{{ route('school-news.show', $newsPost) }}">
+                                    <span class="sref-post-date">{{ $newsPost->published_at?->format('d M Y') }}</span>
+                                    <span class="sref-post-copy"><strong>{{ $newsPost->title }}</strong><span>{{ \Illuminate\Support\Str::limit(strip_tags($newsPost->description), 170) }}</span></span>
+                                    <b aria-hidden="true">→</b>
+                                </a>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="sref-empty">No school news has been published yet. <a href="{{ route('news.index') }}">Browse education news and updates</a>.</p>
+                    @endif
                 </section>
 
-                <div class="sref-band">
-                    <div>
-                        <small>Opportunities</small>
-                        <h3>Explore education news and school guides</h3>
-                        <p>Read education updates, guidance and useful information for families.</p>
+                @if($schoolBursaries->isNotEmpty())
+                    <div class="sref-band">
+                        <div>
+                            <small>Student opportunities</small>
+                            <h3>{{ $schoolBursaries->count() }} scholarship or bursary {{ \Illuminate\Support\Str::plural('opportunity', $schoolBursaries->count()) }}</h3>
+                            <p>{{ \Illuminate\Support\Str::limit($schoolBursaries->first()->title, 100) }}. Check the deadline and details on the opportunity page.</p>
+                        </div>
+                        <a class="sref-btn sref-btn--gold" href="{{ route('scholarships.show', $schoolBursaries->first()) }}">View opportunity</a>
                     </div>
-                    <a class="sref-btn sref-btn--gold" href="{{ route('articles.index') }}">Explore resources</a>
-                </div>
+                @else
+                    <div class="sref-band">
+                        <div>
+                            <small>Opportunities</small>
+                            <h3>Scholarships and bursaries</h3>
+                            <p>Browse funding opportunities published by participating schools.</p>
+                        </div>
+                        <a class="sref-btn sref-btn--gold" href="{{ route('scholarships.index') }}">Browse scholarships</a>
+                    </div>
+                @endif
 
                 {{-- Existing moderated review feature is retained after the reference layout. --}}
                     <section class="sref-card sref-pad sref-reviews" id="reviews">
