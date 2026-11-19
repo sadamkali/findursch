@@ -6,8 +6,9 @@ use App\Models\Article;
 use App\Models\District;
 use App\Models\Review;
 use App\Models\School;
-use App\Models\SchoolType;
 use App\Models\SchoolPost;
+use App\Models\SchoolType;
+use App\Models\SchoolVideo;
 use App\Models\User;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -92,6 +93,49 @@ class HomePage extends Component
             ->limit(3)
             ->get();
 
+        $featuredVideos = SchoolVideo::query()
+            ->whereIn('status', ['approved', 'published'])
+            ->whereHas('school', fn ($query) => $query->publiclyVisible())
+            ->with('school:id,name,slug')
+            ->latest()
+            ->limit(2)
+            ->get();
+
+        $featuredBursaries = SchoolPost::query()
+            ->where('type', 'bursary')
+            ->whereIn('status', ['approved', 'published'])
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->where(fn ($query) => $query->whereNull('deadline')->orWhereDate('deadline', '>=', now()->toDateString()))
+            ->whereHas('school', fn ($query) => $query->publiclyVisible())
+            ->with('school:id,name,slug,district_id')
+            ->orderByRaw('CASE WHEN deadline IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('deadline')
+            ->latest('published_at')
+            ->limit(3)
+            ->get();
+
+        $latestSchoolUpdates = SchoolPost::query()
+            ->where('type', 'news')
+            ->whereIn('status', ['approved', 'published'])
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->whereHas('school', fn ($query) => $query->publiclyVisible())
+            ->with('school:id,name,slug')
+            ->latest('published_at')
+            ->limit(3)
+            ->get();
+
+        $featuredReviews = Review::query()
+            ->where('status', 'approved')
+            ->whereNotNull('body')
+            ->where('body', '!=', '')
+            ->whereHas('school', fn ($query) => $query->publiclyVisible())
+            ->with(['school:id,name,slug', 'user:id,name'])
+            ->latest()
+            ->limit(2)
+            ->get();
+
         $insightArticlesQuery = (clone $publishedArticles)
             ->with(['category', 'author'])
             ->latest('published_at');
@@ -124,6 +168,10 @@ class HomePage extends Component
             'leadArticle',
             'newsArticles',
             'upcomingEvents',
+            'featuredVideos',
+            'featuredBursaries',
+            'latestSchoolUpdates',
+            'featuredReviews',
             'insightArticles',
             'stats',
         ));
