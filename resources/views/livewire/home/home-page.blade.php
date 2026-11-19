@@ -146,16 +146,34 @@
                     </ul>
                     <a class="home-sidebox__foot" href="{{ route('schools.index') }}">Explore all schools →</a>
                 </section>
+                <section class="home-sidebox home-events-box" data-reveal>
+                    <h2>Upcoming events</h2>
+                    @if($upcomingEvents->isNotEmpty())
+                        <ul>
+                            @foreach($upcomingEvents as $event)
+                                <li>
+                                    <a href="{{ route('events.show', $event) }}">
+                                        <span class="home-event-date"><b>{{ $event->starts_at?->format('d') }}</b><small>{{ strtoupper($event->starts_at?->format('M')) }}</small></span>
+                                        <span class="home-event-copy"><strong>{{ $event->title }}</strong><small>{{ $event->school?->name }} · {{ $event->starts_at?->format('g:i A') }}</small></span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="home-side-empty">Upcoming school events will appear here when schools publish them.</p>
+                    @endif
+                    <a class="home-sidebox__foot" href="{{ route('events.index') }}">View all events →</a>
+                </section>
             </aside>
         </div>
 
         {{-- Editorial education news --}}
         <section class="home-section home-news-section" aria-labelledby="home-news-title">
-            <div class="home-section-heading"><h2 id="home-news-title">Education <span>news headlines</span></h2><a class="home-more" href="{{ route('articles.index') }}">All news →</a></div>
+            <div class="home-section-heading"><h2 id="home-news-title">Education <span>news headlines</span></h2><a class="home-more" href="{{ route('news.index') }}">All news →</a></div>
             @if($leadArticle || $newsArticles->isNotEmpty())
                 <div class="home-news-grid">
                     @if($leadArticle)
-                        <a href="{{ route('articles.show', $leadArticle) }}" class="home-news-lead" data-reveal>
+                        <a href="{{ route('news.show', $leadArticle) }}" class="home-news-lead" data-reveal>
                             @if($leadArticle->cover_image)<img src="{{ $leadArticle->cover_image }}" alt="" loading="lazy">@endif
                             <span class="home-news-lead__shade"></span>
                             <div class="home-news-lead__caption">
@@ -167,7 +185,7 @@
                     @endif
                     <div class="home-news-list" data-reveal>
                         @forelse($newsArticles as $article)
-                            <a href="{{ route('articles.show', $article) }}" class="home-news-row">
+                            <a href="{{ route('news.show', $article) }}" class="home-news-row">
                                 <div class="home-news-row__image">
                                     @if($article->cover_image)<img src="{{ $article->cover_image }}" alt="" loading="lazy">@else<span>F</span>@endif
                                 </div>
@@ -176,7 +194,7 @@
                         @empty
                             <p class="home-side-empty">More education headlines will appear here.</p>
                         @endforelse
-                        <a class="home-news-list__more" href="{{ route('articles.index') }}">Browse all headlines →</a>
+                        <a class="home-news-list__more" href="{{ route('news.index') }}">Browse all headlines →</a>
                     </div>
                     @if($spotlightSchool)
                         <a href="{{ route('schools.show', $spotlightSchool) }}" class="home-news-school" data-reveal>
@@ -189,7 +207,7 @@
                     @endif
                 </div>
             @else
-                <div class="home-empty-state"><h3>Education news is coming soon</h3><p>Published education stories and guides will appear here.</p><a class="home-more" href="{{ route('articles.index') }}">Visit news &amp; guides →</a></div>
+                <div class="home-empty-state"><h3>Education news is coming soon</h3><p>Published education stories and guides will appear here.</p><a class="home-more" href="{{ route('news.index') }}">Visit news &amp; guides →</a></div>
             @endif
         </section>
 
