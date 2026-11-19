@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Article;
+use App\Models\Article;\nuse App\Models\ArticleCategory;
 use App\Models\Inquiry;
 use App\Models\Review;
-use App\Models\School;
+use App\Models\School;\nuse App\Models\SchoolPost;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -135,6 +135,10 @@ class AdminWorkspaceController extends Controller
             case 'articles':
                 $items = Article::query()->with(['category:id,name', 'author:id,name'])
                     ->orderByDesc('created_at')->limit(100)->get();
+                break;
+
+            case 'article-categories':
+                $items = ArticleCategory::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'slug']);
                 break;
 
             case 'events':
