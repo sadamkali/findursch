@@ -1,12 +1,83 @@
-<div>
-    <article class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-        <nav class="mb-6 text-sm text-gray-500"><a href="{{ route('articles.index') }}" class="hover:text-primary">Articles</a><span class="mx-2">/</span><span>{{ $article->category?->name ?? 'Education' }}</span></nav>
-        <p class="text-xs font-semibold uppercase tracking-wider text-primary">{{ $article->category?->name ?? 'Education' }}</p>
-        <h1 class="mt-3 text-3xl font-semibold leading-tight text-gray-900 sm:text-5xl" style="font-family: 'DM Serif Display', serif;">{{ $article->title }}</h1>
-        @if($article->excerpt)<p class="mt-5 text-lg leading-8 text-gray-600">{{ $article->excerpt }}</p>@endif
-        <div class="mt-5 flex flex-wrap gap-3 text-xs text-gray-500"><span>{{ $article->author?->name ?? 'FindurSch Editorial' }}</span><span>·</span><span>{{ $article->published_at?->format('d M Y') }}</span><span>·</span><span>{{ $article->read_time_minutes }} min read</span></div>
-        @if($article->cover_image)<img src="{{ $article->cover_image }}" alt="{{ $article->title }}" class="mt-8 max-h-[520px] w-full rounded-xl object-cover">@endif
-        <div class="prose prose-gray mt-9 max-w-none prose-headings:font-semibold prose-a:text-primary">{!! $article->body !!}</div>
-    </article>
-    @if($related->isNotEmpty())<section class="border-t border-gray-100 bg-gray-50 py-12"><div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><h2 class="text-2xl font-semibold text-gray-900" style="font-family: 'DM Serif Display', serif;">Related articles</h2><div class="mt-6 grid gap-5 md:grid-cols-3">@foreach($related as $item)<a href="{{ route('articles.show', $item) }}" class="rounded-xl border border-gray-200 bg-white p-5 hover:border-primary"><p class="text-xs font-semibold uppercase text-primary">{{ $item->category?->name }}</p><h3 class="mt-2 font-semibold text-gray-900">{{ $item->title }}</h3><p class="mt-2 text-sm text-gray-500">{{ $item->published_at?->format('d M Y') }}</p></a>@endforeach</div></div></section>@endif
+<div class="resource-page">
+    <a class="blogs-rtab" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
+    <div class="blogs-ad-slim"><span>FindURSCH news and education stories</span><small>Share useful stories with parents, learners and school communities across Uganda</small></div>
+
+    <main class="blogs-wrap resource-detail-wrap article-detail-wrap">
+        <nav class="resource-crumbs"><a href="{{ route('home') }}">Home</a><span>›</span><a href="{{ request()->routeIs('news.show') ? route('news.index') : route('articles.index') }}">{{ request()->routeIs('news.show') ? 'News' : 'Blogs' }}</a><span>›</span><a href="{{ request()->routeIs('news.show') ? route('news.index', ['category' => $article->category_id]) : route('articles.index', ['category' => $article->category_id]) }}">{{ $article->category?->name ?? 'Education' }}</a><span>›</span><b>{{ $article->title }}</b></nav>
+
+        <div class="resource-detail-grid article-detail-grid">
+            <article class="resource-detail-content article-detail-content">
+                <div class="resource-tags"><span>{{ $article->category?->name ?? 'Education' }}</span><span>{{ $article->read_time_minutes }} min read</span></div>
+                <h1>{{ $article->title }}</h1>
+                @if($article->cover_image)
+                    <figure class="article-cover">
+                        <img src="{{ $article->cover_image }}" alt="{{ $article->title }}">
+                        <figcaption>{{ $article->category?->name ?? 'FindURSCH' }} · {{ $article->published_at?->format('d M Y') }}</figcaption>
+                    </figure>
+                @endif
+                @if($article->excerpt)<p class="resource-detail-lead article-excerpt">{{ $article->excerpt }}</p>@endif
+
+                <div class="article-byline">
+                    <span class="article-avatar">{{ strtoupper(mb_substr($article->author?->name ?? 'F', 0, 1)) }}</span>
+                    <span><b>{{ $article->author?->name ?? 'FindURSCH Editorial' }}</b><small>{{ $article->category?->name ?? 'Education' }} · {{ $article->published_at?->format('d M Y') }}</small></span>
+                    <span class="article-view-count">{{ number_format($article->views_count) }} views</span>
+                </div>
+
+                <div class="resource-share">
+                    <span>SHARE</span>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(request()->fullUrl()) }}" target="_blank" rel="noopener">Facebook</a>
+                    <a href="https://wa.me/?text={{ urlencode($article->title.' '.request()->fullUrl()) }}" target="_blank" rel="noopener">WhatsApp</a>
+                    <button type="button" x-data @click="navigator.clipboard.writeText(window.location.href)">Copy link</button>
+                </div>
+
+                <section class="article-body prose prose-gray max-w-none">
+                    {!! $article->body !!}
+                </section>
+
+                <div class="article-category-tags"><span>TOPIC</span><a href="{{ request()->routeIs('news.show') ? route('news.index', ['category' => $article->category_id]) : route('articles.index', ['category' => $article->category_id]) }}">{{ $article->category?->name ?? 'Education' }}</a></div>
+                <section class="article-story-cta">
+                    <div><small>Have a story to share?</small><h2>Help parents and school communities stay informed</h2><p>Contact FindURSCH about a school announcement, education story or useful community update.</p></div>
+                    <a class="blogs-btn blogs-btn-gold" href="{{ route('contact') }}">Contact the editorial team</a>
+                </section>
+            </article>
+
+            <aside class="resource-detail-sidebar article-sidebar">
+                @if($mostRead->isNotEmpty())
+                    <div class="article-sidebox">
+                        <h2>Most read in {{ $article->category?->name ?? 'Education' }}</h2>
+                        <ol>
+                            @foreach($mostRead as $index => $item)
+                                <li><a href="{{ request()->routeIs('news.show') ? route('news.show', $item) : route('articles.show', $item) }}"><b>{{ str_pad((string)($index + 1), 2, '0', STR_PAD_LEFT) }}</b><span>{{ $item->title }}<small>{{ number_format($item->views_count) }} views</small></span></a></li>
+                            @endforeach
+                        </ol>
+                    </div>
+                @endif
+
+                @if($spotlightSchool)
+                    <div class="article-school-spotlight">
+                        @if($spotlightSchool->getFirstMediaUrl('cover'))<img src="{{ $spotlightSchool->getFirstMediaUrl('cover') }}" alt="{{ $spotlightSchool->name }}" loading="lazy">@endif
+                        <div><small>School spotlight</small><h3>{{ $spotlightSchool->name }}</h3><p>{{ \Illuminate\Support\Str::limit($spotlightSchool->tagline ?: $spotlightSchool->description ?: 'Explore this verified school profile on FindURSCH.', 100) }}</p><a class="blogs-btn blogs-btn-gold" href="{{ route('schools.show', $spotlightSchool) }}">Learn more</a></div>
+                    </div>
+                @endif
+
+                <div class="resource-sidebar-promo"><small>Explore schools</small><h3>Compare school options across Uganda</h3><p>Browse verified profiles, locations, curricula and available school information.</p><a class="blogs-btn blogs-btn-gold" href="{{ route('schools.index') }}">Find a school</a></div>
+                <div class="article-sidebar-links"><a href="{{ route('events.index') }}">Upcoming school events →</a><a href="{{ route('scholarships.index') }}">Scholarships and bursaries →</a><a href="{{ route('articles.index') }}">More education blogs →</a></div>
+            </aside>
+        </div>
+
+        @if($related->isNotEmpty())
+            <section class="resource-related article-related">
+                <div class="resource-section-head"><div><small>Keep reading</small><h2>Related stories</h2></div><a href="{{ request()->routeIs('news.show') ? route('news.index') : route('articles.index') }}">More {{ request()->routeIs('news.show') ? 'news' : 'blogs' }} →</a></div>
+                <div class="resource-related-grid">
+                    @foreach($related as $item)
+                        <a href="{{ request()->routeIs('news.show') ? route('news.show', $item) : route('articles.show', $item) }}">
+                            @if($item->cover_image)<img src="{{ $item->cover_image }}" alt="" loading="lazy">@endif
+                            <small>{{ $item->category?->name ?? 'Education' }} · {{ $item->published_at?->format('d M Y') }}</small>
+                            <b>{{ $item->title }}</b><span>{{ $item->read_time_minutes }} min read</span>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+    </main>
 </div>
