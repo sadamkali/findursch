@@ -61,21 +61,35 @@ class HomePage extends Component
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
 
-        $leadArticle = (clone $publishedArticles)
-            ->with(['category', 'author'])
+        $publishedNews = (clone $publishedArticles)
+            ->whereHas('category', fn ($query) => $query->whereIn('slug', ['school-news', 'education-policy']))
+            ->with(['category', 'author']);
+
+        $leadArticle = (clone $publishedNews)
             ->orderByDesc('is_featured')
             ->latest('published_at')
             ->first();
 
-        $newsArticlesQuery = (clone $publishedArticles)
-            ->with(['category', 'author'])
-            ->latest('published_at');
+        $newsArticlesQuery = (clone $publishedNews)->latest('published_at');
 
         if ($leadArticle) {
             $newsArticlesQuery->where('id', '!=', $leadArticle->id);
         }
 
         $newsArticles = $newsArticlesQuery->limit(3)->get();
+
+        $upcomingEvents = SchoolPost::query()
+            ->where('type', 'event')
+            ->whereIn('status', ['approved', 'published'])
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->whereNotNull('starts_at')
+            ->where('starts_at', '>=', now())
+            ->whereHas('school', fn ($query) => $query->publiclyVisible())
+            ->with('school')
+            ->orderBy('starts_at')
+            ->limit(3)
+            ->get();
 
         $insightArticlesQuery = (clone $publishedArticles)
             ->with(['category', 'author'])
