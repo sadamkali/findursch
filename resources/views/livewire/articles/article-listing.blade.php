@@ -1,4 +1,9 @@
 <div class="blogs-page">
+    @php($isNews = ($mode ?? 'blogs') === 'news')
+    @php($indexRoute = $isNews ? 'news.index' : 'articles.index')
+    @php($showRoute = $isNews ? 'news.show' : 'articles.show')
+    @php($kindLabel = $isNews ? 'news' : 'blogs')
+
     <a class="blogs-rtab" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
     <a class="blogs-ad-slim" href="{{ route('contact') }}">
         <span>Advertise with FindURSCH</span>
@@ -8,15 +13,15 @@
     <section class="blogs-phead">
         <div class="blogs-wrap">
             <p class="blogs-eyebrow">FindURSCH resources</p>
-            <h1>FindURSCH <em>Blogs</em></h1>
-            <p>Practical advice, inspiring stories and fresh ideas for parents, students and teachers, from study skills and school life to careers, health, faith and culture.</p>
+            <h1>{{ $isNews ? 'School' : 'FindURSCH' }} <em>{{ $isNews ? 'News &amp; Updates' : 'Blogs' }}</em></h1>
+            <p>{{ $isNews ? 'Stay informed with education news, school announcements, policy updates and stories from school communities across Uganda.' : 'Practical advice, inspiring stories and fresh ideas for parents, students and teachers, from study skills and school life to careers, health, faith and culture.' }}</p>
         </div>
     </section>
 
     <main class="blogs-wrap">
-        <nav class="blogs-pills" aria-label="Blog categories">
-            <a href="{{ route('articles.index', array_filter(['q' => $search ?: null, 'sort' => $sort !== 'latest' ? $sort : null])) }}"
-               @class(['is-active' => ! $category])>All blogs</a>
+        <nav class="blogs-pills" aria-label="{{ $isNews ? 'News categories' : 'Blog categories' }}">
+            <a href="{{ route($indexRoute, array_filter(['q' => $search ?: null, 'sort' => $sort !== 'latest' ? $sort : null])) }}"
+               @class(['is-active' => ! $category])>{{ $isNews ? 'All news' : 'All blogs' }}</a>
             @foreach($categories as $item)
                 <a href="{{ route('articles.index', array_filter(['category' => $item->id, 'q' => $search ?: null, 'sort' => $sort !== 'latest' ? $sort : null])) }}"
                    @class(['is-active' => (string) $category === (string) $item->id)>{{ $item->name }}</a>
@@ -25,7 +30,7 @@
 
         <form class="blogs-bar" method="GET" action="{{ route('articles.index') }}" role="search">
             <label class="blogs-search-field">
-                <span class="sr-only">Search blogs, topics or authors</span>
+                <span class="sr-only">{{ $isNews ? 'Search news, topics or schools' : '{{ $isNews ? 'Search news, topics or schools' : 'Search blogs, topics or authors' }}' }}</span>
                 <input type="search" name="q" value="{{ $search }}" placeholder="Search blogs, topics or authors">
             </label>
             <button class="blogs-btn blogs-btn-brand" type="submit">Search</button>
@@ -39,7 +44,7 @@
                 </select>
             </label>
             <label>
-                <span class="sr-only">Sort blogs</span>
+                <span class="sr-only">Sort {{ $kindLabel }}</span>
                 <select name="sort" aria-label="Sort blogs">
                     <option value="latest" @selected($sort !== 'popular')>Latest first</option>
                     <option value="popular" @selected($sort === 'popular')>Most read</option>
@@ -48,10 +53,10 @@
         </form>
 
         @if($leadArticle || $mostRead->isNotEmpty())
-            <section class="blogs-sec blogs-top-stories" aria-label="Featured blogs">
+            <section class="blogs-sec blogs-top-stories" aria-label="Featured {{ $kindLabel }}">
                 <div class="blogs-news">
                     @if($leadArticle)
-                        <a class="blogs-lead" href="{{ route('articles.show', $leadArticle) }}">
+                        <a class="blogs-lead" href="{{ route($showRoute, $leadArticle) }}">
                             @if($leadArticle->cover_image)
                                 <img class="blogs-lead__image" src="{{ $leadArticle->cover_image }}" alt="{{ $leadArticle->title }}" fetchpriority="high">
                             @endif
@@ -59,7 +64,7 @@
                             <span class="blogs-lead__caption">
                                 <small>{{ $leadArticle->category?->name ?? 'FindURSCH editorial' }} · {{ $leadArticle->published_at?->format('d M Y') }}</small>
                                 <strong>{{ $leadArticle->title }}</strong>
-                                <span class="blogs-lead__meta">{{ $leadArticle->read_time_minutes }} min read @if($leadArticle->is_featured) · Featured blog @endif</span>
+                                <span class="blogs-lead__meta">{{ $leadArticle->read_time_minutes }} min read @if($leadArticle->is_featured) · Featured {{ $kindLabel }} @endif</span>
                             </span>
                         </a>
                     @endif
@@ -83,8 +88,8 @@
                     @endif
 
                     @if($mostRead->isNotEmpty())
-                        <aside class="blogs-card blogs-box" aria-label="Most read blogs">
-                            <h2>Most read</h2>
+                        <aside class="blogs-card blogs-box" aria-label="Most read {{ $kindLabel }}">
+                            <h2>{{ $isNews ? 'Most read today' : 'Most read' }}</h2>
                             <ol>
                                 @foreach($mostRead as $index => $article)
                                     <li>
@@ -99,7 +104,7 @@
                                     </li>
                                 @endforeach
                             </ol>
-                            <a class="blogs-box-foot" href="{{ route('articles.index', ['sort' => 'popular']) }}">See popular blogs</a>
+                            <a class="blogs-box-foot" href="{{ route('articles.index', ['sort' => 'popular']) }}">See popular {{ $kindLabel }}</a>
                         </aside>
                     @endif
                 </div>
@@ -107,7 +112,7 @@
         @endif
 
         @if($searchResults)
-            <section class="blogs-sec" aria-labelledby="blogs-results-title">
+            <section class="blogs-sec" aria-labelledby="{{ $isNews ? 'news-results-title' : 'blogs-results-title' }}">
                 <div class="blogs-head blogs-head-cat">
                     <h2 id="blogs-results-title">
                         @if($selectedCategory){{ $selectedCategory->name }}
@@ -141,7 +146,7 @@
                     <div class="blogs-pagination">{{ $searchResults->links() }}</div>
                 @else
                     <div class="blogs-empty">
-                        <h3>No blogs found</h3>
+                        <h3>No {{ $kindLabel }} found</h3>
                         <p>Try a different search term or choose another category.</p>
                         <a class="blogs-btn blogs-btn-brand" href="{{ route('articles.index') }}">Clear filters</a>
                     </div>
@@ -231,14 +236,14 @@
                 @endif
             @empty
                 <section class="blogs-empty">
-                    <h3>No published blogs yet</h3>
-                    <p>New stories and useful education guides will appear here when they are published.</p>
+                    <h3>No published {{ $kindLabel }} yet</h3>
+                    <p>{{ $isNews ? 'Education news and school updates will appear here when they are published.' : 'New stories and useful education guides will appear here when they are published.' }}</p>
                 </section>
             @endforelse
         @endif
 
         <section class="blogs-bottom-cta">
-            <div><small>FindURSCH</small><h2>Useful information for every school journey</h2><p>Discover schools, read education stories and compare the options available to your family.</p></div>
+            <div><small>FindURSCH</small><h2>{{ $isNews ? 'The latest education updates for every school community' : 'Useful information for every school journey' }}</h2><p>{{ $isNews ? 'Follow school announcements, education developments and useful updates from across Uganda.' : 'Discover schools, read education stories and compare the options available to your family.' }}</p></div>
             <a class="blogs-btn blogs-btn-gold" href="{{ route('schools.index') }}">Explore schools</a>
         </section>
     </main>
