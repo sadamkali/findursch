@@ -77,18 +77,19 @@ class NewsListing extends Component
 
         $leadArticle = (clone $filtered)->reorder()->orderByDesc('is_featured')->latest('published_at')->first();
         $secondaryQuery = clone $filtered;
-        if ($leadArticle) $secondaryQuery->where('id', '!=', $leadArticle->id);
+        if ($leadArticle) {
+            $secondaryQuery->where('id', '!=', $leadArticle->id);
+        }
         $secondaryArticle = $secondaryQuery->reorder()->orderByDesc('is_featured')->latest('published_at')->first();
 
-        $mostRead = $this->applyFilters(clone $base)->reorder()
+        $mostRead = (clone $base)->reorder()
             ->orderByDesc('views_count')->latest('published_at')->limit(4)->get();
 
         $categorySections = collect();
         if ($this->search === '' && ! $this->category) {
             foreach ($categories as $item) {
-                $articles = $this->applyFilters(clone $base)
-                    ->where('category_id', $item->id)
-                    ->limit(6)->get();
+                $articles = (clone $base)->where('category_id', $item->id)
+                    ->latest('published_at')->limit(6)->get();
 
                 if ($articles->isNotEmpty()) {
                     $categorySections->push(['category' => $item, 'articles' => $articles]);
@@ -101,7 +102,7 @@ class NewsListing extends Component
             $searchResults = $this->applyFilters(clone $base)->paginate(12)->withQueryString();
         }
 
-        return view('livewire.articles.article-listing', [
+        return view('livewire.articles.news-listing', [
             'categories' => $categories,
             'leadArticle' => $leadArticle,
             'secondaryArticle' => $secondaryArticle,
@@ -109,7 +110,6 @@ class NewsListing extends Component
             'categorySections' => $categorySections,
             'searchResults' => $searchResults,
             'selectedCategory' => $categories->firstWhere('id', $this->category),
-            'mode' => 'news',
         ])->layout('layouts.app', [
             'title' => 'School news and updates in Uganda — FindURSCH',
             'description' => 'Education news, school announcements and policy updates from schools and education communities across Uganda.',
