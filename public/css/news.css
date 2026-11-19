@@ -1,0 +1,40 @@
+/* FindURSCH news page — based on my uploads/findursch-news.html */
+.news-page{--nb:#0c5a49;--nd:#083f33;--nx:#052a22;--na:#f0b030;--nt:#f1f6f3;--nl:#e4e8e6;--ni:#1b2420;--nm:#5d6b65;color:var(--ni);font-family:Inter,system-ui,sans-serif}
+.news-page *{box-sizing:border-box}
+.news-register-tab{position:fixed;right:0;top:34%;z-index:40;writing-mode:vertical-rl;background:var(--na);color:#2a1d00;font-size:12px;font-weight:700;letter-spacing:.06em;padding:18px 9px;border-radius:10px 0 0 10px;box-shadow:-3px 3px 12px #0003}
+.news-heading{margin:24px auto 0;background:#050807;color:#fff;text-align:center;padding:46px 20px 42px}
+.news-heading h1{font:700 clamp(29px,4vw,42px)/1.2 "Playfair Display",Georgia,serif;margin:5px 0 12px}.news-heading h1 em{color:var(--na)}
+.news-heading p{max-width:650px;margin:auto;color:#e2eee9;font-size:14px}.news-eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--na)}
+.news-wrap{max-width:1280px;margin:auto;padding:0 24px}.news-category-row{display:flex;align-items:center;gap:16px;padding:20px 0 14px}
+.news-pills{display:flex;gap:8px;overflow-x:auto;flex:1;scrollbar-width:none}.news-pills a{flex:none;border:1px solid var(--nl);border-radius:99px;padding:8px 15px;font-size:12px;font-weight:600}
+.news-pills a:hover,.news-pills a.is-active{background:var(--nb);border-color:var(--nb);color:#fff}.news-digest{font-size:12px;font-weight:700;color:var(--nb);white-space:nowrap}
+.news-toolbar{display:flex;gap:10px;flex-wrap:wrap}.news-toolbar input{flex:1;min-width:220px;height:44px;border:1px solid var(--nl);border-radius:8px;padding:0 14px;font:14px Inter,sans-serif}
+.news-toolbar select{height:44px;border:1px solid var(--nl);border-radius:8px;padding:0 12px;background:#fff;color:var(--nm);font:13px Inter,sans-serif}
+.news-toolbar button{height:44px;padding:0 20px;border:0;border-radius:8px;background:var(--nb);color:#fff;font-weight:700;cursor:pointer}
+.news-top-stories{padding-top:24px}.news-lead-grid{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:24px}
+.news-lead{min-height:340px;position:relative;display:flex;align-items:flex-end;overflow:hidden;border-radius:10px;color:#fff;background:linear-gradient(0deg,#000d 0%,#0002 75%),var(--news-cover,linear-gradient(135deg,#355a50,#18251f));background-position:center;background-size:cover}
+.news-lead-content{display:flex;flex-direction:column;gap:9px;padding:22px}.news-lead-content small{font-size:11px;color:#fff}
+.news-lead-content strong{font:700 24px/1.22 "Playfair Display",Georgia,serif}.news-lead-content>span{font-size:13px;color:#f0f5f2}.news-lead-content>b{font-size:12px;color:#f0b030}
+.news-secondary,.news-most-read,.news-story-card,.news-feature-card{border:1px solid var(--nl);border-radius:10px;overflow:hidden;background:#fff}
+.news-secondary{display:flex;flex-direction:column}.news-secondary img,.news-story-card img,.news-feature-card img{width:100%;height:175px;object-fit:cover;display:block}
+.news-secondary>div:last-child{padding:16px}.news-secondary small,.news-story-card small,.news-feature-card small{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--nb)}
+.news-secondary h2{font:700 19px/1.25 "Playfair Display",Georgia,serif;margin:7px 0}.news-secondary p,.news-story-card p,.news-feature-card p{font-size:13px;color:var(--nm)}
+.news-most-read h2{background:var(--nb);color:#fff;padding:12px 16px;font-size:12px;letter-spacing:.08em;text-transform:uppercase}.news-most-read ol{list-style:none;margin:0;padding:0}
+.news-most-read li a{display:flex;gap:12px;padding:13px 15px;border-bottom:1px solid var(--nl);font-size:13px;line-height:1.35}.news-most-read li a:hover{background:var(--nt)}
+.news-most-read li b{font:700 21px Georgia;color:var(--nb)}.news-most-read li small{display:block;margin-top:4px;font-size:11px;color:var(--nm)}
+.news-section{padding-top:46px}.news-section-title{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--nb);padding-bottom:9px;margin-bottom:18px}
+.news-section-title h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--nb)}.news-section-title a,.news-section-title>span{font-size:12px;font-weight:700;color:var(--nb)}
+.news-category-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:24px}.news-feature-card{display:block}
+.news-feature-card>div:last-child,.news-story-card>div:last-child{padding:17px 19px}.news-feature-card h3,.news-story-card h3{font:700 20px/1.25 "Playfair Display",Georgia,serif;margin:8px 0}
+.news-row-list{display:flex;flex-direction:column;gap:12px}.news-row-list>a{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;padding:10px;border:1px solid var(--nl);border-radius:9px}
+.news-row-list img{width:96px;height:72px;object-fit:cover;border-radius:6px}.news-row-list span{display:flex;flex-direction:column;gap:7px;font-size:13px;line-height:1.3}.news-row-list small{font-size:11px;color:var(--nb)}
+.news-story-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.news-story-card{display:block}.news-story-card h3{font-size:18px}.news-story-card b{display:inline-block;margin-top:12px;color:var(--nb);font-size:12px}
+.news-image-placeholder,.news-row-placeholder{display:grid;place-items:center;background:linear-gradient(135deg,#789a8a,#d9c9a0);color:#fff;font:700 20px Georgia;min-height:175px}
+.news-row-placeholder{width:96px;height:72px;min-height:0;border-radius:6px}.news-pagination{margin-top:24px}
+.news-empty{padding:50px 20px;text-align:center;background:var(--nt);border-radius:10px;margin-top:24px}.news-empty h3{font:700 23px Georgia;margin-bottom:8px}.news-empty p{color:var(--nm);font-size:13px}
+.news-empty a{display:inline-block;margin-top:12px;color:var(--nb);font-weight:700}
+.news-bottom-cta{margin:50px 0;background:var(--nx);color:#fff;border-radius:10px;padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.news-bottom-cta small{color:var(--na);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}.news-bottom-cta h2{font:700 24px Georgia;margin:5px 0}
+.news-bottom-cta p{font-size:13px;color:#e2eee9;max-width:600px}.news-bottom-cta>a{background:var(--na);color:#2a1d00;padding:12px 18px;border-radius:8px;font-weight:700;font-size:13px;white-space:nowrap}
+@media(max-width:1000px){.news-lead-grid{grid-template-columns:1fr 1fr}.news-lead{grid-column:1/-1}.news-category-grid{grid-template-columns:1fr}.news-story-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.news-wrap{padding:0 16px}.news-heading{padding:36px 18px}.news-category-row{align-items:flex-start;flex-direction:column}.news-lead-grid,.news-story-grid{grid-template-columns:1fr}.news-lead{grid-column:auto;min-height:300px}.news-bottom-cta{align-items:flex-start;flex-direction:column;padding:24px}.news-toolbar input{min-width:100%}.news-toolbar select{flex:1;min-width:0}}
