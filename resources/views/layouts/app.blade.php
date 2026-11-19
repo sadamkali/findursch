@@ -48,8 +48,6 @@
                 <a href="{{ route('news.index') }}" @class(['is-active' => request()->routeIs('news.*')])>News</a>
                 <a href="{{ route('articles.index') }}" @class(['is-active' => request()->routeIs('articles.*')])>Blogs</a>
                 <a href="{{ route('events.index') }}" @class(['is-active' => request()->routeIs('events.*')])>Events</a>
-                <a href="{{ route('about') }}" @class(['is-active' => request()->routeIs('about')])>About</a>
-                <a href="{{ route('contact') }}" @class(['is-active' => request()->routeIs('contact')])>Contact</a>
             </nav>
 
             <div class="site-header__actions">
@@ -86,8 +84,6 @@
                 <a @click="mobileMenuOpen = false" href="{{ route('schools.index') }}">Find a school</a>
                 <a @click="mobileMenuOpen = false" href="{{ route('compare') }}">Compare schools</a>
                 <a @click="mobileMenuOpen = false" href="{{ route('articles.index') }}">News &amp; guides</a>
-                <a @click="mobileMenuOpen = false" href="{{ route('about') }}">About FindurSch</a>
-                <a @click="mobileMenuOpen = false" href="{{ route('contact') }}">Contact</a>
                 @guest
                     <a @click="mobileMenuOpen = false" href="{{ $dashboardUrl }}/login?returnTo=%2Faccount">Log in</a>
                 @else
