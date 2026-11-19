@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blogs for parents, students and teachers — FindURSCH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,700&display=swap" rel="stylesheet">
+<style>
+/* ---------- TOKENS (shared by every page) ---------- */
+:root{
+  --brand:#0c5a49; --brand-dk:#083f33; --brand-xdk:#052a22;
+  --accent:#f0b030; --accent-dk:#d99a1a;
+  --tint:#f1f6f3; --line:#e4e8e6; --ink:#1b2420; --mute:#5d6b65;
+  --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+  --r:10px; --gap:24px; --wrap:1280px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+body{font:15px/1.55 var(--sans);color:var(--ink);background:#fff}
+a{color:inherit;text-decoration:none}ul{list-style:none}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gap)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 20px;border-radius:8px;font:600 14px var(--sans);border:1.5px solid transparent;cursor:pointer;white-space:nowrap}
+.btn-gold{background:var(--accent);color:#2a1d00}.btn-gold:hover{background:var(--accent-dk)}
+.btn-ghost{border-color:rgba(255,255,255,.7);color:#fff}.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.btn-brand{background:var(--brand);color:#fff}.btn-brand:hover{background:var(--brand-dk)}
+.more{font:600 13px var(--sans);color:var(--brand)}
+
+/* Top bar + header */
+.topbar{background:var(--brand-dk);color:#fff;font-size:12.5px}
+.topbar .wrap{display:flex;justify-content:flex-end;gap:22px;height:32px;align-items:center}
+.topbar a{opacity:.9}.topbar a:hover{opacity:1}
+header{background:var(--brand);color:#fff;position:sticky;top:0;z-index:40;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+header .wrap{display:flex;align-items:center;gap:28px;height:64px}
+.logo{font:700 26px var(--serif);letter-spacing:-.3px}.logo b{color:var(--accent)}
+nav{display:flex;gap:4px;margin:0 auto}
+nav a{padding:8px 14px;border-radius:8px;font-size:14px;font-weight:500}
+nav a:hover,nav a.on{background:rgba(255,255,255,.16)}
+.rtab{position:fixed;right:0;top:34%;z-index:50;writing-mode:vertical-rl;background:var(--accent);color:#2a1d00;font:700 12px var(--sans);letter-spacing:.06em;padding:18px 9px;border-radius:10px 0 0 10px;box-shadow:-3px 3px 12px rgba(0,0,0,.2)}
+
+/* Shared components */
+.sec{padding-top:48px}
+.head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.ph{background:linear-gradient(135deg,#9fb8ad,#d9c9a0)}
+.ph.b{background:linear-gradient(135deg,#6f8f9a,#b9c8cf)}.ph.c{background:linear-gradient(135deg,#c9a46a,#7e5b34)}.ph.d{background:linear-gradient(135deg,#789a7b,#2f5a43)}
+.dots{display:flex;gap:6px;justify-content:center}
+.dots i{width:8px;height:8px;border-radius:99px;background:#cfd6d2}.dots i.on{width:26px;background:var(--brand)}
+.arrow{position:absolute;top:50%;width:34px;height:34px;margin-top:-17px;border-radius:50%;background:#fff;border:1px solid var(--line);box-shadow:0 3px 10px rgba(0,0,0,.15);display:grid;place-items:center;cursor:pointer;font-size:16px;color:var(--ink)}
+.arrow.l{left:12px}.arrow.r{right:12px}
+.ad{height:200px;border-radius:var(--r);display:grid;place-items:center;text-align:center;color:#fff;font:700 22px/1.2 var(--serif);padding:20px;background:linear-gradient(135deg,#a32a2a,#e05a3a)}
+.ad.alt{background:linear-gradient(135deg,#355a68,#6f8f9a)}
+.ad small{display:block;font:500 11px var(--sans);opacity:.8;margin-top:6px}
+.ad.slim{height:90px;max-width:728px;margin:24px auto 0}
+
+/* Page header, chips, toolbar */
+.phead{background:var(--brand-xdk);color:#fff;text-align:center;padding:44px 24px 40px;margin-top:24px}
+.phead h1{font:700 40px/1.2 var(--serif)}.phead h1 em{color:var(--accent)}
+.phead p{max-width:640px;margin:12px auto 0;opacity:.85}
+.pills{display:flex;gap:8px;overflow-x:auto;padding:20px 0 14px;scrollbar-width:none}
+.pills button{flex:none;height:34px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:#fff;font:500 13px var(--sans);cursor:pointer;color:var(--ink)}
+.pills button:hover{border-color:var(--brand)}
+.pills button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.bar{display:flex;gap:10px;flex-wrap:wrap}
+.bar input{flex:1;min-width:220px;height:44px;border:1px solid var(--line);border-radius:8px;padding:0 14px;font:14px var(--sans)}
+.bar select{height:44px;border:1px solid var(--line);border-radius:8px;padding:0 12px;background:#fff;font:14px var(--sans);color:var(--mute)}
+.bar .btn{height:44px}
+
+/* Blog grid (1.45 : 1 : 1, same as home and news) */
+.news{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:var(--gap)}
+.lead{position:relative;min-height:340px;border-radius:var(--r);overflow:hidden;color:#fff;display:flex;align-items:flex-end}
+.lead::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 35%,rgba(0,0,0,.78))}
+.lead .cap{position:relative;z-index:1;padding:22px}.lead small{font-size:12px;opacity:.9}
+.lead h3{font:700 22px/1.25 var(--serif);margin:4px 0 12px}
+.lead .dots{justify-content:flex-start}.lead .dots i{background:rgba(255,255,255,.5)}.lead .dots i.on{background:#fff}
+.lead .arrow{z-index:2}
+.rows{display:flex;flex-direction:column;gap:12px;padding:12px}
+.row{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center}
+.row .ph{height:72px;border-radius:6px}
+.row h4{font:600 13.5px/1.3 var(--serif)}.row small{color:var(--brand);font-style:italic;font-size:11.5px}
+.big .ph{height:210px}.big .b{padding:18px 20px}.big h3{font:700 21px/1.25 var(--serif);margin-bottom:8px}.big p{font-size:13.5px;color:var(--mute)}
+.big small,.prem small{display:flex;justify-content:space-between;margin-top:12px;font-size:12px;color:var(--mute)}
+.prem{position:relative}.prem .ph{height:170px}
+.prem .flag{position:absolute;top:140px;right:0;background:var(--brand);color:#fff;font:700 10.5px var(--sans);letter-spacing:.05em;padding:5px 12px;text-transform:uppercase}
+.prem .b{padding:16px 18px 18px}.prem h3{font:700 19px/1.25 var(--serif);margin-bottom:8px}.prem p{font-size:13px;color:var(--mute)}
+.kick{display:block;font:700 10.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--brand);margin-bottom:6px}
+
+/* Category heading */
+.head.cat{border-bottom:2px solid var(--brand);padding-bottom:8px}
+.head.cat h2{font:700 13px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+
+/* Most read box */
+.box h5{background:var(--brand);color:#fff;font:700 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:11px 16px}
+.box li a{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px;font-weight:500;line-height:1.35}
+.box li a:hover{background:var(--tint)}
+.box li b{font:700 20px/1 var(--serif);color:var(--brand);width:22px;flex:none}
+.box li em{display:block;font:700 10px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--brand);font-style:normal;margin-bottom:2px}
+.box li small{display:block;color:var(--mute);font-weight:400;font-size:11.5px;margin-top:3px}
+.box .foot{display:block;text-align:center;padding:12px;font:600 12.5px var(--sans);color:var(--brand)}
+
+/* Strips + newsletter + write-for-us */
+.strip{display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--brand-xdk);color:#fff;border-radius:var(--r);padding:18px 24px;margin-top:48px}
+.strip small{font:700 10.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.strip h4{font:700 20px/1.25 var(--serif)}.strip p{font-size:12.5px;opacity:.8}
+.duo{display:grid;grid-template-columns:1.45fr 1fr;gap:var(--gap);margin-top:48px}
+.band{color:#fff;border-radius:var(--r);padding:28px 32px;background:var(--brand);position:relative;overflow:hidden}
+.band::before{content:"";position:absolute;right:-60px;top:-70px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.07)}
+.band>*{position:relative}
+.band h3{font:700 24px/1.25 var(--serif);margin-bottom:4px}.band p{font-size:13px;opacity:.85;margin-bottom:16px}
+.band form{display:flex;gap:10px}.band input{flex:1;min-width:0;height:42px;border:0;border-radius:8px;padding:0 14px;font:14px var(--sans)}
+.band.dark{background:var(--brand-xdk)}.band.dark .btn{margin-top:2px}
+.banner{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--gap);max-width:900px;margin:56px auto 0}
+
+/* Footer */
+footer{background:var(--brand-xdk);color:#d5dcd8;padding-top:56px;font-size:13.5px;margin-top:64px}
+.fgrid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px}
+footer h6{color:#fff;font:700 14px var(--sans);margin-bottom:16px}
+footer li{margin-bottom:10px;opacity:.85}footer li:hover{opacity:1}
+footer .logo{display:block;margin-bottom:14px;color:#fff}footer p{opacity:.8;margin-bottom:14px;max-width:380px}
+.fbar{border-top:1px solid rgba(255,255,255,.1);padding:24px 0;display:flex;justify-content:space-between;align-items:center;gap:24px;font-size:12.5px}
+.fbar .box2{border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:20px}
+.fbar .btn{height:36px;border-color:rgba(255,255,255,.5);color:#fff;font-size:13px}
+
+@media(max-width:1000px){
+  .news,.duo,.fgrid,.banner{grid-template-columns:1fr}
+  nav,.topbar{display:none}header .btn-ghost{display:none}.phead h1{font-size:30px}
+  .strip,.fbar{flex-direction:column;align-items:flex-start}.fbar .box2{flex-direction:column;align-items:flex-start}
+  .band form{flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <a href="#">Opportunities</a><a href="#">Past papers</a><a href="#">School supplies</a><a href="#">Log in</a><a href="#">Sign up</a>
+</div></div>
+
+<header><div class="wrap">
+  <a class="logo" href="#">Find<b>UR</b>SCH</a>
+  <nav><a href="#">Home</a><a href="#">Schools</a><a href="#">Compare</a><a href="#">Scholarships</a><a href="#">News</a><a class="on" href="#">Blogs</a><a href="#">Jobs</a><a href="#">Events</a></nav>
+  <a class="btn btn-ghost" href="#">List your school</a>
+</div></header>
+
+<a class="rtab" href="#">REGISTER YOUR SCHOOL</a>
+
+<div class="ad slim">Your advert here<small>728 × 90</small></div>
+
+<section class="phead">
+  <h1>FindURSCH <em>Blogs</em></h1>
+  <p>Practical advice, inspiring stories and fresh ideas for parents, students and teachers, from study skills and school life to careers, health, faith and culture.</p>
+</section>
+
+<main class="wrap">
+  <div class="pills" id="pills" role="tablist" aria-label="Blog categories"></div>
+  <form class="bar" onsubmit="return false">
+    <input type="search" placeholder="Search blogs, topics or authors" aria-label="Search blogs">
+    <button class="btn btn-brand">Search</button>
+    <select aria-label="Category"><option>All categories</option></select>
+    <select aria-label="Sort"><option>Latest first</option><option>Most read</option></select>
+  </form>
+
+  <section class="sec" style="padding-top:24px" data-cat="top">
+    <div class="news">
+      <div class="lead ph d"><span class="arrow l">‹</span><span class="arrow r">›</span>
+        <div class="cap"><small>FindURSCH editorial · 19 Nov 2026</small><h3>Lead blog title sits over a dark gradient for contrast</h3><div class="dots"><i class="on"></i><i></i><i></i><i></i></div></div></div>
+      <a class="card prem" href="#"><div class="ph c"></div>
+        <div class="b"><span class="kick">Sports · 8 Nov 2026</span><h3>Second top blog with a two-line title</h3><p>A short excerpt of two lines that keeps this card level with the lead story beside it.</p></div></a>
+      <div class="card box"><h5>Most read today</h5><ul>
+        <li><a href="#"><b>1</b><span><em>Parenting · 6 Nov 2026</em>Most read blog title runs to two or three lines<small>346 views</small></span></a></li>
+        <li><a href="#"><b>2</b><span><em>School life · 3 Nov 2026</em>Second most read blog title<small>312 views</small></span></a></li>
+        <li><a href="#"><b>3</b><span><em>Careers · 1 Nov 2026</em>Third most read blog title<small>287 views</small></span></a></li>
+        <li><a href="#"><b>4</b><span><em>Health · 28 Oct 2026</em>Fourth most read blog title<small>254 views</small></span></a></li>
+      </ul><a class="foot" href="#">See all popular blogs</a></div>
+    </div>
+  </section>
+
+  <div id="cats"></div>
+
+  <div class="banner"><div class="ad">Wide advert<small>728 × 200</small></div><div class="ad alt">School advert<small>468 × 200</small></div></div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div><a class="logo" href="#">Find<b>UR</b>SCH</a><p>Uganda's school discovery, comparison and admissions platform, with school profiles, news, blogs, events, jobs and scholarships.</p><p>Kampala, Uganda<br>+256 000 000 000<br>hello@findursch.ug</p></div>
+      <div><h6>Explore schools</h6><ul><li>Primary schools</li><li>Secondary schools</li><li>Universities</li><li>Vocational schools</li><li>Boarding schools</li><li>International schools</li></ul></div>
+      <div><h6>Resources</h6><ul><li>Latest news</li><li>Blogs</li><li>Scholarships</li><li>School jobs</li><li>Events calendar</li><li>Past papers</li><li>Compare schools</li></ul></div>
+      <div><h6>Support</h6><ul><li>List your school</li><li>Advertise with us</li><li>About</li><li>Contact</li><li>Terms and conditions</li><li>Privacy policy</li></ul></div>
+    </div>
+    <div class="fbar">
+      <span>© 2026 FindURSCH. All rights reserved.</span>
+      <div class="box2"><span>Want to reach parents and students every month?</span><a class="btn btn-ghost" href="#">Advertise with us</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Each category renders the same 3-column block. In Blade this is one @foreach($categories as $c) loop. */
+/* full heading, chip label, key */
+const S=[["Parenting &amp; family","Parenting","parenting"],["School life","School life","life"],["Education &amp; career guidance","Careers","careers"],["Student health &amp; wellbeing","Health","health"],["Sports &amp; recreation","Sports","sports"],["Talent &amp; creativity","Talent","talent"],["Agriculture &amp; school farming","Agriculture","agri"],["Culture, arts &amp; heritage","Culture","culture"],["Faith &amp; values","Faith &amp; values","faith"],["School trips &amp; experiences","Trips","trips"],["Education insights","Insights","insights"]];
+const P=["","b","c","d"],F=["Featured blog","Featured career guide","Featured health tip","Featured read"];
+const strip=(k,h,p,b,c)=>`<div class="strip" data-cat="x"><div><small>${k}</small><h4>${h}</h4><p>${p}</p></div><a class="btn ${c}" href="#">${b}</a></div>`;
+const S1=strip("Advertise","Put your brand in front of parents and students","Reach families across Uganda every month.","Advertise with us","btn-gold");
+const S2=strip("For students","UNEB past papers with answers","PLE, UCE and UACE papers to download and revise.","Get past papers","btn-gold");
+const DUO=`<div class="duo" data-cat="x"><div class="band"><h3>Get new blogs in your inbox</h3><p>Parenting tips, study advice and school stories from across Uganda. Free, every week.</p><form onsubmit="return false"><input type="email" placeholder="Enter your email address" aria-label="Email address"><button class="btn btn-gold">Subscribe</button></form></div><div class="band dark"><h3>Write for FindURSCH</h3><p>Teachers, parents and students: share your ideas, experience and advice with thousands of readers.</p><a class="btn btn-gold" href="#">Submit a blog</a></div></div>`;
+const row=(i,j)=>`<a class="row" href="#"><div class="ph ${P[(i+j)%4]}"></div><div><h4>Blog title for a short read</h4><small>6th November 2026</small></div></a>`;
+document.getElementById("cats").innerHTML=S.map(([n,,k],i)=>`
+<section class="sec" data-cat="${k}" id="${k}">
+  <div class="head cat"><h2>${n}</h2><a class="more" href="#">View more</a></div>
+  <div class="news">
+    <a class="card big" href="#"><div class="ph ${P[i%4]}"></div><div class="b"><h3>Lead blog title for ${n.toLowerCase()} runs to two lines</h3><p>A two-line excerpt for the lead blog, trimmed with an ellipsis…</p><small><span>6th November 2026</span><span>1 min read</span></small></div></a>
+    <div class="card rows">${[0,1,2,3].map(j=>row(i,j)).join("")}</div>
+    <a class="card prem" href="#"><div class="ph ${P[(i+2)%4]}"></div><span class="flag">${F[i%4]}</span><div class="b"><h3>Featured blog for this category</h3><p>A short summary that fits the card without crowding the title.</p><small><span>23rd August 2026</span><span>4 min read</span></small></div></a>
+  </div>
+</section>${i==2?S1:i==5?DUO:i==8?S2:""}`).join("");
+
+/* Category chips filter the sections */
+const pills=document.getElementById("pills");
+pills.innerHTML='<button class="on" data-k="all">All blogs</button>'+S.map(([,c,k])=>`<button data-k="${k}">${c}</button>`).join("");
+pills.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  pills.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll("[data-cat]").forEach(s=>{s.hidden=b.dataset.k!=="all"&&s.dataset.cat!==b.dataset.k});
+});
+</script>
+</body>
+</html>
