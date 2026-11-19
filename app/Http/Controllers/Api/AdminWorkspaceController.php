@@ -137,6 +137,28 @@ class AdminWorkspaceController extends Controller
                     ->orderByDesc('created_at')->limit(100)->get();
                 break;
 
+            case 'events':
+            case 'scholarships':
+                $postType = $resource === 'events' ? 'event' : 'bursary';
+                $postQuery = SchoolPost::query()
+                    ->where('type', $postType)
+                    ->with('school:id,name')
+                    ->orderByDesc('created_at');
+
+                if ($status) {
+                    $postQuery->where('status', $status);
+                }
+                if ($search !== '') {
+                    $postQuery->where(function ($builder) use ($search) {
+                        $builder->where('title', 'ilike', '%'.$search.'%')
+                            ->orWhere('description', 'ilike', '%'.$search.'%')
+                            ->orWhereHas('school', fn ($school) => $school->where('name', 'ilike', '%'.$search.'%'));
+                    });
+                }
+
+                $items = $postQuery->limit(100)->get();
+                break;
+
             case 'settings':
                 $items = DB::table('settings')->orderBy('group')->orderBy('key')
                     ->limit(300)->get(['id', 'key', 'value', 'type', 'group', 'label']);
@@ -315,6 +337,21 @@ class AdminWorkspaceController extends Controller
                 }
                 $article->forceFill($data)->save();
                 return response()->json(['data' => $article->fresh(['category', 'author'])]);
+
+            case 'events':
+            case 'scholarships':
+                $postType = $resource === 'events' ? 'event' : 'bursary';
+                $post = SchoolPost::query()->where('type', $postType)->findOrFail($id);
+                $data = $request->validate([
+                    'status' => ['required', 'in:draft,pending,approved,published,rejected'],
+                ]);
+
+                if (in_array($data['status'], ['approved', 'published'], true) && ! $post->published_at) {
+                    $data['published_at'] = now();
+                }
+
+                $post->forceFill($data)->save();
+                return response()->json(['data' => $post->fresh(['school'])]);
 
             case 'settings':
                 $data = $request->validate(['value' => ['present', 'nullable', 'string', 'max:20000']]);
