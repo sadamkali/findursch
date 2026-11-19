@@ -1,6 +1,11 @@
 <?php
 
 use App\Livewire\Articles\ArticleListing;
+use App\Livewire\Articles\NewsListing;
+use App\Livewire\Opportunities\EventListing;
+use App\Livewire\Opportunities\EventShow;
+use App\Livewire\Opportunities\ScholarshipListing;
+use App\Livewire\Opportunities\ScholarshipShow;
 use App\Livewire\Articles\ArticleShow;
 use App\Livewire\Compare\CompareSchools;
 use App\Livewire\Districts\DistrictSchools;
@@ -71,6 +76,12 @@ Route::get('/api/search/suggest', function (Request $request) {
 Route::get('/compare', CompareSchools::class)->name('compare');
 Route::get('/articles', ArticleListing::class)->name('articles.index');
 Route::get('/articles/{article:slug}', ArticleShow::class)->name('articles.show');
+Route::get('/news', NewsListing::class)->name('news.index');
+Route::get('/news/{article:slug}', ArticleShow::class)->name('news.show');
+Route::get('/events', EventListing::class)->name('events.index');
+Route::get('/events/{post}', EventShow::class)->name('events.show');
+Route::get('/scholarships', ScholarshipListing::class)->name('scholarships.index');
+Route::get('/scholarships/{post}', ScholarshipShow::class)->name('scholarships.show');
 
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
