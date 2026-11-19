@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FindURSCH — Find the right school in Uganda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* ---------- TOKENS: change the palette here only ---------- */
+:root{
+  --brand:#0c5a49; --brand-dk:#083f33; --brand-xdk:#052a22;
+  --accent:#f0b030; --accent-dk:#d99a1a;
+  --tint:#f1f6f3; --line:#e4e8e6; --ink:#1b2420; --mute:#5d6b65;
+  --ok:#e3f4e8; --ok-ink:#17703a;
+  --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+  --r:10px; --gap:24px; --wrap:1280px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.55 var(--sans);color:var(--ink);background:#fff}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gap)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 20px;border-radius:8px;font:600 14px var(--sans);border:1.5px solid transparent;cursor:pointer;white-space:nowrap}
+.btn-gold{background:var(--accent);color:#2a1d00}.btn-gold:hover{background:var(--accent-dk)}
+.btn-ghost{border-color:#fff;color:#fff}.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.btn-white{background:#fff;color:var(--brand)}
+.btn-red{background:var(--brand);color:#fff;border-radius:999px;height:46px;padding:0 26px}
+.btn-block{width:100%;justify-content:center}
+.more{font:600 13px var(--sans);color:var(--brand)}
+
+/* ---------- Top bar + header ---------- */
+.topbar{background:var(--brand-dk);color:#fff;font-size:12.5px}
+.topbar .wrap{display:flex;justify-content:flex-end;gap:22px;height:32px;align-items:center}
+.topbar a{color:#ffffff}.topbar a:hover{opacity:1}
+header{background:var(--brand);color:#fff;position:sticky;top:0;z-index:40;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+header .wrap{display:flex;align-items:center;gap:28px;height:64px}
+.logo{font:700 26px var(--serif);letter-spacing:-.3px}
+.logo b{color:var(--accent)}
+nav{display:flex;gap:4px;margin:0 auto}
+nav a{padding:8px 14px;border-radius:8px;font-size:14px;font-weight:500}
+nav a:hover,nav a.on{background:rgba(255,255,255,.16)}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;min-height:470px;display:grid;place-items:center;text-align:center;color:#fff;padding:64px 24px 72px;
+  background:linear-gradient(rgba(5,30,24,.62),rgba(5,30,24,.72)),linear-gradient(120deg,#355a4e,#7b6a3c 55%,#2f4d5a)}
+.hero h1{font:700 56px/1.12 var(--serif);max-width:760px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero p{max-width:620px;margin:20px auto 32px;font-size:17px;color:#f6faf8}
+.search{display:flex;align-items:center;background:#fff;border-radius:999px;padding:7px 7px 7px 22px;max-width:720px;margin:0 auto;box-shadow:0 14px 40px rgba(0,0,0,.3);color:var(--ink)}
+.search input{flex:1;border:0;outline:0;font:15px var(--sans);padding:10px 8px;min-width:0;background:none}
+.search select{border:0;border-left:1px solid var(--line);padding:10px 14px;font:14px var(--sans);background:none;color:var(--mute)}
+.dots{display:flex;gap:6px;justify-content:center}
+.dots i{width:8px;height:8px;border-radius:99px;background:#cfd6d2}.dots i.on{width:26px;background:var(--brand)}
+.hero .dots{position:absolute;bottom:20px;left:0;right:0}
+.hero .dots i{background:rgba(255,255,255,.5)}.hero .dots i.on{background:#fff}
+.tab{position:fixed;right:0;top:34%;z-index:50;writing-mode:vertical-rl;background:var(--accent);color:#2a1d00;font:700 12px var(--sans);letter-spacing:.06em;padding:18px 9px;border-radius:10px 0 0 10px;box-shadow:-3px 3px 12px rgba(0,0,0,.2)}
+
+/* ---------- Layout ---------- */
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:var(--gap);align-items:start}
+.sec{padding-top:56px}
+.head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.head h2{font:700 26px var(--serif)}.head h2 span{color:var(--brand)}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.ph{background:linear-gradient(135deg,#9fb8ad,#d9c9a0)}
+.ph.b{background:linear-gradient(135deg,#6f8f9a,#b9c8cf)}.ph.c{background:linear-gradient(135deg,#c9a46a,#7e5b34)}.ph.d{background:linear-gradient(135deg,#789a7b,#2f5a43)}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11.5px;font-weight:600;background:#f0f1f1;color:var(--mute)}
+.tag.new{background:var(--ok);color:var(--ok-ink)}
+.kick{font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+
+/* Featured cards + carousel arrows */
+.slider{position:relative}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap)}
+.school .ph{height:150px}
+.school div.b{padding:14px 16px 16px}
+.school h3{font:600 15px/1.3 var(--sans);margin:4px 0 6px}
+.school small{display:block;color:var(--mute);font-size:12.5px;margin-bottom:10px}
+.arrow{position:absolute;top:50%;width:34px;height:34px;margin-top:-17px;border-radius:50%;background:#fff;border:1px solid var(--line);box-shadow:0 3px 10px rgba(0,0,0,.15);display:grid;place-items:center;cursor:pointer;font-size:16px;color:var(--ink)}
+.arrow.l{left:-17px}.arrow.r{right:-17px}
+.slider+.dots{margin-top:16px}
+
+/* Spotlight */
+.spot{display:grid;grid-template-columns:1fr 1fr;margin-top:32px;min-height:230px}
+.spot .t{padding:28px 32px;align-self:center}
+.spot h3{font:700 26px/1.2 var(--serif);margin-bottom:10px}
+.spot p{color:var(--mute);margin-bottom:12px}
+.spot .meta{font-size:12.5px;margin-bottom:12px}.spot .meta b{color:var(--mute);font-weight:500;margin-right:4px}
+.strip{display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--brand-xdk);color:#fff;border-radius:var(--r);padding:18px 24px;margin:32px auto 0;max-width:640px}
+.strip h4{font:700 18px var(--sans)}.strip p{font-size:12.5px;color:#e2eee9}
+
+/* Sidebar */
+aside{display:flex;flex-direction:column;gap:var(--gap)}
+.ad{height:250px;border-radius:var(--r);display:grid;place-items:center;text-align:center;color:#fff;font:700 22px/1.2 var(--serif);padding:20px;background:linear-gradient(135deg,#a32a2a,#e05a3a)}
+.ad small{display:block;font:500 11px var(--sans);color:#fff1ec;margin-top:8px}
+.box h5{background:var(--brand);color:#fff;font:700 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:11px 16px}
+.box li a{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);font-size:13.5px;font-weight:500}
+.box li a:hover{background:var(--tint)}
+.ico{width:28px;height:28px;border-radius:50%;background:#fbe9bf;flex:none}
+.box li em{margin-left:auto;font-style:normal;font-size:12.5px;color:var(--mute)}
+.box .foot{display:block;text-align:center;padding:12px;font:600 12.5px var(--sans);color:var(--brand)}
+.date{width:40px;height:40px;border-radius:6px;background:var(--brand-dk);color:#fff;text-align:center;font:700 15px/1 var(--sans);padding-top:6px;flex:none}
+.date small{display:block;font-size:9px;font-weight:500;color:#e2eee9;margin-top:3px}
+.box li div strong{display:block;font-size:12px;line-height:1.3}.box li div span{font-size:11px;color:var(--mute)}
+
+/* News: 3-column feature grid */
+.news{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:var(--gap)}
+.lead{position:relative;min-height:340px;border-radius:var(--r);overflow:hidden;color:#fff;display:flex;align-items:flex-end}
+.lead::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 35%,rgba(0,0,0,.78))}
+.lead .cap{position:relative;z-index:1;padding:22px}.lead small{font-size:12px;color:#ffffff}
+.lead h3{font:700 22px/1.25 var(--serif);margin:4px 0 12px}
+.lead .dots{justify-content:flex-start}.lead .dots i{background:rgba(255,255,255,.5)}.lead .dots i.on{background:#fff}
+.lead .arrow{z-index:2}.lead .arrow.l{left:12px}.lead .arrow.r{right:12px}
+.rows{display:flex;flex-direction:column;gap:12px;padding:12px;position:relative}
+.row{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center}
+.row .ph{height:72px;border-radius:6px}
+.row h4{font:600 13.5px/1.3 var(--serif)}.row small{color:var(--brand);font-style:italic;font-size:11.5px}
+.mini{display:flex;gap:6px;justify-content:center;padding-top:2px}
+.mini span{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;color:var(--mute)}
+.prem{position:relative}.prem .ph{height:170px}
+.prem .flag{position:absolute;top:140px;right:0;background:var(--brand);color:#fff;font:700 10.5px var(--sans);letter-spacing:.05em;padding:5px 12px;text-transform:uppercase}
+.prem .b{padding:16px 18px 18px}.prem h3{font:700 19px/1.25 var(--serif);margin-bottom:8px}
+.prem p{font-size:13px;color:var(--mute)}.prem small{display:flex;justify-content:space-between;margin-top:12px;font-size:12px;color:var(--mute)}
+
+/* Bands */
+.band{display:flex;align-items:center;justify-content:space-between;gap:20px;color:#fff;border-radius:var(--r);padding:28px 32px;background:var(--brand);position:relative;overflow:hidden}
+.band::before{content:"";position:absolute;right:-60px;top:-70px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.07)}
+.band>*{position:relative}
+.band small{font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#e2eee9}
+.band h3{font:700 24px/1.25 var(--serif);margin:4px 0}.band p{font-size:13px;color:#e2eee9}
+.band .acts{display:flex;gap:10px}
+.band.edge{border-left:5px solid var(--accent)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chips a{font-size:11.5px;text-decoration:underline;padding:3px 12px;border-radius:99px;background:rgba(255,255,255,.14)}
+.stack{display:flex;flex-direction:column;gap:var(--gap)}
+
+/* Videos */
+.vids{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--gap)}
+.vid .ph{height:170px;display:grid;place-items:center}
+.play{width:52px;height:52px;border-radius:50%;background:var(--brand);position:relative;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.play::after{content:"";position:absolute;left:21px;top:16px;border:10px solid transparent;border-left:16px solid #fff;border-right:0}
+.vid .b{padding:12px 14px}.vid small{color:var(--brand);font-weight:600;font-size:10.5px;text-transform:uppercase}.vid h4{font:600 14px/1.3 var(--sans);margin:3px 0}.vid span{font-size:12px;color:var(--mute)}
+
+/* Sidebar cards */
+.jobs li a{display:block;padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px;font-weight:500}
+.promo{background:var(--brand);color:#fff;border-radius:var(--r);padding:24px}
+.promo small{font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#e2eee9}
+.promo h3{font:700 28px/1.15 var(--serif);margin:8px 0 12px}.promo p{font-size:13px;color:#e2eee9;margin-bottom:16px}
+.quote{padding:16px 18px 18px}.quote .st{color:var(--accent);letter-spacing:2px;font-size:13px}
+.quote p{font-size:13px;margin:8px 0 14px;color:#33403a}
+.who{display:flex;align-items:center;gap:10px;font-size:12.5px}.who b{display:block}
+.who i{width:34px;height:34px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font:700 12px var(--sans);font-style:normal}
+.quote .dots{margin-top:14px}
+
+/* Insights */
+.tinted{background:var(--tint);margin-top:64px;padding:48px 0 64px}
+.ins{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:var(--gap)}
+.big .ph{height:210px}.big .b{padding:18px 20px}.big h3{font:700 21px/1.25 var(--serif);margin-bottom:8px}.big p{font-size:13.5px;color:var(--mute)}
+.big small{display:flex;justify-content:space-between;margin-top:12px;font-size:12px;color:var(--mute)}
+.spl{position:relative;min-height:340px;border-radius:var(--r);overflow:hidden;color:#fff;display:flex;align-items:flex-end;background:linear-gradient(135deg,#2f5a43,#18382b)}
+.spl::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 20%,rgba(0,0,0,.65))}
+.spl div{position:relative;z-index:1;padding:22px;width:100%}
+.spl small{color:var(--accent);font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.spl h3{font:700 24px/1.2 var(--serif);margin:6px 0}.spl p{font-size:13px;color:#eef4f1;margin-bottom:14px}
+
+/* Banner + CTA */
+.banner{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--gap);max-width:900px;margin:48px auto}
+.banner .ad{height:200px}.banner .ad.alt{background:linear-gradient(135deg,#355a68,#6f8f9a)}
+.cta{background:linear-gradient(var(--brand),var(--brand-dk));color:#fff;text-align:center;padding:72px 24px}
+.cta h2{font:700 36px var(--serif);margin-bottom:12px}.cta p{max-width:560px;margin:0 auto 28px;color:#eaf3ef}
+.cta .acts{display:flex;gap:12px;justify-content:center}
+
+/* ---------- Footer ---------- */
+footer{background:var(--brand-xdk);color:#d5dcd8;padding-top:56px;font-size:13.5px}
+.fgrid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px}
+footer h6{color:#fff;font:700 14px var(--sans);margin-bottom:16px}
+footer li{margin-bottom:10px;color:#e6eeea}footer li:hover{opacity:1}
+footer .logo{display:block;margin-bottom:14px}footer p{color:#d9e5e0;margin-bottom:14px;max-width:380px}
+.fbar{border-top:1px solid rgba(255,255,255,.1);padding:24px 0;display:flex;justify-content:space-between;align-items:center;gap:24px;font-size:12.5px}
+.fbar .box2{border:1px solid #3d6b5f;border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:20px}
+.fbar .btn{height:36px;border-color:#d9e5e0;color:#fff;font-size:13px}
+
+/* ---------- Responsive ---------- */
+@media(max-width:1000px){
+  .cols,.news,.ins,.fgrid,.banner{grid-template-columns:1fr}
+  nav,.topbar{display:none}.hero h1{font-size:38px}.cards,.vids{grid-template-columns:1fr}
+  .spot{grid-template-columns:1fr}.spot .ph{height:180px}.band,.fbar,.strip{flex-direction:column;align-items:flex-start}
+  .arrow.l{left:6px}.arrow.r{right:6px}.header .btn-ghost{display:none}.fbar .box2{flex-direction:column;align-items:flex-start}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <a href="#">Opportunities</a><a href="#">Past papers</a><a href="#">School supplies</a><a href="#">Log in</a><a href="#">Sign up</a>
+</div></div>
+
+<header><div class="wrap">
+  <a class="logo" href="#">Find<b>UR</b>SCH</a>
+  <nav>
+    <a class="on" href="#">Home</a><a href="#">Schools</a><a href="#">Compare</a><a href="#">Scholarships</a><a href="#">News</a><a href="#">Jobs</a><a href="#">Events</a>
+  </nav>
+  <a class="btn btn-ghost" href="#">List your school</a>
+</div></header>
+
+<a class="tab" href="#">REGISTER YOUR SCHOOL</a>
+
+<section class="hero">
+  <div>
+    <h1>Find the <em>right school</em> for your child</h1>
+    <p>Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.</p>
+    <form class="search" onsubmit="return false">
+      <input type="search" placeholder="Search by name, location or district" aria-label="Search schools">
+      <select aria-label="School type"><option>All types</option><option>Nursery</option><option>Primary</option><option>Secondary</option><option>University</option></select>
+      <button class="btn btn-red">Search</button>
+    </form>
+  </div>
+  <div class="dots"><i class="on"></i><i></i></div>
+</section>
+
+<main class="wrap">
+  <div class="cols sec">
+    <div>
+      <div class="head"><h2>Featured <span>schools</span></h2><a class="more" href="#">View all</a></div>
+      <div class="slider">
+        <span class="arrow l">‹</span><span class="arrow r">›</span>
+        <div class="cards">
+          <a class="card school" href="#"><div class="ph"></div><div class="b"><span class="kick">Nursery</span><h3>School name goes here</h3><small>Kampala district</small><span class="tag">UNEB</span> <span class="tag new">New</span></div></a>
+          <a class="card school" href="#"><div class="ph b"></div><div class="b"><span class="kick">Primary</span><h3>School name goes here</h3><small>Wakiso district</small><span class="tag">Cambridge</span> <span class="tag new">New</span></div></a>
+          <a class="card school" href="#"><div class="ph c"></div><div class="b"><span class="kick">Secondary</span><h3>School name goes here</h3><small>Mukono district</small><span class="tag">UNEB</span> <span class="tag new">New</span></div></a>
+        </div>
+      </div>
+      <div class="dots"><i></i><i class="on"></i><i></i></div>
+
+      <div class="card spot">
+        <div class="ph d"></div>
+        <div class="t"><h3>School spotlight</h3><p>Two lines about the school, kept short so the card stays balanced beside the photo.</p><div class="meta"><b>Tel</b> 0700 000 000 &nbsp; <b>Location</b> Kampala</div><a class="more" href="#">Learn more about this school</a></div>
+      </div>
+
+      <div class="strip"><div><h4>Is your school on FindURSCH?</h4><p>Parents across Uganda search here for schools every day.</p></div><a class="btn btn-gold" href="#">List your school</a></div>
+    </div>
+
+    <aside>
+      <div class="ad">Your advert here<small>300 × 250</small></div>
+      <div class="card box"><h5>Browse by category</h5><ul>
+        <li><a href="#"><span class="ico"></span>Nursery &amp; primary<em>15</em></a></li>
+        <li><a href="#"><span class="ico"></span>Secondary<em>10</em></a></li>
+        <li><a href="#"><span class="ico"></span>Primary<em>5</em></a></li>
+        <li><a href="#"><span class="ico"></span>Daycare<em>2</em></a></li>
+        <li><a href="#"><span class="ico"></span>Vocational<em>2</em></a></li>
+      </ul><a class="foot" href="#">All categories</a></div>
+      <div class="card box"><h5>Upcoming events</h5><ul>
+        <li><a href="#"><span class="date">20<small>DEC</small></span><div><strong>Open day and school tour</strong><span>Host school name</span></div></a></li>
+        <li><a href="#"><span class="date">28<small>DEC</small></span><div><strong>Term 1 admissions open</strong><span>Host school name</span></div></a></li>
+        <li><a href="#"><span class="date">05<small>JAN</small></span><div><strong>Parents information evening</strong><span>Host school name</span></div></a></li>
+      </ul><a class="foot" href="#">View all events</a></div>
+    </aside>
+  </div>
+
+  <section class="sec">
+    <div class="head"><h2>Education <span>news headlines</span></h2><a class="more" href="#">All news</a></div>
+    <div class="news">
+      <div class="lead ph c"><span class="arrow l">‹</span><span class="arrow r">›</span>
+        <div class="cap"><small>Source name · 21 hours ago</small><h3>Lead headline sits over a dark gradient for contrast</h3><div class="dots"><i class="on"></i><i></i><i></i><i></i></div></div></div>
+      <div class="card rows">
+        <a class="row" href="#"><div class="ph b"></div><div><h4>Second headline in the list</h4><small>17th November 2026</small></div></a>
+        <a class="row" href="#"><div class="ph d"></div><div><h4>Third headline in the list</h4><small>17th November 2026</small></div></a>
+        <a class="row" href="#"><div class="ph"></div><div><h4>Fourth headline in the list</h4><small>17th November 2026</small></div></a>
+        <div class="mini"><span>↑</span><span>↓</span></div>
+      </div>
+      <a class="card prem" href="#"><div class="ph d"></div><span class="flag">Premium school news</span>
+        <div class="b"><h3>Featured story from a partner school</h3><p>A short two-line summary of the story that fits the card without crowding the headline.</p><small><span>23rd June 2026</span><span>3 min read</span></small></div></a>
+    </div>
+  </section>
+
+  <div class="cols sec">
+    <div class="stack">
+      <div class="band"><div><small>Advertise with us</small><h3>Reach parents and students every month</h3><p>Promote your school, business or service to families across Uganda.</p></div><div class="acts"><a class="btn btn-gold" href="#">Advertise</a><a class="btn btn-ghost" href="#">Send inquiry</a></div></div>
+      <div><div class="head"><h2>Featured <span>school videos</span></h2><a class="more" href="#">All videos</a></div>
+        <div class="vids">
+          <a class="card vid" href="#"><div class="ph c"><i class="play"></i></div><div class="b"><small>School name</small><h4>Children's music classes</h4><span>2026 · 0 views</span></div></a>
+          <a class="card vid" href="#"><div class="ph b"><i class="play"></i></div><div class="b"><small>School name</small><h4>A visit to our school</h4><span>2026 · 0 views</span></div></a>
+        </div></div>
+      <div class="band edge"><div><h3>Scholarships &amp; bursaries</h3><p>Browse funding opportunities for Ugandan students at every level.</p><div class="chips"><a href="#">Government</a><a href="#">Private bursaries</a><a href="#">University grants</a><a href="#">International</a></div></div><a class="btn btn-ghost" href="#">Browse</a></div>
+    </div>
+    <aside>
+      <div class="card box jobs"><h5>Latest jobs</h5><ul><li><a href="#">Programme specialist — Nairobi</a></li><li><a href="#">Debate coach, one day a month — Kampala</a></li><li><a href="#">Field officer — Kampala</a></li></ul><a class="foot" href="#">View all jobs</a></div>
+      <div class="promo"><small>Advertise</small><h3>Put your brand in front of parents</h3><p>Reach families across Uganda every month.</p><a class="btn btn-gold" href="#">Advertise with us</a></div>
+      <div class="card box"><h5>Stories from schools &amp; families</h5><div class="quote"><div class="st">★★★★★</div><p>“Short testimonial text, three or four lines at most, so the card stays compact.”</p><div class="who"><i>AB</i><span><b>Person name</b>Director, School name</span></div><div class="dots"><i></i><i class="on"></i><i></i></div></div></div>
+    </aside>
+  </div>
+</main>
+
+<section class="tinted"><div class="wrap">
+  <div class="head"><h2>Educational <span>insights</span></h2><a class="more" href="#">All articles</a></div>
+  <div class="ins">
+    <a class="card big" href="#"><div class="ph d"></div><div class="b"><h3>Featured article headline runs to two lines</h3><p>A two-line excerpt for the lead article, trimmed with an ellipsis…</p><small><span>Nov 2026</span><span>2 min read</span></small></div></a>
+    <div class="card rows">
+      <a class="row" href="#"><div class="ph b"></div><div><h4>Article headline in the list</h4><small>Nov 2026</small></div></a>
+      <a class="row" href="#"><div class="ph"></div><div><h4>Article headline in the list</h4><small>Nov 2026</small></div></a>
+      <a class="row" href="#"><div class="ph c"></div><div><h4>Article headline in the list</h4><small>Nov 2026</small></div></a>
+      <div class="mini"><span>↑</span><span>↓</span></div>
+    </div>
+    <div class="spl"><div><small>School spotlight</small><h3>Spotlight school name</h3><p>Short description of the school.</p><a class="btn btn-gold btn-block" href="#">Learn more about this school</a></div></div>
+  </div>
+</div></section>
+
+<div class="banner"><div class="ad">Wide advert<small>728 × 250</small></div><div class="ad alt">School advert<small>468 × 250</small></div></div>
+
+<section class="cta">
+  <h2>Is your school listed?</h2>
+  <p>Join schools across Uganda reaching parents, students and educators every day.</p>
+  <div class="acts"><a class="btn btn-white" href="#">Register your school</a><a class="btn btn-ghost" href="#">View benefits</a></div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div><a class="logo" href="#" style="color:#fff">Find<b>UR</b>SCH</a><p>Uganda's school discovery, comparison and admissions platform, with school profiles, news, events, jobs and scholarships.</p><p>Kampala, Uganda<br>+256 000 000 000<br>hello@findursch.ug</p></div>
+      <div><h6>Explore schools</h6><ul><li>Primary schools</li><li>Secondary schools</li><li>Universities</li><li>Vocational schools</li><li>Boarding schools</li><li>International schools</li></ul></div>
+      <div><h6>Resources</h6><ul><li>Latest news</li><li>Scholarships</li><li>School jobs</li><li>Events calendar</li><li>Articles</li><li>Past papers</li><li>Compare schools</li></ul></div>
+      <div><h6>Support</h6><ul><li>List your school</li><li>Advertise with us</li><li>About</li><li>Contact</li><li>Terms and conditions</li><li>Privacy policy</li></ul></div>
+    </div>
+    <div class="fbar">
+      <span>© 2026 FindURSCH. All rights reserved.</span>
+      <div class="box2"><span>Want to reach parents and students every month?</span><a class="btn btn-ghost" href="#">Advertise with us</a></div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

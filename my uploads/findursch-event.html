@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open Day and School Tour 2027 — Events — FindURSCH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ---------- TOKENS (shared by every page) ---------- */
+:root{
+  --brand:#0c5a49; --brand-dk:#083f33; --brand-xdk:#052a22;
+  --accent:#f0b030; --accent-dk:#d99a1a; --wa:#1fa855;
+  --tint:#f1f6f3; --line:#e4e8e6; --ink:#1b2420; --mute:#5d6b65;
+  --warn-bg:#fdf3d6; --warn-ink:#8a5f00; --ok-bg:#e3f4e8; --ok-ink:#17703a; --bad-bg:#fbe9e7; --danger:#b3261e;
+  --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+  --r:10px; --gap:24px; --wrap:1280px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.55 var(--sans);color:var(--ink);background:#fff}
+a{color:inherit;text-decoration:none}ul{list-style:none}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gap)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 20px;border-radius:8px;font:600 14px var(--sans);border:1.5px solid transparent;cursor:pointer;white-space:nowrap}
+.btn-gold{background:var(--accent);color:#2a1d00}.btn-gold:hover{background:var(--accent-dk)}
+.btn-ghost{border-color:#fff;color:#fff}.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.btn-brand{background:var(--brand);color:#fff}.btn-brand:hover{background:var(--brand-dk)}
+.btn-wa{background:var(--wa);color:#fff}
+.btn-line{border-color:var(--brand);color:var(--brand);background:#fff}.btn-line:hover{background:var(--tint)}
+.btn-block{width:100%}.btn.sm{height:36px;padding:0 16px;font-size:13px}
+.fb{background:#1877f2;color:#fff}.xx{background:#1d9bf0;color:#fff}.cp{border-color:var(--line);color:var(--ink);background:#fff}
+
+/* Top bar + header */
+.topbar{background:var(--brand-dk);color:#fff;font-size:12.5px}
+.topbar .wrap{display:flex;justify-content:flex-end;gap:22px;height:32px;align-items:center}
+.topbar a{color:#ffffff}.topbar a:hover{opacity:1}
+header{background:var(--brand);color:#fff;position:sticky;top:0;z-index:40;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+header .wrap{display:flex;align-items:center;gap:28px;height:64px}
+.logo{font:700 26px var(--serif);letter-spacing:-.3px}.logo b{color:var(--accent)}
+nav{display:flex;gap:4px;margin:0 auto}
+nav a{padding:8px 14px;border-radius:8px;font-size:14px;font-weight:500}
+nav a:hover,nav a.on{background:rgba(255,255,255,.16)}
+.rtab{position:fixed;right:0;top:34%;z-index:50;writing-mode:vertical-rl;background:var(--accent);color:#2a1d00;font:700 12px var(--sans);letter-spacing:.06em;padding:18px 9px;border-radius:10px 0 0 10px;box-shadow:-3px 3px 12px rgba(0,0,0,.2)}
+
+/* Shared */
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.ph{background:linear-gradient(135deg,#9fb8ad,#d9c9a0)}
+.ph.b{background:linear-gradient(135deg,#6f8f9a,#b9c8cf)}.ph.c{background:linear-gradient(135deg,#c9a46a,#7e5b34)}.ph.d{background:linear-gradient(135deg,#789a7b,#2f5a43)}
+.ad{border-radius:var(--r);display:grid;place-items:center;text-align:center;color:#fff;font:700 22px/1.2 var(--serif);padding:20px;background:linear-gradient(135deg,#a32a2a,#e05a3a)}
+.ad small{display:block;font:500 11px var(--sans);color:#fff1ec;margin-top:6px}
+.ad.slim{height:90px;max-width:728px;margin:24px auto 0}.ad.side{height:250px}.ad.alt{background:linear-gradient(135deg,#355a68,#6f8f9a)}
+.crumbs{font-size:12.5px;color:var(--mute);padding-top:22px}.crumbs a:hover{color:var(--brand)}.crumbs b{color:var(--ink);font-weight:600}
+
+/* Layout */
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:32px;align-items:start;padding-top:20px}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{padding:4px 12px;border-radius:99px;font:700 10.5px var(--sans);letter-spacing:.05em;text-transform:uppercase;background:var(--tint);color:var(--brand)}
+.tag.a{background:var(--warn-bg);color:var(--warn-ink)}.tag.dk{background:var(--ink);color:#fff;border-radius:4px}.tag.soon{background:var(--ok-bg);color:var(--ok-ink);border-radius:4px}
+h1{font:700 36px/1.2 var(--serif);color:var(--brand);margin:16px 0 20px}
+
+/* Event header block */
+.hd{display:grid;grid-template-columns:260px 1fr;gap:28px;margin-bottom:24px}
+.poster{aspect-ratio:3/4;border-radius:var(--r);border:1px solid var(--line);box-shadow:0 6px 18px rgba(0,0,0,.1);display:grid;place-items:center;text-align:center;color:#fff;font:700 20px/1.3 var(--serif);padding:20px}
+.poster small{display:block;font:500 12px var(--sans);color:#f3f7f5;margin-top:6px}
+.exc{border-left:3px solid var(--accent);padding-left:18px;font:italic 400 15px/1.8 var(--serif);color:var(--mute);margin-bottom:20px}
+.info{border:1px solid var(--line);border-radius:var(--r);margin-bottom:18px}
+.info div{display:grid;grid-template-columns:100px 1fr;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);align-items:center}
+.info div:last-child{border:0}.info dt{font-size:12.5px;color:var(--mute)}.info dd{font:700 15px var(--serif)}
+
+/* Share, body, contact, tags */
+.share{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:20px}
+.share span{font:700 11px var(--sans);letter-spacing:.08em;color:var(--mute);margin-right:4px}
+.body h2,.contact h2{font:700 22px var(--serif);margin:32px 0 14px}
+.body p{color:#33403a;margin-bottom:14px;line-height:1.8}
+.strip{display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--brand-xdk);color:#fff;border-radius:var(--r);padding:18px 24px;margin:28px auto;max-width:90%}
+.strip small{font:700 10.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.strip h4{font:700 20px/1.25 var(--serif)}.strip p{font-size:12.5px;color:#e2eee9}
+.contact p a{color:var(--brand);text-decoration:underline}
+.tagbox{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;margin-top:24px;font:700 11px var(--sans);letter-spacing:.08em;color:var(--mute)}
+.tagbox a{font:600 12px var(--sans);letter-spacing:0;background:var(--tint);color:var(--brand);padding:4px 14px;border-radius:99px}
+
+/* Sidebar */
+aside{display:flex;flex-direction:column;gap:var(--gap)}
+.ev{border:1px solid var(--line);border-top:3px solid var(--brand);border-radius:var(--r);padding:20px}
+.ev small.k{font:700 10.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.ev h3{font:700 22px/1.25 var(--serif);color:var(--brand);margin:4px 0 2px}
+.ev .t{font-size:13px;color:var(--mute);margin-bottom:14px}
+.ev dl div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:13px;border-top:1px solid var(--line)}
+.ev dt{color:var(--mute)}.ev dd{font-weight:600;text-align:right}
+.state{margin:14px 0 12px;text-align:center;padding:11px;border-radius:8px;font:600 13px var(--sans)}
+.state.end{background:var(--bad-bg);color:var(--danger)}.state.soon{background:var(--ok-bg);color:var(--ok-ink)}
+.box h5{background:var(--brand);color:#fff;font:700 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:11px 16px}
+.box li a{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);align-items:center}.box li a:hover{background:var(--tint)}
+.date{width:42px;height:42px;border-radius:6px;background:var(--brand-dk);color:#fff;text-align:center;font:700 16px/1 var(--sans);padding-top:7px;flex:none}
+.date small{display:block;font-size:9px;font-weight:500;color:#e2eee9;margin-top:3px}
+.box li strong{display:block;font-size:12px;line-height:1.3;text-transform:uppercase}.box li span{font-size:11px;color:var(--mute)}
+.box .foot{display:block;text-align:right;padding:12px 16px;font:600 12.5px var(--sans);color:var(--brand)}
+.spl{position:relative;min-height:300px;border-radius:var(--r);overflow:hidden;color:#fff;display:flex;align-items:flex-end;background:linear-gradient(135deg,#2f5a43,#18382b)}
+.spl::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 20%,rgba(0,0,0,.7))}
+.spl div{position:relative;z-index:1;padding:20px;width:100%}
+.spl small{color:var(--accent);font:700 10.5px var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.spl h3{font:700 22px/1.2 var(--serif);margin:6px 0}.spl p{font-size:12.5px;color:#eef4f1;margin-bottom:12px}
+.band{background:var(--brand);color:#fff;border-radius:var(--r);padding:22px}
+.band h3{font:700 18px/1.3 var(--serif);margin-bottom:4px}.band p{font-size:12.5px;color:#e2eee9;margin-bottom:14px}
+.band input{width:100%;height:42px;border:0;border-radius:6px;padding:0 12px;font:14px var(--sans);margin-bottom:10px}
+
+/* Similar events */
+.simh{display:flex;align-items:flex-end;border-bottom:2px solid var(--brand);margin:56px 0 20px}
+.simh span{background:var(--brand);color:#fff;font:700 12.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:8px 16px}
+.sim{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap)}
+.ec{display:flex;flex-direction:column}
+.ec .ph{height:170px}
+.ec .b{padding:14px 16px;flex:1}
+.ec h3{font:700 15.5px/1.3 var(--serif);margin-bottom:8px}.ec p{font-size:12.5px;color:var(--mute);margin-bottom:3px}
+.ec .f{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding:12px 16px;font-size:11px;text-transform:uppercase;color:var(--mute)}
+.ec .f b{color:var(--brand);text-transform:none;font:600 12.5px var(--sans);white-space:nowrap}
+.banner{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--gap);max-width:900px;margin:56px auto 0}.banner .ad{height:200px}
+
+/* Footer */
+footer{background:var(--brand-xdk);color:#d5dcd8;padding-top:56px;font-size:13.5px;margin-top:64px}
+.fgrid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px}
+footer h6{color:#fff;font:700 14px var(--sans);margin-bottom:16px}
+footer li{margin-bottom:10px;color:#e6eeea}footer li:hover{opacity:1}
+footer .logo{display:block;margin-bottom:14px;color:#fff}footer p{color:#d9e5e0;margin-bottom:14px;max-width:380px}
+.fbar{border-top:1px solid rgba(255,255,255,.1);padding:24px 0;display:flex;justify-content:space-between;align-items:center;gap:24px;font-size:12.5px}
+.fbar .box2{border:1px solid #3d6b5f;border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:20px}
+.fbar .btn{height:36px;border-color:#d9e5e0;color:#fff;font-size:13px}
+
+@media(max-width:1100px){.sim{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1000px){
+  .cols,.fgrid,.banner{grid-template-columns:1fr}.hd{grid-template-columns:1fr}.poster{max-width:300px}
+  nav,.topbar{display:none}header .btn-ghost{display:none}h1{font-size:28px}
+  .strip,.fbar{flex-direction:column;align-items:flex-start;max-width:100%}.fbar .box2{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:640px){.sim{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body data-end="2027-01-16T16:00:00">
+
+<div class="topbar"><div class="wrap">
+  <a href="#">Opportunities</a><a href="#">Past papers</a><a href="#">School supplies</a><a href="#">Log in</a><a href="#">Sign up</a>
+</div></div>
+
+<header><div class="wrap">
+  <a class="logo" href="#">Find<b>UR</b>SCH</a>
+  <nav><a href="#">Home</a><a href="#">Schools</a><a href="#">Compare</a><a href="#">Scholarships</a><a href="#">News</a><a href="#">Blogs</a><a href="#">Jobs</a><a class="on" href="#">Events</a></nav>
+  <a class="btn btn-ghost" href="#">List your school</a>
+</div></header>
+
+<a class="rtab" href="#">REGISTER YOUR SCHOOL</a>
+
+<div class="ad slim">Your advert here<small>728 × 90</small></div>
+
+<main class="wrap">
+  <div class="crumbs"><a href="#">Home</a> / <a href="#">Events</a> / <a href="#">Fairs &amp; conferences</a> / <b>Open Day and School Tour 2027</b></div>
+
+  <div class="cols">
+    <article>
+      <div class="tags"><span class="tag a">Fairs &amp; conferences</span><span class="tag">In person</span><span class="tag">Kampala</span><span class="tag soon" id="status">Upcoming</span></div>
+      <h1>Open Day and School Tour 2027</h1>
+
+      <div class="hd">
+        <div class="poster ph d"><div>Event poster<small>Portrait image, 3:4</small></div></div>
+        <div>
+          <p class="exc">Sample Academy invites families to a full-day open day and guided campus tour. Meet teachers, see the classrooms and facilities, and ask your questions in person.</p>
+          <dl class="info">
+            <div><dt>Date</dt><dd>Saturday, 16 January 2027</dd></div>
+            <div><dt>Time</dt><dd>9:00am – 4:00pm</dd></div>
+            <div><dt>Venue</dt><dd>Sample Academy Campus, Kampala</dd></div>
+            <div><dt>Organiser</dt><dd>Sample Academic Centre</dd></div>
+          </dl>
+          <a class="btn btn-wa" href="#">Talk to us on WhatsApp</a>
+        </div>
+      </div>
+
+      <div class="share"><span>SHARE:</span><a class="btn sm fb" href="#">Facebook</a><a class="btn sm btn-wa" href="#">WhatsApp</a><a class="btn sm xx" href="#">Twitter</a><button class="btn sm cp" id="copy">Copy link</button></div>
+
+      <section class="body">
+        <h2>About the event</h2>
+        <p>Sample Academy invites you to a full-day open day. Walk through the classrooms, laboratories, library and sports grounds with our teachers and student guides, and see what a normal school day looks like.</p>
+        <p>Staff will be available to talk about admissions, fees, curriculum and boarding. Bring your child, your questions and any documents you would like to discuss.</p>
+        <div class="strip"><div><small>Premium schools</small><h4>Be the first school parents see</h4><p>Top of search, homepage feature and spotlight adverts.</p></div><a class="btn btn-brand" href="#">See school plans</a></div>
+      </section>
+
+      <section class="contact">
+        <h2>Contact the organiser</h2>
+        <p>Jane Doe · <a href="#">+256 700 000 000</a> · <a href="#">events@sample-academy.example</a></p>
+      </section>
+
+      <div class="tagbox">TAGS:<a href="#">Fairs &amp; conferences</a><a href="#">Kampala schools</a></div>
+    </article>
+
+    <aside>
+      <div class="ev">
+        <small class="k">Event date</small>
+        <h3>Sat, 16 Jan 2027</h3><p class="t">9:00am – 4:00pm</p>
+        <dl><div><dt>Venue</dt><dd>Kampala</dd></div><div><dt>Organiser</dt><dd>Sample Academic Centre</dd></div><div><dt>Format</dt><dd>In person</dd></div></dl>
+        <p class="state soon" id="state">Open for visitors</p>
+        <a class="btn btn-line btn-block" href="#">Ask on WhatsApp</a>
+      </div>
+
+      <div class="card box"><h5>Upcoming events</h5><ul>
+        <li><a href="#"><span class="date">20<small>DEC</small></span><div><strong>Annual open day</strong><span>Kampala · 8:00am–4:00pm</span></div></a></li>
+        <li><a href="#"><span class="date">10<small>JAN</small></span><div><strong>Parents information evening</strong><span>Wakiso · 5:00pm–7:00pm</span></div></a></li>
+        <li><a href="#"><span class="date">24<small>JAN</small></span><div><strong>Inter-school science fair</strong><span>Mukono · 9:00am–3:00pm</span></div></a></li>
+      </ul><a class="foot" href="#">See all upcoming events</a></div>
+
+      <div class="ad side">Your advert here<small>300 × 250</small></div>
+
+      <div class="spl"><div><small>School spotlight</small><h3>Spotlight school name</h3><p>Short description of the school, kept to two lines.</p><a class="btn btn-gold btn-block" href="#">Learn more about this school</a></div></div>
+
+      <form class="band" onsubmit="return false"><h3>Get event updates by email</h3><p>Upcoming open days, fairs and school events, free, straight to your inbox.</p>
+        <input type="email" placeholder="Enter your email address" aria-label="Email address"><button class="btn btn-gold btn-block">Subscribe</button></form>
+    </aside>
+  </div>
+
+  <div class="simh"><span>Similar events</span></div>
+  <div class="sim" id="sim"></div>
+
+  <div class="banner"><div class="ad">Wide advert<small>728 × 200</small></div><div class="ad alt">School advert<small>468 × 200</small></div></div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div><a class="logo" href="#">Find<b>UR</b>SCH</a><p>Uganda's school discovery, comparison and admissions platform, with school profiles, news, blogs, events, jobs and scholarships.</p><p>Kampala, Uganda<br>+256 000 000 000<br>hello@findursch.ug</p></div>
+      <div><h6>Explore schools</h6><ul><li>Primary schools</li><li>Secondary schools</li><li>Universities</li><li>Vocational schools</li><li>Boarding schools</li><li>International schools</li></ul></div>
+      <div><h6>Resources</h6><ul><li>Latest news</li><li>Blogs</li><li>Scholarships</li><li>School jobs</li><li>Events calendar</li><li>Past papers</li><li>Compare schools</li></ul></div>
+      <div><h6>Support</h6><ul><li>List your school</li><li>Advertise with us</li><li>About</li><li>Contact</li><li>Terms and conditions</li><li>Privacy policy</li></ul></div>
+    </div>
+    <div class="fbar">
+      <span>© 2026 FindURSCH. All rights reserved.</span>
+      <div class="box2"><span>Want to reach parents and students every month?</span><a class="btn btn-ghost" href="#">Advertise with us</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Upcoming or past is decided from the event end time (data-end). In Laravel use $event->ends_at->isPast(). */
+if(new Date(document.body.dataset.end)<new Date()){
+  const s=document.getElementById("status");s.textContent="Past event";s.className="tag dk";
+  const t=document.getElementById("state");t.textContent="This event has ended";t.className="state end";
+}
+const c=document.getElementById("copy");
+c.onclick=()=>{try{navigator.clipboard.writeText(location.href);c.textContent="Link copied";setTimeout(()=>c.textContent="Copy link",1500)}catch(e){}};
+
+/* Similar events. In Laravel: @foreach($similar as $e) <x-event-card :event="$e"/> */
+const E=[["Mathematics &amp; science olympiad","Sample High School, Kampala","8:30am – 2:00pm","22 May 2027","Sample High School"],["Open Day and School Tour 2027","Sample Academy Campus, Kampala","9:00am – 4:00pm","16 January 2027","Sample Academic Centre"],["Annual open day","Sample School Ground, Kampala","8:00am – 4:00pm","20 December 2026","Sample School"],["Parents information evening","Sample Primary School, Wakiso","5:00pm – 7:00pm","10 January 2027","Sample Primary"],["Inter-school science fair","Sample College, Mukono","9:00am – 3:00pm","24 January 2027","Sample College"]];
+const P=["","b","c","d"];
+document.getElementById("sim").innerHTML=E.map((e,i)=>`<a class="card ec" href="#"><div class="ph ${P[i%4]}"></div><div class="b"><h3>${e[0]}</h3><p>${e[1]}</p><p>${e[2]}</p><p>${e[3]}</p></div><div class="f"><span>${e[4]}</span><b>Details</b></div></a>`).join("");
+</script>
+</body>
+</html>

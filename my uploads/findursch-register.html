@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>List your school — FindURSCH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,700&display=swap" rel="stylesheet">
+<style>
+/* ---------- TOKENS (shared by every page) ---------- */
+:root{
+  --brand:#0c5a49; --brand-dk:#083f33; --brand-xdk:#052a22;
+  --accent:#f0b030; --accent-dk:#d99a1a;
+  --tint:#f1f6f3; --line:#e4e8e6; --ink:#1b2420; --mute:#5d6b65;
+  --warn-bg:#fdf3d6; --warn-line:#f0b030; --ok-bg:#e3f4e8; --ok-ink:#17703a; --danger:#b3261e;
+  --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+  --r:10px; --gap:24px; --wrap:1280px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+body{font:15px/1.55 var(--sans);color:var(--ink);background:#fff}
+a{color:inherit;text-decoration:none}ul{list-style:none}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gap)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 24px;border-radius:8px;font:600 14px var(--sans);border:1.5px solid transparent;cursor:pointer;white-space:nowrap}
+.btn-gold{background:var(--accent);color:#2a1d00}.btn-gold:hover{background:var(--accent-dk)}
+.btn-ghost{border-color:#fff;color:#fff;height:42px;padding:0 20px}.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.btn-brand{background:var(--brand);color:#fff}.btn-brand:hover{background:var(--brand-dk)}
+.btn-line{border-color:var(--line);color:var(--ink);background:#fff}.btn-line:hover{border-color:var(--brand)}
+
+/* Top bar + header */
+.topbar{background:var(--brand-dk);color:#fff;font-size:12.5px}
+.topbar .wrap{display:flex;justify-content:flex-end;gap:22px;height:32px;align-items:center}
+.topbar a{color:#ffffff}.topbar a:hover{opacity:1}
+header{background:var(--brand);color:#fff;position:sticky;top:0;z-index:40;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+header .wrap{display:flex;align-items:center;gap:28px;height:64px}
+.logo{font:700 26px var(--serif);letter-spacing:-.3px}.logo b{color:var(--accent)}
+nav{display:flex;gap:4px;margin:0 auto}
+nav a{padding:8px 14px;border-radius:8px;font-size:14px;font-weight:500}
+nav a:hover{background:rgba(255,255,255,.16)}
+.rtab{position:fixed;right:0;top:34%;z-index:50;writing-mode:vertical-rl;background:var(--accent);color:#2a1d00;font:700 12px var(--sans);letter-spacing:.06em;padding:18px 9px;border-radius:10px 0 0 10px;box-shadow:-3px 3px 12px rgba(0,0,0,.2)}
+.up{position:fixed;right:24px;bottom:28px;width:44px;height:44px;border-radius:50%;background:var(--brand);color:#fff;border:0;font-size:18px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);z-index:45}
+
+/* Page header */
+.phead{background:var(--tint);border-bottom:1px solid var(--line);padding:14px 0 36px}
+.crumbs{font-size:12.5px;color:var(--mute)}.crumbs b{color:var(--ink);font-weight:600}
+.phead h1{font:700 40px/1.15 var(--serif);text-align:center;margin:24px auto 12px;max-width:900px}
+.phead h1 em{color:var(--brand)}
+.phead p{text-align:center;max-width:600px;margin:0 auto;color:var(--mute)}
+
+/* Layout */
+.wz{display:grid;grid-template-columns:minmax(0,780px) 300px;gap:32px;justify-content:center;padding:36px 24px 0;max-width:var(--wrap);margin:0 auto;align-items:start}
+.wiz{background:#fff;border:1px solid var(--line);border-top:4px solid var(--brand);border-radius:14px;padding:28px 32px 32px;scroll-margin-top:84px}
+
+/* Stepper */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);text-align:center}
+.st i{display:grid;place-items:center;width:36px;height:36px;margin:0 auto 6px;border-radius:50%;border:2px solid #b4c0ba;background:#fff;color:#66756e;font:700 13px var(--sans);font-style:normal}
+.st span{font:600 12px var(--sans);color:#66756e}
+.st.done i{border-color:var(--brand);color:var(--brand)}.st.done span{color:var(--mute)}
+.st.on i{background:var(--brand);border-color:var(--brand);color:#fff}.st.on span{color:var(--brand)}
+.track{height:3px;background:var(--line);margin:16px 0 28px;border-radius:2px}
+.track b{display:block;height:100%;width:25%;background:var(--brand);border-radius:2px;transition:width .3s}
+
+/* Form */
+.pane h2{font:700 26px var(--serif);margin-bottom:2px}
+.pane>p{color:var(--mute);font-size:13.5px;margin-bottom:20px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}.w{grid-column:1/-1}
+label.f{display:block;font:600 13px var(--sans)}
+.req::after{content:" *";color:var(--danger)}
+.f input,.f select,.f textarea{display:block;width:100%;margin-top:6px;height:46px;padding:0 14px;border:1px solid #d6dcd9;border-radius:8px;font:14px var(--sans);background:#fff;color:var(--ink)}
+.f textarea{height:110px;padding:12px 14px;resize:vertical}
+.f input:focus,.f select:focus,.f textarea:focus{outline:2px solid var(--brand);border-color:var(--brand)}
+.f small{display:block;margin-top:4px;font-weight:400;font-size:12px;color:var(--mute)}
+.drop{display:block;margin-top:6px;border:2px dashed #b9c8c1;border-radius:10px;background:var(--tint);text-align:center;padding:30px 16px;cursor:pointer;color:var(--brand);font:600 14px var(--sans)}
+.drop:hover{background:#e8f1ed}.drop small{display:block;margin-top:4px;color:var(--mute);font:400 12px var(--sans)}
+.drop.err{border-color:var(--danger);color:var(--danger)}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.opt{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;cursor:pointer;background:#fff}
+.opt input{width:16px;height:16px;accent-color:var(--brand);flex:none}
+.opt:hover{border-color:var(--brand)}.opt:has(input:checked){background:var(--tint);border-color:var(--brand);font-weight:600;color:var(--brand)}
+.sub{font:600 13px var(--sans);margin:22px 0 10px}
+.agree{display:flex;gap:12px;align-items:flex-start;background:var(--warn-bg);border:2px solid var(--warn-line);border-radius:10px;padding:16px 18px;font-size:14px;margin-top:22px}
+.agree input{width:20px;height:20px;accent-color:var(--brand);flex:none;margin-top:2px}
+.agree a{color:var(--brand);text-decoration:underline}
+.agree em{font:700 10px var(--sans);letter-spacing:.05em;text-transform:uppercase;background:var(--brand);color:#fff;padding:2px 9px;border-radius:99px;margin-left:4px;font-style:normal}
+.okn{margin-top:14px;border-left:4px solid var(--brand);background:var(--ok-bg);color:#27402f;padding:14px 18px;font-size:13.5px;border-radius:0 8px 8px 0}
+.err-t{color:var(--danger);font-size:12.5px;margin-top:10px}
+.nav{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:32px;padding-top:24px;color:var(--mute);font-size:13px}
+
+/* Success */
+.done-p{text-align:center;padding:24px 8px}
+.done-p i{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 16px;border-radius:50%;background:var(--ok-bg);color:var(--ok-ink);font:700 30px var(--sans);font-style:normal}
+.done-p h2{font:700 28px var(--serif);margin-bottom:8px}.done-p p{color:var(--mute);max-width:460px;margin:0 auto 22px}
+
+/* Side card */
+.side{background:var(--brand);color:#fff;border-radius:14px;padding:26px;position:sticky;top:88px}
+.side h3{font:700 21px/1.25 var(--serif);margin-bottom:16px}
+.side li{display:flex;gap:10px;margin-bottom:12px;font-size:14px}.side li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);margin-top:9px;flex:none}
+.side hr{border:0;border-top:1px solid rgba(255,255,255,.2);margin:18px 0}
+.side p{font-size:13.5px}.side a{font-weight:700;text-decoration:underline}
+
+/* Footer */
+footer{background:var(--brand-xdk);color:#d5dcd8;padding-top:56px;font-size:13.5px;margin-top:64px}
+.fgrid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px}
+footer h6{color:#fff;font:700 14px var(--sans);margin-bottom:16px}
+footer li{margin-bottom:10px;color:#e6eeea}footer li:hover{opacity:1}
+footer .logo{display:block;margin-bottom:14px;color:#fff}footer p{color:#d9e5e0;margin-bottom:14px;max-width:380px}
+.fbar{border-top:1px solid rgba(255,255,255,.1);padding:24px 0;display:flex;justify-content:space-between;align-items:center;gap:24px;font-size:12.5px}
+.fbar .box2{border:1px solid #3d6b5f;border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:20px}
+.fbar .btn{height:36px;font-size:13px}
+
+@media(max-width:1000px){
+  .wz,.fgrid{grid-template-columns:1fr}.side{position:static}
+  nav,.topbar{display:none}header .btn-ghost{display:none}.phead h1{font-size:28px}
+  .opts{grid-template-columns:repeat(2,1fr)}.fbar{flex-direction:column;align-items:flex-start}.fbar .box2{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:640px){.fg{grid-template-columns:1fr}.wiz{padding:22px 18px}.opts{grid-template-columns:1fr}.st span{font-size:10.5px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <a href="#">Opportunities</a><a href="#">Past papers</a><a href="#">School supplies</a><a href="#">Log in</a><a href="#">Sign up</a>
+</div></div>
+
+<header><div class="wrap">
+  <a class="logo" href="#">Find<b>UR</b>SCH</a>
+  <nav><a href="#">Home</a><a href="#">Schools</a><a href="#">Compare</a><a href="#">Scholarships</a><a href="#">News</a><a href="#">Jobs</a><a href="#">Events</a></nav>
+  <a class="btn btn-ghost" href="#">List your school</a>
+</div></header>
+
+<a class="rtab" href="#">REGISTER YOUR SCHOOL</a>
+
+<section class="phead"><div class="wrap">
+  <div class="crumbs"><a href="#">Home</a> / <b>List your school</b></div>
+  <h1>Getting started: put your school in front of <em>more parents</em></h1>
+  <p>Create your school profile on FindURSCH so parents across Uganda can discover and contact you. It is free and takes about 5 minutes. Our team reviews every listing before it goes public.</p>
+</div></section>
+
+<main class="wz">
+  <section class="wiz" id="card" aria-label="School registration">
+    <ol class="steps" id="steps" style="list-style:none">
+      <li class="st on"><i>1</i><span>Account</span></li>
+      <li class="st"><i>2</i><span>School info</span></li>
+      <li class="st"><i>3</i><span>Location</span></li>
+      <li class="st"><i>4</i><span>Facilities</span></li>
+    </ol>
+    <div class="track"><b id="fill"></b></div>
+
+    <form id="wiz" novalidate>
+      <!-- STEP 1 -->
+      <div class="pane">
+        <h2>Create your account</h2>
+        <p>This is the person who will manage the school's listing. You will sign in with this email.</p>
+        <div class="fg">
+          <label class="f"><span class="req">First name</span><input name="first" required autocomplete="given-name"></label>
+          <label class="f"><span class="req">Last name</span><input name="last" required autocomplete="family-name"></label>
+          <label class="f"><span class="req">Your role at the school</span><select required><option value="">Select</option><option>Director / Proprietor</option><option>Head teacher / Principal</option><option>Deputy head teacher</option><option>Administrator</option><option>Bursar</option><option>Marketing officer</option><option>Other</option></select></label>
+          <label class="f"><span class="req">Phone / WhatsApp</span><input type="tel" required placeholder="+256 7XX XXX XXX" pattern="\+?[0-9 ]{9,15}" autocomplete="tel"></label>
+          <label class="f w"><span class="req">Email address</span><input type="email" required autocomplete="email"></label>
+          <label class="f"><span class="req">Password</span><input type="password" id="pw" required minlength="8" placeholder="At least 8 characters" autocomplete="new-password"></label>
+          <label class="f"><span class="req">Confirm password</span><input type="password" id="pw2" required autocomplete="new-password"></label>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="pane" hidden>
+        <h2>Tell us about your school</h2>
+        <p>Parents see this on your school's profile page.</p>
+        <div class="fg">
+          <label class="f w"><span class="req">School name</span><input required></label>
+          <label class="f"><span class="req">School level</span><select required><option value="">Select</option><option>Nursery</option><option>Primary</option><option>Secondary</option><option>A-Level</option><option>University</option><option>Vocational</option><option>International</option></select></label>
+          <label class="f"><span class="req">Ownership</span><select required><option value="">Select</option><option>Private</option><option>Government</option><option>Faith-based</option><option>NGO / Community</option></select></label>
+          <label class="f">Curriculum<select><option value="">Select</option><option>UNEB (O-Level)</option><option>UNEB (A-Level)</option><option>Cambridge IGCSE</option><option>Cambridge A-Level</option><option>IB</option><option>STEM</option><option>Other</option></select></label>
+          <label class="f">Learners<select><option value="">Select</option><option>Mixed (boys and girls)</option><option>Boys only</option><option>Girls only</option></select></label>
+          <label class="f">Day / boarding<select><option value="">Select</option><option>Day</option><option>Boarding</option><option>Day and boarding</option></select></label>
+          <label class="f">Religious affiliation<select><option value="">Select</option><option>Non-denominational</option><option>Catholic</option><option>Anglican</option><option>Pentecostal</option><option>Seventh-day Adventist</option><option>Muslim</option><option>None</option></select></label>
+          <label class="f">Year founded<input type="number" min="1800" max="2026" placeholder="e.g. 1998"></label>
+          <label class="f">School website<input type="url" placeholder="https://"></label>
+          <label class="f w"><span class="req">About the school</span><textarea required minlength="30" maxlength="1500" id="about" placeholder="Mission, values, achievements and what makes your school different"></textarea><small><span id="ac">0</span> / 1,500 characters</small></label>
+          <div class="w"><label class="f" for="logo">School logo (optional)</label>
+            <label class="drop" for="logo" data-max="2"><span>Click to upload your logo</span><small>JPG, PNG or WebP · Max 2 MB</small></label>
+            <input type="file" id="logo" accept="image/png,image/jpeg,image/webp" hidden></div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="pane" hidden>
+        <h2>Where is your school?</h2>
+        <p>Helps parents find schools near them.</p>
+        <div class="fg">
+          <label class="f"><span class="req">Region</span><select id="reg" required><option value="">Select</option><option>Central</option><option>Eastern</option><option>Northern</option><option>Western</option></select></label>
+          <label class="f"><span class="req">District</span><select id="dis" required><option value="">Select a region first</option></select></label>
+          <label class="f"><span class="req">Town / area</span><input required placeholder="e.g. Kisaasi"></label>
+          <label class="f">P.O. Box<input placeholder="e.g. P.O. Box 151631"></label>
+          <label class="f w"><span class="req">Physical address</span><input required placeholder="Street, plot number or road"></label>
+          <label class="f">Nearest landmark<input placeholder="e.g. Opposite Kisaasi Market"></label>
+          <label class="f">Google Maps link<input type="url" placeholder="https://maps.google.com/"></label>
+          <label class="f">School phone<input type="tel" placeholder="+256 ..."></label>
+          <label class="f">School email<input type="email" placeholder="info@yourschool.ac.ug"></label>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="pane" hidden>
+        <h2>Facilities and fees</h2>
+        <p>Select everything your school offers.</p>
+        <div class="opts" id="opts"></div>
+        <div class="fg" style="margin-top:22px">
+          <label class="f">Fees from (UGX per term)<input type="number" min="0" step="1000" placeholder="e.g. 350000"></label>
+          <label class="f">Fees to (UGX per term)<input type="number" min="0" step="1000" placeholder="e.g. 800000"></label>
+          <label class="f">Co-curricular activities<input placeholder="e.g. Football, debate, choir"></label>
+          <label class="f">YouTube video link<input type="url" placeholder="https://youtube.com/..."></label>
+          <label class="f">Facebook page<input type="url" placeholder="https://facebook.com/..."></label>
+          <label class="f">Instagram<input type="url" placeholder="https://instagram.com/..."></label>
+          <div class="w"><label class="f" for="cover">Cover photo (optional)</label>
+            <label class="drop" for="cover" data-max="5"><span>Click to upload a cover photo</span><small>Your best photo of the school · Max 5 MB · add more photos from your dashboard</small></label>
+            <input type="file" id="cover" accept="image/png,image/jpeg,image/webp" hidden></div>
+          <label class="f w">How did you hear about FindURSCH?<select><option value="">Select</option><option>Search engine</option><option>Social media</option><option>Another school</option><option>Word of mouth</option><option>Your team contacted us</option><option>Other</option></select></label>
+        </div>
+        <label class="agree"><input type="checkbox" id="ok" required><span><b>I confirm the information is accurate</b> and agree to the <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a>.<em>Required</em></span></label>
+        <p class="okn">Registration is free. Your school starts on the <b>Basic</b> package and you can upgrade to Standard or Premium from your dashboard at any time.</p>
+      </div>
+
+      <p class="err-t" id="err" role="alert" hidden></p>
+      <div class="nav">
+        <button type="button" class="btn btn-line" id="back">← Back</button>
+        <span id="cnt">Step 1 of 4</span>
+        <button type="button" class="btn btn-brand" id="next">Continue →</button>
+      </div>
+    </form>
+
+    <div class="done-p" id="done" hidden>
+      <i>✓</i><h2>Registration received</h2>
+      <p>Thank you. We sent a verification link to your email. Your dashboard is ready now, and your school will appear in search once our team has reviewed it, usually within one working day.</p>
+      <a class="btn btn-brand" href="#">Go to my dashboard</a>
+    </div>
+  </section>
+
+  <aside class="side">
+    <h3>Why list with FindURSCH?</h3>
+    <ul><li><span>Be found by parents searching across Uganda</span></li><li><span>Get enquiries by phone, WhatsApp and email</span></li><li><span>Share news, events, jobs and scholarships</span></li><li><span>Free to start, upgrade any time</span></li></ul>
+    <hr><p>Already registered? <a href="#">Log in to your dashboard</a></p>
+    <hr><p>Need help? <a href="#">Chat with us on WhatsApp</a></p>
+  </aside>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div><a class="logo" href="#">Find<b>UR</b>SCH</a><p>Uganda's school discovery, comparison and admissions platform, with school profiles, news, events, jobs and scholarships.</p><p>Kampala, Uganda<br>+256 000 000 000<br>hello@findursch.ug</p></div>
+      <div><h6>Explore schools</h6><ul><li>Primary schools</li><li>Secondary schools</li><li>Universities</li><li>Vocational schools</li><li>Boarding schools</li><li>International schools</li></ul></div>
+      <div><h6>Resources</h6><ul><li>Latest news</li><li>Scholarships</li><li>School jobs</li><li>Events calendar</li><li>Articles</li><li>Past papers</li><li>Compare schools</li></ul></div>
+      <div><h6>Support</h6><ul><li>List your school</li><li>Advertise with us</li><li>About</li><li>Contact</li><li>Terms and conditions</li><li>Privacy policy</li></ul></div>
+    </div>
+    <div class="fbar">
+      <span>© 2026 FindURSCH. All rights reserved.</span>
+      <div class="box2"><span>Want to reach parents and students every month?</span><a class="btn btn-ghost" href="#">Advertise with us</a></div>
+    </div>
+  </div>
+</footer>
+<button class="up" id="up" aria-label="Back to top" hidden>↑</button>
+
+<script>
+const $=id=>document.getElementById(id);
+const panes=[...document.querySelectorAll(".pane")],steps=[...document.querySelectorAll(".st")];
+let n=0;
+
+/* Facility tiles. In Laravel: @foreach($facilities->where('in_wizard',true) as $f) */
+$("opts").innerHTML=["Library","Science laboratories","ICT / computer lab","Boarding facilities","School transport","Sick bay / clinic","Sports fields","Swimming pool","Music & drama","Chapel / prayer space","Dining hall","Security & CCTV","Electricity / solar","Clean water","Special needs support","Wi-Fi"]
+  .map(t=>`<label class="opt"><input type="checkbox" name="facility" value="${t}">${t}</label>`).join("");
+
+/* Region -> district. In Laravel: load from the districts table. */
+const D={Central:["Kampala","Wakiso","Mukono","Masaka","Buikwe"],Eastern:["Jinja","Mbale","Tororo","Iganga"],Northern:["Gulu","Lira","Arua","Kitgum"],Western:["Mbarara","Kabarole","Kasese","Masindi","Rukungiri"]};
+$("reg").onchange=e=>{$("dis").innerHTML='<option value="">Select</option>'+(D[e.target.value]||[]).map(d=>`<option>${d}</option>`).join("")};
+
+/* About counter */
+$("about").oninput=e=>$("ac").textContent=e.target.value.length.toLocaleString();
+
+/* Upload zones: size check and file name */
+document.querySelectorAll('input[type=file]').forEach(inp=>{
+  const z=document.querySelector(`label.drop[for=${inp.id}]`);
+  inp.onchange=()=>{const f=inp.files[0];if(!f)return;
+    const big=f.size>z.dataset.max*1048576;z.classList.toggle("err",big);
+    z.firstElementChild.textContent=big?`File is larger than ${z.dataset.max} MB. Choose a smaller one.`:`${f.name} selected`;
+    if(big)inp.value=""};
+});
+
+function show(i){
+  n=i;panes.forEach((p,k)=>p.hidden=k!==i);
+  steps.forEach((s,k)=>{s.classList.toggle("on",k===i);s.classList.toggle("done",k<i);s.firstElementChild.textContent=k<i?"✓":k+1;
+    k===i?s.setAttribute("aria-current","step"):s.removeAttribute("aria-current")});
+  $("fill").style.width=(i+1)*25+"%";$("cnt").textContent=`Step ${i+1} of 4`;
+  $("back").style.visibility=i?"visible":"hidden";$("next").textContent=i===3?"Submit registration ✓":"Continue →";
+  $("err").hidden=true;$("card").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function valid(){
+  if(n===0)$("pw2").setCustomValidity($("pw").value===$("pw2").value?"":"Passwords do not match");
+  for(const el of panes[n].querySelectorAll("input,select,textarea")){
+    if(!el.checkValidity()){el.reportValidity();return false}
+  }
+  return true;
+}
+$("back").onclick=()=>show(n-1);
+$("next").onclick=()=>{
+  if(!valid())return;
+  if(n<3)return show(n+1);
+  /* Submit: replace with a fetch() POST to Laravel (/list-your-school) and handle validation errors. */
+  $("wiz").hidden=true;$("fill").style.width="100%";
+  steps.forEach(s=>{s.classList.remove("on");s.classList.add("done");s.firstElementChild.textContent="✓"});
+  $("done").hidden=false;$("card").scrollIntoView({behavior:"smooth",block:"start"});
+};
+show(0);
+
+/* Back to top */
+const up=$("up");up.onclick=()=>scrollTo({top:0,behavior:"smooth"});
+addEventListener("scroll",()=>up.hidden=scrollY<400,{passive:true});
+</script>
+</body>
+</html>

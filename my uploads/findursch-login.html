@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — FindURSCH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* ---------- TOKENS (shared by every page) ---------- */
+:root{
+  --brand:#0c5a49; --brand-dk:#083f33; --brand-xdk:#052a22;
+  --accent:#f0b030; --accent-dk:#d99a1a; --wa:#1fa855;
+  --tint:#f1f6f3; --line:#e4e8e6; --ink:#1b2420; --mute:#5d6b65;
+  --on-dark:#e2eee9; --danger:#b3261e; --danger-bg:#fbe9e7;
+  --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+  --r:10px; --gap:24px; --wrap:1280px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.55 var(--sans);color:var(--ink);background:#fff}
+a{color:inherit;text-decoration:none}ul{list-style:none}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gap)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 20px;border-radius:8px;font:600 14px var(--sans);border:1.5px solid transparent;cursor:pointer;white-space:nowrap}
+.btn-ghost{border-color:#fff;color:#fff}.btn-ghost:hover{background:rgba(255,255,255,.16)}
+
+/* Top bar + header */
+.topbar{background:var(--brand-dk);color:#fff;font-size:12.5px}
+.topbar .wrap{display:flex;justify-content:flex-end;gap:22px;height:32px;align-items:center}
+.topbar a:hover{text-decoration:underline}
+header{background:var(--brand);color:#fff;position:sticky;top:0;z-index:40;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+header .wrap{display:flex;align-items:center;gap:28px;height:64px}
+.logo{font:700 26px var(--serif);letter-spacing:-.3px}.logo b{color:var(--accent)}
+nav{display:flex;gap:4px;margin:0 auto}
+nav a{padding:8px 14px;border-radius:8px;font-size:14px;font-weight:500}
+nav a:hover{background:rgba(255,255,255,.18)}
+.rtab{position:fixed;right:0;top:34%;z-index:50;writing-mode:vertical-rl;background:var(--accent);color:#2a1d00;font:700 12px var(--sans);letter-spacing:.06em;padding:18px 9px;border-radius:10px 0 0 10px;box-shadow:-3px 3px 12px rgba(0,0,0,.2)}
+
+/* Login */
+main{background:var(--tint);padding:48px 24px 56px;display:grid;place-items:start center}
+.login{width:100%;max-width:440px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 18px 50px rgba(8,63,51,.18)}
+.lh{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--brand),var(--brand-dk));color:#fff;text-align:center;padding:36px 24px 30px}
+.lh::before{content:"";position:absolute;right:-30px;top:-50px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.1)}
+.lh::after{content:"";position:absolute;left:-40px;bottom:-60px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.08)}
+.lh>*{position:relative;z-index:1}
+.lh .logo{font-size:34px;display:block;margin-bottom:14px}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid #fff;border-radius:99px;padding:7px 16px;font:600 13px var(--sans);background:rgba(255,255,255,.14)}
+.pill i{width:8px;height:8px;border-radius:50%;background:#3ddc84}
+.lb{padding:34px 36px 30px}
+.lb h1{font:700 30px/1.2 var(--serif);text-align:center}
+.lb .sub{text-align:center;color:var(--mute);font-size:14.5px;margin:6px 0 26px}
+.row{display:flex;justify-content:space-between;align-items:baseline}
+label.f{display:block;font:600 13px var(--sans);margin-bottom:6px}
+.row a{font:600 13px var(--sans);color:var(--brand)}.row a:hover{text-decoration:underline}
+.in{position:relative;margin-bottom:18px}
+.in input{display:block;width:100%;height:50px;padding:0 16px;border:1px solid #cdd6d2;border-radius:10px;font:15px var(--sans);background:#fff;color:var(--ink)}
+.in input::placeholder{color:#7a8781}
+.in input:focus{outline:2px solid var(--brand);border-color:var(--brand)}
+.in.bad input{border-color:var(--danger);outline-color:var(--danger)}
+.in button{position:absolute;right:8px;top:50%;transform:translateY(-50%);height:34px;padding:0 10px;border:0;background:none;font:600 12.5px var(--sans);color:var(--mute);cursor:pointer;border-radius:6px}
+.in button:hover{color:var(--brand);background:var(--tint)}
+.in .pw{padding-right:64px}
+.keep{display:flex;align-items:center;gap:10px;font:500 13px var(--sans);cursor:pointer;margin:2px 0 20px}
+.keep input{width:18px;height:18px;accent-color:var(--brand)}
+.msg{display:none;background:var(--danger-bg);color:var(--danger);border-radius:8px;padding:10px 14px;font:600 13px var(--sans);margin-bottom:16px}
+.msg.show{display:block}.msg.ok{background:#e3f4e8;color:#17703a}
+.go{width:100%;height:50px;border:0;border-radius:10px;background:var(--brand);color:#fff;font:700 15px var(--sans);cursor:pointer;box-shadow:0 8px 18px rgba(12,90,73,.28)}
+.go:hover{background:var(--brand-dk)}.go:disabled{background:#4e7f73;cursor:wait;box-shadow:none}
+.or{display:flex;align-items:center;gap:14px;margin:20px 0;font:600 11px var(--sans);letter-spacing:.1em;color:var(--mute)}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.reg{display:flex;align-items:center;justify-content:center;height:48px;border:1.5px solid var(--brand);border-radius:10px;color:var(--brand);font:700 14px var(--sans)}
+.reg:hover{background:var(--tint)}
+.help{border-top:1px solid var(--line);margin-top:24px;padding-top:20px;text-align:center;font-size:13.5px;color:var(--mute)}
+.help a{color:var(--brand);font-weight:700}.help a:hover{text-decoration:underline}
+.parent{text-align:center;font-size:13px;color:var(--mute);margin-top:14px}.parent a{color:var(--brand);font-weight:600;text-decoration:underline}
+
+/* Footer */
+footer{background:var(--brand-xdk);color:#fff;padding-top:56px;font-size:13.5px}
+.fgrid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px}
+footer h6{color:#fff;font:700 14px var(--sans);margin-bottom:16px}
+footer li{margin-bottom:10px;color:var(--on-dark)}footer li:hover{color:#fff;text-decoration:underline}
+footer .logo{display:block;margin-bottom:14px}footer p{color:var(--on-dark);margin-bottom:14px;max-width:380px}
+.fbar{border-top:1px solid #2a5a4d;padding:24px 0;display:flex;justify-content:space-between;align-items:center;gap:24px;font-size:12.5px;color:var(--on-dark)}
+.fbar .box2{border:1px solid #3d6b5f;border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:20px}
+.fbar .btn{height:36px;font-size:13px}
+
+@media(max-width:1000px){
+  .fgrid{grid-template-columns:1fr}nav,.topbar{display:none}header .btn-ghost{display:none}
+  .fbar{flex-direction:column;align-items:flex-start}.fbar .box2{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:480px){.lb{padding:28px 22px 24px}main{padding:28px 14px 40px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <a href="#">Opportunities</a><a href="#">Past papers</a><a href="#">School supplies</a><a href="#">Log in</a><a href="#">Sign up</a>
+</div></div>
+
+<header><div class="wrap">
+  <a class="logo" href="#">Find<b>UR</b>SCH</a>
+  <nav><a href="#">Home</a><a href="#">Schools</a><a href="#">Compare</a><a href="#">Scholarships</a><a href="#">News</a><a href="#">Blogs</a><a href="#">Jobs</a><a href="#">Events</a></nav>
+  <a class="btn btn-ghost" href="#">List your school</a>
+</div></header>
+
+<a class="rtab" href="#">REGISTER YOUR SCHOOL</a>
+
+<main>
+  <section class="login" aria-labelledby="t">
+    <div class="lh"><a class="logo" href="#">Find<b>UR</b>SCH</a><span class="pill"><i></i>Parent and school sign in</span></div>
+    <div class="lb">
+      <h1 id="t">Welcome back</h1>
+      <p class="sub">Sign in to manage your school or your saved schools on FindURSCH</p>
+
+      <form id="f" novalidate>
+        <p class="msg" id="msg" role="alert"></p>
+        <label class="f" for="u">Email or phone number</label>
+        <div class="in" id="gu"><input id="u" name="login" autocomplete="username" placeholder="you@school.ac.ug or 07XX XXX XXX"></div>
+
+        <div class="row"><label class="f" for="p">Password</label><a href="#">Forgot password?</a></div>
+        <div class="in" id="gp"><input class="pw" id="p" name="password" type="password" autocomplete="current-password" placeholder="Enter your password"><button type="button" id="show" aria-label="Show password">Show</button></div>
+
+        <label class="keep"><input type="checkbox" name="remember" checked>Keep me signed in</label>
+        <button class="go" id="go">Sign in</button>
+      </form>
+
+      <div class="or">OR</div>
+      <a class="reg" href="#">Register your school, if not a member</a>
+      <p class="parent">Looking for schools for your child? <a href="#">Create a parent account</a></p>
+      <p class="help">Need help signing in? <a href="#">Chat with us on WhatsApp</a></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div><a class="logo" href="#">Find<b>UR</b>SCH</a><p>Uganda's school discovery, comparison and admissions platform, with school profiles, news, blogs, events, jobs and scholarships.</p><p>Kampala, Uganda<br>+256 000 000 000<br>hello@findursch.ug</p></div>
+      <div><h6>Explore schools</h6><ul><li>Primary schools</li><li>Secondary schools</li><li>Universities</li><li>Vocational schools</li><li>Boarding schools</li><li>International schools</li></ul></div>
+      <div><h6>Resources</h6><ul><li>Latest news</li><li>Blogs</li><li>Scholarships</li><li>School jobs</li><li>Events calendar</li><li>Past papers</li><li>Compare schools</li></ul></div>
+      <div><h6>Support</h6><ul><li>List your school</li><li>Advertise with us</li><li>About</li><li>Contact</li><li>Terms and conditions</li><li>Privacy policy</li></ul></div>
+    </div>
+    <div class="fbar">
+      <span>© 2026 FindURSCH. All rights reserved.</span>
+      <div class="box2"><span>Want to reach parents and students every month?</span><a class="btn btn-ghost" href="#">Advertise with us</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+$("show").onclick=()=>{const p=$("p"),v=p.type==="password";p.type=v?"text":"password";$("show").textContent=v?"Hide":"Show";$("show").setAttribute("aria-label",v?"Hide password":"Show password")};
+
+/* Accepts an email address or a Ugandan mobile number (07XX..., 2567XX... or +2567XX...) */
+const okLogin=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)||/^(\+?256|0)7\d{8}$/.test(v.replace(/[\s-]/g,""));
+function err(m,...bad){$("msg").className="msg show";$("msg").textContent=m;["gu","gp"].forEach(g=>$(g).classList.toggle("bad",bad.includes(g)));(bad[0]==="gu"?$("u"):$("p")).focus()}
+
+$("f").onsubmit=e=>{
+  e.preventDefault();
+  const u=$("u").value.trim(),p=$("p").value;
+  if(!okLogin(u))return err("Enter a valid email address or phone number.","gu");
+  if(p.length<8)return err("Enter your password (at least 8 characters).","gp");
+  $("msg").className="msg";["gu","gp"].forEach(g=>$(g).classList.remove("bad"));
+  $("go").disabled=true;$("go").textContent="Signing in…";
+  /* Laravel: remove preventDefault and let the form POST to /login. Redirect by role after login:
+     school_owner -> /dashboard, administrator/owner -> /admin, parent -> /account. */
+  setTimeout(()=>{$("go").disabled=false;$("go").textContent="Sign in";$("msg").className="msg show ok";$("msg").textContent="Demo only: connect this form to your Laravel login route."},900);
+};
+</script>
+</body>
+</html>

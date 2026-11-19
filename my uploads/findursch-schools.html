@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Find a school in Uganda — FindURSCH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* ---------- TOKENS (shared by every page) ---------- */
+:root{
+  --brand:#0c5a49; --brand-dk:#083f33; --brand-xdk:#052a22;
+  --accent:#f0b030; --accent-dk:#d99a1a;
+  --tint:#f1f6f3; --line:#e4e8e6; --ink:#1b2420; --mute:#5d6b65;
+  --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+  --r:10px; --gap:24px; --wrap:1280px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+body{font:15px/1.55 var(--sans);color:var(--ink);background:#fff}
+a{color:inherit;text-decoration:none}ul{list-style:none}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gap)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 20px;border-radius:8px;font:600 14px var(--sans);border:1.5px solid transparent;cursor:pointer;white-space:nowrap}
+.btn-gold{background:var(--accent);color:#2a1d00}.btn-gold:hover{background:var(--accent-dk)}
+.btn-ghost{border-color:#fff;color:#fff}.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.btn-brand{background:var(--brand);color:#fff}.btn-brand:hover{background:var(--brand-dk)}
+.btn-block{width:100%}
+
+/* Top bar + header */
+.topbar{background:var(--brand-dk);color:#fff;font-size:12.5px}
+.topbar .wrap{display:flex;justify-content:flex-end;gap:22px;height:32px;align-items:center}
+.topbar a{color:#ffffff}.topbar a:hover{opacity:1}
+header{background:var(--brand);color:#fff;position:sticky;top:0;z-index:40;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+header .wrap{display:flex;align-items:center;gap:28px;height:64px}
+.logo{font:700 26px var(--serif);letter-spacing:-.3px}.logo b{color:var(--accent)}
+nav{display:flex;gap:4px;margin:0 auto}
+nav a{padding:8px 14px;border-radius:8px;font-size:14px;font-weight:500}
+nav a:hover,nav a.on{background:rgba(255,255,255,.16)}
+.rtab{position:fixed;right:0;top:34%;z-index:50;writing-mode:vertical-rl;background:var(--accent);color:#2a1d00;font:700 12px var(--sans);letter-spacing:.06em;padding:18px 9px;border-radius:10px 0 0 10px;box-shadow:-3px 3px 12px rgba(0,0,0,.2)}
+
+/* Page header + search band */
+.phead{background:var(--tint)}
+.phead .wrap{display:grid;grid-template-columns:1fr 728px;gap:32px;align-items:center;padding-top:32px;padding-bottom:32px}
+.crumbs{font-size:12px;color:var(--mute);margin-bottom:10px}.crumbs a{color:var(--mute)}.crumbs span{margin:0 6px}
+.phead h1{font:700 36px/1.15 var(--serif);margin-bottom:8px}
+.phead p{font-size:13.5px;color:var(--mute);max-width:430px}.phead p b{color:var(--brand)}
+.ad{border-radius:var(--r);display:grid;place-items:center;text-align:center;color:#fff;font:700 22px/1.2 var(--serif);padding:20px;background:linear-gradient(135deg,#a32a2a,#e05a3a)}
+.ad small{display:block;font:500 11px var(--sans);color:#fff1ec;margin-top:6px}
+.ad.top{height:90px}.ad.side{height:250px}
+.sband{background:var(--brand);padding:28px 0}
+.sform{display:flex;align-items:center;background:#fff;border-radius:999px;padding:8px 8px 8px 24px;max-width:760px;margin:0 auto;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.sform input{flex:1;border:0;outline:0;font:15px var(--sans);padding:10px 0;min-width:0;background:none}
+.sform select{border:0;border-left:1px solid var(--line);padding:10px 14px;font:13.5px var(--sans);background:none;color:var(--ink);max-width:150px}
+.sform .go{height:46px;padding:0 28px;border-radius:999px;background:var(--brand-xdk);color:#fff;border:0;font:600 14px var(--sans);cursor:pointer;margin-left:6px}
+
+/* Layout */
+.cols{display:grid;grid-template-columns:260px minmax(0,1fr);gap:var(--gap);align-items:start;padding-top:28px}
+aside{display:flex;flex-direction:column;gap:var(--gap)}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.box h5{background:var(--brand);color:#fff;font:700 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:11px 16px}
+.cats li{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13.5px;cursor:pointer}
+.cats li:hover{background:var(--tint)}.cats li.on{background:var(--tint);font-weight:600}
+.cats i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+.cats em{margin-left:auto;font-style:normal;font-size:11.5px;min-width:26px;text-align:center;padding:1px 8px;border-radius:99px;background:#eef1ef;color:var(--mute)}
+.cats li.on em{background:var(--brand);color:#fff}
+.dist{max-height:178px;overflow:auto;padding:8px 0}
+.dist label{display:flex;align-items:center;gap:10px;padding:6px 16px;font-size:13px;cursor:pointer}
+.dist input,.fee input{accent-color:var(--brand)}
+.fee{padding:16px}.fee input[type=range]{width:100%}
+.fee .mm{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);margin-bottom:6px}
+.fee p{text-align:center;font-size:13px;margin:8px 0 14px}
+.promo2{background:var(--brand);color:#fff;border-radius:14px;padding:24px;position:relative;overflow:hidden}
+.promo2::before{content:"";position:absolute;right:-50px;top:-50px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.07)}
+.promo2>*{position:relative}
+.promo2 small{font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.promo2 h3{font:700 26px/1.2 var(--serif);margin:8px 0 10px}.promo2 p{font-size:13px;color:#e8f1ed;margin-bottom:12px}
+.promo2 li{font-size:12.5px;display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.promo2 li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.promo2 .btn{margin-top:12px}
+
+/* Toolbar */
+.tool{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;font-size:13px;color:var(--mute)}.tool b{color:var(--ink)}
+.tool .r{display:flex;gap:8px;align-items:center}
+.tool select{height:36px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font:13px var(--sans);background:#fff}
+.vt{width:36px;height:36px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;display:grid;place-items:center;color:var(--mute)}
+.vt.on{background:var(--brand);border-color:var(--brand);color:#fff}
+
+/* School cards */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap)}
+.span{grid-column:1/-1}
+.sc{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.sc .ph{height:150px;position:relative;flex:none}
+.ph{background:linear-gradient(135deg,#9fb8ad,#d9c9a0)}
+.ph.b{background:linear-gradient(135deg,#6f8f9a,#b9c8cf)}.ph.c{background:linear-gradient(135deg,#c9a46a,#7e5b34)}.ph.d{background:linear-gradient(135deg,#789a7b,#2f5a43)}
+.ph.nop{background:var(--tint);display:grid;place-items:center}
+.pop{position:absolute;left:0;top:12px;background:var(--accent);color:#2a1d00;font:700 10.5px var(--sans);letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:0 6px 6px 0}
+.in{flex:1;display:flex;flex-direction:column}
+.sc .b{padding:14px 16px 12px;flex:1}
+.t{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.pill{font:700 10px var(--sans);letter-spacing:.04em;text-transform:uppercase;padding:2px 9px;border-radius:99px;border:1px solid #bcd9cf;color:var(--brand)}
+.pill.g{border-color:var(--line);color:var(--mute);text-transform:none;font-weight:500;letter-spacing:0;font-size:10.5px}
+.sc h3{font:600 14.5px/1.3 var(--sans);margin-bottom:4px}
+.loc{font-size:12px;color:var(--mute);display:flex;align-items:center;gap:6px}.loc::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--brand);flex:none}
+.sc .f{border-top:1px solid var(--line);padding:10px 16px 14px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 10px}
+.chips{flex:1 0 100%;display:flex;gap:10px;align-items:center;font-size:11px;color:var(--mute)}
+.chips em{font-style:normal;font-weight:700;font-size:10.5px;padding:1px 8px;border-radius:99px;background:#fdf3d6;color:#8a5f00}
+.f b{font-size:13px}
+.vp{height:30px;padding:0 14px;display:inline-flex;align-items:center;border:1.5px solid var(--brand);color:var(--brand);border-radius:99px;font:600 12px var(--sans);margin-left:auto}
+.vp:hover{background:var(--brand);color:#fff}
+.grid.list{grid-template-columns:1fr}.list .sc{flex-direction:row}.list .sc .ph{width:240px;height:auto;min-height:150px}
+
+/* Inline promo strips + big band */
+.promo{display:flex;align-items:center;justify-content:space-between;gap:20px;background:var(--brand-xdk);color:#fff;border-radius:var(--r);padding:20px 28px;max-width:92%;margin:0 auto;width:100%}
+.promo small{font:700 10.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.promo h3{font:700 21px/1.25 var(--serif);margin:2px 0}.promo p{font-size:12px;color:#e2eee9}
+.big{background:var(--brand);color:#fff;border-radius:var(--r);padding:44px 48px;max-width:92%;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;gap:24px;position:relative;overflow:hidden}
+.big::before{content:"";position:absolute;right:-70px;top:-80px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.07)}
+.big>*{position:relative}.big small{font:700 12px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.big h3{font:700 34px/1.15 var(--serif);margin:8px 0 10px}.big p{color:#e8f1ed;max-width:420px}
+
+/* Pagination */
+.pg{display:flex;gap:8px;justify-content:center;border-top:1px solid var(--line);margin-top:32px;padding-top:24px}
+.pg a{width:36px;height:36px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;font:600 13px var(--sans);color:var(--ink)}
+.pg a.on{background:var(--brand);border-color:var(--brand);color:#fff}.pg a:hover{border-color:var(--brand)}
+
+/* Footer */
+footer{background:var(--brand-xdk);color:#d5dcd8;padding-top:56px;font-size:13.5px;margin-top:64px}
+.fgrid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px}
+footer h6{color:#fff;font:700 14px var(--sans);margin-bottom:16px}
+footer li{margin-bottom:10px;color:#e6eeea}footer li:hover{opacity:1}
+footer .logo{display:block;margin-bottom:14px;color:#fff}footer p{color:#d9e5e0;margin-bottom:14px;max-width:380px}
+.fbar{border-top:1px solid rgba(255,255,255,.1);padding:24px 0;display:flex;justify-content:space-between;align-items:center;gap:24px;font-size:12.5px}
+.fbar .box2{border:1px solid #3d6b5f;border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:20px}
+.fbar .btn{height:36px;border-color:#d9e5e0;color:#fff;font-size:13px}
+
+@media(max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1000px){
+  .cols,.fgrid,.phead .wrap{grid-template-columns:1fr}.phead .ad{display:none}
+  nav,.topbar{display:none}header .btn-ghost{display:none}.phead h1{font-size:28px}
+  .sform{flex-wrap:wrap;border-radius:20px;padding:14px}.sform input{flex:1 0 100%}.sform select{flex:1;border-left:0;border-top:1px solid var(--line);max-width:none}.sform .go{flex:1 0 100%;margin:8px 0 0}
+  .promo,.big,.fbar{flex-direction:column;align-items:flex-start;max-width:100%}.fbar .box2{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:640px){.grid{grid-template-columns:1fr}.list .sc{flex-direction:column}.list .sc .ph{width:100%}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <a href="#">Opportunities</a><a href="#">Past papers</a><a href="#">School supplies</a><a href="#">Log in</a><a href="#">Sign up</a>
+</div></div>
+
+<header><div class="wrap">
+  <a class="logo" href="#">Find<b>UR</b>SCH</a>
+  <nav><a href="#">Home</a><a class="on" href="#">Schools</a><a href="#">Compare</a><a href="#">Scholarships</a><a href="#">News</a><a href="#">Jobs</a><a href="#">Events</a></nav>
+  <a class="btn btn-ghost" href="#">List your school</a>
+</div></header>
+
+<a class="rtab" href="#">REGISTER YOUR SCHOOL</a>
+
+<section class="phead"><div class="wrap">
+  <div>
+    <div class="crumbs"><a href="#">Home</a><span>›</span>Schools</div>
+    <h1>Find a school in Uganda</h1>
+    <p>Discover <b>36</b> verified nursery, primary, secondary, vocational and international schools across all districts of Uganda. Compare by location, curriculum and fees.</p>
+  </div>
+  <div class="ad top">Your advert here<small>728 × 90</small></div>
+</div></section>
+
+<section class="sband"><div class="wrap">
+  <form class="sform" onsubmit="return false">
+    <input type="search" placeholder="Search school name" aria-label="School name">
+    <select aria-label="District"><option>All districts</option><option>Kampala</option><option>Wakiso</option><option>Mukono</option></select>
+    <select aria-label="Region"><option>All regions</option><option>Central</option><option>Eastern</option><option>Northern</option><option>Western</option></select>
+    <select aria-label="Curriculum"><option>Curriculum</option><option>UNEB</option><option>Cambridge</option><option>IB</option></select>
+    <button class="go">Search</button>
+  </form>
+</div></section>
+
+<main class="wrap">
+  <div class="cols">
+    <aside>
+      <div class="card box"><h5>Category</h5><ul class="cats" id="cats" style="padding:6px 0"></ul></div>
+      <div class="card box"><h5>District</h5><div class="dist">
+        <label><input type="checkbox">Wakiso (16)</label><label><input type="checkbox">Kampala (11)</label><label><input type="checkbox">Masindi (1)</label><label><input type="checkbox">Masaka (1)</label><label><input type="checkbox">Mukono (1)</label><label><input type="checkbox">Rukungiri (1)</label><label><input type="checkbox">Other (1)</label></div></div>
+      <div class="ad side">Your advert here<small>300 × 250</small></div>
+      <div class="card box"><h5>Fee range (UGX)</h5><div class="fee">
+        <div class="mm"><span>0</span><span>2,000,000+</span></div>
+        <input type="range" id="fee" min="0" max="2000000" step="50000" value="2000000" aria-label="Maximum fee per term">
+        <p id="feeV">Up to UGX 2,000,000</p><button class="btn btn-brand btn-block">Apply</button></div></div>
+      <div class="promo2"><small>Advertise</small><h3>Put your brand in front of parents and students</h3><p>Reach families across Uganda every month.</p>
+        <ul><li>Banners on every section</li><li>School spotlights</li><li>Featured videos</li></ul><a class="btn btn-gold" href="#">Advertise with us</a></div>
+    </aside>
+
+    <section>
+      <div class="tool"><span>Showing <b id="count">36</b> results · page 1 of 3</span>
+        <div class="r"><select aria-label="Sort"><option>Sort: newest first</option><option>Name A–Z</option><option>Fees: low to high</option></select>
+          <button class="vt on" data-v="g" aria-label="Grid view">▦</button><button class="vt" data-v="l" aria-label="List view">☰</button></div></div>
+      <div class="grid" id="grid"></div>
+      <nav class="pg" aria-label="Pages"><a href="#">‹</a><a class="on" href="#">1</a><a href="#">2</a><a href="#">3</a><a href="#">›</a></nav>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div><a class="logo" href="#">Find<b>UR</b>SCH</a><p>Uganda's school discovery, comparison and admissions platform, with school profiles, news, events, jobs and scholarships.</p><p>Kampala, Uganda<br>+256 000 000 000<br>hello@findursch.ug</p></div>
+      <div><h6>Explore schools</h6><ul><li>Primary schools</li><li>Secondary schools</li><li>Universities</li><li>Vocational schools</li><li>Boarding schools</li><li>International schools</li></ul></div>
+      <div><h6>Resources</h6><ul><li>Latest news</li><li>Scholarships</li><li>School jobs</li><li>Events calendar</li><li>Articles</li><li>Past papers</li><li>Compare schools</li></ul></div>
+      <div><h6>Support</h6><ul><li>List your school</li><li>Advertise with us</li><li>About</li><li>Contact</li><li>Terms and conditions</li><li>Privacy policy</li></ul></div>
+    </div>
+    <div class="fbar">
+      <span>© 2026 FindURSCH. All rights reserved.</span>
+      <div class="box2"><span>Want to reach parents and students every month?</span><a class="btn btn-ghost" href="#">Advertise with us</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* In Laravel: the cards become one @foreach over paginated schools; strips are inserted with $loop->iteration. */
+const C=[["All institutions",36,"#0c5a49",""],["Nursery & primary",15,"#2f6fd6"],["Secondary school",10,"#2f9e5a"],["Primary school",5,"#e08a1e"],["Daycare / nursery",2,"#8a5bd6"],["Vocational school",2,"#d6479a"],["Music school",1,"#6b7f78"],["University / college",1,"#c9a46a"]];
+/* name, type, location, curriculum, mode, fee (null = hidden), isNew, hasPhoto */
+const D=[
+["Acacia Grove Nursery & Primary","Nursery & primary","Nakifuma · Central · Mukono","UNEB","Day & boarding","250k – 700k",1,1],
+["Lakeview Senior Secondary","Secondary school","Bugoya · Central · Buikwe","UNEB","Day & boarding","350k – 900k",1,0],
+["Cedar Ridge Secondary","Secondary school","Bulenga · Central · Wakiso","UNEB","Day school","250k – 300k",1,1],
+["Sunrise Day Care and Pre-School","Daycare / nursery","Mpererwe · Central · Kampala","Other","Day school","250k – 500k",1,1],
+["Nilebridge International School","Nursery & primary","Namugongo · Central · Wakiso","Cambridge","Day & boarding","850k – 3.8M",0,1],
+["Westgate Girls' Secondary","Secondary school","Central · Wakiso","Other","Day & boarding","400k – 800k",0,0],
+["Marigold Infant Schools","Nursery & primary","Kakunyu · Central · Wakiso","Other","Day & boarding",null,0,1],
+["Hillcrest Education Service","Nursery & primary","Kisalosolo · Central · Kampala","UNEB","Day school","650k – 1M",0,1],
+["Rwenzori Nursery & Primary","Nursery & primary","Bbira · Central · Wakiso","UNEB","Day school",null,0,1],
+["Greenfield High School","Secondary school","Namugoona · Central · Kampala","UNEB","Day & boarding","500k – 850k",0,1],
+["Kihande Senior School","Secondary school","Kihande · Western · Masindi","UNEB","Day & boarding","300k – 800k",0,1],
+["Little Stars Valley School","Nursery & primary","Kiiti · Central · Wakiso","UNEB","Day & boarding","300k – 900k",0,1],
+["Masaka Greenfield Academy","Secondary school","Western · Rukungiri","UNEB","Day & boarding",null,0,1],
+["Eastern Skills Institute","Vocational school","Kireka · Central · Kampala","Other","Day school","300k – 500k",0,1],
+["Northern Star Primary","Nursery & primary","Bukalanza · Central · Wakiso","UNEB","Day & boarding","250k – 450k",0,0]];
+const P=["","b","c","d"];
+const CAP='<svg viewBox="0 0 24 24" width="44" aria-hidden="true"><path d="M12 3 1 9l11 6 9-4.9V17h2V9L12 3zM5 13.2v4L12 21l7-3.8v-4L12 17l-7-3.8z" fill="#b9c8c1"/></svg>';
+const card=(d,i)=>`<article class="sc" data-t="${d[1]}"><div class="ph ${d[7]?P[i%4]:"nop"}">${d[7]?"":CAP}${i==9?'<span class="pop">Popular</span>':""}</div><div class="in"><div class="b"><div class="t"><span class="pill">${d[1]}</span><span class="pill g">${d[3]}</span></div><h3>${d[0]}</h3><p class="loc">${d[2]}</p></div><div class="f"><div class="chips"><span>${d[4]}</span>${d[6]?"<em>New</em>":""}</div>${d[5]?`<b>UGX ${d[5]}</b>`:""}<a class="vp" href="#">View profile</a></div></div></article>`;
+const S1='<div class="promo span"><div><small>Premium schools</small><h3>Be the first school parents see</h3><p>Top of search, homepage feature and spotlight adverts.</p></div><a class="btn btn-brand" href="#">See school plans</a></div>';
+const S2='<div class="promo span"><div><small>For students</small><h3>UNEB past papers with answers</h3><p>PLE, UCE and UACE papers to download and revise.</p></div><a class="btn btn-gold" href="#">Get past papers</a></div>';
+const S3='<div class="big span"><div><small>Opportunities</small><h3>Scholarships and bursaries open now</h3><p>Funding for primary, secondary, university and TVET.</p></div><a class="btn btn-gold" href="#">Find scholarships</a></div>';
+const grid=document.getElementById("grid");
+grid.innerHTML=D.map((d,i)=>card(d,i)+(i==5?S1:i==11?S2:i==14?S3:"")).join("");
+
+const cats=document.getElementById("cats"),count=document.getElementById("count");
+cats.innerHTML=C.map((c,i)=>`<li class="${i?"":"on"}" data-k="${i?c[0]:""}"><i style="--c:${c[2]}"></i>${c[0]}<em>${c[1]}</em></li>`).join("");
+cats.onclick=e=>{const li=e.target.closest("li");if(!li)return;
+  cats.querySelectorAll("li").forEach(x=>x.classList.toggle("on",x===li));
+  const k=li.dataset.k;let n=0;
+  grid.querySelectorAll(".sc").forEach(c=>{const show=!k||c.dataset.t===k;c.hidden=!show;n+=show});
+  count.textContent=k?n:36};
+
+document.querySelectorAll(".vt").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".vt").forEach(x=>x.classList.toggle("on",x===b));
+  grid.classList.toggle("list",b.dataset.v==="l")});
+const fee=document.getElementById("fee");
+fee.oninput=()=>document.getElementById("feeV").textContent="Up to UGX "+Number(fee.value).toLocaleString();
+</script>
+</body>
+</html>

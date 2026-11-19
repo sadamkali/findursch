@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>School name — Kampala | Fees, contacts and admissions — FindURSCH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* ---------- TOKENS (identical to the homepage and news page) ---------- */
+:root{
+  --brand:#0c5a49; --brand-dk:#083f33; --brand-xdk:#052a22;
+  --accent:#f0b030; --accent-dk:#d99a1a; --wa:#1fa855;
+  --tint:#f1f6f3; --line:#e4e8e6; --ink:#1b2420; --mute:#5d6b65;
+  --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+  --r:10px; --gap:24px; --wrap:1280px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.55 var(--sans);color:var(--ink);background:#fff}
+a{color:inherit;text-decoration:none}ul{list-style:none}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gap)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 20px;border-radius:8px;font:600 14px var(--sans);border:1.5px solid transparent;cursor:pointer;white-space:nowrap}
+.btn.sm{height:38px;padding:0 16px;font-size:13px}
+.btn-gold{background:var(--accent);color:#2a1d00}.btn-gold:hover{background:var(--accent-dk)}
+.btn-ghost{border-color:#fff;color:#fff}.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.btn-brand{background:var(--brand);color:#fff}.btn-brand:hover{background:var(--brand-dk)}
+.btn-wa{background:var(--wa);color:#fff}
+.btn-line{border-color:var(--line);color:var(--ink);background:#fff}.btn-line:hover{border-color:var(--brand)}
+.btn-block{width:100%}
+.more{font:600 13px var(--sans);color:var(--brand)}
+
+/* Top bar + header */
+.topbar{background:var(--brand-dk);color:#fff;font-size:12.5px}
+.topbar .wrap{display:flex;justify-content:flex-end;gap:22px;height:32px;align-items:center}
+.topbar a{color:#ffffff}.topbar a:hover{opacity:1}
+header{background:var(--brand);color:#fff;position:sticky;top:0;z-index:40;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+header .wrap{display:flex;align-items:center;gap:28px;height:64px}
+.logo{font:700 26px var(--serif);letter-spacing:-.3px}.logo b{color:var(--accent)}
+nav{display:flex;gap:4px;margin:0 auto}
+nav a{padding:8px 14px;border-radius:8px;font-size:14px;font-weight:500}
+nav a:hover,nav a.on{background:rgba(255,255,255,.16)}
+.rtab{position:fixed;right:0;top:34%;z-index:50;writing-mode:vertical-rl;background:var(--accent);color:#2a1d00;font:700 12px var(--sans);letter-spacing:.06em;padding:18px 9px;border-radius:10px 0 0 10px;box-shadow:-3px 3px 12px rgba(0,0,0,.2)}
+
+/* Photo mosaic: one large photo + three stacked */
+.mosaic{display:grid;grid-template-columns:2fr 1fr;gap:3px;height:400px;background:#fff}
+.mosaic .main{position:relative}
+.mosaic .side{display:grid;grid-template-rows:repeat(3,1fr);gap:3px}
+.mosaic .side div{position:relative}
+.ph{background:linear-gradient(135deg,#9fb8ad,#d9c9a0)}
+.ph.b{background:linear-gradient(135deg,#6f8f9a,#b9c8cf)}.ph.c{background:linear-gradient(135deg,#c9a46a,#7e5b34)}.ph.d{background:linear-gradient(135deg,#789a7b,#2f5a43)}
+.chip{position:absolute;left:14px;bottom:14px;background:rgba(0,0,0,.6);color:#fff;font:500 12px var(--sans);padding:6px 12px;border-radius:6px}
+.more-ph{position:absolute;inset:0;background:rgba(0,0,0,.5);color:#fff;display:grid;place-items:center;font:700 16px var(--sans)}
+.crumbs{border-bottom:1px solid var(--line);font-size:12.5px;color:var(--mute)}
+.crumbs .wrap{display:flex;gap:10px;padding-top:11px;padding-bottom:11px;flex-wrap:wrap}
+.crumbs a{color:var(--brand)}.crumbs span:last-child{color:var(--ink)}
+
+/* Layout */
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:var(--gap);align-items:start;padding-top:32px}
+.stack{display:flex;flex-direction:column;gap:var(--gap)}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.pad{padding:24px 28px}
+.pad h2{font:700 20px var(--serif);padding-bottom:12px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+.pad h2 span{color:var(--brand)}
+
+/* School header */
+.top{display:grid;grid-template-columns:84px 1fr;gap:20px;align-items:center;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.sl{width:84px;height:84px;border:1px solid var(--line);border-radius:var(--r);display:grid;place-items:center;font:700 26px var(--serif);color:var(--brand);background:var(--tint)}
+.top h1{font:700 28px/1.2 var(--serif)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tag{padding:2px 10px;border-radius:99px;border:1px solid var(--line);font-size:11px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.03em}
+.tag.a{background:#fdf3d6;border-color:#f3dc9a;color:#8a5f00}.tag.g{background:#e3f4e8;border-color:#bfe3cb;color:#17703a}
+.cn{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--mute)}.cn a{color:var(--brand)}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:-1px;position:relative;z-index:1}
+.tabs a{height:38px;padding:0 18px;display:flex;align-items:center;background:var(--brand);color:#fff;border-radius:8px 8px 0 0;font:600 13px var(--sans)}
+.tabs a.on{background:#fff;color:var(--brand);border:1px solid var(--line);border-bottom-color:#fff}
+.quote{background:var(--tint);border-left:4px solid var(--brand);border-radius:6px;padding:14px 18px;margin-bottom:16px;font:italic 600 15px var(--serif);color:var(--brand)}
+.about p{margin-bottom:10px;color:#33403a}
+.facs{display:flex;flex-wrap:wrap;gap:10px}
+.facs span{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;background:var(--tint);font-size:13px;font-weight:500}
+.facs i{width:8px;height:8px;border-radius:50%;background:var(--brand)}
+
+/* Gallery */
+.g1{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:150px;gap:6px}
+.g1 .big{grid-column:span 4;grid-row:span 2}.g1 div{grid-column:span 2;border-radius:6px}
+.g2{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px}
+.g2 div{height:130px;border-radius:6px;position:relative;overflow:hidden}
+.g1 .big{grid-column:span 4}
+
+/* Events empty state, news rows */
+.empty{text-align:center;padding:28px 0 16px;color:var(--mute)}.empty a{color:var(--brand);font-weight:600}
+.row{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;margin-bottom:12px}
+.row .ph{height:72px;border-radius:6px}.row h4{font:600 14px/1.3 var(--serif)}.row small{color:var(--brand);font-style:italic;font-size:12px}
+
+/* Opportunity band */
+.band{display:flex;align-items:center;justify-content:space-between;gap:20px;color:#fff;border-radius:var(--r);padding:26px 30px;background:var(--brand);position:relative;overflow:hidden}
+.band::before{content:"";position:absolute;right:-60px;top:-70px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.07)}
+.band>*{position:relative}.band small{font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#e2eee9}
+.band h3{font:700 22px/1.25 var(--serif);margin:4px 0}.band p{font-size:13px;color:#e2eee9}
+
+/* Sidebar */
+aside{display:flex;flex-direction:column;gap:var(--gap)}
+.join,.contact{background:var(--brand);color:#fff;border-radius:14px;padding:22px}
+.join{background:var(--brand-dk)}
+.join h3,.contact h3{font:700 18px/1.3 var(--serif);margin-bottom:8px}
+.join p{font-size:12.5px;color:#e2eee9;margin-bottom:16px}.join .btn{margin-bottom:10px}
+.ci{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.14)}
+.ci:last-of-type{border:0}
+.ci i{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-style:normal;flex:none}
+.ci small{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#e2eee9}.ci b{font-size:13.5px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.box h5{background:var(--brand);color:#fff;font:700 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:11px 16px}
+.qf{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+.qf div{background:var(--tint);border-radius:8px;padding:10px 12px}
+.qf small{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.qf b{display:flex;align-items:flex-start;gap:7px;font-size:13px;line-height:1.3;margin-top:4px}
+.qf i{width:7px;height:7px;border-radius:50%;background:var(--c,var(--brand));margin-top:6px;flex:none}
+.fee{margin:14px;background:#fdf3d6;border-radius:8px;text-align:center;padding:14px}
+.fee b{display:block;color:var(--accent-dk);font:600 16px var(--sans)}.fee small{color:var(--mute);font-size:12px}
+.ad{height:250px;border-radius:var(--r);display:grid;place-items:center;text-align:center;color:#fff;font:700 22px/1.2 var(--serif);padding:20px;background:linear-gradient(135deg,#a32a2a,#e05a3a)}
+.ad small{display:block;font:500 11px var(--sans);color:#fff1ec;margin-top:6px}
+.soc{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+.soc .btn{height:36px;font-size:12.5px}
+.fb{background:#1877f2;color:#fff}.xx{background:#14171a;color:#fff}
+dl{padding:6px 16px}dl div{display:grid;grid-template-columns:96px 1fr;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+dl dt{color:var(--mute)}dl dd.l{color:var(--brand);font-weight:600}
+.map{margin:6px 16px 16px;height:150px;border:1px dashed #b9c8c1;border-radius:8px;background:var(--tint);display:grid;place-items:center;text-align:center;font-size:12px;color:var(--mute)}
+.map a{display:block;color:var(--brand);font-weight:600;font-size:13px}
+
+/* Enquiry dialog */
+dialog{border:0;border-radius:14px;padding:26px;width:min(500px,92vw);margin:auto}
+dialog::backdrop{background:rgba(5,42,34,.6)}
+dialog h3{font:700 22px var(--serif);margin-bottom:4px}dialog>p,dialog form>p{color:var(--mute);font-size:13px;margin-bottom:16px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fg .w{grid-column:1/-1}
+dialog label{font:600 12px var(--sans);display:block}
+dialog input,dialog select,dialog textarea{width:100%;margin-top:4px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font:14px var(--sans)}
+dialog .acts{justify-content:flex-end;margin-bottom:0}
+
+/* Footer */
+footer{background:var(--brand-xdk);color:#d5dcd8;padding-top:56px;font-size:13.5px;margin-top:64px}
+.fgrid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px}
+footer h6{color:#fff;font:700 14px var(--sans);margin-bottom:16px}
+footer li{margin-bottom:10px;color:#e6eeea}footer li:hover{opacity:1}
+footer .logo{display:block;margin-bottom:14px;color:#fff}footer p{color:#d9e5e0;margin-bottom:14px;max-width:380px}
+.fbar{border-top:1px solid rgba(255,255,255,.1);padding:24px 0;display:flex;justify-content:space-between;align-items:center;gap:24px;font-size:12.5px}
+.fbar .box2{border:1px solid #3d6b5f;border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:20px}
+.fbar .btn{height:36px;border-color:#d9e5e0;color:#fff;font-size:13px}
+
+@media(max-width:1000px){
+  .cols,.fgrid{grid-template-columns:1fr}
+  nav,.topbar{display:none}header .btn-ghost{display:none}
+  .mosaic{grid-template-columns:1fr;height:280px}.mosaic .side{display:none}
+  .top{grid-template-columns:64px 1fr}.sl{width:64px;height:64px;font-size:20px}.top h1{font-size:22px}
+  .band,.fbar{flex-direction:column;align-items:flex-start}.fbar .box2{flex-direction:column;align-items:flex-start}
+  .pad{padding:20px}.g1{grid-auto-rows:110px}.g2 div{height:90px}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <a href="#">Opportunities</a><a href="#">Past papers</a><a href="#">School supplies</a><a href="#">Log in</a><a href="#">Sign up</a>
+</div></div>
+
+<header><div class="wrap">
+  <a class="logo" href="#">Find<b>UR</b>SCH</a>
+  <nav><a href="#">Home</a><a class="on" href="#">Schools</a><a href="#">Compare</a><a href="#">Scholarships</a><a href="#">News</a><a href="#">Jobs</a><a href="#">Events</a></nav>
+  <a class="btn btn-ghost" href="#">List your school</a>
+</div></header>
+
+<a class="rtab" href="#">REGISTER YOUR SCHOOL</a>
+
+<section class="mosaic" aria-label="School photos">
+  <div class="main ph c"><span class="chip">View all 10 photos</span></div>
+  <div class="side">
+    <div class="ph d"></div><div class="ph b"></div>
+    <div class="ph"><span class="more-ph">+6 more</span></div>
+  </div>
+</section>
+
+<div class="crumbs"><div class="wrap"><a href="#">Home</a><a href="#">Schools</a><a href="#">Nursery &amp; primary</a><span>School name</span></div></div>
+
+<main class="wrap">
+  <div class="cols">
+    <div class="stack">
+      <div>
+        <div class="top">
+          <div class="sl">SN</div>
+          <div>
+            <h1>School name goes here</h1>
+            <div class="tags"><span class="tag a">Nursery &amp; primary</span><span class="tag g">UNEB</span><span class="tag">Private</span><span class="tag g">Day &amp; boarding</span><span class="tag">Mixed</span><span class="tag">All religions welcome</span></div>
+            <div class="cn"><a href="#">0700 000 000</a><a href="#">info@school.example</a><span>Kampala, Central Uganda</span></div>
+          </div>
+        </div>
+        <div class="acts">
+          <button class="btn btn-brand sm" data-enq>Apply for admission</button>
+          <a class="btn btn-wa sm" href="#">WhatsApp</a>
+          <button class="btn btn-line sm" data-copy>Share</button>
+        </div>
+        <nav class="tabs" id="tabs" aria-label="Profile sections" style="margin:0 0 -1px"><a class="on" href="#about">About</a><a href="#facilities">Facilities</a><a href="#events">Events</a><a href="#gallery">Gallery</a><a href="#news">News</a></nav>
+      </div>
+
+      <section class="card pad about" id="about" style="margin-top:-24px">
+        <h2>About School name goes here</h2>
+        <div class="quote">Welcome to School name goes here</div>
+        <p>A short opening line that tells parents what the school is about and who it is for.</p>
+        <p>A second paragraph on the school's approach, values and daily routine, kept to two or three lines.</p>
+        <p>A closing line that invites families to visit or send an enquiry.</p>
+      </section>
+
+      <section class="card pad" id="facilities">
+        <h2>Our <span>facilities</span></h2>
+        <div class="facs"><span><i></i>Library</span><span><i></i>Computer lab</span><span><i></i>School van</span><span><i></i>Chapel</span><span><i></i>Dining hall</span><span><i></i>Security</span></div>
+      </section>
+
+      <section class="card pad" id="gallery">
+        <h2>Photo <span>gallery</span></h2>
+        <div class="g1"><div class="big ph c"></div><div class="ph b"></div><div class="ph d"></div></div>
+        <div class="g2"><div class="ph"></div><div class="ph c"></div><div class="ph b"></div><div class="ph d"><span class="more-ph">+3 more</span></div></div>
+      </section>
+
+      <section class="card pad" id="events">
+        <h2>Upcoming <span>and past events</span></h2>
+        <p class="empty">No events posted yet. <a href="#">Follow this school</a> to hear when one is added.</p>
+      </section>
+
+      <section class="card pad" id="news">
+        <h2>School <span>news</span></h2>
+        <a class="row" href="#"><div class="ph d"></div><div><h4>Headline for a school news story</h4><small>17th November 2026</small></div></a>
+        <a class="row" href="#"><div class="ph b"></div><div><h4>Headline for another school story</h4><small>2nd November 2026</small></div></a>
+      </section>
+
+      <div class="band"><div><small>Opportunities</small><h3>Scholarships and bursaries open now</h3><p>Funding for primary, secondary, university and TVET.</p></div><a class="btn btn-gold" href="#">Find scholarships</a></div>
+    </div>
+
+    <aside>
+      <div class="join"><h3>Ready to join School name goes here?</h3><p>Applications are open. Apply today and secure a place for your child.</p>
+        <button class="btn btn-gold btn-block" data-enq>Apply for admission</button><button class="btn btn-ghost btn-block" data-enq>Send enquiry</button></div>
+
+      <div class="contact"><h3>Contact the school</h3>
+        <div class="ci"><i>☎</i><div><small>Phone</small><b>0700 000 000</b></div></div>
+        <div class="ci"><i>✉</i><div><small>Email</small><b>info@school.example</b></div></div>
+        <div class="ci"><i>⌂</i><div><small>Location</small><b>Kampala, Central, Uganda</b></div></div>
+        <div class="two"><button class="btn btn-gold sm" data-enq>Apply now</button><a class="btn btn-ghost sm" href="#">WhatsApp us</a></div></div>
+
+      <div class="card box"><h5>Quick facts</h5><div class="qf">
+        <div><small>Type</small><b><i style="--c:#d33"></i>Nursery &amp; primary</b></div>
+        <div><small>Ownership</small><b><i style="--c:#d33"></i>Private</b></div>
+        <div><small>Gender</small><b><i style="--c:#2f9e5a"></i>Mixed (boys &amp; girls)</b></div>
+        <div><small>Religion</small><b><i style="--c:#6b5bd2"></i>All religions welcome</b></div>
+        <div><small>Residence</small><b><i style="--c:var(--accent)"></i>Day &amp; boarding</b></div>
+        <div><small>Curriculum</small><b><i style="--c:var(--accent)"></i>UNEB (Uganda)</b></div></div></div>
+
+      <div class="card box"><h5>School fees</h5><div class="fee"><b>Contact school</b><small>for current fee structure</small></div></div>
+
+      <div class="ad">Your advert here<small>300 × 250</small></div>
+
+      <div class="card box"><h5>Find us on social media</h5><div class="soc">
+        <a class="btn fb" href="#">Facebook</a><a class="btn xx" href="#">Twitter / X</a><a class="btn btn-wa" href="#">WhatsApp</a><button class="btn btn-line" data-copy>Copy link</button></div></div>
+
+      <div class="card box"><h5>Location</h5>
+        <dl><div><dt>Region</dt><dd class="l">Central</dd></div><div><dt>District</dt><dd class="l">Kampala</dd></div><div><dt>County</dt><dd>County name</dd></div><div><dt>Sub-county</dt><dd>Sub-county name</dd></div><div><dt>Village</dt><dd>Village name</dd></div></dl>
+        <div class="map"><div><a href="#">View on Google Maps</a>Village, Kampala, Central</div></div></div>
+    </aside>
+  </div>
+</main>
+
+<dialog id="enq">
+  <form method="dialog">
+    <h3>Admission enquiry</h3><p>School name goes here. Fill in your details and the school will contact you.</p>
+    <div class="fg">
+      <label>Parent or guardian<input required></label><label>Phone<input type="tel" required></label>
+      <label class="w">Email (optional)<input type="email"></label>
+      <label>Student name<input></label><label>Class applying for<select><option>Baby class</option><option>Middle class</option><option>Top class</option><option>Primary 1</option></select></label>
+      <label class="w">Preferred intake<select><option>Term 1 2027</option><option>Term 2 2027</option><option>Term 3 2027</option></select></label>
+      <label class="w">Message<textarea rows="3"></textarea></label>
+    </div>
+    <div class="acts" style="margin-top:16px"><button class="btn btn-line" value="cancel">Cancel</button><button class="btn btn-brand" value="send">Send enquiry</button></div>
+  </form>
+</dialog>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div><a class="logo" href="#">Find<b>UR</b>SCH</a><p>Uganda's school discovery, comparison and admissions platform, with school profiles, news, events, jobs and scholarships.</p><p>Kampala, Uganda<br>+256 000 000 000<br>hello@findursch.ug</p></div>
+      <div><h6>Explore schools</h6><ul><li>Primary schools</li><li>Secondary schools</li><li>Universities</li><li>Vocational schools</li><li>Boarding schools</li><li>International schools</li></ul></div>
+      <div><h6>Resources</h6><ul><li>Latest news</li><li>Scholarships</li><li>School jobs</li><li>Events calendar</li><li>Articles</li><li>Past papers</li><li>Compare schools</li></ul></div>
+      <div><h6>Support</h6><ul><li>List your school</li><li>Advertise with us</li><li>About</li><li>Contact</li><li>Terms and conditions</li><li>Privacy policy</li></ul></div>
+    </div>
+    <div class="fbar">
+      <span>© 2026 FindURSCH. All rights reserved.</span>
+      <div class="box2"><span>Want to reach parents and students every month?</span><a class="btn btn-ghost" href="#">Advertise with us</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const dlg=document.getElementById("enq");
+document.querySelectorAll("[data-enq]").forEach(b=>b.onclick=()=>dlg.showModal());
+document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{
+  try{navigator.clipboard.writeText(location.href);const t=b.textContent;b.textContent="Link copied";setTimeout(()=>b.textContent=t,1500)}catch(e){}
+});
+const tabs=document.getElementById("tabs");
+tabs.addEventListener("click",e=>{const a=e.target.closest("a");if(a)tabs.querySelectorAll("a").forEach(x=>x.classList.toggle("on",x===a))});
+</script>
+</body>
+</html>
