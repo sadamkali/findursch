@@ -1,4 +1,5 @@
 <div class="blogs-page">
+    <a class="blogs-rtab" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
     <a class="blogs-ad-slim" href="{{ route('contact') }}">
         <span>Advertise with FindURSCH</span>
         <small>Reach parents, students and school communities across Uganda · Contact our team</small>
