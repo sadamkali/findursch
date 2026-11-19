@@ -30,7 +30,7 @@ class EventShow extends Component
             ->whereIn('status', ['approved', 'published'])
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
-            ->whereKeyNot($this->event->id)
+            ->where('id', '!=', $this->event->id)
             ->where(function ($query) {
                 $query->where('school_id', $this->event->school_id)
                     ->orWhereDate('starts_at', '>=', now()->toDateString());
