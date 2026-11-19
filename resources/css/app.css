@@ -1497,3 +1497,22 @@ a, button { -webkit-tap-highlight-color: transparent; }
     .account-workspace-content > section { width: calc(100% - 28px); padding-top: 22px; padding-bottom: 26px; }
     .account-workspace-content h1 { font-size: 22px; }
 }
+
+/* Published school posts on public school profiles */
+.sref-post-list{display:grid;gap:10px;margin-top:16px}
+.sref-post-row{display:grid;grid-template-columns:72px minmax(0,1fr) 18px;gap:12px;align-items:start;padding:14px;border:1px solid #e4e8e6;border-radius:9px;background:#fff;transition:border-color .18s ease,background .18s ease}
+.sref-post-row:hover{border-color:#0c5a49;background:#f7faf8}
+.sref-post-date{padding:8px 5px;border-radius:7px;background:#f1f6f3;color:#0c5a49;font-size:10px;font-weight:800;text-align:center}
+.sref-post-copy{display:grid;gap:4px;min-width:0}
+.sref-post-copy strong{color:#1b2420;font:700 16px/1.25 'Playfair Display',Georgia,serif}
+.sref-post-copy small{color:#0c5a49;font-size:10px;font-weight:700}
+.sref-post-copy>span{color:#5d6b65;font-size:12px;line-height:1.5}
+.sref-post-row> b{color:#0c5a49;font-size:16px}
+.home-event-date{display:grid;place-items:center;align-content:center;flex:none;width:42px;height:46px;border-radius:7px;background:#f1f6f3;color:#0c5a49}
+.home-event-date b{font:700 20px/1 'Playfair Display',Georgia,serif}
+.home-event-date small{margin-top:3px;font-size:9px;font-weight:800;letter-spacing:.06em}
+.home-event-copy{display:grid;min-width:0;gap:4px}
+.home-event-copy strong{color:#1b2420;font:600 13px/1.3 'Playfair Display',Georgia,serif}
+.home-event-copy small{color:#5d6b65;font-size:10px;line-height:1.35}
+.home-events-box li a{display:flex;align-items:center;gap:10px}
+@media(max-width:640px){.sref-post-row{grid-template-columns:60px minmax(0,1fr) 14px;padding:11px}.sref-post-copy strong{font-size:14px}}
