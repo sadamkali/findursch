@@ -23,20 +23,20 @@
             <a href="{{ route($indexRoute, array_filter(['q' => $search ?: null, 'sort' => $sort !== 'latest' ? $sort : null])) }}"
                @class(['is-active' => ! $category])>{{ $isNews ? 'All news' : 'All blogs' }}</a>
             @foreach($categories as $item)
-                <a href="{{ route('articles.index', array_filter(['category' => $item->id, 'q' => $search ?: null, 'sort' => $sort !== 'latest' ? $sort : null])) }}"
+                <a href="{{ route($indexRoute, array_filter(['category' => $item->id, 'q' => $search ?: null, 'sort' => $sort !== 'latest' ? $sort : null])) }}"
                    @class(['is-active' => (string) $category === (string) $item->id)>{{ $item->name }}</a>
             @endforeach
         </nav>
 
-        <form class="blogs-bar" method="GET" action="{{ route('articles.index') }}" role="search">
+        <form class="blogs-bar" method="GET" action="{{ route($indexRoute) }}" role="search">
             <label class="blogs-search-field">
-                <span class="sr-only">{{ $isNews ? 'Search news, topics or schools' : '{{ $isNews ? 'Search news, topics or schools' : 'Search blogs, topics or authors' }}' }}</span>
-                <input type="search" name="q" value="{{ $search }}" placeholder="Search blogs, topics or authors">
+                <span class="sr-only">{{ $isNews ? 'Search news, topics or schools' : 'Search blogs, topics or authors' }}</span>
+                <input type="search" name="q" value="{{ $search }}" placeholder="{{ $isNews ? 'Search news, topics or schools' : 'Search blogs, topics or authors' }}">
             </label>
             <button class="blogs-btn blogs-btn-brand" type="submit">Search</button>
             <label>
                 <span class="sr-only">Category</span>
-                <select name="category" aria-label="Category">
+                <select name="category" aria-label="{{ $isNews ? 'News category' : 'Blog category' }}">
                     <option value="">All categories</option>
                     @foreach($categories as $item)
                         <option value="{{ $item->id }}" @selected((string) $category === (string) $item->id)>{{ $item->name }}</option>
@@ -70,7 +70,7 @@
                     @endif
 
                     @if($secondaryArticle)
-                        <a class="blogs-card blogs-prem" href="{{ route('articles.show', $secondaryArticle) }}">
+                        <a class="blogs-card blogs-prem" href="{{ route($showRoute, $secondaryArticle) }}">
                             <div class="blogs-media">
                                 @if($secondaryArticle->cover_image)
                                     <img src="{{ $secondaryArticle->cover_image }}" alt="{{ $secondaryArticle->title }}" loading="lazy">
@@ -93,7 +93,7 @@
                             <ol>
                                 @foreach($mostRead as $index => $article)
                                     <li>
-                                        <a href="{{ route('articles.show', $article) }}">
+                                        <a href="{{ route($showRoute, $article) }}">
                                             <b>{{ $index + 1 }}</b>
                                             <span>
                                                 <em>{{ $article->category?->name ?? 'Education' }}</em>
@@ -104,7 +104,7 @@
                                     </li>
                                 @endforeach
                             </ol>
-                            <a class="blogs-box-foot" href="{{ route('articles.index', ['sort' => 'popular']) }}">See popular {{ $kindLabel }}</a>
+                            <a class="blogs-box-foot" href="{{ route($indexRoute, ['sort' => 'popular']) }}">See popular {{ $kindLabel }}</a>
                         </aside>
                     @endif
                 </div>
@@ -126,7 +126,7 @@
                 @if($searchResults->isNotEmpty())
                     <div class="blogs-results-grid">
                         @foreach($searchResults as $article)
-                            <a class="blogs-card blogs-result-card" href="{{ route('articles.show', $article) }}">
+                            <a class="blogs-card blogs-result-card" href="{{ route($showRoute, $article) }}">
                                 <div class="blogs-media">
                                     @if($article->cover_image)
                                         <img src="{{ $article->cover_image }}" alt="{{ $article->title }}" loading="lazy">
@@ -148,7 +148,7 @@
                     <div class="blogs-empty">
                         <h3>No {{ $kindLabel }} found</h3>
                         <p>Try a different search term or choose another category.</p>
-                        <a class="blogs-btn blogs-btn-brand" href="{{ route('articles.index') }}">Clear filters</a>
+                        <a class="blogs-btn blogs-btn-brand" href="{{ route($indexRoute) }}">Clear filters</a>
                     </div>
                 @endif
             </section>
@@ -164,10 +164,10 @@
                 <section class="blogs-sec" id="blog-category-{{ $sectionCategory->slug }}">
                     <div class="blogs-head blogs-head-cat">
                         <h2>{{ $sectionCategory->name }}</h2>
-                        <a class="blogs-more" href="{{ route('articles.index', ['category' => $sectionCategory->id]) }}">View more <span aria-hidden="true">→</span></a>
+                        <a class="blogs-more" href="{{ route($indexRoute, ['category' => $sectionCategory->id]) }}">View more <span aria-hidden="true">→</span></a>
                     </div>
                     <div class="blogs-news">
-                        <a class="blogs-card blogs-big" href="{{ route('articles.show', $sectionLead) }}">
+                        <a class="blogs-card blogs-big" href="{{ route($showRoute, $sectionLead) }}">
                             <div class="blogs-media">
                                 @if($sectionLead->cover_image)
                                     <img src="{{ $sectionLead->cover_image }}" alt="{{ $sectionLead->title }}" loading="lazy">
@@ -184,7 +184,7 @@
 
                         <div class="blogs-card blogs-rows">
                             @forelse($sectionRows as $rowArticle)
-                                <a class="blogs-row" href="{{ route('articles.show', $rowArticle) }}">
+                                <a class="blogs-row" href="{{ route($showRoute, $rowArticle) }}">
                                     <div class="blogs-row-media">
                                         @if($rowArticle->cover_image)
                                             <img src="{{ $rowArticle->cover_image }}" alt="" loading="lazy">
@@ -203,7 +203,7 @@
                         </div>
 
                         @if($sectionFeature)
-                            <a class="blogs-card blogs-prem" href="{{ route('articles.show', $sectionFeature) }}">
+                            <a class="blogs-card blogs-prem" href="{{ route($showRoute, $sectionFeature) }}">
                                 <div class="blogs-media">
                                     @if($sectionFeature->cover_image)
                                         <img src="{{ $sectionFeature->cover_image }}" alt="{{ $sectionFeature->title }}" loading="lazy">
