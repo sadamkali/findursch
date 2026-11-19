@@ -211,58 +211,143 @@
             @endif
         </section>
 
-        {{-- Lower resources and owner callouts --}}
-        <div class="home-cols home-section home-resources-layout">
-            <section class="home-main-column home-stack">
-                <div class="home-band" data-reveal>
-                    <div><small>Make an informed choice</small><h2>Compare schools before you decide</h2><p>Review school details side by side and build a shortlist that suits your family.</p></div>
-                    <a href="{{ route('compare') }}" class="btn btn-gold">Compare schools →</a>
+        {{-- Advertise, school videos, bursaries and school community content --}}
+    <div class="home-cols home-section home-resources-layout">
+        <section class="home-main-column home-stack">
+            <div class="home-band" data-reveal>
+                <div>
+                    <small>Advertise with FindURSCH</small>
+                    <h2>Reach parents and students across Uganda</h2>
+                    <p>Promote your school, education service or opportunity to families actively exploring their options.</p>
                 </div>
-                <section aria-labelledby="home-guides-title">
-                    <div class="home-section-heading"><h2 id="home-guides-title">Education <span>guides &amp; updates</span></h2><a class="home-more" href="{{ route('articles.index') }}">All articles →</a></div>
-                    @if($insightArticles->isNotEmpty())
-                        <div class="home-guide-grid">
-                            @foreach($insightArticles->take(2) as $article)
-                                <a href="{{ route('articles.show', $article) }}" class="home-guide-card" data-reveal>
-                                    <div class="home-guide-card__image">@if($article->cover_image)<img src="{{ $article->cover_image }}" alt="" loading="lazy">@else<span>FindurSch</span>@endif</div>
-                                    <div class="home-guide-card__body"><small>{{ $article->category?->name ?? 'Education' }}</small><h3>{{ $article->title }}</h3><p>{{ \Illuminate\Support\Str::limit($article->excerpt, 105) }}</p><span>{{ $article->published_at?->format('d M Y') }} · {{ $article->read_time_minutes }} min read</span></div>
-                                </a>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="home-empty-state home-empty-state--compact"><p>New education guides will be published here.</p><a class="home-more" href="{{ route('articles.index') }}">Browse articles →</a></div>
-                    @endif
-                </section>
-                <div class="home-band home-band--light" data-reveal>
-                    <div><small>Find schools across Uganda</small><h2>Start with the school type that fits your needs</h2>
-                        <div class="home-chips">@foreach($schoolTypes->take(5) as $type)<a href="{{ route('schools.index', ['type' => $type->id]) }}">{{ $type->name }}</a>@endforeach</div>
+                <div class="home-band__actions">
+                    <a href="{{ route('contact') }}" class="btn btn-gold">Advertise with us →</a>
+                    <a href="{{ route('contact') }}" class="btn btn-ghost">Send an inquiry</a>
+                </div>
+            </div>
+
+            <section class="home-video-section" aria-labelledby="home-videos-title">
+                <div class="home-section-heading">
+                    <h2 id="home-videos-title">Featured <span>school videos</span></h2>
+                    <a class="home-more" href="{{ route('schools.index') }}">Explore schools →</a>
+                </div>
+                @if($featuredVideos->isNotEmpty())
+                    <div class="home-video-grid">
+                        @foreach($featuredVideos as $video)
+                            <a class="home-video-card" href="{{ $video->youtube_url }}" target="_blank" rel="noopener noreferrer" data-reveal>
+                                <div class="home-video-card__image">
+                                    <img src="https://img.youtube.com/vi/{{ rawurlencode($video->youtube_video_id) }}/hqdefault.jpg" alt="" loading="lazy">
+                                    <span class="home-video-card__play" aria-hidden="true"></span>
+                                </div>
+                                <div class="home-video-card__body">
+                                    <small>{{ $video->school?->name ?? 'FindURSCH school' }}</small>
+                                    <h3>{{ $video->title }}</h3>
+                                    <span>Watch video <b aria-hidden="true">↗</b></span>
+                                </div>
+                            </a>
+                        @endforeach
                     </div>
-                    <a href="{{ route('schools.index') }}" class="btn btn-outline-light">Browse schools</a>
-                </div>
+                @else
+                    <div class="home-empty-state home-empty-state--compact">
+                        <h3>School videos will appear here</h3>
+                        <p>Approved videos shared by participating schools will be featured in this section.</p>
+                        <a class="home-more" href="{{ route('schools.index') }}">Discover schools →</a>
+                    </div>
+                @endif
             </section>
 
-            <aside class="home-sidebar" aria-label="More education resources">
-                <section class="home-sidebox home-jobs-box" data-reveal>
-                    <h2>Schools to explore</h2>
+            <section class="home-bursary-section" aria-labelledby="home-bursaries-title">
+                <div class="home-bursary-heading">
+                    <div>
+                        <small>Student opportunities</small>
+                        <h2 id="home-bursaries-title">Scholarships &amp; bursaries</h2>
+                        <p>Explore funding opportunities published by school communities.</p>
+                    </div>
+                    <a href="{{ route('scholarships.index') }}" class="btn btn-ghost">Browse all →</a>
+                </div>
+                @if($featuredBursaries->isNotEmpty())
+                    <div class="home-bursary-list">
+                        @foreach($featuredBursaries as $bursary)
+                            <a href="{{ route('scholarships.show', $bursary) }}" class="home-bursary-item">
+                                <span class="home-bursary-item__icon" aria-hidden="true">✦</span>
+                                <span class="home-bursary-item__copy">
+                                    <b>{{ $bursary->title }}</b>
+                                    <small>{{ $bursary->school?->name }} · {{ $bursary->award ?: 'Scholarship / bursary' }}</small>
+                                </span>
+                                <span class="home-bursary-item__deadline">
+                                    {{ $bursary->deadline ? 'Closes '.$bursary->deadline->format('d M Y') : 'Contact school' }}
+                                </span>
+                            </a>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="home-bursary-empty">
+                        <p>There are no currently published bursaries. New opportunities will appear here when schools publish them.</p>
+                        <a href="{{ route('scholarships.index') }}">Visit scholarships →</a>
+                    </div>
+                @endif
+            </section>
+
+            <div class="home-band home-band--light" data-reveal>
+                <div>
+                    <small>Make an informed choice</small>
+                    <h2>Compare schools before you decide</h2>
+                    <p>Review school details side by side and build a shortlist that suits your family.</p>
+                </div>
+                <a href="{{ route('compare') }}" class="btn btn-gold">Compare schools →</a>
+            </div>
+        </section>
+
+        <aside class="home-sidebar" aria-label="Latest school information and family stories">
+            <section class="home-sidebox home-jobs-box" data-reveal>
+                <h2>Latest school updates</h2>
+                @if($latestSchoolUpdates->isNotEmpty())
                     <ul>
-                        @forelse($featuredSchools as $school)
-                            <li><a href="{{ route('schools.show', $school) }}"><span>{{ $school->name }}</span><em>{{ $school->district?->name }}</em></a></li>
-                        @empty
-                            <li class="home-side-empty">School profiles will appear here.</li>
-                        @endforelse
+                        @foreach($latestSchoolUpdates as $update)
+                            <li>
+                                <a href="{{ route('school-news.show', $update) }}">
+                                    <span>{{ $update->title }}</span>
+                                    <em>{{ $update->school?->name }} · {{ $update->published_at?->format('d M Y') }}</em>
+                                </a>
+                            </li>
+                        @endforeach
                     </ul>
-                    <a class="home-sidebox__foot" href="{{ route('schools.index') }}">View school directory →</a>
-                </section>
-                <a href="{{ route('register') }}" class="home-sidebar-promo" data-reveal>
-                    <small>For school owners</small><h2>Help families discover your school</h2><p>Build a profile with your school's details, programmes and contact information.</p><span class="btn btn-gold">Register your school</span>
-                </a>
-                <section class="home-sidebox home-help-box" data-reveal>
-                    <h2>Need help choosing?</h2>
-                    <div class="home-help-box__body"><p>Explore school profiles, compare key details and contact schools directly for current admissions information.</p><a class="home-sidebox__foot" href="{{ route('schools.index') }}">Start exploring →</a></div>
-                </section>
-            </aside>
-        </div>
-    </main>
+                @else
+                    <p class="home-side-empty">Published announcements from schools will appear here.</p>
+                @endif
+                <a class="home-sidebox__foot" href="{{ route('news.index') }}">Browse education news →</a>
+            </section>
+
+            <a href="{{ route('register') }}" class="home-sidebar-promo" data-reveal>
+                <small>For school owners</small>
+                <h2>Help families discover your school</h2>
+                <p>Build a profile with your school's details, programmes, facilities and contact information.</p>
+                <span class="btn btn-gold">Register your school</span>
+            </a>
+
+            <section class="home-review-box" data-reveal>
+                <h2>Stories from schools &amp; families</h2>
+                @forelse($featuredReviews as $review)
+                    <article class="home-review-card">
+                        <div class="home-review-card__stars" aria-label="{{ $review->rating }} out of 5 stars">
+                            @for($star = 1; $star <= 5; $star++)
+                                <span>{{ $star <= (int) $review->rating ? '★' : '☆' }}</span>
+                            @endfor
+                        </div>
+                        @if($review->title)<h3>{{ $review->title }}</h3>@endif
+                        <p>“{{ \Illuminate\Support\Str::limit($review->body, 190) }}”</p>
+                        <div class="home-review-card__author">
+                            <span>{{ strtoupper(mb_substr($review->user?->name ?? 'Parent', 0, 1)) }}</span>
+                            <div><b>{{ $review->user?->name ?? 'FindURSCH user' }}</b><small>{{ $review->school?->name }}</small></div>
+                        </div>
+                    </article>
+                @empty
+                    <p class="home-side-empty">Approved family and community reviews will be featured here.</p>
+                @endforelse
+                <a class="home-sidebox__foot" href="{{ route('schools.index') }}">Explore reviewed schools →</a>
+            </section>
+        </aside>
+    </div>
 
     {{-- Tinted editorial insights band --}}
     <section class="home-insights">
