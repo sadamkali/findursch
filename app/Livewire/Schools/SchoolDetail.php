@@ -4,6 +4,7 @@ namespace App\Livewire\Schools;
 
 use App\Models\School;
 use App\Models\SchoolView;
+use App\Models\SchoolPost;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
