@@ -1,8 +1,10 @@
 <div class="blogs-page">
-    @php($isNews = ($mode ?? 'blogs') === 'news')
-    @php($indexRoute = $isNews ? 'news.index' : 'articles.index')
-    @php($showRoute = $isNews ? 'news.show' : 'articles.show')
-    @php($kindLabel = $isNews ? 'news' : 'blogs')
+    @php
+        $isNews = ($mode ?? 'blogs') === 'news';
+        $indexRoute = $isNews ? 'news.index' : 'articles.index';
+        $showRoute = $isNews ? 'news.show' : 'articles.show';
+        $kindLabel = $isNews ? 'news' : 'blogs';
+    @endphp
 
     <a class="blogs-rtab" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
     <a class="blogs-ad-slim" href="{{ route('contact') }}">
