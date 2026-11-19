@@ -145,7 +145,12 @@ class AdminWorkspaceController extends Controller
 
             case 'events':
             case 'scholarships':
-                $postType = $resource === 'events' ? 'event' : 'bursary';
+            case 'school-news':
+                $postType = match ($resource) {
+                    'events' => 'event',
+                    'scholarships' => 'bursary',
+                    default => 'news',
+                };
                 $postQuery = SchoolPost::query()
                     ->where('type', $postType)
                     ->with('school:id,name')
@@ -346,7 +351,12 @@ class AdminWorkspaceController extends Controller
 
             case 'events':
             case 'scholarships':
-                $postType = $resource === 'events' ? 'event' : 'bursary';
+            case 'school-news':
+                $postType = match ($resource) {
+                    'events' => 'event',
+                    'scholarships' => 'bursary',
+                    default => 'news',
+                };
                 $post = SchoolPost::query()->where('type', $postType)->findOrFail($id);
                 $data = $request->validate([
                     'status' => ['required', 'in:draft,pending,approved,published,rejected'],
