@@ -189,3 +189,15 @@
 @media (prefers-reduced-motion: reduce) {
     .blogs-page * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+.blogs-rtab {
+    position: fixed; z-index: 50; top: 34%; right: 0; padding: 18px 9px;
+    border-radius: 10px 0 0 10px; background: var(--blogs-accent);
+    color: #2a1d00 !important; box-shadow: -3px 3px 12px rgba(0,0,0,.2);
+    font: 700 12px/1.2 var(--blogs-sans); letter-spacing: .06em;
+    writing-mode: vertical-rl;
+}
+.blogs-rtab:hover { background: var(--blogs-accent-dark); }
+@media (max-width: 640px) {
+    .blogs-rtab { top: 40%; padding: 14px 7px; font-size: 10px; }
+}
