@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="/favicon.png">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @if (request()->routeIs('articles.index'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}">@endif
+    @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}">@endif
     @livewireStyles
 </head>
 <body class="h-full bg-white text-gray-900 antialiased">
@@ -19,11 +19,14 @@
     <div class="site-topbar">
         <div class="site-wrap site-topbar__inner">
             <a href="{{ route('schools.index') }}">Explore schools</a>
-            <a href="{{ route('articles.index') }}">Blogs &amp; guides</a>
+            <a href="{{ route('news.index') }}">Latest news</a>
+            <a href="{{ route('articles.index') }}">Blogs</a>
+            <a href="{{ route('events.index') }}">Events</a>
+            <a href="{{ route('scholarships.index') }}">Scholarships</a>
             <a href="{{ route('compare') }}">Compare schools</a>
             @guest
                 <a href="{{ $dashboardUrl }}/login?returnTo=%2Faccount">Log in</a>
-                <a href="{{ $dashboardUrl }}/register?type=parent&returnTo=%2Faccount">Sign up</a>
+                <a href="{{ $dashboardUrl }}/register?type=school_owner&returnTo=%2Faccount">Sign up</a>
             @else
                 <a href="{{ auth()->user()->hasRole('school_owner') ? ($dashboardUrl.'/owner') : (auth()->user()->hasRole('admin') ? ($dashboardUrl.'/admin') : route('user.dashboard')) }}">My account</a>
             @endguest
@@ -40,7 +43,10 @@
                 <a href="{{ route('home') }}" @class(['is-active' => request()->routeIs('home')])>Home</a>
                 <a href="{{ route('schools.index') }}" @class(['is-active' => request()->routeIs('schools.*', 'district.*', 'search')])>Schools</a>
                 <a href="{{ route('compare') }}" @class(['is-active' => request()->routeIs('compare')])>Compare</a>
+                <a href="{{ route('scholarships.index') }}" @class(['is-active' => request()->routeIs('scholarships.*')])>Scholarships</a>
+                <a href="{{ route('news.index') }}" @class(['is-active' => request()->routeIs('news.*')])>News</a>
                 <a href="{{ route('articles.index') }}" @class(['is-active' => request()->routeIs('articles.*')])>Blogs</a>
+                <a href="{{ route('events.index') }}" @class(['is-active' => request()->routeIs('events.*')])>Events</a>
                 <a href="{{ route('about') }}" @class(['is-active' => request()->routeIs('about')])>About</a>
                 <a href="{{ route('contact') }}" @class(['is-active' => request()->routeIs('contact')])>Contact</a>
             </nav>
