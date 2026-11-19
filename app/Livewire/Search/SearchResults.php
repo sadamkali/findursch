@@ -18,7 +18,11 @@ class SearchResults extends Component
 
     public function render()
     {
-        $schools = collect();
+        // Keep a paginator even before a search is submitted because the view
+        // displays total() and links() for the empty and populated states alike.
+        $schools = School::query()
+            ->whereRaw('1 = 0')
+            ->paginate(15);
         $districts = collect();
 
         if (strlen($this->q) >= 2) {
