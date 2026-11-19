@@ -176,7 +176,9 @@
                 </div>
 
                 @if($latestSchoolUpdates->first())
-                    @php($featuredSchoolUpdate = $latestSchoolUpdates->first())
+                    @php
+                        $featuredSchoolUpdate = $latestSchoolUpdates->first();
+                    @endphp
                     <a class="card prem" href="{{ route('school-news.show', $featuredSchoolUpdate) }}">
                         <div class="ph d">
                             @if($featuredSchoolUpdate->school?->getFirstMediaUrl('cover'))
@@ -269,7 +271,9 @@
                 <div class="card box">
                     <h5>Stories from schools &amp; families</h5>
                     @if($featuredReviews->first())
-                        @php($homeReview = $featuredReviews->first())
+                        @php
+                            $homeReview = $featuredReviews->first();
+                        @endphp
                         <div class="quote">
                             <div class="st" aria-label="{{ $homeReview->rating }} out of 5 stars">
                                 @for($star = 1; $star <= 5; $star++){{ $star <= (int) $homeReview->rating ? '★' : '☆' }}@endfor
@@ -291,7 +295,9 @@
             <div class="head"><h2>Educational <span>insights</span></h2><a class="more" href="{{ route('articles.index') }}">All articles</a></div>
             <div class="ins">
                 @if($insightArticles->first())
-                    @php($primaryInsight = $insightArticles->first())
+                    @php
+                        $primaryInsight = $insightArticles->first();
+                    @endphp
                     <a class="card big" href="{{ route('articles.show', $primaryInsight) }}">
                         <div class="ph d">
                             @if($primaryInsight->cover_image)<img src="{{ $primaryInsight->cover_image }}" alt="" loading="lazy">@else<span class="ph-initials">FS</span>@endif
