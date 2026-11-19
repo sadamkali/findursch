@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Article;\nuse App\Models\ArticleCategory;
+use App\Models\Article;
+use App\Models\ArticleCategory;
 use App\Models\Inquiry;
 use App\Models\Review;
-use App\Models\School;\nuse App\Models\SchoolPost;
+use App\Models\School;
+use App\Models\SchoolPost;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
