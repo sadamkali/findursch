@@ -7,6 +7,7 @@ use App\Models\District;
 use App\Models\Review;
 use App\Models\School;
 use App\Models\SchoolType;
+use App\Models\SchoolPost;
 use App\Models\User;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -122,6 +123,7 @@ class HomePage extends Component
             'searchDistricts',
             'leadArticle',
             'newsArticles',
+            'upcomingEvents',
             'insightArticles',
             'stats',
         ));
