@@ -141,7 +141,7 @@ class ArticleListing extends Component
             'categorySections' => $categorySections,
             'searchResults' => $searchResults,
             'selectedCategory' => $categories->firstWhere('id', $this->category),
-        ])->layoutData([
+        ])->layout('layouts.app', [
             'title' => 'Blogs for parents, students and teachers — FindURSCH',
             'description' => 'Practical advice, inspiring stories and fresh ideas for parents, students and teachers across Uganda.',
         ]);
