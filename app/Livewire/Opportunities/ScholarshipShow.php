@@ -30,7 +30,7 @@ class ScholarshipShow extends Component
             ->whereIn('status', ['approved', 'published'])
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
-            ->whereKeyNot($this->scholarship->id)
+            ->where('id', '!=', $this->scholarship->id)
             ->with('school')
             ->orderBy('deadline')
             ->limit(3)
