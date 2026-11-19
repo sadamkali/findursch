@@ -102,7 +102,7 @@ class School extends Model implements HasMedia
 
     public function facilities(): BelongsToMany
     {
-        return $this->belongsToMany(Facility::class)->withPivot('notes');
+        return $this->belongsToMany(Facility::class, 'school_facilities', 'school_id', 'facility_id')->withPivot('notes');
     }
 
     public function reviews(): HasMany
