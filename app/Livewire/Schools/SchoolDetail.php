@@ -194,9 +194,20 @@ class SchoolDetail extends Component
 
     public function render()
     {
+        $schoolPosts = SchoolPost::query()
+            ->where('school_id', $this->school->id)
+            ->whereIn('status', ['approved', 'published'])
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->latest('published_at')
+            ->get();
+
         return view('livewire.schools.school-detail', [
             'alreadyReviewed' => auth()->check()
                 && $this->school->reviews()->where('user_id', auth()->id())->exists(),
+            'schoolEvents' => $schoolPosts->where('type', 'event')->sortBy('starts_at')->values(),
+            'schoolNews' => $schoolPosts->where('type', 'news')->values(),
+            'schoolBursaries' => $schoolPosts->where('type', 'bursary')->sortBy('deadline')->values(),
         ]);
     }
 }
