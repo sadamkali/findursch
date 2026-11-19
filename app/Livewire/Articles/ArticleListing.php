@@ -61,7 +61,7 @@ class ArticleListing extends Component
             $query->where(function (Builder $searchQuery) use ($pattern) {
                 $searchQuery
                     ->whereRaw('LOWER(title) LIKE ?', [$pattern])
-                    ->orWhereRaw('LOWER(COALESCE(excerpt, '')) LIKE ?', [$pattern])
+                    ->orWhereRaw("LOWER(COALESCE(excerpt, '')) LIKE ?", [$pattern])
                     ->orWhereHas('category', fn (Builder $categoryQuery) => $categoryQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]))
                     ->orWhereHas('author', fn (Builder $authorQuery) => $authorQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]));
             });
@@ -93,7 +93,7 @@ class ArticleListing extends Component
 
         $secondaryArticleQuery = clone $filteredQuery;
         if ($leadArticle) {
-            $secondaryArticleQuery->whereKeyNot($leadArticle->id);
+            $secondaryArticleQuery->where('id', '!=', $leadArticle->id);
         }
 
         $secondaryArticle = $secondaryArticleQuery
