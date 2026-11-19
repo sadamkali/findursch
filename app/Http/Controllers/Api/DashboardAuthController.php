@@ -216,14 +216,27 @@ class DashboardAuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email', 'max:255'],
+            'login' => ['required_without:email', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
             'password' => ['required', 'string'],
+            'remember' => ['sometimes', 'boolean'],
         ]);
 
-        $user = User::query()->where('email', Str::lower(trim($credentials['email'])))->first();
+        $identifier = trim((string) ($credentials['login'] ?? $credentials['email'] ?? ''));
+        $normalizedPhone = preg_replace('/[\\s().-]+/', '', $identifier);
+        $email = Str::lower($identifier);
+
+        $user = User::query()
+            ->where(function ($query) use ($email, $identifier, $normalizedPhone) {
+                $query->whereRaw('LOWER(email) = ?', [$email])
+                    ->orWhere('phone', $identifier)
+                    ->orWhere('phone', $normalizedPhone);
+            })
+            ->first();
 
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
+                'login' => ['The supplied sign-in details are incorrect.'],
                 'email' => ['The supplied sign-in details are incorrect.'],
             ]);
         }
@@ -236,15 +249,15 @@ class DashboardAuthController extends Controller
             return response()->json(['message' => 'This account does not have access to the FindurSch workspace.'], 403);
         }
 
-        return $this->issueDashboardSession($user);
+        return $this->issueDashboardSession($user, (bool) ($credentials['remember'] ?? true));
     }
 
-    private function issueDashboardSession(User $user): JsonResponse
+    private function issueDashboardSession(User $user, bool $remember = true): JsonResponse
     {
         $token = $user->createToken(
             'findursch-dashboard',
             ['*'],
-            now()->addDays(30)
+            now()->addDays($remember ? 30 : 1)
         )->plainTextToken;
 
         $user->forceFill(['last_login_at' => now()])->save();
