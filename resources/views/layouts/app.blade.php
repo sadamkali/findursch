@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="/favicon.png">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (request()->routeIs('articles.index'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}">@endif
     @livewireStyles
 </head>
 <body class="h-full bg-white text-gray-900 antialiased">
@@ -18,7 +19,7 @@
     <div class="site-topbar">
         <div class="site-wrap site-topbar__inner">
             <a href="{{ route('schools.index') }}">Explore schools</a>
-            <a href="{{ route('articles.index') }}">Education news &amp; guides</a>
+            <a href="{{ route('articles.index') }}">Blogs &amp; guides</a>
             <a href="{{ route('compare') }}">Compare schools</a>
             @guest
                 <a href="{{ $dashboardUrl }}/login?returnTo=%2Faccount">Log in</a>
@@ -39,7 +40,7 @@
                 <a href="{{ route('home') }}" @class(['is-active' => request()->routeIs('home')])>Home</a>
                 <a href="{{ route('schools.index') }}" @class(['is-active' => request()->routeIs('schools.*', 'district.*', 'search')])>Schools</a>
                 <a href="{{ route('compare') }}" @class(['is-active' => request()->routeIs('compare')])>Compare</a>
-                <a href="{{ route('articles.index') }}" @class(['is-active' => request()->routeIs('articles.*')])>News</a>
+                <a href="{{ route('articles.index') }}" @class(['is-active' => request()->routeIs('articles.*')])>Blogs</a>
                 <a href="{{ route('about') }}" @class(['is-active' => request()->routeIs('about')])>About</a>
                 <a href="{{ route('contact') }}" @class(['is-active' => request()->routeIs('contact')])>Contact</a>
             </nav>
@@ -134,7 +135,7 @@
                 <div>
                     <h2>Resources</h2>
                     <ul>
-                        <li><a href="{{ route('articles.index') }}">Latest news</a></li>
+                        <li><a href="{{ route('articles.index') }}">Blogs</a></li>
                         <li><a href="{{ route('about') }}">About FindurSch</a></li>
                         <li><a href="{{ route('contact') }}">Contact</a></li>
                     </ul>
