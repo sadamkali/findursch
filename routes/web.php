@@ -105,10 +105,8 @@ Route::get('/login', function (Request $request) use ($dashboardUrl) {
     return redirect()->away($dashboardUrl().'/login?returnTo='.rawurlencode($path));
 })->name('login');
 
-Route::get('/register', function (Request $request) use ($dashboardUrl) {
-    $type = $request->query('type') === 'school_owner' ? 'school_owner' : 'parent';
-
-    return redirect()->away($dashboardUrl().'/register?type='.$type.'&returnTo=%2Faccount');
+Route::get('/register', function () use ($dashboardUrl) {
+    return redirect()->away($dashboardUrl().'/register?type=school_owner&returnTo=%2Faccount');
 })->name('register');
 
 Route::get('/forgot-password', fn () => redirect()->away($dashboardUrl().'/login'))->name('password.request');
