@@ -23,10 +23,10 @@
     <main class="blogs-wrap">
         <nav class="blogs-pills" aria-label="{{ $isNews ? 'News categories' : 'Blog categories' }}">
             <a href="{{ route($indexRoute, array_filter(['q' => $search ?: null, 'sort' => $sort !== 'latest' ? $sort : null])) }}"
-               @class(['is-active' => ! $category])>{{ $isNews ? 'All news' : 'All blogs' }}</a>
+               class="{{ ! $category ? 'is-active' : '' }}">{{ $isNews ? 'All news' : 'All blogs' }}</a>
             @foreach($categories as $item)
                 <a href="{{ route($indexRoute, array_filter(['category' => $item->id, 'q' => $search ?: null, 'sort' => $sort !== 'latest' ? $sort : null])) }}"
-                   @class(['is-active' => (string) $category === (string) $item->id)>{{ $item->name }}</a>
+                   class="{{ (string) $category === (string) $item->id ? 'is-active' : '' }}">{{ $item->name }}</a>
             @endforeach
         </nav>
 
@@ -41,15 +41,15 @@
                 <select name="category" aria-label="{{ $isNews ? 'News category' : 'Blog category' }}">
                     <option value="">All categories</option>
                     @foreach($categories as $item)
-                        <option value="{{ $item->id }}" @selected((string) $category === (string) $item->id)>{{ $item->name }}</option>
+                        <option value="{{ $item->id }}" {{ (string) $category === (string) $item->id ? 'selected' : '' }}>{{ $item->name }}</option>
                     @endforeach
                 </select>
             </label>
             <label>
                 <span class="sr-only">Sort {{ $kindLabel }}</span>
                 <select name="sort" aria-label="Sort blogs">
-                    <option value="latest" @selected($sort !== 'popular')>Latest first</option>
-                    <option value="popular" @selected($sort === 'popular')>Most read</option>
+                    <option value="latest" {{ $sort !== 'popular' ? 'selected' : '' }}>Latest first</option>
+                    <option value="popular" {{ $sort === 'popular' ? 'selected' : '' }}>Most read</option>
                 </select>
             </label>
         </form>
