@@ -304,3 +304,54 @@
 @media(max-width:900px){.resource-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.resource-detail-grid{grid-template-columns:1fr}.resource-detail-sidebar{position:static;grid-template-columns:repeat(2,minmax(0,1fr))}.resource-detail-sidebar>*{min-width:0}}
 @media(max-width:640px){.resource-hero{margin-top:16px;padding:36px 18px}.resource-hero>p:last-child{font-size:12.5px}.resource-toolbar{align-items:stretch}.resource-search{min-width:100%}.resource-pills{width:100%;overflow-x:auto;flex-wrap:nowrap}.resource-pills a{flex:none}.resource-grid,.resource-past-list,.resource-related-grid{grid-template-columns:1fr}.resource-card-image{height:190px}.resource-detail-wrap{padding-top:18px}.resource-detail-grid{gap:20px}.resource-event-summary{grid-template-columns:1fr}.resource-event-poster,.resource-event-poster img,.resource-event-poster span{min-height:190px;max-height:250px}.resource-detail-sidebar{grid-template-columns:1fr}.resource-prose,.resource-organiser{padding:19px}.resource-section-head h2{font-size:20px}}
 @media(prefers-reduced-motion:reduce){.resource-card{transition:none}.resource-card:hover{transform:none}}
+
+/* Individual article layout from findursch-article.html */
+.article-detail-wrap{padding-bottom:12px}
+.article-detail-content>h1{margin-bottom:18px}
+.article-cover{margin:0 0 10px}
+.article-cover img{display:block;width:100%;max-height:480px;aspect-ratio:16/9;object-fit:cover;border-radius:9px;background:var(--rp-tint)}
+.article-cover figcaption{padding-top:6px;color:var(--rp-muted);font-size:10px}
+.article-excerpt{margin:16px 0 18px;padding-left:16px;border-left:3px solid var(--rp-brand);font-size:15px}
+.article-byline{display:flex;align-items:center;gap:11px;margin:18px 0;padding:13px 0;border-top:1px solid var(--rp-line);border-bottom:1px solid var(--rp-line)}
+.article-avatar{display:grid;width:40px;height:40px;flex:none;place-items:center;border-radius:50%;background:var(--rp-brand);color:#fff;font:700 16px 'Playfair Display',Georgia,serif}
+.article-byline>span:nth-child(2){display:grid;gap:3px}
+.article-byline b{color:var(--rp-ink);font-size:12px}
+.article-byline small{color:var(--rp-muted);font-size:10px}
+.article-view-count{margin-left:auto;color:var(--rp-muted);font-size:10px}
+.article-body{color:#34423b;font-size:15px;line-height:1.85}
+.article-body p{margin:0 0 20px}
+.article-body h2{margin:29px 0 10px;color:var(--rp-brand);font:700 25px/1.2 'Playfair Display',Georgia,serif}
+.article-body h3{margin:24px 0 9px;color:var(--rp-ink);font:700 20px/1.25 'Playfair Display',Georgia,serif}
+.article-body ul{margin:0 0 18px;padding-left:22px;list-style:disc}
+.article-body ol{margin:0 0 18px;padding-left:22px;list-style:decimal}
+.article-body a{color:var(--rp-brand);text-decoration:underline;text-underline-offset:3px}
+.article-body blockquote{margin:24px 0;padding:13px 18px;border-left:4px solid var(--rp-gold);background:var(--rp-tint);color:var(--rp-brand);font:italic 19px/1.5 'Playfair Display',Georgia,serif}
+.article-body img{max-width:100%;height:auto;border-radius:8px}
+.article-category-tags{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:25px;padding:16px 0;border-top:1px solid var(--rp-line);border-bottom:1px solid var(--rp-line)}
+.article-category-tags>span{color:var(--rp-muted);font-size:10px;font-weight:800;letter-spacing:.1em}
+.article-category-tags a{padding:6px 11px;border-radius:99px;background:var(--rp-tint);color:var(--rp-brand);font-size:10px;font-weight:700}
+.article-story-cta{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:24px;padding:20px;border-radius:9px;background:var(--rp-deep);color:#fff}
+.article-story-cta small{color:var(--rp-gold);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.article-story-cta h2{margin:5px 0;color:#fff;font:700 20px/1.25 'Playfair Display',Georgia,serif}
+.article-story-cta p{color:#e2eee9;font-size:11px}
+.article-sidebar{gap:18px}
+.article-sidebox{overflow:hidden;border:1px solid var(--rp-line);border-radius:9px;background:#fff}
+.article-sidebox h2{padding:12px 15px;background:var(--rp-brand);color:#fff;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.article-sidebox ol{margin:0;padding:0;list-style:none}
+.article-sidebox li a{display:flex;gap:11px;padding:13px 14px;border-bottom:1px solid var(--rp-line)}
+.article-sidebox li a:hover{background:var(--rp-tint)}
+.article-sidebox li b{flex:none;color:var(--rp-brand);font:700 19px/1 'Playfair Display',Georgia,serif}
+.article-sidebox li span{color:var(--rp-ink);font-size:11.5px;font-weight:600;line-height:1.4}
+.article-sidebox li small{display:block;margin-top:4px;color:var(--rp-muted);font-size:10px;font-weight:400}
+.article-school-spotlight{overflow:hidden;border-radius:9px;background:var(--rp-brand);color:#fff}
+.article-school-spotlight img{display:block;width:100%;height:142px;object-fit:cover}
+.article-school-spotlight>div{padding:17px}
+.article-school-spotlight small{color:var(--rp-gold);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.article-school-spotlight h3{margin:5px 0;color:#fff;font:700 20px/1.2 'Playfair Display',Georgia,serif}
+.article-school-spotlight p{margin-bottom:13px;color:#e2eee9;font-size:11.5px}
+.article-sidebar-links{display:grid;gap:0;border:1px solid var(--rp-line);border-radius:9px;background:#fff}
+.article-sidebar-links a{padding:12px 14px;border-bottom:1px solid var(--rp-line);color:var(--rp-brand);font-size:11.5px;font-weight:700}
+.article-sidebar-links a:last-child{border-bottom:0}
+.article-related .resource-related-grid a{overflow:hidden}
+.article-related .resource-related-grid img{width:100%;height:145px;object-fit:cover;border-radius:5px}
+@media(max-width:640px){.article-story-cta{align-items:flex-start;flex-direction:column}.article-byline{flex-wrap:wrap}.article-view-count{width:100%;margin-left:51px}}
