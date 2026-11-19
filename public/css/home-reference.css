@@ -1,0 +1,243 @@
+/* FindURSCH homepage — scoped copy of the uploaded visual system */
+.findursch-home-reference{
+  --brand:#0c5a49;--brand-dk:#083f33;--brand-xdk:#052a22;
+  --accent:#f0b030;--accent-dk:#d99a1a;
+  --tint:#f1f6f3;--line:#e4e8e6;--ink:#1b2420;--mute:#5d6b65;
+  --ok:#e3f4e8;--ok-ink:#17703a;
+  --serif:'Playfair Display',Georgia,serif;--sans:'Inter',system-ui,sans-serif;
+  --r:10px;--gap:24px;--wrap:1280px;
+  color:var(--ink);background:#fff;font:15px/1.55 var(--sans);
+  overflow:hidden;
+}
+.findursch-home-reference,.findursch-home-reference *{box-sizing:border-box;margin:0;padding:0}
+.findursch-home-reference a{color:inherit;text-decoration:none}
+.findursch-home-reference ul{list-style:none}
+.findursch-home-reference img{display:block;max-width:100%}
+.findursch-home-reference .wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gap)}
+.findursch-home-reference :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* Buttons */
+.findursch-home-reference .btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 20px;border-radius:8px;font:600 14px var(--sans);border:1.5px solid transparent;cursor:pointer;white-space:nowrap}
+.findursch-home-reference .btn-gold{background:var(--accent);color:#2a1d00}
+.findursch-home-reference .btn-gold:hover{background:var(--accent-dk)}
+.findursch-home-reference .btn-ghost{border-color:#fff;color:#fff}
+.findursch-home-reference .btn-ghost:hover{background:rgba(255,255,255,.12)}
+.findursch-home-reference .btn-white{background:#fff;color:var(--brand)}
+.findursch-home-reference .btn-red{background:var(--brand);color:#fff;border-radius:999px;height:46px;padding:0 26px}
+.findursch-home-reference .btn-block{width:100%;justify-content:center}
+.findursch-home-reference .more{font:600 13px var(--sans);color:var(--brand)}
+
+/* Hero */
+.findursch-home-reference .hero{position:relative;min-height:470px;display:grid;place-items:center;text-align:center;color:#fff;padding:64px 24px 72px;background:linear-gradient(rgba(5,30,24,.62),rgba(5,30,24,.72)),linear-gradient(120deg,#355a4e,#7b6a3c 55%,#2f4d5a)}
+.findursch-home-reference .hero h1{font:700 56px/1.12 var(--serif);max-width:760px;margin:0 auto}
+.findursch-home-reference .hero h1 em{font-style:normal;color:var(--accent)}
+.findursch-home-reference .hero p{max-width:620px;margin:20px auto 32px;font-size:17px;color:#f6faf8}
+.findursch-home-reference .search{display:flex;align-items:center;background:#fff;border-radius:999px;padding:7px 7px 7px 22px;max-width:720px;margin:0 auto;box-shadow:0 14px 40px rgba(0,0,0,.3);color:var(--ink)}
+.findursch-home-reference .search input{flex:1;min-width:0;border:0;outline:0;font:15px var(--sans);padding:10px 8px;background:none;color:var(--ink)}
+.findursch-home-reference .search select{max-width:180px;border:0;border-left:1px solid var(--line);padding:10px 14px;font:14px var(--sans);background:none;color:var(--mute)}
+.findursch-home-reference .dots{display:flex;gap:6px;justify-content:center}
+.findursch-home-reference .dots i{display:block;width:8px;height:8px;border-radius:99px;background:#cfd6d2}
+.findursch-home-reference .dots i.on{width:26px;background:var(--brand)}
+.findursch-home-reference .hero .dots{position:absolute;bottom:20px;left:0;right:0}
+.findursch-home-reference .hero .dots i{background:rgba(255,255,255,.5)}
+.findursch-home-reference .hero .dots i.on{background:#fff}
+.findursch-home-reference .tab{position:fixed;right:0;top:34%;z-index:50;writing-mode:vertical-rl;background:var(--accent);color:#2a1d00;font:700 12px var(--sans);letter-spacing:.06em;padding:18px 9px;border-radius:10px 0 0 10px;box-shadow:-3px 3px 12px rgba(0,0,0,.2)}
+
+/* Layout and headings */
+.findursch-home-reference .cols{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:var(--gap);align-items:start}
+.findursch-home-reference .sec{padding-top:56px}
+.findursch-home-reference .head{display:flex;justify-content:space-between;align-items:baseline;gap:15px;margin-bottom:18px}
+.findursch-home-reference .head h2{font:700 26px var(--serif)}
+.findursch-home-reference .head h2 span{color:var(--brand)}
+.findursch-home-reference .card{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.findursch-home-reference .ph{position:relative;overflow:hidden;background:linear-gradient(135deg,#9fb8ad,#d9c9a0)}
+.findursch-home-reference .ph.b{background:linear-gradient(135deg,#6f8f9a,#b9c8cf)}
+.findursch-home-reference .ph.c{background:linear-gradient(135deg,#c9a46a,#7e5b34)}
+.findursch-home-reference .ph.d{background:linear-gradient(135deg,#789a7b,#2f5a43)}
+.findursch-home-reference .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.findursch-home-reference .ph-initials{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.88);font:700 38px var(--serif);letter-spacing:.04em;text-shadow:0 2px 9px rgba(0,0,0,.15)}
+.findursch-home-reference .tag{display:inline-block;margin:3px 3px 0 0;padding:2px 9px;border-radius:99px;font-size:11.5px;font-weight:600;background:#f0f1f1;color:var(--mute)}
+.findursch-home-reference .tag.new{background:var(--ok);color:var(--ok-ink)}
+.findursch-home-reference .kick{font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+
+/* Featured schools and spotlight */
+.findursch-home-reference .slider{position:relative}
+.findursch-home-reference .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap)}
+.findursch-home-reference .school .ph{height:150px}
+.findursch-home-reference .school .b{padding:14px 16px 16px}
+.findursch-home-reference .school h3{font:600 15px/1.3 var(--sans);margin:4px 0 6px}
+.findursch-home-reference .school small{display:block;color:var(--mute);font-size:12.5px;margin-bottom:10px}
+.findursch-home-reference .school .ph-initials{font-size:34px}
+.findursch-home-reference .school-empty-link{transition:transform .18s ease,box-shadow .18s ease}
+.findursch-home-reference .school-empty-link:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(5,42,34,.1)}
+.findursch-home-reference .arrow{position:absolute;top:50%;z-index:2;width:34px;height:34px;margin-top:-17px;border-radius:50%;background:#fff;border:1px solid var(--line);box-shadow:0 3px 10px rgba(0,0,0,.15);display:grid;place-items:center;cursor:pointer;font-size:16px;color:var(--ink)}
+.findursch-home-reference .arrow.l{left:-17px}
+.findursch-home-reference .arrow.r{right:-17px}
+.findursch-home-reference .slider+.dots{margin-top:16px}
+.findursch-home-reference .spot{display:grid;grid-template-columns:1fr 1fr;margin-top:32px;min-height:230px}
+.findursch-home-reference .spot>.ph{min-height:230px}
+.findursch-home-reference .spot .t{padding:28px 32px;align-self:center}
+.findursch-home-reference .spot h3{font:700 26px/1.2 var(--serif);margin-bottom:10px}
+.findursch-home-reference .spot p{color:var(--mute);margin-bottom:12px}
+.findursch-home-reference .spot .meta{font-size:12.5px;margin-bottom:12px}
+.findursch-home-reference .spot .meta b{color:var(--mute);font-weight:500;margin-right:4px}
+.findursch-home-reference .strip{display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--brand-xdk);color:#fff;border-radius:var(--r);padding:18px 24px;margin:32px auto 0;max-width:640px}
+.findursch-home-reference .strip h4{font:700 18px var(--sans)}
+.findursch-home-reference .strip p{font-size:12.5px;color:#e2eee9}
+
+/* Sidebar modules */
+.findursch-home-reference aside{display:flex;flex-direction:column;gap:var(--gap);min-width:0}
+.findursch-home-reference .ad{min-height:250px;border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;color:#fff;font:700 22px/1.2 var(--serif);padding:20px;background:linear-gradient(135deg,#a32a2a,#e05a3a)}
+.findursch-home-reference .ad small{display:block;font:500 11px var(--sans);color:#fff1ec;margin-top:0}
+.findursch-home-reference .ad .ad-cta{display:inline-flex;margin-top:7px;padding:10px 15px;border-radius:7px;background:rgba(255,255,255,.14);font:700 12px var(--sans)}
+.findursch-home-reference .ad-primary{min-height:250px}
+.findursch-home-reference .box h5{background:var(--brand);color:#fff;font:700 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:11px 16px}
+.findursch-home-reference .box li a{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);font-size:13.5px;font-weight:500}
+.findursch-home-reference .box li a:hover{background:var(--tint)}
+.findursch-home-reference .ico{width:28px;height:28px;border-radius:50%;background:#fbe9bf;display:grid;place-items:center;flex:none;color:var(--brand);font-size:11px;font-weight:800}
+.findursch-home-reference .box li em{margin-left:auto;font-style:normal;font-size:12.5px;color:var(--mute)}
+.findursch-home-reference .box .foot{display:block;text-align:center;padding:12px;font:600 12.5px var(--sans);color:var(--brand)}
+.findursch-home-reference .date{width:40px;height:40px;border-radius:6px;background:var(--brand-dk);color:#fff;text-align:center;font:700 15px/1 var(--sans);padding-top:6px;flex:none}
+.findursch-home-reference .date small{display:block;font-size:9px;font-weight:500;color:#e2eee9;margin-top:3px}
+.findursch-home-reference .box li div strong{display:block;font-size:12px;line-height:1.3}
+.findursch-home-reference .box li div span{font-size:11px;color:var(--mute)}
+.findursch-home-reference .box-empty{display:block;padding:14px 16px;color:var(--mute);font-size:12.5px;line-height:1.6}
+.findursch-home-reference .jobs li a{display:block;padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px;font-weight:500}
+.findursch-home-reference .jobs-empty{display:grid;gap:7px;padding:17px 16px;color:var(--mute);font-size:12px;line-height:1.55}
+.findursch-home-reference .jobs-empty b{color:var(--ink);font-size:13px}
+.findursch-home-reference .promo{display:block;background:var(--brand);color:#fff;border-radius:var(--r);padding:24px}
+.findursch-home-reference .promo small{font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#e2eee9}
+.findursch-home-reference .promo h3{font:700 28px/1.15 var(--serif);margin:8px 0 12px}
+.findursch-home-reference .promo p{font-size:13px;color:#e2eee9;margin-bottom:16px}
+.findursch-home-reference .quote{padding:16px 18px 18px}
+.findursch-home-reference .quote .st{color:var(--accent);letter-spacing:2px;font-size:13px;line-height:1.3}
+.findursch-home-reference .quote p{font-size:13px;margin:8px 0 14px;color:#33403a}
+.findursch-home-reference .who{display:flex;align-items:center;gap:10px;font-size:12.5px}
+.findursch-home-reference .who b{display:block}
+.findursch-home-reference .who i{width:34px;height:34px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font:700 12px var(--sans);font-style:normal;flex:none}
+.findursch-home-reference .quote .dots{margin-top:14px}
+.findursch-home-reference .bursary-preview{display:grid;gap:7px;margin-top:14px}
+.findursch-home-reference .bursary-preview a{display:flex;justify-content:space-between;gap:14px;align-items:center;padding-top:7px;border-top:1px solid rgba(255,255,255,.2);font-size:11px}
+.findursch-home-reference .bursary-preview small{color:#e2eee9;text-align:right}
+
+/* Education news feature */
+.findursch-home-reference .news{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:var(--gap)}
+.findursch-home-reference .lead{position:relative;min-height:340px;border-radius:var(--r);overflow:hidden;color:#fff;display:flex;align-items:flex-end;background-size:cover;background-position:center}
+.findursch-home-reference .lead>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.findursch-home-reference .lead::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 35%,rgba(0,0,0,.78))}
+.findursch-home-reference .lead .cap{position:relative;z-index:1;padding:22px}
+.findursch-home-reference .lead small{font-size:12px;color:#fff}
+.findursch-home-reference .lead h3{font:700 22px/1.25 var(--serif);margin:4px 0 12px}
+.findursch-home-reference .lead .dots{justify-content:flex-start}
+.findursch-home-reference .lead .dots i{background:rgba(255,255,255,.5)}
+.findursch-home-reference .lead .dots i.on{background:#fff}
+.findursch-home-reference .lead .arrow{z-index:2}
+.findursch-home-reference .lead .arrow.l{left:12px}
+.findursch-home-reference .lead .arrow.r{right:12px}
+.findursch-home-reference .rows{display:flex;flex-direction:column;gap:12px;padding:12px;position:relative}
+.findursch-home-reference .row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:center}
+.findursch-home-reference .row>.ph{height:72px;border-radius:6px}
+.findursch-home-reference .row>.ph>span{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.85);font:700 23px var(--serif)}
+.findursch-home-reference .row h4{font:600 13.5px/1.3 var(--serif)}
+.findursch-home-reference .row small{color:var(--brand);font-style:italic;font-size:11.5px}
+.findursch-home-reference .mini{display:flex;gap:6px;justify-content:center;padding-top:2px}
+.findursch-home-reference .mini span{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;color:var(--mute)}
+.findursch-home-reference .prem{position:relative}
+.findursch-home-reference .prem .ph{height:170px}
+.findursch-home-reference .prem .flag{position:absolute;top:140px;right:0;background:var(--brand);color:#fff;font:700 10.5px var(--sans);letter-spacing:.05em;padding:5px 12px;text-transform:uppercase}
+.findursch-home-reference .prem .b{padding:16px 18px 18px}
+.findursch-home-reference .prem h3{font:700 19px/1.25 var(--serif);margin-bottom:8px}
+.findursch-home-reference .prem p{font-size:13px;color:var(--mute)}
+.findursch-home-reference .prem small{display:flex;justify-content:space-between;gap:8px;margin-top:12px;font-size:12px;color:var(--mute)}
+.findursch-home-reference .prem-empty .b{padding:16px 18px 18px}
+
+/* Bands, videos and scholarships */
+.findursch-home-reference .band{display:flex;align-items:center;justify-content:space-between;gap:20px;color:#fff;border-radius:var(--r);padding:28px 32px;background:var(--brand);position:relative;overflow:hidden}
+.findursch-home-reference .band::before{content:"";position:absolute;right:-60px;top:-70px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.07)}
+.findursch-home-reference .band>*{position:relative}
+.findursch-home-reference .band small{font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#e2eee9}
+.findursch-home-reference .band h3{font:700 24px/1.25 var(--serif);margin:4px 0}
+.findursch-home-reference .band p{font-size:13px;color:#e2eee9}
+.findursch-home-reference .band .acts{display:flex;gap:10px}
+.findursch-home-reference .band.edge{border-left:5px solid var(--accent)}
+.findursch-home-reference .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.findursch-home-reference .chips a{font-size:11.5px;text-decoration:underline;padding:3px 12px;border-radius:99px;background:rgba(255,255,255,.14)}
+.findursch-home-reference .stack{display:flex;flex-direction:column;gap:var(--gap)}
+.findursch-home-reference .vids{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gap)}
+.findursch-home-reference .vid .ph{height:170px;display:grid;place-items:center}
+.findursch-home-reference .play{width:52px;height:52px;border-radius:50%;background:var(--brand);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.findursch-home-reference .play::after{content:"";position:absolute;left:21px;top:16px;border:10px solid transparent;border-left:16px solid #fff;border-right:0}
+.findursch-home-reference .vid .b{padding:12px 14px}
+.findursch-home-reference .vid small{color:var(--brand);font-weight:600;font-size:10.5px;text-transform:uppercase}
+.findursch-home-reference .vid h4{font:600 14px/1.3 var(--sans);margin:3px 0}
+.findursch-home-reference .vid span{font-size:12px;color:var(--mute)}
+.findursch-home-reference .video-empty{padding:18px;color:var(--mute);font-size:13px}
+.findursch-home-reference .video-empty .more{display:inline-block;margin-top:8px}
+
+/* Insights and footer-facing promotion panels */
+.findursch-home-reference .tinted{background:var(--tint);margin-top:64px;padding:48px 0 64px}
+.findursch-home-reference .ins{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:var(--gap)}
+.findursch-home-reference .big .ph{height:210px}
+.findursch-home-reference .big .b{padding:18px 20px}
+.findursch-home-reference .big h3{font:700 21px/1.25 var(--serif);margin-bottom:8px}
+.findursch-home-reference .big p{font-size:13.5px;color:var(--mute)}
+.findursch-home-reference .big small{display:flex;justify-content:space-between;gap:8px;margin-top:12px;font-size:12px;color:var(--mute)}
+.findursch-home-reference .spl{position:relative;min-height:340px;border-radius:var(--r);overflow:hidden;color:#fff;display:flex;align-items:flex-end;background:linear-gradient(135deg,#2f5a43,#18382b)}
+.findursch-home-reference .spl>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.findursch-home-reference .spl::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 20%,rgba(0,0,0,.65))}
+.findursch-home-reference .spl div{position:relative;z-index:1;padding:22px;width:100%}
+.findursch-home-reference .spl small{color:var(--accent);font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.findursch-home-reference .spl h3{font:700 24px/1.2 var(--serif);margin:6px 0}
+.findursch-home-reference .spl p{font-size:13px;color:#eef4f1;margin-bottom:14px}
+.findursch-home-reference .banner{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--gap);max-width:900px;margin:48px auto}
+.findursch-home-reference .banner .ad{min-height:200px}
+.findursch-home-reference .banner .ad-alt{background:linear-gradient(135deg,#355a68,#6f8f9a)}
+.findursch-home-reference .cta{background:linear-gradient(var(--brand),var(--brand-dk));color:#fff;text-align:center;padding:72px 24px}
+.findursch-home-reference .cta h2{font:700 36px var(--serif);margin-bottom:12px}
+.findursch-home-reference .cta p{max-width:560px;margin:0 auto 28px;color:#eaf3ef}
+.findursch-home-reference .cta .acts{display:flex;gap:12px;justify-content:center}
+
+/* Responsive layout */
+@media(max-width:1000px){
+  .findursch-home-reference .cols,.findursch-home-reference .news,.findursch-home-reference .ins,.findursch-home-reference .banner{grid-template-columns:1fr}
+  .findursch-home-reference .hero h1{font-size:38px}
+  .findursch-home-reference .cards,.findursch-home-reference .vids{grid-template-columns:1fr}
+  .findursch-home-reference .spot{grid-template-columns:1fr}
+  .findursch-home-reference .spot>.ph{height:180px;min-height:180px}
+  .findursch-home-reference .band,.findursch-home-reference .strip{flex-direction:column;align-items:flex-start}
+  .findursch-home-reference .arrow.l{left:6px}
+  .findursch-home-reference .arrow.r{right:6px}
+  .findursch-home-reference .strip{margin-left:0;margin-right:0}
+}
+@media(max-width:640px){
+  .findursch-home-reference .wrap{padding-left:16px;padding-right:16px}
+  .findursch-home-reference .hero{min-height:460px;padding:54px 18px 70px}
+  .findursch-home-reference .hero h1{font-size:36px}
+  .findursch-home-reference .hero p{font-size:14px;margin:16px auto 24px}
+  .findursch-home-reference .search{display:grid;grid-template-columns:minmax(0,1fr);gap:7px;border-radius:16px;padding:11px}
+  .findursch-home-reference .search input,.findursch-home-reference .search select{width:100%;max-width:none;border:0;border-bottom:1px solid var(--line);padding:12px 8px}
+  .findursch-home-reference .search .btn{width:100%;justify-content:center}
+  .findursch-home-reference .sec{padding-top:38px}
+  .findursch-home-reference .head h2{font-size:22px}
+  .findursch-home-reference .spot .t{padding:22px}
+  .findursch-home-reference .strip{padding:18px}
+  .findursch-home-reference .news{gap:14px}
+  .findursch-home-reference .lead{min-height:280px}
+  .findursch-home-reference .row{grid-template-columns:78px minmax(0,1fr)}
+  .findursch-home-reference .row>.ph{height:64px}
+  .findursch-home-reference .band{padding:22px}
+  .findursch-home-reference .band .acts{flex-direction:column;width:100%}
+  .findursch-home-reference .band .acts .btn{width:100%;justify-content:center}
+  .findursch-home-reference .prem .ph{height:160px}
+  .findursch-home-reference .vids{gap:14px}
+  .findursch-home-reference .tinted{margin-top:42px;padding:36px 0 42px}
+  .findursch-home-reference .banner{margin:34px 16px}
+  .findursch-home-reference .cta{padding:54px 18px}
+  .findursch-home-reference .cta h2{font-size:30px}
+  .findursch-home-reference .cta .acts{flex-direction:column;align-items:stretch}
+  .findursch-home-reference .cta .acts .btn{justify-content:center}
+  .findursch-home-reference .tab{top:38%;padding:14px 7px;font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  .findursch-home-reference *{scroll-behavior:auto!important;transition:none!important}
+}
