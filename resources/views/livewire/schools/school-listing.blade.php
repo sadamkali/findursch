@@ -202,7 +202,6 @@
                                     </div>
                                 </div>
                             </article>
-                        @endforeach
                             @if($loop->iteration === 6)
                                 <div class="promo span">
                                     <div><small>Premium schools</small><h3>Be the first school parents see</h3><p>Top of search, homepage feature and spotlight adverts.</p></div>
@@ -221,6 +220,7 @@
                                     <a class="btn btn-gold" href="{{ route('scholarships.index') }}">Find scholarships</a>
                                 </div>
                             @endif
+                        @endforeach
                     </div>
 
                     <div class="pagination pg">
