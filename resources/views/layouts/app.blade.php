@@ -11,8 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="/favicon.png">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @if (request()->routeIs('schools.index'))<link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}">@endif
-    @if (request()->routeIs('events.show'))<link rel="stylesheet" href="{{ asset('css/events-reference.css') }}">@endif
+    {{-- These page styles are safely scoped to their page wrappers; load them directly so Livewire route rendering cannot skip them. --}}
+    <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/events-reference.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/events-listing-reference.css') }}?v=1">
     @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}">@endif
     @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}">@endif
     @if (request()->routeIs('scholarships.*'))<link rel="stylesheet" href="{{ asset('css/scholarships-reference.css') }}">@endif

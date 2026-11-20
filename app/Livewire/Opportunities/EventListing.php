@@ -30,7 +30,7 @@ class EventListing extends Component
             ->whereIn('status', ['approved', 'published'])
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
-            ->with(['school.district']);
+            ->with(['school.district', 'school.media']);
 
         if (trim($this->search) !== '') {
             $term = '%'.mb_strtolower(trim($this->search)).'%';
