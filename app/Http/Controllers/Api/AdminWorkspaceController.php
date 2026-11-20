@@ -58,11 +58,21 @@ class AdminWorkspaceController extends Controller
         switch ($resource) {
             case 'schools':
             case 'verification':
+                $filters = $request->validate([
+                    'q' => ['sometimes', 'nullable', 'string', 'max:150'],
+                    'status' => ['sometimes', 'nullable', 'in:active,pending,draft,suspended,rejected'],
+                    'verification_status' => ['sometimes', 'nullable', 'in:unverified,pending,verified'],
+                    'page' => ['sometimes', 'integer', 'min:1'],
+                    'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+                    'sort' => ['sometimes', 'in:name,created_at,status,id'],
+                    'direction' => ['sometimes', 'in:asc,desc'],
+                ]);
+
                 $query = School::query()->with([
                     'district:id,name',
                     'type:id,name',
                     'owner:id,name,email',
-                ])->orderByDesc('created_at');
+                ]);
 
                 if ($resource === 'verification') {
                     $query->where(function ($builder) {
@@ -70,18 +80,60 @@ class AdminWorkspaceController extends Controller
                             ->orWhereIn('status', ['draft', 'pending']);
                     });
                 }
-                if ($status) {
-                    $query->where('status', $status);
+
+                if (! empty($filters['status'])) {
+                    $query->where('status', $filters['status']);
+                }
+                if (! empty($filters['verification_status'])) {
+                    $query->where('verification_status', $filters['verification_status']);
                 }
                 if ($search !== '') {
                     $query->where(function ($builder) use ($search) {
                         $builder->where('name', 'ilike', '%'.$search.'%')
-                            ->orWhere('email', 'ilike', '%'.$search.'%');
+                            ->orWhere('email', 'ilike', '%'.$search.'%')
+                            ->orWhere('phone', 'ilike', '%'.$search.'%');
                     });
                 }
 
-                $items = $query->limit(100)->get();
-                break;
+                $sortColumns = [
+                    'name' => 'name',
+                    'created_at' => 'created_at',
+                    'status' => 'status',
+                    'id' => 'id',
+                ];
+                $sort = $sortColumns[$filters['sort'] ?? 'created_at'];
+                $direction = $filters['direction'] ?? 'desc';
+                $perPage = (int) ($filters['per_page'] ?? 25);
+
+                $paginator = $query
+                    ->orderBy($sort, $direction)
+                    ->paginate($perPage)
+                    ->appends($request->query());
+
+                $summary = [
+                    'total' => School::query()->count(),
+                    'active' => School::query()->where('status', 'active')->count(),
+                    'pending' => School::query()
+                        ->where(fn ($builder) => $builder
+                            ->whereIn('status', ['draft', 'pending'])
+                            ->orWhere('verification_status', 'pending'))
+                        ->count(),
+                    'verified' => School::query()->where('verification_status', 'verified')->count(),
+                    'needs_attention' => School::query()->whereIn('status', ['suspended', 'rejected'])->count(),
+                ];
+
+                return response()->json([
+                    'data' => $paginator->items(),
+                    'meta' => [
+                        'current_page' => $paginator->currentPage(),
+                        'last_page' => $paginator->lastPage(),
+                        'per_page' => $paginator->perPage(),
+                        'total' => $paginator->total(),
+                        'from' => $paginator->firstItem(),
+                        'to' => $paginator->lastItem(),
+                    ],
+                    'summary' => $summary,
+                ]);
 
             case 'owners':
             case 'parents':
