@@ -85,7 +85,7 @@
         @keydown.escape.window="mobileMenuOpen = false"
         class="site-header">
         <div class="site-wrap site-header__inner">
-            <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">@if($siteName === 'FindURSCH')Find<b>UR</b>SCH@else{{ $siteName }}@endif</a>
+            <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">{{ $siteName }}</a>
 
             <nav class="site-nav" aria-label="Primary navigation">
                 @foreach($primaryNavigation as $item)
@@ -130,7 +130,7 @@
                 else if (!$event.shiftKey && document.activeElement === last) { $event.preventDefault(); first.focus(); }
             ">
             <div class="site-mobile-drawer__head">
-                <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">@if($siteName === 'FindURSCH')Find<b>UR</b>SCH@else{{ $siteName }}@endif</a>
+                <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">{{ $siteName }}</a>
                 <button type="button" class="site-mobile-drawer__close" x-ref="mobileClose" @click="mobileMenuOpen = false" aria-label="Close menu">×</button>
             </div>
 
@@ -173,7 +173,7 @@
         <div class="site-wrap">
             <div class="site-footer__grid">
                 <div class="site-footer__brand">
-                    <a href="{{ route('home') }}" class="site-logo site-logo--footer">@if($siteName === 'FindURSCH')Find<b>UR</b>SCH@else{{ $siteName }}@endif</a>
+                    <a href="{{ route('home') }}" class="site-logo site-logo--footer">{{ $siteName }}</a>
                     <p>Uganda's school discovery, comparison and admissions platform, with school profiles, news, events, jobs and scholarships.</p>
                     <p class="site-footer__location">Kampala, Uganda</p>
                 </div>
