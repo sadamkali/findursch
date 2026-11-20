@@ -33,7 +33,8 @@
     </section>
 
     <main class="wrap">
-        <div class="cols sec">
+        @if($homepageDisplaySettings['featured_schools'] || $homepageDisplaySettings['sidebar'])
+        <div class="cols sec" @if(!$homepageDisplaySettings['featured_schools'] || !$homepageDisplaySettings['sidebar']) style="grid-template-columns:minmax(0,1fr)" @endif>
             @if($homepageDisplaySettings['featured_schools'])
             <div>
                 <div class="head">
@@ -171,6 +172,7 @@
             </aside>
             @endif
         </div>
+        @endif
 
         @if($homepageDisplaySettings['news'])
         <section class="sec">
@@ -237,12 +239,15 @@
         </section>
         @endif
 
-        <div class="cols sec">
+        @if($homepageDisplaySettings['videos'] || $homepageDisplaySettings['scholarships'] || $homepageDisplaySettings['sidebar'] || $homepageDisplaySettings['banner_ads'])
+        <div class="cols sec" @if(!$homepageDisplaySettings['sidebar']) style="grid-template-columns:minmax(0,1fr)" @endif>
             <div class="stack">
+                @if($homepageDisplaySettings['banner_ads'])
                 <div class="band">
                     <div><small>Advertise with us</small><h3>Reach parents and students every month</h3><p>Promote your school, business or service to families across Uganda.</p></div>
                     <div class="acts"><a class="btn btn-gold" href="{{ route('contact') }}">Advertise</a><a class="btn btn-ghost" href="{{ route('contact') }}">Send inquiry</a></div>
                 </div>
+                @endif
 
                 @if($homepageDisplaySettings['videos'])
                 <div>
@@ -300,12 +305,14 @@
                     <a class="foot" href="{{ route('contact') }}">Enquire about job listings</a>
                 </div>
 
+                @if($homepageDisplaySettings['banner_ads'])
                 <a class="promo" href="{{ route('contact') }}">
                     <small>Advertise</small>
                     <h3>Put your brand in front of parents</h3>
                     <p>Reach families across Uganda every month with a FindURSCH promotion.</p>
                     <span class="btn btn-gold">Advertise with us</span>
                 </a>
+                @endif
 
                 @if($homepageDisplaySettings['reviews'])
                 <div class="card box">
@@ -330,6 +337,7 @@
             </aside>
             @endif
         </div>
+        @endif
     </main>
 
     @if($homepageDisplaySettings['insights'])
