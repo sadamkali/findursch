@@ -121,6 +121,20 @@ class AdminTemplateController extends Controller
             // Homepage hero carousel. The image URL remains available for old templates.
             'homepage_hero_image_url' => '',
             'homepage_slides' => '[]',
+            'site_navigation' => '[{"label":"Home","href":"/","enabled":true},{"label":"Schools","href":"/schools","enabled":true},{"label":"Compare","href":"/compare","enabled":true},{"label":"Scholarships","href":"/scholarships","enabled":true},{"label":"News","href":"/news","enabled":true},{"label":"Events","href":"/events","enabled":true},{"label":"Blogs","href":"/articles","enabled":true}]',
+
+            // Header and footer structure.
+            'site_topbar_enabled' => '1',
+            'site_navigation_enabled' => '1',
+            'site_account_actions_enabled' => '1',
+            'site_header_cta_label' => 'List your school',
+            'site_footer_enabled' => '1',
+            'site_footer_explore_enabled' => '1',
+            'site_footer_resources_enabled' => '1',
+            'site_footer_support_enabled' => '1',
+            'site_footer_social_enabled' => '1',
+            'site_footer_promo_enabled' => '1',
+            'site_footer_copyright_text' => '',
 
             // Homepage display controls.
             'homepage_register_tab_enabled' => '1',
@@ -160,7 +174,10 @@ class AdminTemplateController extends Controller
             'homepage_news_enabled', 'homepage_videos_enabled',
             'homepage_scholarships_enabled', 'homepage_reviews_enabled',
             'homepage_insights_enabled', 'homepage_banner_ads_enabled',
-            'homepage_cta_enabled', 'schools_require_approval',
+            'homepage_cta_enabled', 'site_topbar_enabled', 'site_navigation_enabled',
+            'site_account_actions_enabled', 'site_footer_enabled', 'site_footer_explore_enabled',
+            'site_footer_resources_enabled', 'site_footer_support_enabled',
+            'site_footer_social_enabled', 'site_footer_promo_enabled', 'schools_require_approval',
             'reviews_require_approval', 'maintenance_mode', 'require_two_step',
             'admin_signin_alerts', 'block_new_country_signins',
         ];
@@ -168,12 +185,15 @@ class AdminTemplateController extends Controller
 
     private function jsonSettingKeys(): array
     {
-        return ['homepage_slides'];
+        return ['homepage_slides', 'site_navigation'];
     }
 
     private function settingGroup(string $key): string
     {
         if (str_starts_with($key, 'admin_') || in_array($key, ['require_two_step', 'admin_signin_alerts', 'block_new_country_signins'], true)) return 'security';
+        if ($key === 'site_navigation') return 'navigation';
+        if (str_starts_with($key, 'site_footer_')) return 'footer';
+        if (in_array($key, ['site_topbar_enabled', 'site_navigation_enabled', 'site_account_actions_enabled', 'site_header_cta_label'], true)) return 'header';
         if (str_starts_with($key, 'homepage_hero') || $key === 'homepage_slides') return 'homepage';
         if (str_starts_with($key, 'homepage_')) return 'display';
         if (in_array($key, ['primary_color', 'accent_color', 'font_display', 'font_body', 'site_logo', 'site_favicon'], true)) return 'branding';
@@ -235,18 +255,36 @@ class AdminTemplateController extends Controller
             if (in_array($key, $booleanKeys, true)) {
                 validator([$key => $value], [$key => ['required', 'boolean']])->validate();
             } elseif (in_array($key, $jsonKeys, true)) {
-                validator(['slides' => $value], [
-                    'slides' => ['present', 'array', 'max:8'],
-                    'slides.*.image_url' => ['nullable', 'url', 'max:2048'],
-                    'slides.*.title' => ['required', 'string', 'max:180'],
-                    'slides.*.description' => ['nullable', 'string', 'max:1000'],
-                    'slides.*.button_label' => ['nullable', 'string', 'max:80'],
-                    'slides.*.button_url' => ['nullable', 'string', 'max:500'],
-                    'slides.*.enabled' => ['sometimes', 'boolean'],
-                ])->validate();
+                if ($key === 'homepage_slides') {
+                    validator(['slides' => $value], [
+                        'slides' => ['present', 'array', 'max:8'],
+                        'slides.*.image_url' => ['nullable', 'url', 'max:2048'],
+                        'slides.*.title' => ['required', 'string', 'max:180'],
+                        'slides.*.description' => ['nullable', 'string', 'max:1000'],
+                        'slides.*.button_label' => ['nullable', 'string', 'max:80'],
+                        'slides.*.button_url' => ['nullable', 'string', 'max:500'],
+                        'slides.*.enabled' => ['sometimes', 'boolean'],
+                    ])->validate();
+                } else {
+                    validator(['navigation' => $value], [
+                        'navigation' => ['present', 'array', 'max:10'],
+                        'navigation.*.label' => ['required', 'string', 'max:40'],
+                        'navigation.*.href' => [
+                            'required', 'string', 'max:255',
+                            function ($attribute, $path, $fail) {
+                                if (! is_string($path) || ! str_starts_with($path, '/') || str_starts_with($path, '//') || preg_match('/[\r\n]/', $path)) {
+                                    $fail('Navigation links must use an internal site path beginning with a single slash.');
+                                }
+                            },
+                        ],
+                        'navigation.*.enabled' => ['sometimes', 'boolean'],
+                    ])->validate();
+                }
             } else {
                 $rules = match ($key) {
                     'site_name' => ['required', 'string', 'max:255'],
+                    'site_header_cta_label' => ['nullable', 'string', 'max:60'],
+                    'site_footer_copyright_text' => ['nullable', 'string', 'max:180'],
                     'site_tagline' => ['nullable', 'string', 'max:255'],
                     'site_description', 'meta_description' => ['nullable', 'string', 'max:1000'],
                     'meta_title' => ['nullable', 'string', 'max:255'],
