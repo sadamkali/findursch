@@ -1,0 +1,158 @@
+/* Scholarships reference page — scoped to avoid changing other FindURSCH pages */
+.findursch-scholarships{
+  --brand:#0c5a49;--brand-dk:#083f33;--brand-xdk:#052a22;
+  --accent:#f0b030;--accent-dk:#d99a1a;--tint:#f1f6f3;--line:#e4e8e6;
+  --ink:#1b2420;--mute:#5d6b65;--on-dark:#e2eee9;--open:#17703a;--closed:#b3261e;
+  --warn-bg:#fdf3d6;--warn-line:#f0b030;--warn-ink:#6b4a00;
+  --serif:'Playfair Display',Georgia,serif;--sans:'Inter',system-ui,sans-serif;
+  --r:10px;--gap:24px;--wrap:1280px;
+  color:var(--ink);background:#fff;font:15px/1.55 var(--sans);overflow:hidden;
+}
+.findursch-scholarships,.findursch-scholarships *{box-sizing:border-box}
+.findursch-scholarships a{color:inherit;text-decoration:none}
+.findursch-scholarships ul{list-style:none}
+.findursch-scholarships img{display:block;max-width:100%}
+.findursch-scholarships button,.findursch-scholarships input,.findursch-scholarships select{font:inherit}
+.findursch-scholarships :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.findursch-scholarships .wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gap)}
+.findursch-scholarships .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:0 20px;border-radius:8px;font:600 14px var(--sans);border:1.5px solid transparent;cursor:pointer;white-space:nowrap}
+.findursch-scholarships .btn-gold{background:var(--accent);color:#2a1d00}
+.findursch-scholarships .btn-gold:hover{background:var(--accent-dk)}
+.findursch-scholarships .btn-ghost{border-color:#fff;color:#fff}
+.findursch-scholarships .btn-brand{background:var(--brand);color:#fff}
+.findursch-scholarships .btn-brand:hover{background:var(--brand-dk)}
+.findursch-scholarships .more{border:0;background:none;font:600 13px var(--sans);color:var(--brand);cursor:pointer}
+
+/* Advertising placements */
+.findursch-scholarships .ad{min-height:200px;border-radius:var(--r);display:grid;place-content:center;gap:8px;text-align:center;color:#fff;font:700 22px/1.2 var(--serif);padding:20px;background:linear-gradient(135deg,#a32a2a,#e05a3a)}
+.findursch-scholarships .ad small{display:block;font:500 11px/1.5 var(--sans);color:#fff1ec}
+.findursch-scholarships .ad.slim{height:90px;max-width:728px;margin:24px auto 0;font-size:18px}
+.findursch-scholarships .ad.slim small{margin-top:2px}
+.findursch-scholarships .ad.slim small a{text-decoration:underline;font-weight:700}
+.findursch-scholarships .ad.alt{background:linear-gradient(135deg,#355a68,#6f8f9a)}
+.findursch-scholarships .rtab{position:fixed;right:0;top:34%;z-index:50;writing-mode:vertical-rl;background:var(--accent);color:#2a1d00;padding:18px 9px;border-radius:10px 0 0 10px;box-shadow:-3px 3px 12px rgba(0,0,0,.2);font:700 12px var(--sans);letter-spacing:.06em}
+
+/* Page title, categories and filters */
+.findursch-scholarships .phead{background:#000;color:#fff;text-align:center;padding:44px 24px 40px;margin-top:24px}
+.findursch-scholarships .phead h1{font:700 40px/1.2 var(--serif)}
+.findursch-scholarships .phead h1 em{color:var(--accent);font-style:normal}
+.findursch-scholarships .phead p{max-width:700px;margin:12px auto 0;color:var(--on-dark)}
+.findursch-scholarships .phead b{color:var(--accent)}
+.findursch-scholarships .pills{display:flex;gap:8px;overflow-x:auto;padding:20px 0 14px;scrollbar-width:none}
+.findursch-scholarships .pills::-webkit-scrollbar{display:none}
+.findursch-scholarships .pills button{flex:none;height:34px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:#fff;font:500 13px var(--sans);cursor:pointer;color:var(--ink);white-space:nowrap}
+.findursch-scholarships .pills button:hover{border-color:var(--brand)}
+.findursch-scholarships .pills button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.findursch-scholarships .bar{display:flex;gap:10px;flex-wrap:wrap}
+.findursch-scholarships .bar input{flex:1;min-width:220px;height:44px;border:1px solid var(--line);border-radius:8px;padding:0 14px;font:14px var(--sans);background:#fff;color:var(--ink)}
+.findursch-scholarships .bar select{height:44px;border:1px solid var(--line);border-radius:8px;padding:0 12px;background:#fff;font:14px var(--sans);color:var(--ink)}
+.findursch-scholarships .bar .btn{height:44px}
+.findursch-scholarships .result-summary{display:flex;justify-content:space-between;gap:12px;margin-top:24px;padding:12px 0;border-bottom:1px solid var(--line);color:var(--mute);font-size:12px}
+.findursch-scholarships .result-summary strong{color:var(--brand);font-weight:700}
+.findursch-scholarships .group-count{font:600 12px var(--sans);color:var(--mute)}
+
+/* Scholarship safety notice */
+.findursch-scholarships .note{display:flex;gap:14px;align-items:flex-start;background:var(--warn-bg);border:1px solid var(--warn-line);border-left:5px solid var(--warn-line);border-radius:var(--r);padding:16px 20px;margin-top:20px}
+.findursch-scholarships .note i{flex:none;width:28px;height:28px;border-radius:50%;background:var(--warn-line);color:#2a1d00;display:grid;place-items:center;font:700 15px var(--sans);font-style:normal}
+.findursch-scholarships .note small{display:block;font:700 10.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--warn-ink)}
+.findursch-scholarships .note b{display:block;font:700 17px var(--serif);margin:2px 0 4px;color:var(--ink)}
+.findursch-scholarships .note p{font-size:13px;color:#4a3a14}
+
+/* Category sections and opportunity cards */
+.findursch-scholarships .sec{padding-top:48px}
+.findursch-scholarships .head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:18px}
+.findursch-scholarships .head.cat{border-bottom:2px solid var(--brand);padding-bottom:8px}
+.findursch-scholarships .head.cat h2{font:700 13px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+.findursch-scholarships .news{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:var(--gap)}
+.findursch-scholarships .card{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.findursch-scholarships .sch{display:flex;flex-direction:column;min-width:0;transition:border-color .18s ease,transform .18s ease}
+.findursch-scholarships .sch:hover{border-color:var(--brand);transform:translateY(-2px)}
+.findursch-scholarships .im{position:relative}
+.findursch-scholarships .im .ph{position:relative;height:170px;overflow:hidden;background:linear-gradient(135deg,#9fb8ad,#d9c9a0)}
+.findursch-scholarships .sch.lg .im .ph{height:230px}
+.findursch-scholarships .im .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.findursch-scholarships .ph-mark{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.88);font:700 38px var(--serif);letter-spacing:.04em;text-shadow:0 2px 9px rgba(0,0,0,.15)}
+.findursch-scholarships .flag{position:absolute;right:0;bottom:0;background:var(--brand);color:#fff;font:700 10.5px var(--sans);letter-spacing:.05em;padding:5px 12px;text-transform:uppercase}
+.findursch-scholarships .sch .b{padding:16px 18px 12px;flex:1}
+.findursch-scholarships .sch h3{font:700 17px/1.3 var(--serif);margin-bottom:6px;color:var(--ink)}
+.findursch-scholarships .org{font-size:13px;color:var(--ink);margin-bottom:2px;font-weight:600}
+.findursch-scholarships .lv{font-size:12.5px;color:var(--mute);margin-bottom:8px}
+.findursch-scholarships .dl{font:700 12.5px var(--sans);margin:6px 0}
+.findursch-scholarships .dl.op{color:var(--open)}
+.findursch-scholarships .dl.cl{color:var(--closed)}
+.findursch-scholarships .desc{font-size:12px;color:var(--mute);line-height:1.6;margin-top:9px}
+.findursch-scholarships .sch .f{display:flex;justify-content:space-between;gap:8px;margin:0 18px;border-top:1px solid var(--line);padding:12px 0;font-size:12px;color:var(--mute)}
+.findursch-scholarships .sch .f b{color:var(--brand);font-weight:600;font-size:12.5px}
+.findursch-scholarships .category-empty,.findursch-scholarships .video-empty{display:flex;align-items:center;gap:15px;border:1px solid var(--line);border-radius:var(--r);background:#fafcfb;padding:21px 22px}
+.findursch-scholarships .empty-mark{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--brand);font-size:17px}
+.findursch-scholarships .category-empty h3,.findursch-scholarships .video-empty h3{font:700 16px/1.3 var(--serif);margin-bottom:4px;color:var(--ink)}
+.findursch-scholarships .category-empty p,.findursch-scholarships .video-empty p{font-size:12.5px;color:var(--mute);line-height:1.6}
+.findursch-scholarships .view-more-row{display:flex;justify-content:flex-end;margin-top:12px}
+.findursch-scholarships .clear-filters{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:28px;border-top:1px solid var(--line);padding-top:15px;color:var(--mute);font-size:12px}
+.findursch-scholarships .clear-filters button{padding:4px}
+
+/* Promotion strips, submission offer and email-alert panel */
+.findursch-scholarships .strip{display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--brand-xdk);color:#fff;border-radius:var(--r);padding:18px 24px;margin-top:48px}
+.findursch-scholarships .strip small{font:700 10.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.findursch-scholarships .strip h4{font:700 20px/1.25 var(--serif)}
+.findursch-scholarships .strip p{font-size:12.5px;color:var(--on-dark)}
+.findursch-scholarships .offer{display:grid;grid-template-columns:280px 1fr;background:var(--tint);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-top:48px}
+.findursch-scholarships .offer-mark{min-height:190px;display:grid;place-items:center;background:linear-gradient(135deg,#789a7b,#2f5a43);color:#fff;font:700 54px var(--serif)}
+.findursch-scholarships .offer>div:last-child{padding:28px 32px;align-self:center}
+.findursch-scholarships .offer h3{font:700 24px/1.25 var(--serif);margin-bottom:8px;color:var(--brand)}
+.findursch-scholarships .offer p{font-size:14px;color:var(--mute);margin-bottom:16px}
+.findursch-scholarships .duo{display:grid;grid-template-columns:1.45fr 1fr;gap:var(--gap);margin-top:48px}
+.findursch-scholarships .band{color:#fff;border-radius:var(--r);padding:26px 30px;background:var(--brand);position:relative;overflow:hidden}
+.findursch-scholarships .band::before{content:"";position:absolute;right:-60px;top:-70px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.08)}
+.findursch-scholarships .band>*{position:relative}
+.findursch-scholarships .band h3{font:700 22px/1.25 var(--serif);margin-bottom:4px}
+.findursch-scholarships .band p{font-size:13px;color:var(--on-dark);margin-bottom:16px}
+.findursch-scholarships .band.dark{background:var(--ink)}
+.findursch-scholarships .band.dark::before{display:none}
+.findursch-scholarships .advertise-band{margin-top:48px}
+.findursch-scholarships .banner{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--gap);max-width:900px;margin:56px auto 0}
+.findursch-scholarships .banner .ad{height:200px}
+.findursch-scholarships .video-section{padding-top:48px}
+.findursch-scholarships .vids{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap)}
+.findursch-scholarships .vph{position:relative;display:grid;place-items:center;height:190px;overflow:hidden;background:linear-gradient(135deg,#9fb8ad,#d9c9a0)}
+.findursch-scholarships .vph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.findursch-scholarships .play{width:52px;height:52px;border-radius:50%;background:var(--brand);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.findursch-scholarships .play::after{content:"";position:absolute;left:21px;top:16px;border:10px solid transparent;border-left:16px solid #fff;border-right:0}
+.findursch-scholarships .vc .b{padding:14px 16px}
+.findursch-scholarships .vc h3{font:700 16px/1.3 var(--serif);margin-bottom:4px}
+.findursch-scholarships .vc small{display:block;font-size:12px;color:var(--mute)}
+
+/* Mobile and reduced-motion behavior */
+@media(max-width:1000px){
+  .findursch-scholarships .news,.findursch-scholarships .duo,.findursch-scholarships .banner,.findursch-scholarships .vids,.findursch-scholarships .offer{grid-template-columns:1fr}
+  .findursch-scholarships .phead h1{font-size:30px}
+  .findursch-scholarships .strip,.findursch-scholarships .result-summary{flex-direction:column;align-items:flex-start}
+  .findursch-scholarships .bar{display:grid;grid-template-columns:1fr 1fr}
+  .findursch-scholarships .bar input{grid-column:1/-1;min-width:0}
+  .findursch-scholarships .bar .btn{width:100%}
+}
+@media(max-width:640px){
+  .findursch-scholarships .wrap{padding:0 16px}
+  .findursch-scholarships .phead{padding:37px 18px 34px}
+  .findursch-scholarships .phead h1{font-size:28px}
+  .findursch-scholarships .phead p{font-size:13px}
+  .findursch-scholarships .sec{padding-top:36px}
+  .findursch-scholarships .bar{grid-template-columns:1fr}
+  .findursch-scholarships .bar input{grid-column:auto}
+  .findursch-scholarships .note{padding:14px;gap:11px}
+  .findursch-scholarships .note b{font-size:15px}
+  .findursch-scholarships .strip,.findursch-scholarships .offer>div:last-child{padding:19px}
+  .findursch-scholarships .strip{align-items:flex-start;flex-direction:column}
+  .findursch-scholarships .strip .btn{width:100%}
+  .findursch-scholarships .offer{grid-template-columns:1fr}
+  .findursch-scholarships .offer-mark{min-height:120px}
+  .findursch-scholarships .duo{gap:14px;margin-top:34px}
+  .findursch-scholarships .band{padding:22px}
+  .findursch-scholarships .banner{margin-top:34px}
+  .findursch-scholarships .banner .ad{height:auto;min-height:160px}
+  .findursch-scholarships .category-empty,.findursch-scholarships .video-empty{align-items:flex-start;padding:16px}
+  .findursch-scholarships .rtab{top:38%;padding:14px 7px;font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  .findursch-scholarships *{scroll-behavior:auto!important;transition:none!important}
+}

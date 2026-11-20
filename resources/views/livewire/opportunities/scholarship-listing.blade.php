@@ -1,47 +1,285 @@
-<div class="resource-page">
-    <a class="blogs-rtab" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
-    <div class="blogs-ad-slim"><span>Scholarship and bursary listings</span><small>Explore opportunities shared by school communities · <a href="{{ route('contact') }}">Contact FindURSCH</a></small></div>
-    <section class="resource-hero">
-        <p class="resource-eyebrow">Student opportunities</p>
+<div class="findursch-scholarships">
+    <a class="rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
+
+    <div class="wrap">
+        <div class="ad slim">
+            <span>Advertise with FindURSCH</span>
+            <small>Reach parents, students and school communities across Uganda · <a href="{{ route('contact') }}">Enquire about advertising</a></small>
+        </div>
+    </div>
+
+    <section class="phead">
         <h1>Scholarships &amp; <em>Bursaries</em> in Uganda</h1>
-        <p>Discover school bursaries and student funding opportunities published by participating schools. <b>{{ $openCount }}</b> currently open or without a listed deadline.</p>
+        <p>Explore school bursaries and published funding opportunities for Ugandan learners. <b>{{ number_format($openCount) }}</b> open now.</p>
     </section>
-    <main class="blogs-wrap resource-main">
-        <form class="resource-search resource-scholarship-search" method="GET" action="{{ route('scholarships.index') }}">
-            <input type="search" name="q" value="{{ $search }}" placeholder="Search scholarships, schools or courses" aria-label="Search scholarships">
-            <button class="blogs-btn blogs-btn-brand" type="submit">Search</button>
-            <select name="deadlineFilter" aria-label="Deadline">
-                <option value="all" @selected($deadlineFilter === 'all')>Any deadline</option>
-                <option value="open" @selected($deadlineFilter === 'open')>Open now</option>
-                <option value="closed" @selected($deadlineFilter === 'closed')>Closed</option>
+
+    <main class="wrap">
+        <div class="pills" role="tablist" aria-label="Scholarship categories">
+            <button type="button" class="{{ $category === 'all' ? 'on' : '' }}" wire:click="setCategory('all')" aria-selected="{{ $category === 'all' ? 'true' : 'false' }}">All scholarships</button>
+            <button type="button" class="{{ $category === 'primary' ? 'on' : '' }}" wire:click="setCategory('primary')" aria-selected="{{ $category === 'primary' ? 'true' : 'false' }}">Primary</button>
+            <button type="button" class="{{ $category === 'secondary' ? 'on' : '' }}" wire:click="setCategory('secondary')" aria-selected="{{ $category === 'secondary' ? 'true' : 'false' }}">Secondary</button>
+            <button type="button" class="{{ $category === 'government' ? 'on' : '' }}" wire:click="setCategory('government')" aria-selected="{{ $category === 'government' ? 'true' : 'false' }}">Government</button>
+            <button type="button" class="{{ $category === 'university' ? 'on' : '' }}" wire:click="setCategory('university')" aria-selected="{{ $category === 'university' ? 'true' : 'false' }}">University</button>
+            <button type="button" class="{{ $category === 'international' ? 'on' : '' }}" wire:click="setCategory('international')" aria-selected="{{ $category === 'international' ? 'true' : 'false' }}">International</button>
+            <button type="button" class="{{ $category === 'foundations' ? 'on' : '' }}" wire:click="setCategory('foundations')" aria-selected="{{ $category === 'foundations' ? 'true' : 'false' }}">Foundations</button>
+            <button type="button" class="{{ $category === 'tvet' ? 'on' : '' }}" wire:click="setCategory('tvet')" aria-selected="{{ $category === 'tvet' ? 'true' : 'false' }}">TVET</button>
+            <button type="button" class="{{ $category === 'other' ? 'on' : '' }}" wire:click="setCategory('other')" aria-selected="{{ $category === 'other' ? 'true' : 'false' }}">School bursaries</button>
+            <button type="button" class="{{ $category === 'videos' ? 'on' : '' }}" wire:click="setCategory('videos')" aria-selected="{{ $category === 'videos' ? 'true' : 'false' }}">School videos</button>
+        </div>
+
+        <form class="bar" wire:submit.prevent="$refresh">
+            <input type="search" wire:model.live.debounce.350ms="search" placeholder="Search scholarships, schools or courses" aria-label="Search scholarships">
+            <button class="btn btn-brand" type="submit">Search</button>
+            <select wire:model.live="category" aria-label="Category">
+                <option value="all">All categories</option>
+                <option value="primary">Primary school</option>
+                <option value="secondary">Secondary school</option>
+                <option value="government">Government</option>
+                <option value="university">University</option>
+                <option value="international">International</option>
+                <option value="foundations">NGO &amp; foundations</option>
+                <option value="tvet">TVET &amp; vocational</option>
+                <option value="other">Other school bursaries</option>
+                <option value="videos">School videos</option>
             </select>
+            <select wire:model.live="deadlineFilter" aria-label="Deadline">
+                <option value="all">Any deadline</option>
+                <option value="open">Open now</option>
+                <option value="closed">Closed</option>
+            </select>
+            <a class="btn btn-gold" href="{{ route('contact') }}">+ Post a scholarship</a>
         </form>
-        <div class="resource-safety-note" role="note"><span>!</span><div><small>Scholarship safety notice</small><b>Never pay anyone to receive or secure a scholarship.</b><p>Check eligibility, application steps and deadlines directly with the publishing school. Be cautious of anyone who asks for processing, registration or release fees.</p></div></div>
-        <div class="resource-section-head"><div><small>Funding opportunities</small><h2>{{ $deadlineFilter === 'closed' ? 'Closed opportunities' : ($deadlineFilter === 'open' ? 'Open opportunities' : 'Published scholarships & bursaries') }}</h2></div><span>{{ $scholarships->total() }} {{ \Illuminate\Support\Str::plural('opportunity', $scholarships->total()) }}</span></div>
-        @if($scholarships->isNotEmpty())
-            <div class="resource-grid">
-                @foreach($scholarships as $item)
-                    <a class="resource-card" href="{{ route('scholarships.show', $item) }}">
-                        <div class="resource-card-image resource-scholarship-image">
-                            @if($item->school?->getFirstMediaUrl('cover'))<img src="{{ $item->school->getFirstMediaUrl('cover') }}" alt="{{ $item->school->name }}" loading="lazy">@else<span class="resource-card-placeholder">Student opportunity</span>@endif
-                            <span class="resource-date-chip">{{ $item->deadline ? ($item->deadline->isPast() ? 'Deadline passed' : 'Deadline '.$item->deadline->format('d M Y')) : 'Deadline not listed' }}</span>
-                        </div>
-                        <div class="resource-card-body">
-                            <small>{{ $item->school?->name ?? 'School opportunity' }} · {{ $item->award ?: 'Bursary / scholarship' }}</small>
-                            <h3>{{ $item->title }}</h3>
-                            <p>{{ \Illuminate\Support\Str::limit(strip_tags($item->description), 135) }}</p>
-                            <div class="resource-card-meta"><span>{{ $item->deadline ? 'Deadline '.$item->deadline->format('d M Y') : 'Contact school for details' }}</span><b>View details →</b></div>
-                        </div>
-                    </a>
-                @endforeach
+
+        <div class="note" role="note">
+            <i>!</i>
+            <div>
+                <small>Scholarship safety notice</small>
+                <b>Never pay anyone to receive or secure a scholarship.</b>
+                <p>FindURSCH does not sell or guarantee scholarships. Be careful with anyone who asks for application, processing, registration or release fees. Check directly with the publishing school or provider before sending money.</p>
             </div>
-            <div class="blogs-pagination">{{ $scholarships->links() }}</div>
+        </div>
+
+        @if($category === 'all')
+            <div class="result-summary">
+                <span>Published opportunities</span>
+                <strong>{{ number_format($totalMatches) }} {{ \Illuminate\Support\Str::plural('opportunity', $totalMatches) }}</strong>
+            </div>
+
+            @foreach($groups as $group)
+                <section class="sec category-section" id="category-{{ $group['key'] }}">
+                    <div class="head cat">
+                        <h2>{{ $group['heading'] }}</h2>
+                        <span class="group-count">{{ number_format($group['count']) }} available</span>
+                    </div>
+
+                    @if($group['items']->isNotEmpty())
+                        <div class="news">
+                            @foreach($group['items'] as $item)
+                                <a class="card sch {{ $loop->first ? 'lg' : '' }}" href="{{ route('scholarships.show', $item) }}">
+                                    <div class="im">
+                                        <div class="ph">
+                                            @if($item->school?->getFirstMediaUrl('cover'))
+                                                <img src="{{ $item->school->getFirstMediaUrl('cover') }}" alt="{{ $item->school->name }}" loading="lazy">
+                                            @else
+                                                <span class="ph-mark">{{ strtoupper(mb_substr($item->school?->name ?? 'FS', 0, 2)) }}</span>
+                                            @endif
+                                        </div>
+                                        <span class="flag">School bursary</span>
+                                    </div>
+                                    <div class="b">
+                                        <h3>{{ $item->title }}</h3>
+                                        <p class="org">{{ $item->school?->name ?? 'Participating school' }}</p>
+                                        <p class="lv">{{ $group['label'] }} · {{ $item->award ?: 'Award details available from the school' }}</p>
+                                        <p class="dl {{ $item->deadline && $item->deadline->isBefore(today()) ? 'cl' : 'op' }}">
+                                            @if($item->deadline)
+                                                {{ $item->deadline->isBefore(today()) ? 'Deadline passed' : 'Deadline' }}: {{ $item->deadline->format('d F Y') }}
+                                            @else
+                                                Contact school for deadline details
+                                            @endif
+                                        </p>
+                                        <p class="desc">{{ \Illuminate\Support\Str::limit(strip_tags($item->description), 150) }}</p>
+                                    </div>
+                                    <div class="f"><span>{{ $item->school?->district?->name ?? 'Uganda' }}</span><b>Details →</b></div>
+                                </a>
+                            @endforeach
+                        </div>
+                        @if($group['count'] > 3)
+                            <div class="view-more-row">
+                                <button type="button" class="more" wire:click="setCategory('{{ $group['key'] }}')">View all {{ strtolower($group['label']) }} opportunities →</button>
+                            </div>
+                        @endif
+                    @else
+                        <div class="category-empty">
+                            <span class="empty-mark">✦</span>
+                            <div>
+                                <h3>No published opportunities in this category yet</h3>
+                                <p>When a school or provider publishes an eligible opportunity, it will appear here. Always confirm details and deadlines with the publisher.</p>
+                            </div>
+                        </div>
+                    @endif
+                </section>
+
+                @if($loop->iteration === 3)
+                    <div class="offer">
+                        <div class="ph offer-mark"><span>FS</span></div>
+                        <div>
+                            <h3>Offering a scholarship? Reach the right students</h3>
+                            <p>Contact FindURSCH to discuss publishing your scholarship, bursary or sponsorship for students and families across Uganda.</p>
+                            <a class="btn btn-brand" href="{{ route('contact') }}">Submit an opportunity</a>
+                        </div>
+                    </div>
+                    <div class="strip">
+                        <div>
+                            <small>For school communities</small>
+                            <h4>Is your school on FindURSCH?</h4>
+                            <p>Help parents discover your school and its published opportunities.</p>
+                        </div>
+                        <a class="btn btn-gold" href="{{ route('register') }}">List your school</a>
+                    </div>
+                @endif
+
+                @if($loop->iteration === 4)
+                    <div class="duo">
+                        <div class="band">
+                            <h3>Stay informed about scholarship opportunities</h3>
+                            <p>Ask FindURSCH about updates to published bursaries and scholarship listings.</p>
+                            <a class="btn btn-gold" href="{{ route('contact') }}">Request updates</a>
+                        </div>
+                        <div class="band dark">
+                            <h3>Offering a scholarship?</h3>
+                            <p>Share the details with our team so we can advise on publishing and verification.</p>
+                            <a class="btn btn-gold" href="{{ route('contact') }}">Contact FindURSCH</a>
+                        </div>
+                    </div>
+                @endif
+
+                @if($loop->iteration === 6)
+                    <div class="band advertise-band">
+                        <h3>Reach parents, students and school communities</h3>
+                        <p>Ask about advertising and promotion opportunities on FindURSCH.</p>
+                        <a class="btn btn-gold" href="{{ route('contact') }}">Advertise with us</a>
+                    </div>
+
+                    <section class="sec video-section">
+                        <div class="head cat">
+                            <h2>School videos</h2>
+                            <span class="group-count">{{ number_format($videoCount) }} published</span>
+                        </div>
+                        @if($videos->isNotEmpty())
+                            <div class="vids">
+                                @foreach($videos as $video)
+                                    <a class="card vc" href="{{ $video->youtube_url }}" target="_blank" rel="noopener noreferrer">
+                                        <div class="ph vph">
+                                            <img src="https://img.youtube.com/vi/{{ rawurlencode($video->youtube_video_id) }}/hqdefault.jpg" alt="" loading="lazy">
+                                            <i class="play"></i>
+                                        </div>
+                                        <div class="b">
+                                            <h3>{{ $video->title }}</h3>
+                                            <small>{{ $video->school?->name ?? 'School community' }}</small>
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="video-empty">
+                                <span class="empty-mark">▶</span>
+                                <div><h3>School videos will appear here</h3><p>Approved videos shared by participating schools will be featured in this section.</p></div>
+                            </div>
+                        @endif
+                    </section>
+                @endif
+            @endforeach
+
+            <div class="banner">
+                <a class="ad" href="{{ route('contact') }}">
+                    Advertise with FindURSCH
+                    <small>Reach parents and students across Uganda · Enquire about placements</small>
+                </a>
+                <a class="ad alt" href="{{ route('register') }}">
+                    Promote your school
+                    <small>Create a school profile for families to discover</small>
+                </a>
+            </div>
+        @elseif($category === 'videos')
+            <section class="sec video-section">
+                <div class="head cat">
+                    <h2>School videos</h2>
+                    <span class="group-count">{{ number_format($videoCount) }} published</span>
+                </div>
+                @if($videos->isNotEmpty())
+                    <div class="vids">
+                        @foreach($videos as $video)
+                            <a class="card vc" href="{{ $video->youtube_url }}" target="_blank" rel="noopener noreferrer">
+                                <div class="ph vph">
+                                    <img src="https://img.youtube.com/vi/{{ rawurlencode($video->youtube_video_id) }}/hqdefault.jpg" alt="" loading="lazy">
+                                    <i class="play"></i>
+                                </div>
+                                <div class="b"><h3>{{ $video->title }}</h3><small>{{ $video->school?->name ?? 'School community' }}</small></div>
+                            </a>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="video-empty">
+                        <span class="empty-mark">▶</span>
+                        <div><h3>School videos will appear here</h3><p>Approved videos shared by participating schools will be featured in this section.</p></div>
+                    </div>
+                @endif
+            </section>
         @else
-            <div class="resource-empty">
-                <span class="resource-empty-icon">✦</span>
-                <h3>No published scholarships or bursaries found</h3>
-                <p>New opportunities will appear here when participating schools publish them. Always confirm eligibility and deadlines with the school.</p>
-                @if($search !== '' || $deadlineFilter !== 'all')<a class="blogs-btn blogs-btn-brand" href="{{ route('scholarships.index') }}">Clear filters</a>@endif
+            <section class="sec">
+                <div class="head cat">
+                    <h2>{{ $selectedCategory['heading'] }}</h2>
+                    <span class="group-count">{{ number_format($selectedScholarships->total()) }} available</span>
+                </div>
+                @if($selectedScholarships->isNotEmpty())
+                    <div class="news">
+                        @foreach($selectedScholarships as $item)
+                            <a class="card sch {{ $loop->first ? 'lg' : '' }}" href="{{ route('scholarships.show', $item) }}">
+                                <div class="im">
+                                    <div class="ph">
+                                        @if($item->school?->getFirstMediaUrl('cover'))
+                                            <img src="{{ $item->school->getFirstMediaUrl('cover') }}" alt="{{ $item->school->name }}" loading="lazy">
+                                        @else
+                                            <span class="ph-mark">{{ strtoupper(mb_substr($item->school?->name ?? 'FS', 0, 2)) }}</span>
+                                        @endif
+                                    </div>
+                                    <span class="flag">School bursary</span>
+                                </div>
+                                <div class="b">
+                                    <h3>{{ $item->title }}</h3>
+                                    <p class="org">{{ $item->school?->name ?? 'Participating school' }}</p>
+                                    <p class="lv">{{ $selectedCategory['label'] }} · {{ $item->award ?: 'Award details available from the school' }}</p>
+                                    <p class="dl {{ $item->deadline && $item->deadline->isBefore(today()) ? 'cl' : 'op' }}">
+                                        @if($item->deadline)
+                                            {{ $item->deadline->isBefore(today()) ? 'Deadline passed' : 'Deadline' }}: {{ $item->deadline->format('d F Y') }}
+                                        @else
+                                            Contact school for deadline details
+                                        @endif
+                                    </p>
+                                    <p class="desc">{{ \Illuminate\Support\Str::limit(strip_tags($item->description), 150) }}</p>
+                                </div>
+                                <div class="f"><span>{{ $item->school?->district?->name ?? 'Uganda' }}</span><b>Details →</b></div>
+                            </a>
+                        @endforeach
+                    </div>
+                    <div class="pagination">{{ $selectedScholarships->links() }}</div>
+                @else
+                    <div class="category-empty">
+                        <span class="empty-mark">✦</span>
+                        <div><h3>No published opportunities found</h3><p>Try another category or adjust your search and deadline filters. New school bursaries will appear here when published.</p></div>
+                    </div>
+                @endif
+                <div class="view-more-row">
+                    <button type="button" class="more" wire:click="setCategory('all')">← View all scholarship categories</button>
+                </div>
+            </section>
+        @endif
+
+        @if($search !== '' || $deadlineFilter !== 'all')
+            <div class="clear-filters">
+                <span>Showing results for your current filters.</span>
+                <button type="button" wire:click="$set('search', '')" class="more">Clear search</button>
+                <button type="button" wire:click="$set('deadlineFilter', 'all')" class="more">Any deadline</button>
             </div>
         @endif
     </main>
