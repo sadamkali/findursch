@@ -92,14 +92,57 @@ class AdminTemplateController extends Controller
     private function settingDefaults(): array
     {
         return [
+            // Public website identity and brand.
             'site_name' => 'FindURSCH',
+            'site_tagline' => "Uganda's School Discovery Platform",
+            'site_description' => 'Discover, compare and learn about schools across Uganda with FindurSch.',
+            'site_logo' => '',
+            'site_favicon' => '',
+            'primary_color' => '#0c5a49',
+            'accent_color' => '#f0b030',
+            'font_display' => 'Playfair Display',
+            'font_body' => 'Inter',
+
+            // Search and social previews.
+            'meta_title' => 'FindURSCH: find the right school in Uganda',
+            'meta_description' => 'Discover and compare schools across Uganda with FindurSch.',
+            'meta_keywords' => '',
+
+            // Public contact and social links.
             'support_email' => 'hello@findursch.ug',
             'support_phone' => '+256 700 000000',
             'support_whatsapp' => '',
-            'meta_title' => "FindURSCH: find the right school in Uganda",
+            'contact_address' => 'Kampala, Uganda',
+            'facebook_url' => '',
+            'twitter_url' => '',
+            'instagram_url' => '',
+            'youtube_url' => '',
+
+            // Homepage hero carousel. The image URL remains available for old templates.
+            'homepage_hero_image_url' => '',
+            'homepage_slides' => '[]',
+
+            // Homepage display controls.
+            'homepage_register_tab_enabled' => '1',
+            'homepage_search_enabled' => '1',
+            'homepage_featured_schools_enabled' => '1',
+            'homepage_sidebar_enabled' => '1',
+            'homepage_categories_enabled' => '1',
+            'homepage_upcoming_events_enabled' => '1',
+            'homepage_news_enabled' => '1',
+            'homepage_videos_enabled' => '1',
+            'homepage_scholarships_enabled' => '1',
+            'homepage_reviews_enabled' => '1',
+            'homepage_insights_enabled' => '1',
+            'homepage_banner_ads_enabled' => '1',
+            'homepage_cta_enabled' => '1',
+
+            // Publishing and moderation.
             'schools_require_approval' => '1',
             'reviews_require_approval' => '1',
             'maintenance_mode' => '0',
+
+            // Administrator security.
             'require_two_step' => '0',
             'admin_signin_alerts' => '1',
             'block_new_country_signins' => '0',
@@ -108,27 +151,71 @@ class AdminTemplateController extends Controller
         ];
     }
 
+    private function booleanSettingKeys(): array
+    {
+        return [
+            'homepage_register_tab_enabled', 'homepage_search_enabled',
+            'homepage_featured_schools_enabled', 'homepage_sidebar_enabled',
+            'homepage_categories_enabled', 'homepage_upcoming_events_enabled',
+            'homepage_news_enabled', 'homepage_videos_enabled',
+            'homepage_scholarships_enabled', 'homepage_reviews_enabled',
+            'homepage_insights_enabled', 'homepage_banner_ads_enabled',
+            'homepage_cta_enabled', 'schools_require_approval',
+            'reviews_require_approval', 'maintenance_mode', 'require_two_step',
+            'admin_signin_alerts', 'block_new_country_signins',
+        ];
+    }
+
+    private function jsonSettingKeys(): array
+    {
+        return ['homepage_slides'];
+    }
+
+    private function settingGroup(string $key): string
+    {
+        if (str_starts_with($key, 'admin_') || in_array($key, ['require_two_step', 'admin_signin_alerts', 'block_new_country_signins'], true)) return 'security';
+        if (str_starts_with($key, 'homepage_hero') || $key === 'homepage_slides') return 'homepage';
+        if (str_starts_with($key, 'homepage_')) return 'display';
+        if (in_array($key, ['primary_color', 'accent_color', 'font_display', 'font_body', 'site_logo', 'site_favicon'], true)) return 'branding';
+        if (in_array($key, ['meta_title', 'meta_description', 'meta_keywords'], true)) return 'seo';
+        if (in_array($key, ['support_email', 'support_phone', 'support_whatsapp', 'contact_address'], true)) return 'contact';
+        if (str_ends_with($key, '_url')) return 'social';
+        if (in_array($key, ['schools_require_approval', 'reviews_require_approval', 'maintenance_mode'], true)) return 'publishing';
+        return 'general';
+    }
+
     public function settings(Request $request): JsonResponse
     {
         $this->ensureRolesAndPermissions();
         $this->requirePermission($request, 'admin.system.edit_site_settings');
 
-        foreach ($this->settingDefaults() as $key => $value) {
+        $defaults = $this->settingDefaults();
+        $booleanKeys = $this->booleanSettingKeys();
+        $jsonKeys = $this->jsonSettingKeys();
+
+        foreach ($defaults as $key => $value) {
             Setting::firstOrCreate(
                 ['key' => $key],
-                ['value' => $value, 'type' => in_array($key, [
-                    'schools_require_approval', 'reviews_require_approval', 'maintenance_mode',
-                    'require_two_step', 'admin_signin_alerts', 'block_new_country_signins',
-                ], true) ? 'boolean' : 'string', 'group' => str_starts_with($key, 'admin_') || in_array($key, ['require_two_step', 'admin_signin_alerts', 'block_new_country_signins'], true) ? 'security' : 'general', 'label' => Str::headline($key)]
+                [
+                    'value' => $value,
+                    'type' => in_array($key, $booleanKeys, true) ? 'boolean' : (in_array($key, $jsonKeys, true) ? 'json' : 'string'),
+                    'group' => $this->settingGroup($key),
+                    'label' => Str::headline($key),
+                ]
             );
         }
 
         $values = Setting::query()
-            ->whereIn('key', array_keys($this->settingDefaults()))
-            ->pluck('value', 'key');
+            ->whereIn('key', array_keys($defaults))
+            ->pluck('value', 'key')
+            ->all();
 
-        foreach (['schools_require_approval', 'reviews_require_approval', 'maintenance_mode', 'require_two_step', 'admin_signin_alerts', 'block_new_country_signins'] as $key) {
+        foreach ($booleanKeys as $key) {
             $values[$key] = filter_var($values[$key] ?? false, FILTER_VALIDATE_BOOLEAN);
+        }
+        foreach ($jsonKeys as $key) {
+            $decoded = json_decode((string) ($values[$key] ?? '[]'), true);
+            $values[$key] = is_array($decoded) ? $decoded : [];
         }
 
         return response()->json(['data' => ['settings' => $values]]);
@@ -138,32 +225,59 @@ class AdminTemplateController extends Controller
     {
         $this->requirePermission($request, 'admin.system.edit_site_settings');
         $data = $request->validate(['settings' => ['required', 'array']]);
-        $allowed = array_keys($this->settingDefaults());
+        $defaults = $this->settingDefaults();
+        $allowed = array_keys($defaults);
         $values = collect($data['settings'])->only($allowed);
+        $booleanKeys = $this->booleanSettingKeys();
+        $jsonKeys = $this->jsonSettingKeys();
 
         foreach ($values as $key => $value) {
-            $booleanKeys = [
-                'schools_require_approval', 'reviews_require_approval', 'maintenance_mode',
-                'require_two_step', 'admin_signin_alerts', 'block_new_country_signins',
-            ];
-            $rules = match ($key) {
-                'site_name' => ['required', 'string', 'max:255'],
-                'support_email' => ['nullable', 'email', 'max:255'],
-                'support_phone', 'support_whatsapp' => ['nullable', 'string', 'max:40'],
-                'meta_title' => ['nullable', 'string', 'max:255'],
-                'admin_session_timeout_minutes' => ['required', 'integer', 'in:30,120,480'],
-                'admin_min_password_length' => ['required', 'integer', 'in:8,10,12'],
-                default => in_array($key, $booleanKeys, true) ? ['required', 'boolean'] : ['nullable', 'string', 'max:2000'],
-            };
-            validator([$key => $value], [$key => $rules])->validate();
+            if (in_array($key, $booleanKeys, true)) {
+                validator([$key => $value], [$key => ['required', 'boolean']])->validate();
+            } elseif (in_array($key, $jsonKeys, true)) {
+                validator(['slides' => $value], [
+                    'slides' => ['present', 'array', 'max:8'],
+                    'slides.*.image_url' => ['nullable', 'url', 'max:2048'],
+                    'slides.*.title' => ['required', 'string', 'max:180'],
+                    'slides.*.description' => ['nullable', 'string', 'max:1000'],
+                    'slides.*.button_label' => ['nullable', 'string', 'max:80'],
+                    'slides.*.button_url' => ['nullable', 'string', 'max:500'],
+                    'slides.*.enabled' => ['sometimes', 'boolean'],
+                ])->validate();
+            } else {
+                $rules = match ($key) {
+                    'site_name' => ['required', 'string', 'max:255'],
+                    'site_tagline' => ['nullable', 'string', 'max:255'],
+                    'site_description', 'meta_description' => ['nullable', 'string', 'max:1000'],
+                    'meta_title' => ['nullable', 'string', 'max:255'],
+                    'meta_keywords' => ['nullable', 'string', 'max:1000'],
+                    'support_email' => ['nullable', 'email', 'max:255'],
+                    'support_phone', 'support_whatsapp' => ['nullable', 'string', 'max:40'],
+                    'contact_address' => ['nullable', 'string', 'max:255'],
+                    'site_logo', 'site_favicon', 'homepage_hero_image_url',
+                    'facebook_url', 'twitter_url', 'instagram_url', 'youtube_url' => ['nullable', 'url', 'max:2048'],
+                    'primary_color', 'accent_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+                    'font_display' => ['required', 'in:Playfair Display,DM Serif Display'],
+                    'font_body' => ['required', 'in:Inter,system-ui'],
+                    'admin_session_timeout_minutes' => ['required', 'integer', 'in:30,120,480'],
+                    'admin_min_password_length' => ['required', 'integer', 'in:8,10,12'],
+                    default => ['nullable', 'string', 'max:2000'],
+                };
+                validator([$key => $value], [$key => $rules])->validate();
+            }
 
-            $stored = in_array($key, $booleanKeys, true) ? ($value ? '1' : '0') : (string) ($value ?? '');
+            $stored = in_array($key, $booleanKeys, true)
+                ? ($value ? '1' : '0')
+                : (in_array($key, $jsonKeys, true)
+                    ? json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+                    : (string) ($value ?? ''));
+
             Setting::updateOrCreate(
                 ['key' => $key],
                 [
                     'value' => $stored,
-                    'type' => in_array($key, $booleanKeys, true) ? 'boolean' : (in_array($key, ['admin_session_timeout_minutes', 'admin_min_password_length'], true) ? 'integer' : 'string'),
-                    'group' => str_starts_with($key, 'admin_') || in_array($key, ['require_two_step', 'admin_signin_alerts', 'block_new_country_signins'], true) ? 'security' : 'general',
+                    'type' => in_array($key, $booleanKeys, true) ? 'boolean' : (in_array($key, $jsonKeys, true) ? 'json' : (in_array($key, ['admin_session_timeout_minutes', 'admin_min_password_length'], true) ? 'integer' : 'string')),
+                    'group' => $this->settingGroup($key),
                     'label' => Str::headline($key),
                 ]
             );
