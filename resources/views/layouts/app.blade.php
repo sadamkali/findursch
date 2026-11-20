@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="{{ asset('css/events-reference.css') }}?v=2">
     <link rel="stylesheet" href="{{ asset('css/events-listing-reference.css') }}?v=1">
     <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=3">
-    <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=3">
     @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}">@endif
     @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}">@endif
     @if (request()->routeIs('scholarships.*'))<link rel="stylesheet" href="{{ asset('css/scholarships-reference.css') }}">@endif
@@ -57,10 +57,16 @@
     @endphp
 
     {{-- Utility information only: page navigation and account actions live in the main header. --}}
-    <div class="site-topbar" role="region" aria-label="Site information">
+    <div class="site-topbar" role="region" aria-label="Site information and account links">
         <div class="site-wrap site-topbar__inner">
             <span class="site-topbar__message">Discover and compare schools across Uganda</span>
-            <a class="site-topbar__contact" href="{{ route('contact') }}">Contact us <span aria-hidden="true">→</span></a>
+            <div class="site-topbar__actions">
+                @guest
+                    <a class="site-topbar__signin" href="{{ $signInUrl }}">Sign in</a>
+                    <a class="site-topbar__signup" href="{{ $schoolRegistrationUrl }}">Sign up</a>
+                @endguest
+                <a class="site-topbar__contact" href="{{ route('contact') }}">Contact us <span aria-hidden="true">→</span></a>
+            </div>
         </div>
     </div>
 

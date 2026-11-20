@@ -66,3 +66,27 @@
   .site-footer__promo{width:100%}
 }
 @media(prefers-reduced-motion:reduce){.site-drawer-transition{transition:none!important}}
+
+/* Top utility actions: sign-in and sign-up sit beside contact without repeating page navigation. */
+.site-topbar__actions{display:flex;flex:none;align-items:center;gap:16px}
+.site-topbar__signin{color:rgba(255,255,255,.92);font-size:11px;font-weight:600;white-space:nowrap;transition:color .18s ease}
+.site-topbar__signin:hover{color:var(--gold)}
+.site-topbar__signup{display:inline-flex;min-height:25px;align-items:center;justify-content:center;padding:0 11px;border:1px solid var(--gold);border-radius:5px;background:var(--gold);color:#2a1d00;font-size:10px;font-weight:800;letter-spacing:.01em;white-space:nowrap;transition:background .18s ease,border-color .18s ease}
+.site-topbar__signup:hover{border-color:#ffd36c;background:#ffd36c}
+.site-topbar__contact{margin-left:1px;padding-left:15px;border-left:1px solid rgba(255,255,255,.22)}
+@media(max-width:1000px){
+  .site-topbar__inner{justify-content:space-between}
+  .site-topbar__actions{gap:13px}
+}
+@media(max-width:640px){
+  .site-topbar__inner{min-height:34px;gap:8px}
+  .site-topbar__message{max-width:42%;font-size:9px;line-height:1.25}
+  .site-topbar__actions{gap:9px}
+  .site-topbar__signin{font-size:10px}
+  .site-topbar__signup{min-height:23px;padding-inline:8px;font-size:9px}
+  .site-topbar__contact{padding-left:9px;font-size:9px}
+}
+@media(max-width:370px){
+  .site-topbar__message{display:none}
+  .site-topbar__inner{justify-content:flex-end}
+}
