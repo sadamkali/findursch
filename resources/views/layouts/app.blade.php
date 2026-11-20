@@ -8,6 +8,10 @@
                 'meta_title', 'meta_description', 'meta_keywords',
                 'support_email', 'support_phone', 'support_whatsapp', 'contact_address',
                 'facebook_url', 'twitter_url', 'instagram_url', 'youtube_url',
+                'site_navigation', 'site_topbar_enabled', 'site_navigation_enabled',
+                'site_account_actions_enabled', 'site_header_cta_label', 'site_footer_enabled',
+                'site_footer_explore_enabled', 'site_footer_resources_enabled', 'site_footer_support_enabled',
+                'site_footer_social_enabled', 'site_footer_promo_enabled', 'site_footer_copyright_text',
             ])
             ->pluck('value', 'key');
         $siteName = $siteSettings['site_name'] ?? 'FindURSCH';
@@ -19,6 +23,17 @@
         $siteSupportEmail = $siteSettings['support_email'] ?? '';
         $siteSupportPhone = $siteSettings['support_phone'] ?? '';
         $siteSupportWhatsapp = preg_replace('/\\D+/', '', (string) ($siteSettings['support_whatsapp'] ?? ''));
+        $siteTopbarEnabled = filter_var($siteSettings['site_topbar_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $siteNavigationEnabled = filter_var($siteSettings['site_navigation_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $siteAccountActionsEnabled = filter_var($siteSettings['site_account_actions_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $siteFooterEnabled = filter_var($siteSettings['site_footer_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $siteFooterExploreEnabled = filter_var($siteSettings['site_footer_explore_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $siteFooterResourcesEnabled = filter_var($siteSettings['site_footer_resources_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $siteFooterSupportEnabled = filter_var($siteSettings['site_footer_support_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $siteFooterSocialEnabled = filter_var($siteSettings['site_footer_social_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $siteFooterPromoEnabled = filter_var($siteSettings['site_footer_promo_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $siteHeaderCtaLabel = $siteSettings['site_header_cta_label'] ?? 'List your school';
+        $siteFooterCopyright = $siteSettings['site_footer_copyright_text'] ?? '';
     @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -51,16 +66,36 @@
         $signInUrl = $dashboardUrl.'/login?returnTo=%2Faccount';
         $schoolRegistrationUrl = $dashboardUrl.'/register?type=school_owner&returnTo=%2Faccount';
 
-        // One navigation definition drives both desktop and mobile menus.
-        $primaryNavigation = [
-            ['label' => 'Home', 'route' => 'home', 'active' => request()->routeIs('home')],
-            ['label' => 'Schools', 'route' => 'schools.index', 'active' => request()->routeIs('schools.*', 'district.*', 'search')],
-            ['label' => 'Compare', 'route' => 'compare', 'active' => request()->routeIs('compare')],
-            ['label' => 'Scholarships', 'route' => 'scholarships.index', 'active' => request()->routeIs('scholarships.*')],
-            ['label' => 'News', 'route' => 'news.index', 'active' => request()->routeIs('news.*')],
-            ['label' => 'Events', 'route' => 'events.index', 'active' => request()->routeIs('events.*')],
-            ['label' => 'Blogs', 'route' => 'articles.index', 'active' => request()->routeIs('articles.*')],
+        // One settings-backed navigation list drives desktop and mobile menus.
+        $savedNavigation = json_decode((string) ($siteSettings['site_navigation'] ?? '[]'), true);
+        $navigationFallback = [
+            ['label' => 'Home', 'href' => '/'],
+            ['label' => 'Schools', 'href' => '/schools'],
+            ['label' => 'Compare', 'href' => '/compare'],
+            ['label' => 'Scholarships', 'href' => '/scholarships'],
+            ['label' => 'News', 'href' => '/news'],
+            ['label' => 'Events', 'href' => '/events'],
+            ['label' => 'Blogs', 'href' => '/articles'],
         ];
+        $navigationItems = is_array($savedNavigation) ? $savedNavigation : $navigationFallback;
+        if ($navigationItems === []) $navigationItems = $navigationFallback;
+        $currentPath = '/'.trim(request()->path(), '/');
+        $primaryNavigation = collect($navigationItems)
+            ->filter(fn ($item) => is_array($item)
+                && ($item['enabled'] ?? true)
+                && is_string($item['href'] ?? null)
+                && str_starts_with($item['href'], '/')
+                && ! str_starts_with($item['href'], '//')
+                && filled($item['label'] ?? null))
+            ->map(function ($item) use ($currentPath) {
+                $href = $item['href'];
+                $path = parse_url($href, PHP_URL_PATH) ?: '/';
+                $active = $path === '/'
+                    ? $currentPath === '/'
+                    : ($currentPath === $path || str_starts_with($currentPath, rtrim($path, '/').'/'));
+                return ['label' => $item['label'], 'href' => $href, 'active' => $active];
+            })
+            ->values();
 
         $accountLinkLabel = null;
         $accountLinkUrl = null;
@@ -80,18 +115,22 @@
     @endphp
 
     {{-- Utility information only: page navigation and account actions live in the main header. --}}
+    @if($siteTopbarEnabled)
     <div class="site-topbar" role="region" aria-label="Site information and account links">
         <div class="site-wrap site-topbar__inner">
             <span class="site-topbar__message">{{ $siteTagline }}</span>
             <div class="site-topbar__actions">
-                @guest
-                    <a class="site-topbar__signin" href="{{ $signInUrl }}">Sign in</a>
-                    <a class="site-topbar__signup" href="{{ $schoolRegistrationUrl }}">Sign up</a>
-                @endguest
+                @if($siteAccountActionsEnabled)
+                    @guest
+                        <a class="site-topbar__signin" href="{{ $signInUrl }}">Sign in</a>
+                        <a class="site-topbar__signup" href="{{ $schoolRegistrationUrl }}">Sign up</a>
+                    @endguest
+                @endif
                 <a class="site-topbar__contact" href="{{ route('contact') }}">Contact us <span aria-hidden="true">→</span></a>
             </div>
         </div>
     </div>
+    @endif
 
     <header
         x-data="{ mobileMenuOpen: false }"
@@ -103,21 +142,26 @@
                 @if($siteLogoUrl)<img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" style="max-height:44px;max-width:200px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
             </a>
 
+            @if($siteNavigationEnabled)
             <nav class="site-nav" aria-label="Primary navigation">
                 @foreach($primaryNavigation as $item)
-                    <a href="{{ route($item['route']) }}" @class(['is-active' => $item['active']])>{{ $item['label'] }}</a>
+                    <a href="{{ $item['href'] }}" @class(['is-active' => $item['active']])>{{ $item['label'] }}</a>
                 @endforeach
             </nav>
+            @endif
 
             <div class="site-header__actions">
+                @if($siteAccountActionsEnabled)
                 @auth
                     <a class="site-account-link" href="{{ $accountLinkUrl }}">{{ $accountLinkLabel }}</a>
                     <form method="POST" action="{{ route('logout') }}" class="site-logout-form">@csrf
                         <button type="submit" class="site-account-link">Log out</button>
                     </form>
                 @else
-                    <a href="{{ $schoolRegistrationUrl }}" class="site-header__cta">List your school</a>
+                    <a href="{{ $schoolRegistrationUrl }}" class="site-header__cta">{{ $siteHeaderCtaLabel }}</a>
                 @endauth
+                @endif
+                @if($siteNavigationEnabled)
                 <button type="button"
                     class="site-menu-toggle"
                     x-ref="mobileOpen"
@@ -128,9 +172,11 @@
                     <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
                     <svg x-cloak x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="m6 6 12 12M18 6 6 18"/></svg>
                 </button>
+                @endif
             </div>
         </div>
 
+        @if($siteNavigationEnabled)
         <button type="button" class="site-mobile-overlay" x-cloak x-show="mobileMenuOpen"
             x-transition.opacity.duration.250ms @click="mobileMenuOpen = false" aria-label="Close navigation"></button>
 
@@ -154,10 +200,11 @@
 
             <nav class="site-mobile-drawer__links" aria-label="Mobile navigation">
                 @foreach($primaryNavigation as $item)
-                    <a @click="mobileMenuOpen = false" href="{{ route($item['route']) }}" @class(['is-active' => $item['active']])>{{ $item['label'] }}</a>
+                    <a @click="mobileMenuOpen = false" href="{{ $item['href'] }}" @class(['is-active' => $item['active']])>{{ $item['label'] }}</a>
                 @endforeach
             </nav>
 
+            @if($siteAccountActionsEnabled)
             <div class="site-mobile-drawer__footer">
                 @guest
                     <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ $signInUrl }}" @click="mobileMenuOpen = false">Sign in</a>
@@ -169,7 +216,9 @@
                     </form>
                 @endguest
             </div>
+            @endif
         </aside>
+        @endif
     </header>
 
     <div x-data="compareBar" x-cloak x-show="schools.length > 0" class="compare-bar">
@@ -187,6 +236,7 @@
         @yield('content')
     </main>
 
+    @if($siteFooterEnabled)
     <footer class="site-footer">
         <div class="site-wrap">
             <div class="site-footer__grid">
@@ -195,13 +245,16 @@
                         @if($siteLogoUrl)<img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" style="max-height:48px;max-width:220px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
                     </a>
                     <p>{{ $siteDescription }}</p>
-                    <p class="site-footer__location">{{ $siteAddress }}</p>
+                    @if($siteAddress)<p class="site-footer__location">{{ $siteAddress }}</p>@endif
+                    @if($siteFooterSocialEnabled)
                     <div class="site-footer__social" aria-label="Social media links">
                         @foreach(['Facebook' => 'facebook_url', 'X' => 'twitter_url', 'Instagram' => 'instagram_url', 'YouTube' => 'youtube_url'] as $socialLabel => $socialKey)
                             @if(!empty($siteSettings[$socialKey]))<a href="{{ $siteSettings[$socialKey] }}" target="_blank" rel="noopener noreferrer">{{ $socialLabel }}</a>@endif
                         @endforeach
                     </div>
+                    @endif
                 </div>
+                @if($siteFooterExploreEnabled)
                 <div>
                     <h2>Explore schools</h2>
                     <ul>
@@ -211,6 +264,8 @@
                         <li><a href="{{ route('schools.index', ['verified_only' => 1]) }}">Verified schools</a></li>
                     </ul>
                 </div>
+                @endif
+                @if($siteFooterResourcesEnabled)
                 <div>
                     <h2>Resources</h2>
                     <ul>
@@ -219,6 +274,8 @@
                         <li><a href="{{ route('contact') }}">Contact</a></li>
                     </ul>
                 </div>
+                @endif
+                @if($siteFooterSupportEnabled)
                 <div>
                     <h2>Support</h2>
                     <ul>
@@ -232,19 +289,23 @@
                         <li><a href="{{ route('legal.privacy') }}">Privacy policy</a></li>
                     </ul>
                 </div>
+                @endif
             </div>
             <div class="site-footer__bar">
                 <div>
-                    <span>© {{ date('Y') }} {{ $siteName }}. All rights reserved.</span>
+                    <span>{{ $siteFooterCopyright ?: ('© '.date('Y').' '.$siteName.'. All rights reserved.') }}</span>
                     <span class="site-footer__legal"><a href="{{ route('legal.privacy') }}">Privacy</a><a href="{{ route('legal.terms') }}">Terms</a></span>
                 </div>
+                @if($siteFooterPromoEnabled)
                 <div class="site-footer__promo">
                     <span>Want to reach parents and students every month?</span>
                     <a class="btn btn-footer" href="{{ route('contact') }}">Advertise with us</a>
                 </div>
+                @endif
             </div>
         </div>
     </footer>
+    @endif
 
     @livewireScripts
 </body>
