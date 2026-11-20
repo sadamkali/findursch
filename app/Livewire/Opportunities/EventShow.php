@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Opportunities;
 
+use App\Models\School;
 use App\Models\SchoolPost;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -19,31 +21,52 @@ class EventShow extends Component
             ->whereIn('status', ['approved', 'published'])
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
-            ->with(['school.district.region'])
+            ->with(['school.district.region', 'school.media'])
             ->firstOrFail();
     }
 
     public function render()
     {
-        $similarEvents = SchoolPost::query()
+        $base = SchoolPost::query()
             ->where('type', 'event')
             ->whereIn('status', ['approved', 'published'])
             ->whereNotNull('published_at')
-            ->where('published_at', '<=', now())
+            ->where('published_at', '<=', now());
+
+        $similarEvents = (clone $base)
             ->where('id', '!=', $this->event->id)
-            ->where(function ($query) {
+            ->where(function (Builder $query) {
                 $query->where('school_id', $this->event->school_id)
-                    ->orWhereDate('starts_at', '>=', now()->toDateString());
+                    ->orWhere('starts_at', '>=', now());
             })
+            ->with(['school.district', 'school.media'])
+            ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END', [now()])
+            ->orderBy('starts_at')
+            ->limit(4)
+            ->get();
+
+        $upcomingEvents = (clone $base)
+            ->where('id', '!=', $this->event->id)
+            ->whereNotNull('starts_at')
+            ->where('starts_at', '>=', now())
             ->with('school')
             ->orderBy('starts_at')
             ->limit(3)
             ->get();
 
-        return view('livewire.opportunities.event-show', compact('similarEvents'))
-            ->layout('layouts.app', [
-                'title' => $this->event->title.' — Events — FindURSCH',
-                'description' => \Illuminate\Support\Str::limit(strip_tags($this->event->description), 155),
-            ]);
+        $spotlightSchool = School::query()
+            ->publiclyVisible()
+            ->featured()
+            ->with('district')
+            ->first();
+
+        return view('livewire.opportunities.event-show', compact(
+            'similarEvents',
+            'upcomingEvents',
+            'spotlightSchool',
+        ))->layout('layouts.app', [
+            'title' => $this->event->title.' — Events — FindURSCH',
+            'description' => \Illuminate\Support\Str::limit(strip_tags($this->event->description), 155),
+        ]);
     }
 }

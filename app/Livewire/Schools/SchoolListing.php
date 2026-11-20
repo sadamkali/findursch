@@ -37,8 +37,8 @@ class SchoolListing extends Component
     #[Url]
     public $verified_only = false;
 
-    #[Url]
-    public $sort = 'featured';
+    #[Url(except: 'newest')]
+    public $sort = 'newest';
 
     #[Url]
     public $search = '';
@@ -65,7 +65,7 @@ class SchoolListing extends Component
             'feeFilterEnabled',
         ]);
 
-        $this->sort = 'featured';
+        $this->sort = 'newest';
         $this->maxFee = 2000000;
         $this->resetPage();
     }
@@ -185,11 +185,11 @@ class SchoolListing extends Component
 
         match ($this->sort) {
             'rating' => $query->orderByDesc('rating_average')->latest('created_at'),
-            'newest' => $query->latest('created_at'),
+            'featured' => $query->orderByDesc('is_featured')->latest('created_at'),
             'name' => $query->orderBy('name'),
             'fee_low' => $this->sortByTermFee($query, $termTuition, 'asc'),
             'fee_high' => $this->sortByTermFee($query, $termTuition, 'desc'),
-            default => $query->orderByDesc('is_featured')->latest('created_at'),
+            default => $query->latest('created_at'),
         };
 
         $schoolTypes = SchoolType::query()
@@ -212,13 +212,16 @@ class SchoolListing extends Component
             ->get();
 
         return view('livewire.schools.school-listing', [
-            'schools' => $query->paginate(15),
+            'schools' => $query->paginate(15)->withQueryString(),
             'schoolTypes' => $schoolTypes,
             'districts' => $districts,
             'allDistricts' => District::query()->orderBy('name')->get(['id', 'name']),
             'regions' => $regions,
             'curricula' => Curriculum::query()->where('is_active', true)->orderBy('name')->get(),
             'allSchoolCount' => School::query()->publiclyVisible()->count(),
+        ])->layout('layouts.app', [
+            'title' => 'Find a school in Uganda — FindURSCH',
+            'description' => 'Find verified nursery, primary, secondary, vocational and international schools across Uganda. Compare districts, curricula and published tuition fees.',
         ]);
     }
 
