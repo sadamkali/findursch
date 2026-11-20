@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="{{ asset('css/events-reference.css') }}?v=2">
     <link rel="stylesheet" href="{{ asset('css/events-listing-reference.css') }}?v=1">
     <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=3">
-    <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=2">
     @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}">@endif
     @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}">@endif
     @if (request()->routeIs('scholarships.*'))<link rel="stylesheet" href="{{ asset('css/scholarships-reference.css') }}">@endif
@@ -23,21 +23,44 @@
     @livewireStyles
 </head>
 <body class="h-full bg-white text-gray-900 antialiased">
-    @php($dashboardUrl = rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/'))
-    <div class="site-topbar">
+    @php
+        $dashboardUrl = rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/');
+        $signInUrl = $dashboardUrl.'/login?returnTo=%2Faccount';
+        $schoolRegistrationUrl = $dashboardUrl.'/register?type=school_owner&returnTo=%2Faccount';
+
+        // One navigation definition drives both desktop and mobile menus.
+        $primaryNavigation = [
+            ['label' => 'Home', 'route' => 'home', 'active' => request()->routeIs('home')],
+            ['label' => 'Schools', 'route' => 'schools.index', 'active' => request()->routeIs('schools.*', 'district.*', 'search')],
+            ['label' => 'Compare', 'route' => 'compare', 'active' => request()->routeIs('compare')],
+            ['label' => 'Scholarships', 'route' => 'scholarships.index', 'active' => request()->routeIs('scholarships.*')],
+            ['label' => 'News', 'route' => 'news.index', 'active' => request()->routeIs('news.*')],
+            ['label' => 'Events', 'route' => 'events.index', 'active' => request()->routeIs('events.*')],
+            ['label' => 'Blogs', 'route' => 'articles.index', 'active' => request()->routeIs('articles.*')],
+        ];
+
+        $accountLinkLabel = null;
+        $accountLinkUrl = null;
+
+        if (auth()->check()) {
+            if (auth()->user()->hasRole('admin')) {
+                $accountLinkLabel = 'Admin dashboard';
+                $accountLinkUrl = $dashboardUrl.'/admin';
+            } elseif (auth()->user()->hasRole('school_owner')) {
+                $accountLinkLabel = 'School dashboard';
+                $accountLinkUrl = $dashboardUrl.'/owner';
+            } else {
+                $accountLinkLabel = 'My account';
+                $accountLinkUrl = route('user.home');
+            }
+        }
+    @endphp
+
+    {{-- Utility information only: page navigation and account actions live in the main header. --}}
+    <div class="site-topbar" role="region" aria-label="Site information">
         <div class="site-wrap site-topbar__inner">
-            <a href="{{ route('schools.index') }}">Explore schools</a>
-            <a href="{{ route('news.index') }}">Latest news</a>
-            <a href="{{ route('articles.index') }}">Blogs</a>
-            <a href="{{ route('events.index') }}">Events</a>
-            <a href="{{ route('scholarships.index') }}">Scholarships</a>
-            <a href="{{ route('compare') }}">Compare schools</a>
-            @guest
-                <a href="{{ $dashboardUrl }}/login?returnTo=%2Faccount">Log in</a>
-                <a href="{{ $dashboardUrl }}/register?type=school_owner&returnTo=%2Faccount">Sign up</a>
-            @else
-                <a href="{{ auth()->user()->hasRole('school_owner') ? ($dashboardUrl.'/owner') : (auth()->user()->hasRole('admin') ? ($dashboardUrl.'/admin') : route('user.dashboard')) }}">My account</a>
-            @endguest
+            <span class="site-topbar__message">Discover and compare schools across Uganda</span>
+            <a class="site-topbar__contact" href="{{ route('contact') }}">Contact us <span aria-hidden="true">→</span></a>
         </div>
     </div>
 
@@ -47,36 +70,24 @@
         @keydown.escape.window="mobileMenuOpen = false"
         class="site-header">
         <div class="site-wrap site-header__inner">
-            <a href="{{ route('home') }}" class="site-logo" aria-label="FindurSch home">
-                <span>Find<b>UR</b>SCH</span>
-            </a>
+            <a href="{{ route('home') }}" class="site-logo" aria-label="FindurSch home">Find<b>UR</b>SCH</a>
 
             <nav class="site-nav" aria-label="Primary navigation">
-                <a href="{{ route('home') }}" @class(['is-active' => request()->routeIs('home')])>Home</a>
-                <a href="{{ route('schools.index') }}" @class(['is-active' => request()->routeIs('schools.*', 'district.*', 'search')])>Schools</a>
-                <a href="{{ route('compare') }}" @class(['is-active' => request()->routeIs('compare')])>Compare</a>
-                <a href="{{ route('scholarships.index') }}" @class(['is-active' => request()->routeIs('scholarships.*')])>Scholarships</a>
-                <a href="{{ route('news.index') }}" @class(['is-active' => request()->routeIs('news.*')])>News</a>
-                <a href="{{ route('articles.index') }}" @class(['is-active' => request()->routeIs('articles.*')])>Blogs</a>
-                <a href="{{ route('events.index') }}" @class(['is-active' => request()->routeIs('events.*')])>Events</a>
+                @foreach($primaryNavigation as $item)
+                    <a href="{{ route($item['route']) }}" @class(['is-active' => $item['active']])>{{ $item['label'] }}</a>
+                @endforeach
             </nav>
 
             <div class="site-header__actions">
                 @auth
-                    @if (auth()->user()->hasRole('admin'))
-                        <a class="site-account-link" href="{{ $dashboardUrl }}/admin">Admin</a>
-                    @elseif (auth()->user()->hasRole('school_owner'))
-                        <a class="site-account-link" href="{{ $dashboardUrl }}/owner">School dashboard</a>
-                    @else
-                        <a class="site-account-link" href="{{ route('user.home') }}">My account</a>
-                    @endif
+                    <a class="site-account-link" href="{{ $accountLinkUrl }}">{{ $accountLinkLabel }}</a>
                     <form method="POST" action="{{ route('logout') }}" class="site-logout-form">@csrf
                         <button type="submit" class="site-account-link">Log out</button>
                     </form>
                 @else
-                    <a class="site-account-link" href="{{ $dashboardUrl }}/login?returnTo=%2Faccount">Log in</a>
+                    <a class="site-account-link" href="{{ $signInUrl }}">Sign in</a>
+                    <a href="{{ $schoolRegistrationUrl }}" class="site-header__cta">List your school</a>
                 @endauth
-                <a href="{{ $dashboardUrl }}/register?type=school_owner" class="site-header__cta">List your school</a>
                 <button type="button"
                     class="site-menu-toggle"
                     x-ref="mobileOpen"
@@ -110,31 +121,17 @@
             </div>
 
             <nav class="site-mobile-drawer__links" aria-label="Mobile navigation">
-                <a @click="mobileMenuOpen = false" href="{{ route('home') }}" @class(['is-active' => request()->routeIs('home')])>Home</a>
-                <a @click="mobileMenuOpen = false" href="{{ route('schools.index') }}" @class(['is-active' => request()->routeIs('schools.*', 'district.*', 'search')])>Schools</a>
-                <a @click="mobileMenuOpen = false" href="{{ route('compare') }}" @class(['is-active' => request()->routeIs('compare')])>Compare</a>
-                <a @click="mobileMenuOpen = false" href="{{ route('scholarships.index') }}" @class(['is-active' => request()->routeIs('scholarships.*')])>Scholarships</a>
-                <a @click="mobileMenuOpen = false" href="{{ route('news.index') }}" @class(['is-active' => request()->routeIs('news.*')])>News</a>
-                <a @click="mobileMenuOpen = false" href="{{ route('articles.index') }}" @class(['is-active' => request()->routeIs('articles.*')])>Blogs</a>
-                <a @click="mobileMenuOpen = false" href="{{ route('events.index') }}" @class(['is-active' => request()->routeIs('events.*')])>Events</a>
-                <hr>
-                <a @click="mobileMenuOpen = false" href="{{ route('about') }}">About FindURSCH</a>
-                <a @click="mobileMenuOpen = false" href="{{ route('contact') }}">Contact</a>
-                <a @click="mobileMenuOpen = false" href="{{ $dashboardUrl }}/register?type=school_owner">List your school</a>
+                @foreach($primaryNavigation as $item)
+                    <a @click="mobileMenuOpen = false" href="{{ route($item['route']) }}" @class(['is-active' => $item['active']])>{{ $item['label'] }}</a>
+                @endforeach
             </nav>
 
             <div class="site-mobile-drawer__footer">
                 @guest
-                    <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ $dashboardUrl }}/login?returnTo=%2Faccount" @click="mobileMenuOpen = false">Sign in</a>
-                    <a class="site-mobile-drawer__button site-mobile-drawer__button--gold" href="{{ $dashboardUrl }}/register?type=school_owner&returnTo=%2Faccount" @click="mobileMenuOpen = false">Register</a>
+                    <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ $signInUrl }}" @click="mobileMenuOpen = false">Sign in</a>
+                    <a class="site-mobile-drawer__button site-mobile-drawer__button--gold" href="{{ $schoolRegistrationUrl }}" @click="mobileMenuOpen = false">List your school</a>
                 @else
-                    @if (auth()->user()->hasRole('admin'))
-                        <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ $dashboardUrl }}/admin" @click="mobileMenuOpen = false">Admin dashboard</a>
-                    @elseif (auth()->user()->hasRole('school_owner'))
-                        <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ $dashboardUrl }}/owner" @click="mobileMenuOpen = false">School dashboard</a>
-                    @else
-                        <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ route('user.home') }}" @click="mobileMenuOpen = false">My account</a>
-                    @endif
+                    <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ $accountLinkUrl }}" @click="mobileMenuOpen = false">{{ $accountLinkLabel }}</a>
                     <form method="POST" action="{{ route('logout') }}">@csrf
                         <button type="submit" class="site-mobile-drawer__button site-mobile-drawer__button--gold">Log out</button>
                     </form>
