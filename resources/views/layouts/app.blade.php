@@ -91,7 +91,6 @@
                         <button type="submit" class="site-account-link">Log out</button>
                     </form>
                 @else
-                    <a class="site-account-link" href="{{ $signInUrl }}">Sign in</a>
                     <a href="{{ $schoolRegistrationUrl }}" class="site-header__cta">List your school</a>
                 @endauth
                 <button type="button"

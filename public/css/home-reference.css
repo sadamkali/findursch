@@ -28,7 +28,10 @@
 .findursch-home-reference .more{font:600 13px var(--sans);color:var(--brand)}
 
 /* Hero */
-.findursch-home-reference .hero{position:relative;min-height:470px;display:grid;place-items:center;text-align:center;color:#fff;padding:64px 24px 72px;background:linear-gradient(rgba(5,30,24,.62),rgba(5,30,24,.72)),linear-gradient(120deg,#355a4e,#7b6a3c 55%,#2f4d5a)}
+.findursch-home-reference .hero{position:relative;isolation:isolate;min-height:470px;display:grid;place-items:center;text-align:center;color:#fff;padding:64px 24px 72px;background:#18382b url('https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=2200&q=85') center 42%/cover no-repeat}
+.findursch-home-reference .hero::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(0,0,0,.46)}
+.findursch-home-reference .hero>div{position:relative;z-index:1}
+.findursch-home-reference .hero h1,.findursch-home-reference .hero p{text-shadow:0 2px 12px rgba(0,0,0,.38)}
 .findursch-home-reference .hero h1{font:700 56px/1.12 var(--serif);max-width:760px;margin:0 auto}
 .findursch-home-reference .hero h1 em{font-style:normal;color:var(--accent)}
 .findursch-home-reference .hero p{max-width:620px;margin:20px auto 32px;font-size:17px;color:#f6faf8}
