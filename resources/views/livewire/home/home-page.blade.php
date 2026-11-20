@@ -19,7 +19,7 @@
                     <button class="btn btn-red" type="submit">Search</button>
                 </form>
             @endif
-            <a class="btn btn-gold hero-slide-cta" x-show="currentSlide.button_label && currentSlide.button_url" :href="currentSlide.button_url" x-text="currentSlide.button_label"></a>
+            <a class="btn btn-gold hero-slide-cta" x-cloak x-show="currentSlide.button_label && currentSlide.button_url" :href="currentSlide.button_url" x-text="currentSlide.button_label"></a>
         </div>
         <div class="hero-carousel-controls" x-show="slides.length > 1" x-cloak>
             <button type="button" class="hero-carousel-arrow" @click="previous()" aria-label="Previous slide">‹</button>
@@ -240,7 +240,8 @@
         @endif
 
         @if($homepageDisplaySettings['videos'] || $homepageDisplaySettings['scholarships'] || $homepageDisplaySettings['sidebar'] || $homepageDisplaySettings['banner_ads'])
-        <div class="cols sec" @if(!$homepageDisplaySettings['sidebar']) style="grid-template-columns:minmax(0,1fr)" @endif>
+        <div class="cols sec" @if(!$homepageDisplaySettings['sidebar'] || (!$homepageDisplaySettings['videos'] && !$homepageDisplaySettings['scholarships'] && !$homepageDisplaySettings['banner_ads'])) style="grid-template-columns:minmax(0,1fr)" @endif>
+            @if($homepageDisplaySettings['videos'] || $homepageDisplaySettings['scholarships'] || $homepageDisplaySettings['banner_ads'])
             <div class="stack">
                 @if($homepageDisplaySettings['banner_ads'])
                 <div class="band">
@@ -293,6 +294,7 @@
                 </div>
                 @endif
             </div>
+            @endif
 
             @if($homepageDisplaySettings['sidebar'])
             <aside>
