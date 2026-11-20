@@ -4,13 +4,14 @@
     @php
         $siteSettings = \App\Models\Setting::query()
             ->whereIn('key', [
-                'site_name', 'site_description', 'site_logo', 'site_favicon',
+                'site_name', 'site_tagline', 'site_description', 'site_logo', 'site_favicon',
                 'meta_title', 'meta_description', 'meta_keywords',
                 'support_email', 'support_phone', 'support_whatsapp', 'contact_address',
                 'facebook_url', 'twitter_url', 'instagram_url', 'youtube_url',
             ])
             ->pluck('value', 'key');
         $siteName = $siteSettings['site_name'] ?? 'FindURSCH';
+        $siteTagline = $siteSettings['site_tagline'] ?? 'Discover and compare schools across Uganda';
         $siteDescription = $siteSettings['site_description'] ?? 'Uganda’s school discovery and comparison platform.';
         $siteLogoUrl = $siteSettings['site_logo'] ?? '';
         $siteFaviconUrl = $siteSettings['site_favicon'] ?? '';
@@ -81,7 +82,7 @@
     {{-- Utility information only: page navigation and account actions live in the main header. --}}
     <div class="site-topbar" role="region" aria-label="Site information and account links">
         <div class="site-wrap site-topbar__inner">
-            <span class="site-topbar__message">Discover and compare schools across Uganda</span>
+            <span class="site-topbar__message">{{ $siteTagline }}</span>
             <div class="site-topbar__actions">
                 @guest
                     <a class="site-topbar__signin" href="{{ $signInUrl }}">Sign in</a>

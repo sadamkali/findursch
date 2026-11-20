@@ -3,7 +3,7 @@
         <a class="tab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
     @endif
 
-    <section class="hero" x-data="homepageHero(@js($homepageSlides))" x-init="init()" :style="backgroundStyle">
+    <section class="hero" x-data="homepageHero(@js($homepageSlides))" :style="backgroundStyle">
         <div>
             <h1 x-text="currentSlide.title">Find the right school for your child</h1>
             <p x-text="currentSlide.description">Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.</p>
@@ -19,7 +19,7 @@
                     <button class="btn btn-red" type="submit">Search</button>
                 </form>
             @endif
-            <a class="btn btn-gold hero-slide-cta" x-show="currentSlide.button_label && currentSlide.button_url" :href="currentSlide.button_url" x-text="currentSlide.button_label" hidden></a>
+            <a class="btn btn-gold hero-slide-cta" x-show="currentSlide.button_label && currentSlide.button_url" :href="currentSlide.button_url" x-text="currentSlide.button_label"></a>
         </div>
         <div class="hero-carousel-controls" x-show="slides.length > 1" x-cloak>
             <button type="button" class="hero-carousel-arrow" @click="previous()" aria-label="Previous slide">‹</button>
