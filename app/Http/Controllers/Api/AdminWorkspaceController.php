@@ -170,6 +170,28 @@ class AdminWorkspaceController extends Controller
                 $items = $postQuery->limit(100)->get();
                 break;
 
+            case 'advertisements':
+                $adQuery = DB::table('school_advertisements')
+                    ->join('schools', 'schools.id', '=', 'school_advertisements.school_id')
+                    ->leftJoin('users', 'users.id', '=', 'school_advertisements.created_by')
+                    ->orderByDesc('school_advertisements.created_at');
+                if ($status) $adQuery->where('school_advertisements.status', $status);
+                if ($search !== '') {
+                    $adQuery->where(function ($builder) use ($search) {
+                        $builder->where('school_advertisements.title', 'ilike', '%'.$search.'%')
+                            ->orWhere('schools.name', 'ilike', '%'.$search.'%');
+                    });
+                }
+                $items = $adQuery->limit(100)->get([
+                    'school_advertisements.id', 'school_advertisements.title',
+                    'school_advertisements.placement', 'school_advertisements.destination_url',
+                    'school_advertisements.description', 'school_advertisements.status',
+                    'school_advertisements.starts_at', 'school_advertisements.ends_at',
+                    'school_advertisements.created_at', 'schools.name as school_name',
+                    'schools.slug as school_slug', 'users.name as owner_name',
+                ]);
+                break;
+
             case 'settings':
                 $items = DB::table('settings')->orderBy('group')->orderBy('key')
                     ->limit(300)->get(['id', 'key', 'value', 'type', 'group', 'label']);
@@ -368,6 +390,20 @@ class AdminWorkspaceController extends Controller
 
                 $post->forceFill($data)->save();
                 return response()->json(['data' => $post->fresh(['school'])]);
+
+            case 'advertisements':
+                $advertisement = DB::table('school_advertisements')->where('id', $id)->first();
+                abort_unless($advertisement, 404);
+                $data = $request->validate([
+                    'status' => ['required', 'in:draft,pending,active,rejected,expired'],
+                    'starts_at' => ['sometimes', 'nullable', 'date'],
+                    'ends_at' => ['sometimes', 'nullable', 'date', 'after_or_equal:starts_at'],
+                ]);
+                if ($data['status'] === 'active' && empty($advertisement->starts_at)) {
+                    $data['starts_at'] = now();
+                }
+                DB::table('school_advertisements')->where('id', $id)->update($data + ['updated_at' => now()]);
+                return response()->json(['message' => 'Advertisement status updated.']);
 
             case 'settings':
                 $data = $request->validate(['value' => ['present', 'nullable', 'string', 'max:20000']]);
