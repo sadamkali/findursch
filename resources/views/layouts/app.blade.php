@@ -3,9 +3,18 @@
 <head>
     @php
         $siteSettings = \App\Models\Setting::query()
-            ->whereIn('key', ['site_name', 'site_description', 'meta_title', 'support_email', 'support_phone', 'support_whatsapp'])
+            ->whereIn('key', [
+                'site_name', 'site_description', 'site_logo', 'site_favicon',
+                'meta_title', 'meta_description', 'meta_keywords',
+                'support_email', 'support_phone', 'support_whatsapp', 'contact_address',
+                'facebook_url', 'twitter_url', 'instagram_url', 'youtube_url',
+            ])
             ->pluck('value', 'key');
         $siteName = $siteSettings['site_name'] ?? 'FindURSCH';
+        $siteDescription = $siteSettings['site_description'] ?? 'Uganda’s school discovery and comparison platform.';
+        $siteLogoUrl = $siteSettings['site_logo'] ?? '';
+        $siteFaviconUrl = $siteSettings['site_favicon'] ?? '';
+        $siteAddress = $siteSettings['contact_address'] ?? 'Kampala, Uganda';
         $siteSupportEmail = $siteSettings['support_email'] ?? '';
         $siteSupportPhone = $siteSettings['support_phone'] ?? '';
         $siteSupportWhatsapp = preg_replace('/\\D+/', '', (string) ($siteSettings['support_whatsapp'] ?? ''));
@@ -14,11 +23,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? ($siteSettings['meta_title'] ?? 'FindURSCH — Find the right school in Uganda') }}</title>
-    <meta name="description" content="{{ $description ?? ($siteSettings['site_description'] ?? 'Discover, compare and learn about schools across Uganda with FindurSch.') }}">
+    <meta name="description" content="{{ $description ?? ($siteSettings['meta_description'] ?? $siteDescription) }}">
+    @if(!empty($siteSettings['meta_keywords']))<meta name="keywords" content="{{ $siteSettings['meta_keywords'] }}">@endif
+    <meta property="og:title" content="{{ $title ?? ($siteSettings['meta_title'] ?? $siteName) }}">
+    <meta property="og:description" content="{{ $description ?? ($siteSettings['meta_description'] ?? $siteDescription) }}">
+    @if($siteLogoUrl)<meta property="og:image" content="{{ $siteLogoUrl }}">@endif
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="icon" href="{{ $siteFaviconUrl ?: '/favicon.png' }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- These page styles are safely scoped to their page wrappers; load them directly so Livewire route rendering cannot skip them. --}}
     <link rel="stylesheet" href="{{ asset('css/events-reference.css') }}?v=2">
@@ -85,7 +98,9 @@
         @keydown.escape.window="mobileMenuOpen = false"
         class="site-header">
         <div class="site-wrap site-header__inner">
-            <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">{{ $siteName }}</a>
+            <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">
+                @if($siteLogoUrl)<img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" style="max-height:44px;max-width:200px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
+            </a>
 
             <nav class="site-nav" aria-label="Primary navigation">
                 @foreach($primaryNavigation as $item)
@@ -130,7 +145,9 @@
                 else if (!$event.shiftKey && document.activeElement === last) { $event.preventDefault(); first.focus(); }
             ">
             <div class="site-mobile-drawer__head">
-                <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">{{ $siteName }}</a>
+                <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">
+                @if($siteLogoUrl)<img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" style="max-height:44px;max-width:200px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
+            </a>
                 <button type="button" class="site-mobile-drawer__close" x-ref="mobileClose" @click="mobileMenuOpen = false" aria-label="Close menu">×</button>
             </div>
 
@@ -173,9 +190,16 @@
         <div class="site-wrap">
             <div class="site-footer__grid">
                 <div class="site-footer__brand">
-                    <a href="{{ route('home') }}" class="site-logo site-logo--footer">{{ $siteName }}</a>
-                    <p>Uganda's school discovery, comparison and admissions platform, with school profiles, news, events, jobs and scholarships.</p>
-                    <p class="site-footer__location">Kampala, Uganda</p>
+                    <a href="{{ route('home') }}" class="site-logo site-logo--footer">
+                        @if($siteLogoUrl)<img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" style="max-height:48px;max-width:220px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
+                    </a>
+                    <p>{{ $siteDescription }}</p>
+                    <p class="site-footer__location">{{ $siteAddress }}</p>
+                    <div class="site-footer__social" aria-label="Social media links">
+                        @foreach(['Facebook' => 'facebook_url', 'X' => 'twitter_url', 'Instagram' => 'instagram_url', 'YouTube' => 'youtube_url'] as $socialLabel => $socialKey)
+                            @if(!empty($siteSettings[$socialKey]))<a href="{{ $siteSettings[$socialKey] }}" target="_blank" rel="noopener noreferrer">{{ $socialLabel }}</a>@endif
+                        @endforeach
+                    </div>
                 </div>
                 <div>
                     <h2>Explore schools</h2>

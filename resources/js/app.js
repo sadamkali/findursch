@@ -41,6 +41,52 @@ Alpine.data('compareBar', () => ({
     }
 }));
 
+Alpine.data('homepageHero', (configuredSlides) => ({
+    slides: Array.isArray(configuredSlides) ? configuredSlides : [],
+    active: 0,
+    timer: null,
+    get currentSlide() {
+        return this.slides[this.active] || this.slides[0] || {
+            image_url: '',
+            title: 'Find the right school for your child',
+            description: 'Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.',
+            button_label: '',
+            button_url: '',
+        };
+    },
+    get backgroundStyle() {
+        const image = this.currentSlide.image_url;
+        return image ? { '--hero-background-image': 'url(' + JSON.stringify(image) + ')' } : {};
+    },
+    init() {
+        this.slides = this.slides.filter(slide => slide && slide.image_url);
+        if (!this.slides.length) {
+            this.slides = [{
+                image_url: '',
+                title: 'Find the right school for your child',
+                description: 'Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.',
+                button_label: '',
+                button_url: '',
+            }];
+        }
+        if (this.slides.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            this.timer = window.setInterval(() => this.next(), 6500);
+        }
+    },
+    destroy() {
+        if (this.timer) window.clearInterval(this.timer);
+    },
+    show(index) {
+        this.active = index;
+    },
+    next() {
+        this.active = (this.active + 1) % this.slides.length;
+    },
+    previous() {
+        this.active = (this.active - 1 + this.slides.length) % this.slides.length;
+    },
+}));
+
 Alpine.data('schoolTabs', () => ({
     active: 'overview',
     setTab(tab) { this.active = tab }

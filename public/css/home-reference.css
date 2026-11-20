@@ -248,3 +248,16 @@
 @media(prefers-reduced-motion:reduce){
   .findursch-home-reference *{scroll-behavior:auto!important;transition:none!important}
 }
+
+/* Configurable homepage hero carousel */
+.findursch-home-reference .hero-carousel-controls{position:absolute;left:0;right:0;bottom:20px;z-index:2;display:flex;align-items:center;justify-content:center;gap:16px}
+.findursch-home-reference .hero-carousel-arrow{display:grid;place-items:center;width:32px;height:32px;border:1px solid rgba(255,255,255,.55);border-radius:50%;background:rgba(0,0,0,.18);color:#fff;font:400 24px/1 var(--sans);cursor:pointer}
+.findursch-home-reference .hero-carousel-arrow:hover{background:rgba(0,0,0,.4)}
+.findursch-home-reference .hero-carousel-controls .dots{position:static;display:flex;align-items:center;gap:6px}
+.findursch-home-reference .hero-carousel-controls .dots button{display:block;width:8px;height:8px;padding:0;border:0;border-radius:99px;background:rgba(255,255,255,.55);cursor:pointer}
+.findursch-home-reference .hero-carousel-controls .dots button.on{width:26px;background:#fff}
+.findursch-home-reference .hero-slide-cta{margin-top:18px}
+@media(max-width:640px){
+  .findursch-home-reference .hero-carousel-controls{bottom:16px}
+  .findursch-home-reference .hero-carousel-arrow{width:30px;height:30px}
+}

@@ -11,6 +11,7 @@ use App\Models\SchoolAdvertisement;
 use Illuminate\Support\Facades\DB;
 use App\Models\SchoolType;
 use App\Models\SchoolVideo;
+use App\Models\Setting;
 use App\Models\User;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -167,7 +168,70 @@ class HomePage extends Component
 
         $homeSidebarAd = $activeAds->firstWhere('placement', 'school_spotlight');
         $homeBannerAds = $activeAds->where('placement', 'homepage_banner')->take(2)->values();
-        $heroImageUrl = DB::table('settings')->where('key', 'homepage_hero_image_url')->value('value');
+        $homepageSettings = Setting::query()
+            ->whereIn('key', [
+                'homepage_hero_image_url', 'homepage_slides',
+                'homepage_register_tab_enabled', 'homepage_search_enabled',
+                'homepage_featured_schools_enabled', 'homepage_sidebar_enabled',
+                'homepage_categories_enabled', 'homepage_upcoming_events_enabled',
+                'homepage_news_enabled', 'homepage_videos_enabled',
+                'homepage_scholarships_enabled', 'homepage_reviews_enabled',
+                'homepage_insights_enabled', 'homepage_banner_ads_enabled',
+                'homepage_cta_enabled', 'primary_color', 'accent_color',
+                'font_display', 'font_body',
+            ])
+            ->pluck('value', 'key');
+
+        $heroImageUrl = (string) ($homepageSettings['homepage_hero_image_url'] ?? '');
+        $storedSlides = json_decode((string) ($homepageSettings['homepage_slides'] ?? '[]'), true);
+        $homepageSlides = collect(is_array($storedSlides) ? $storedSlides : [])
+            ->filter(fn ($slide) => is_array($slide) && ($slide['enabled'] ?? true) && filled($slide['image_url'] ?? null))
+            ->map(fn ($slide) => [
+                'image_url' => (string) ($slide['image_url'] ?? ''),
+                'title' => (string) ($slide['title'] ?? 'Find the right school for your child'),
+                'description' => (string) ($slide['description'] ?? ''),
+                'button_label' => (string) ($slide['button_label'] ?? ''),
+                'button_url' => (string) ($slide['button_url'] ?? ''),
+            ])
+            ->values()
+            ->all();
+
+        if ($homepageSlides === []) {
+            $homepageSlides = [[
+                'image_url' => $heroImageUrl,
+                'title' => 'Find the right school for your child',
+                'description' => 'Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.',
+                'button_label' => '',
+                'button_url' => '',
+            ]];
+        }
+
+        $displayKeys = [
+            'register_tab' => 'homepage_register_tab_enabled',
+            'search' => 'homepage_search_enabled',
+            'featured_schools' => 'homepage_featured_schools_enabled',
+            'sidebar' => 'homepage_sidebar_enabled',
+            'categories' => 'homepage_categories_enabled',
+            'upcoming_events' => 'homepage_upcoming_events_enabled',
+            'news' => 'homepage_news_enabled',
+            'videos' => 'homepage_videos_enabled',
+            'scholarships' => 'homepage_scholarships_enabled',
+            'reviews' => 'homepage_reviews_enabled',
+            'insights' => 'homepage_insights_enabled',
+            'banner_ads' => 'homepage_banner_ads_enabled',
+            'cta' => 'homepage_cta_enabled',
+        ];
+        $homepageDisplaySettings = collect($displayKeys)->mapWithKeys(
+            fn ($key, $name) => [$name => filter_var($homepageSettings[$key] ?? true, FILTER_VALIDATE_BOOLEAN)]
+        )->all();
+
+        $validColor = fn ($value, $fallback) => is_string($value) && preg_match('/^#[0-9a-fA-F]{6}$/', $value) ? $value : $fallback;
+        $homepageTheme = [
+            'primary_color' => $validColor($homepageSettings['primary_color'] ?? null, '#0c5a49'),
+            'accent_color' => $validColor($homepageSettings['accent_color'] ?? null, '#f0b030'),
+            'font_display' => in_array($homepageSettings['font_display'] ?? '', ['Playfair Display', 'DM Serif Display'], true) ? $homepageSettings['font_display'] : 'Playfair Display',
+            'font_body' => in_array($homepageSettings['font_body'] ?? '', ['Inter', 'system-ui'], true) ? $homepageSettings['font_body'] : 'Inter',
+        ];
 
         $stats = [
             'schools' => School::query()->publiclyVisible()->count(),
@@ -193,6 +257,9 @@ class HomePage extends Component
             'homeSidebarAd',
             'homeBannerAds',
             'heroImageUrl',
+            'homepageSlides',
+            'homepageDisplaySettings',
+            'homepageTheme',
             'stats',
         ));
     }

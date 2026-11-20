@@ -1,26 +1,40 @@
-<div class="findursch-home-reference">
-    <a class="tab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
+<div class="findursch-home-reference" style="--brand: {{ $homepageTheme['primary_color'] }}; --accent: {{ $homepageTheme['accent_color'] }}; --serif: '{{ $homepageTheme['font_display'] }}', Georgia, serif; --sans: '{{ $homepageTheme['font_body'] }}', system-ui, sans-serif;">
+    @if($homepageDisplaySettings['register_tab'])
+        <a class="tab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
+    @endif
 
-    <section class="hero" @if($heroImageUrl) style="--hero-background-image: url('{{ $heroImageUrl }}')" @endif>
+    <section class="hero" x-data="homepageHero(@js($homepageSlides))" x-init="init()" :style="backgroundStyle">
         <div>
-            <h1>Find the <em>right school</em> for your child</h1>
-            <p>Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.</p>
-            <form class="search" action="{{ route('schools.index') }}" method="GET">
-                <input type="search" name="search" placeholder="Search by name, location or district" aria-label="Search schools">
-                <select name="type" aria-label="School type">
-                    <option value="">All types</option>
-                    @foreach($schoolTypes as $type)
-                        <option value="{{ $type->id }}">{{ $type->name }}</option>
-                    @endforeach
-                </select>
-                <button class="btn btn-red" type="submit">Search</button>
-            </form>
+            <h1 x-text="currentSlide.title">Find the right school for your child</h1>
+            <p x-text="currentSlide.description">Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.</p>
+            @if($homepageDisplaySettings['search'])
+                <form class="search" action="{{ route('schools.index') }}" method="GET">
+                    <input type="search" name="search" placeholder="Search by name, location or district" aria-label="Search schools">
+                    <select name="type" aria-label="School type">
+                        <option value="">All types</option>
+                        @foreach($schoolTypes as $type)
+                            <option value="{{ $type->id }}">{{ $type->name }}</option>
+                        @endforeach
+                    </select>
+                    <button class="btn btn-red" type="submit">Search</button>
+                </form>
+            @endif
+            <a class="btn btn-gold hero-slide-cta" x-show="currentSlide.button_label && currentSlide.button_url" :href="currentSlide.button_url" x-text="currentSlide.button_label" hidden></a>
         </div>
-        <div class="dots" aria-hidden="true"><i class="on"></i><i></i></div>
+        <div class="hero-carousel-controls" x-show="slides.length > 1" x-cloak>
+            <button type="button" class="hero-carousel-arrow" @click="previous()" aria-label="Previous slide">‹</button>
+            <div class="dots" role="tablist" aria-label="Homepage slides">
+                <template x-for="(slide, index) in slides" :key="index">
+                    <button type="button" :class="{on: active === index}" :aria-label="'Show slide ' + (index + 1)" :aria-selected="active === index" role="tab" @click="show(index)"></button>
+                </template>
+            </div>
+            <button type="button" class="hero-carousel-arrow" @click="next()" aria-label="Next slide">›</button>
+        </div>
     </section>
 
     <main class="wrap">
         <div class="cols sec">
+            @if($homepageDisplaySettings['featured_schools'])
             <div>
                 <div class="head">
                     <h2>Featured <span>schools</span></h2>
@@ -101,8 +115,11 @@
                     <a class="btn btn-gold" href="{{ route('register') }}">List your school</a>
                 </div>
             </div>
+            @endif
 
+            @if($homepageDisplaySettings['sidebar'])
             <aside>
+                @if($homepageDisplaySettings['banner_ads'])
                 @if($homeSidebarAd)
                     <a class="ad ad-primary ad-managed" href="{{ $homeSidebarAd->destination_url ?: route('schools.index') }}" target="{{ $homeSidebarAd->destination_url ? '_blank' : '_self' }}" rel="{{ $homeSidebarAd->destination_url ? 'noopener noreferrer' : '' }}">
                         @if($homeSidebarAd->image_url)<img src="{{ $homeSidebarAd->image_url }}" alt="{{ $homeSidebarAd->image_alt ?: $homeSidebarAd->title }}" loading="lazy">@endif
@@ -117,7 +134,9 @@
                         <b class="ad-cta">Advertise with us →</b>
                     </a>
                 @endif
+                @endif
 
+                @if($homepageDisplaySettings['categories'])
                 <div class="card box">
                     <h5>Browse by category</h5>
                     <ul>
@@ -129,7 +148,9 @@
                     </ul>
                     <a class="foot" href="{{ route('schools.index') }}">All categories</a>
                 </div>
+                @endif
 
+                @if($homepageDisplaySettings['upcoming_events'])
                 <div class="card box">
                     <h5>Upcoming events</h5>
                     <ul>
@@ -146,9 +167,12 @@
                     </ul>
                     <a class="foot" href="{{ route('events.index') }}">View all events</a>
                 </div>
+                @endif
             </aside>
+            @endif
         </div>
 
+        @if($homepageDisplaySettings['news'])
         <section class="sec">
             <div class="head">
                 <h2>Education <span>news headlines</span></h2>
@@ -211,6 +235,7 @@
                 @endif
             </div>
         </section>
+        @endif
 
         <div class="cols sec">
             <div class="stack">
@@ -219,6 +244,7 @@
                     <div class="acts"><a class="btn btn-gold" href="{{ route('contact') }}">Advertise</a><a class="btn btn-ghost" href="{{ route('contact') }}">Send inquiry</a></div>
                 </div>
 
+                @if($homepageDisplaySettings['videos'])
                 <div>
                     <div class="head"><h2>Featured <span>school videos</span></h2><a class="more" href="{{ route('schools.index') }}">All videos</a></div>
                     @if($featuredVideos->isNotEmpty())
@@ -237,7 +263,9 @@
                         <div class="card video-empty"><p>Approved school videos will appear here when participating schools share them.</p><a href="{{ route('schools.index') }}" class="more">Explore schools →</a></div>
                     @endif
                 </div>
+                @endif
 
+                @if($homepageDisplaySettings['scholarships'])
                 <div class="band edge">
                     <div>
                         <h3>Scholarships &amp; bursaries</h3>
@@ -258,8 +286,10 @@
                     </div>
                     <a class="btn btn-ghost" href="{{ route('scholarships.index') }}">Browse</a>
                 </div>
+                @endif
             </div>
 
+            @if($homepageDisplaySettings['sidebar'])
             <aside>
                 <div class="card box jobs">
                     <h5>Latest jobs</h5>
@@ -277,6 +307,7 @@
                     <span class="btn btn-gold">Advertise with us</span>
                 </a>
 
+                @if($homepageDisplaySettings['reviews'])
                 <div class="card box">
                     <h5>Stories from schools &amp; families</h5>
                     @if($featuredReviews->first())
@@ -295,10 +326,13 @@
                         <div class="quote"><p>Approved stories and reviews from school communities will appear here.</p><a class="more" href="{{ route('schools.index') }}">Explore schools</a></div>
                     @endif
                 </div>
+                @endif
             </aside>
+            @endif
         </div>
     </main>
 
+    @if($homepageDisplaySettings['insights'])
     <section class="tinted">
         <div class="wrap">
             <div class="head"><h2>Educational <span>insights</span></h2><a class="more" href="{{ route('articles.index') }}">All articles</a></div>
@@ -342,7 +376,9 @@
             </div>
         </div>
     </section>
+    @endif
 
+    @if($homepageDisplaySettings['banner_ads'])
     <div class="banner">
         @forelse($homeBannerAds as $ad)
             <a class="ad ad-wide ad-managed" href="{{ $ad->destination_url ?: route('schools.index') }}" target="{{ $ad->destination_url ? '_blank' : '_self' }}" rel="{{ $ad->destination_url ? 'noopener noreferrer' : '' }}">
@@ -354,10 +390,13 @@
             <a class="ad ad-alt" href="{{ route('register') }}"><span>School profile promotion</span><small>Help families discover your school</small><b class="ad-cta">List your school →</b></a>
         @endforelse
     </div>
+    @endif
 
+    @if($homepageDisplaySettings['cta'])
     <section class="cta">
         <h2>Is your school listed?</h2>
         <p>Join schools across Uganda reaching parents, students and educators every day.</p>
         <div class="acts"><a class="btn btn-white" href="{{ route('register') }}">Register your school</a><a class="btn btn-ghost" href="{{ route('schools.index') }}">View school directory</a></div>
     </section>
+    @endif
 </div>
