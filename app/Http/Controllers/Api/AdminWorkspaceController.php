@@ -172,7 +172,7 @@ class AdminWorkspaceController extends Controller
 
             case 'advertisements':
                 $adQuery = DB::table('school_advertisements')
-                    ->join('schools', 'schools.id', '=', 'school_advertisements.school_id')
+                    ->leftJoin('schools', 'schools.id', '=', 'school_advertisements.school_id')
                     ->leftJoin('users', 'users.id', '=', 'school_advertisements.created_by')
                     ->orderByDesc('school_advertisements.created_at');
                 if ($status) $adQuery->where('school_advertisements.status', $status);
@@ -183,12 +183,14 @@ class AdminWorkspaceController extends Controller
                     });
                 }
                 $items = $adQuery->limit(100)->get([
-                    'school_advertisements.id', 'school_advertisements.title',
+                    'school_advertisements.id', 'school_advertisements.school_id',
+                    'school_advertisements.is_platform_ad', 'school_advertisements.title',
                     'school_advertisements.placement', 'school_advertisements.destination_url',
                     'school_advertisements.description', 'school_advertisements.status',
                     'school_advertisements.starts_at', 'school_advertisements.ends_at',
-                    'school_advertisements.created_at', 'schools.name as school_name',
-                    'schools.slug as school_slug', 'users.name as owner_name',
+                    'school_advertisements.image_url', 'school_advertisements.image_alt',
+                    'school_advertisements.cta_label', 'school_advertisements.created_at',
+                    'schools.name as school_name', 'schools.slug as school_slug', 'users.name as owner_name',
                 ]);
                 break;
 
@@ -395,15 +397,22 @@ class AdminWorkspaceController extends Controller
                 $advertisement = DB::table('school_advertisements')->where('id', $id)->first();
                 abort_unless($advertisement, 404);
                 $data = $request->validate([
-                    'status' => ['required', 'in:draft,pending,active,rejected,expired'],
+                    'status' => ['sometimes', 'in:draft,pending,active,rejected,expired'],
+                    'placement' => ['sometimes', 'in:school_spotlight,homepage_banner,search_feature'],
+                    'destination_url' => ['sometimes', 'nullable', 'url', 'max:500'],
+                    'description' => ['sometimes', 'string', 'max:5000'],
+                    'image_url' => ['sometimes', 'nullable', 'url', 'max:2048'],
+                    'image_alt' => ['sometimes', 'nullable', 'string', 'max:255'],
+                    'cta_label' => ['sometimes', 'nullable', 'string', 'max:80'],
                     'starts_at' => ['sometimes', 'nullable', 'date'],
                     'ends_at' => ['sometimes', 'nullable', 'date', 'after_or_equal:starts_at'],
                 ]);
-                if ($data['status'] === 'active' && empty($advertisement->starts_at)) {
+                abort_unless($data !== [], 422);
+                if (($data['status'] ?? null) === 'active' && empty($data['starts_at']) && empty($advertisement->starts_at)) {
                     $data['starts_at'] = now();
                 }
                 DB::table('school_advertisements')->where('id', $id)->update($data + ['updated_at' => now()]);
-                return response()->json(['message' => 'Advertisement status updated.']);
+                return response()->json(['message' => 'Advertisement updated.']);
 
             case 'settings':
                 $data = $request->validate(['value' => ['present', 'nullable', 'string', 'max:20000']]);
@@ -437,6 +446,36 @@ class AdminWorkspaceController extends Controller
             default:
                 return response()->json(['message' => 'This section is read-only or unavailable.'], 422);
         }
+    }
+
+    public function storeAdvertisement(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'title' => ['required', 'string', 'min:2', 'max:180'],
+            'placement' => ['required', 'in:school_spotlight,homepage_banner,search_feature'],
+            'destination_url' => ['nullable', 'url', 'max:500'],
+            'description' => ['required', 'string', 'max:5000'],
+            'image_url' => ['nullable', 'url', 'max:2048'],
+            'image_alt' => ['nullable', 'string', 'max:255'],
+            'cta_label' => ['nullable', 'string', 'max:80'],
+            'starts_at' => ['nullable', 'date'],
+            'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
+        ]);
+
+        $id = DB::table('school_advertisements')->insertGetId([
+            ...$data,
+            'school_id' => null,
+            'created_by' => $request->user()->id,
+            'is_platform_ad' => true,
+            'status' => 'draft',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json([
+            'data' => DB::table('school_advertisements')->where('id', $id)->first(),
+            'message' => 'Website advertisement saved as a draft.',
+        ], 201);
     }
 
     public function storeArticle(Request $request): JsonResponse

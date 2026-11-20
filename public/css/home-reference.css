@@ -28,7 +28,7 @@
 .findursch-home-reference .more{font:600 13px var(--sans);color:var(--brand)}
 
 /* Hero */
-.findursch-home-reference .hero{position:relative;isolation:isolate;min-height:470px;display:grid;place-items:center;text-align:center;color:#fff;padding:64px 24px 72px;background:#18382b url('https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=2200&q=85') center 42%/cover no-repeat}
+.findursch-home-reference .hero{position:relative;isolation:isolate;min-height:470px;display:grid;place-items:center;text-align:center;color:#fff;padding:64px 24px 72px;background:#18382b var(--hero-background-image, url('https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=2200&q=85')) center 42%/cover no-repeat}
 .findursch-home-reference .hero::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(0,0,0,.46)}
 .findursch-home-reference .hero>div{position:relative;z-index:1}
 .findursch-home-reference .hero h1,.findursch-home-reference .hero p{text-shadow:0 2px 12px rgba(0,0,0,.38)}
@@ -94,6 +94,10 @@
 .findursch-home-reference .ad small{display:block;font:500 11px var(--sans);color:#fff1ec;margin-top:0}
 .findursch-home-reference .ad .ad-cta{display:inline-flex;margin-top:7px;padding:10px 15px;border-radius:7px;background:rgba(255,255,255,.14);font:700 12px var(--sans)}
 .findursch-home-reference .ad-primary{min-height:250px}
+.findursch-home-reference .ad-managed{position:relative;isolation:isolate;overflow:hidden}
+.findursch-home-reference .ad-managed>img{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover}
+.findursch-home-reference .ad-managed::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(0,0,0,.5)}
+.findursch-home-reference .banner .ad-managed{min-height:190px}
 .findursch-home-reference .box h5{background:var(--brand);color:#fff;font:700 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:11px 16px}
 .findursch-home-reference .box li a{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);font-size:13.5px;font-weight:500}
 .findursch-home-reference .box li a:hover{background:var(--tint)}

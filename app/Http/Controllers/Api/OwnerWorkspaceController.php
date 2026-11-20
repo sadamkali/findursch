@@ -337,6 +337,9 @@ class OwnerWorkspaceController extends Controller
                 'placement' => ['required', Rule::in(['school_spotlight', 'homepage_banner', 'search_feature'])],
                 'url' => ['nullable', 'url', 'max:500'],
                 'description' => ['required', 'string', 'max:5000'],
+                'image_url' => ['nullable', 'url', 'max:2048'],
+                'image_alt' => ['nullable', 'string', 'max:255'],
+                'cta_label' => ['nullable', 'string', 'max:80'],
             ]);
 
             $created = SchoolAdvertisement::create([
@@ -346,6 +349,9 @@ class OwnerWorkspaceController extends Controller
                 'placement' => $validated['placement'],
                 'destination_url' => $validated['url'] ?? null,
                 'description' => $validated['description'],
+                'image_url' => $validated['image_url'] ?? null,
+                'image_alt' => $validated['image_alt'] ?? null,
+                'cta_label' => $validated['cta_label'] ?? null,
                 'status' => 'draft',
             ]);
 

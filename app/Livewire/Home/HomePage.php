@@ -7,6 +7,8 @@ use App\Models\District;
 use App\Models\Review;
 use App\Models\School;
 use App\Models\SchoolPost;
+use App\Models\SchoolAdvertisement;
+use Illuminate\Support\Facades\DB;
 use App\Models\SchoolType;
 use App\Models\SchoolVideo;
 use App\Models\User;
@@ -152,6 +154,21 @@ class HomePage extends Component
 
         $insightArticles = $insightArticlesQuery->limit(4)->get();
 
+        $activeAds = SchoolAdvertisement::query()
+            ->where('status', 'active')
+            ->where(fn ($query) => $query->whereNull('starts_at')->orWhere('starts_at', '<=', now()))
+            ->where(fn ($query) => $query->whereNull('ends_at')->orWhere('ends_at', '>=', now()))
+            ->where(fn ($query) => $query->where('is_platform_ad', true)
+                ->orWhereHas('school', fn ($school) => $school->publiclyVisible()))
+            ->with('school:id,name,slug')
+            ->orderByDesc('is_platform_ad')
+            ->latest('created_at')
+            ->get();
+
+        $homeSidebarAd = $activeAds->firstWhere('placement', 'school_spotlight');
+        $homeBannerAds = $activeAds->where('placement', 'homepage_banner')->take(2)->values();
+        $heroImageUrl = DB::table('settings')->where('key', 'homepage_hero_image_url')->value('value');
+
         $stats = [
             'schools' => School::query()->publiclyVisible()->count(),
             'districts' => District::query()->count(),
@@ -173,6 +190,9 @@ class HomePage extends Component
             'latestSchoolUpdates',
             'featuredReviews',
             'insightArticles',
+            'homeSidebarAd',
+            'homeBannerAds',
+            'heroImageUrl',
             'stats',
         ));
     }

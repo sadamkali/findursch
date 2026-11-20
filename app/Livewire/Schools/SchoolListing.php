@@ -8,6 +8,7 @@ use App\Models\Region;
 use App\Models\School;
 use App\Models\SchoolFee;
 use App\Models\SchoolType;
+use App\Models\SchoolAdvertisement;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -211,6 +212,17 @@ class SchoolListing extends Component
             ->orderBy('name')
             ->get();
 
+        $searchFeatureAd = SchoolAdvertisement::query()
+            ->where('placement', 'search_feature')
+            ->where('status', 'active')
+            ->where(fn ($query) => $query->whereNull('starts_at')->orWhere('starts_at', '<=', now()))
+            ->where(fn ($query) => $query->whereNull('ends_at')->orWhere('ends_at', '>=', now()))
+            ->where(fn ($query) => $query->where('is_platform_ad', true)
+                ->orWhereHas('school', fn ($school) => $school->publiclyVisible()))
+            ->orderByDesc('is_platform_ad')
+            ->latest('created_at')
+            ->first();
+
         return view('livewire.schools.school-listing', [
             'schools' => $query->paginate(15)->withQueryString(),
             'schoolTypes' => $schoolTypes,
@@ -219,6 +231,7 @@ class SchoolListing extends Component
             'regions' => $regions,
             'curricula' => Curriculum::query()->where('is_active', true)->orderBy('name')->get(),
             'allSchoolCount' => School::query()->publiclyVisible()->count(),
+            'searchFeatureAd' => $searchFeatureAd,
         ])->layout('layouts.app', [
             'title' => 'Find a school in Uganda — FindURSCH',
             'description' => 'Find verified nursery, primary, secondary, vocational and international schools across Uganda. Compare districts, curricula and published tuition fees.',

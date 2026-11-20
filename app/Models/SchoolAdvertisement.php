@@ -9,7 +9,7 @@ class SchoolAdvertisement extends Model
 {
     protected $fillable = [
         'school_id', 'created_by', 'title', 'placement', 'destination_url',
-        'description', 'status', 'starts_at', 'ends_at',
+        'description', 'status', 'starts_at', 'ends_at', 'image_url', 'image_alt', 'cta_label', 'is_platform_ad',
     ];
 
     protected function casts(): array

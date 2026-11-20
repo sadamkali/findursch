@@ -1,7 +1,7 @@
 <div class="findursch-home-reference">
     <a class="tab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
 
-    <section class="hero">
+    <section class="hero" @if($heroImageUrl) style="--hero-background-image: url('{{ $heroImageUrl }}')" @endif>
         <div>
             <h1>Find the <em>right school</em> for your child</h1>
             <p>Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.</p>
@@ -103,11 +103,20 @@
             </div>
 
             <aside>
-                <a class="ad ad-primary" href="{{ route('contact') }}">
-                    <span>Advertise with FindURSCH</span>
-                    <small>Reach parents and students across Uganda</small>
-                    <b class="ad-cta">Advertise with us →</b>
-                </a>
+                @if($homeSidebarAd)
+                    <a class="ad ad-primary ad-managed" href="{{ $homeSidebarAd->destination_url ?: route('schools.index') }}" target="{{ $homeSidebarAd->destination_url ? '_blank' : '_self' }}" rel="{{ $homeSidebarAd->destination_url ? 'noopener noreferrer' : '' }}">
+                        @if($homeSidebarAd->image_url)<img src="{{ $homeSidebarAd->image_url }}" alt="{{ $homeSidebarAd->image_alt ?: $homeSidebarAd->title }}" loading="lazy">@endif
+                        <span>{{ $homeSidebarAd->title }}</span>
+                        <small>{{ $homeSidebarAd->description }}</small>
+                        <b class="ad-cta">{{ $homeSidebarAd->cta_label ?: 'Learn more' }} →</b>
+                    </a>
+                @else
+                    <a class="ad ad-primary" href="{{ route('contact') }}">
+                        <span>Advertise with FindURSCH</span>
+                        <small>Reach parents and students across Uganda</small>
+                        <b class="ad-cta">Advertise with us →</b>
+                    </a>
+                @endif
 
                 <div class="card box">
                     <h5>Browse by category</h5>
@@ -335,8 +344,15 @@
     </section>
 
     <div class="banner">
-        <a class="ad ad-wide" href="{{ route('contact') }}"><span>Promote your school or service</span><small>Reach parents and students across Uganda</small><b class="ad-cta">Advertise with us →</b></a>
-        <a class="ad ad-alt" href="{{ route('register') }}"><span>School profile promotion</span><small>Help families discover your school</small><b class="ad-cta">List your school →</b></a>
+        @forelse($homeBannerAds as $ad)
+            <a class="ad ad-wide ad-managed" href="{{ $ad->destination_url ?: route('schools.index') }}" target="{{ $ad->destination_url ? '_blank' : '_self' }}" rel="{{ $ad->destination_url ? 'noopener noreferrer' : '' }}">
+                @if($ad->image_url)<img src="{{ $ad->image_url }}" alt="{{ $ad->image_alt ?: $ad->title }}" loading="lazy">@endif
+                <span>{{ $ad->title }}</span><small>{{ $ad->description }}</small><b class="ad-cta">{{ $ad->cta_label ?: 'Learn more' }} →</b>
+            </a>
+        @empty
+            <a class="ad ad-wide" href="{{ route('contact') }}"><span>Promote your school or service</span><small>Reach parents and students across Uganda</small><b class="ad-cta">Advertise with us →</b></a>
+            <a class="ad ad-alt" href="{{ route('register') }}"><span>School profile promotion</span><small>Help families discover your school</small><b class="ad-cta">List your school →</b></a>
+        @endforelse
     </div>
 
     <section class="cta">

@@ -223,6 +223,14 @@
                         @endforeach
                     </div>
 
+                    @if($searchFeatureAd)
+                        <a class="promo span" href="{{ $searchFeatureAd->destination_url ?: route('schools.index') }}" target="{{ $searchFeatureAd->destination_url ? '_blank' : '_self' }}" rel="{{ $searchFeatureAd->destination_url ? 'noopener noreferrer' : '' }}">
+                            @if($searchFeatureAd->image_url)<img src="{{ $searchFeatureAd->image_url }}" alt="{{ $searchFeatureAd->image_alt ?: $searchFeatureAd->title }}" loading="lazy" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:12px">@endif
+                            <div><small>Featured placement</small><h3>{{ $searchFeatureAd->title }}</h3><p>{{ $searchFeatureAd->description }}</p></div>
+                            <span class="btn btn-brand">{{ $searchFeatureAd->cta_label ?: 'Learn more' }}</span>
+                        </a>
+                    @endif
+
                     <div class="pagination pg">
                         {{ $schools->onEachSide(1)->links() }}
                     </div>

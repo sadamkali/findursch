@@ -26,6 +26,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])
         Route::get('/{resource}', [AdminWorkspaceController::class, 'index'])
             ->whereIn('resource', ['schools', 'verification', 'owners', 'parents', 'enquiries', 'reviews', 'articles', 'article-categories', 'events', 'scholarships', 'school-news', 'advertisements', 'settings', 'plans', 'subscriptions', 'payments', 'activity', 'contacts', 'locations']);
         Route::post('/articles', [AdminWorkspaceController::class, 'storeArticle']);
+        Route::post('/advertisements', [AdminWorkspaceController::class, 'storeAdvertisement']);
         Route::patch('/{resource}/{id}', [AdminWorkspaceController::class, 'update'])
             ->whereIn('resource', ['schools', 'verification', 'owners', 'parents', 'enquiries', 'reviews', 'articles', 'events', 'scholarships', 'school-news', 'advertisements', 'settings', 'plans', 'contacts']);
     });
