@@ -8,11 +8,11 @@
                     <a href="{{ route('home') }}">Home</a><span aria-hidden="true">›</span>Schools
                 </nav>
                 <h1>Find a school in Uganda</h1>
-                <p>Discover <b>{{ number_format($allSchoolCount) }}</b> verified nursery, primary, secondary, vocational and international school listings across Uganda. Compare by location, curriculum and published fees.</p>
+                <p>Discover <b>{{ number_format($allSchoolCount) }}</b> verified nursery, primary, secondary, vocational and international schools across all districts of Uganda. Compare by location, curriculum and fees.</p>
             </div>
             <a href="{{ route('contact') }}" class="ad top">
-                Promote your school
-                <small>Reach parents and students across Uganda · Contact us</small>
+                Your advert here
+                <small>728 × 90</small>
             </a>
         </div>
     </section>
@@ -48,8 +48,29 @@
     </section>
 
     <main class="wrap">
-        <div class="cols">
-            <aside aria-label="Filter schools">
+        <div class="cols" x-data="{ filtersOpen: false }">
+            <aside id="school-filters" x-ref="schoolFilters" :class="{ 'open': filtersOpen }" aria-label="Filter schools">
+                <section class="card box mf">
+                    <h5>More filters</h5>
+                    <div class="mfb">
+                        <label>Region
+                            <select wire:model.live="region" aria-label="Filter by region">
+                                <option value="">All regions</option>
+                                @foreach($regions as $regionOption)
+                                    <option value="{{ $regionOption->id }}">{{ $regionOption->name }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                        <label>Curriculum
+                            <select wire:model.live="curriculum" aria-label="Filter by curriculum">
+                                <option value="">Any curriculum</option>
+                                @foreach($curricula as $curriculumOption)
+                                    <option value="{{ $curriculumOption->id }}">{{ $curriculumOption->abbreviation }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                    </div>
+                </section>
                 <section class="card box">
                     <h5>Category</h5>
                     <ul class="cats">
@@ -89,8 +110,8 @@
                 </section>
 
                 <a class="ad side" href="{{ route('contact') }}">
-                    School advertising
-                    <small>Put your school in front of parents · Ask about placements</small>
+                    Your advert here
+                    <small>300 × 250</small>
                 </a>
 
                 <section class="card box">
@@ -119,8 +140,11 @@
 
             <section class="results" aria-label="School results">
                 <div class="tool">
-                    <div><span>Showing <b>{{ number_format($schools->total()) }}</b> results</span><small>Browse verified school profiles across Uganda</small></div>
+                    <span>Showing <b>{{ number_format($schools->total()) }}</b> results · page {{ $schools->currentPage() }} of {{ $schools->lastPage() }}</span>
                     <div class="r">
+                        <button type="button" class="fbtn"
+                            @click="filtersOpen = !filtersOpen; if (filtersOpen) $nextTick(() => $refs.schoolFilters.scrollIntoView({ behavior: 'smooth', block: 'start' }))"
+                            :aria-expanded="filtersOpen.toString()" aria-controls="school-filters">Filters</button>
                         <label class="sort-label"><span>Sort:</span>
                             <select wire:model.live="sort" aria-label="Sort schools">
                                 <option value="newest">Newest first</option>
@@ -165,41 +189,41 @@
                                         <p class="loc">
                                             {{ $school->district?->name ?? 'Uganda' }}@if($school->district?->region) · {{ $school->district->region->name }}@endif
                                         </p>
-                                        @if($school->tagline)
-                                            <p class="tagline">{{ $school->tagline }}</p>
-                                        @endif
                                     </div>
                                     <div class="f">
                                         <div class="chips">
                                             <span>{{ match($school->boarding_type) { 'boarding' => 'Boarding', 'mixed' => 'Day & boarding', default => 'Day school' } }}</span>
                                             @if($school->created_at?->greaterThan(now()->subDays(14)))<em>New</em>@endif
-                                            @if($school->rating_average > 0)<span>★ {{ number_format((float) $school->rating_average, 1) }}</span>@endif
                                         </div>
                                         @if($school->lowest_term_tuition !== null)
                                             <b>UGX {{ number_format((float) $school->lowest_term_tuition) }} / term</b>
                                         @endif
                                         <a class="vp" href="{{ route('schools.show', $school) }}">View profile</a>
-                                        <button type="button" class="compare" x-data @click.stop.prevent="window.dispatchEvent(new CustomEvent('findursch:compare-add', { detail: @js($school->slug) }))">+ Compare</button>
                                     </div>
                                 </div>
                             </article>
                         @endforeach
-                        @if($schools->count() >= 6)
-                            <div class="promo span">
-                                <div><small>Premium schools</small><h3>Be the first school parents see</h3><p>Promote your institution on FindURSCH and reach more families.</p></div>
-                                <a class="btn btn-brand" href="{{ route('contact') }}">See school plans</a>
-                            </div>
-                        @endif
-                        @if($schools->count() >= 12)
-                            <div class="promo span alt-promo">
-                                <div><small>For students</small><h3>Find scholarships and bursaries</h3><p>Explore school bursaries and funding opportunities published on FindURSCH.</p></div>
-                                <a class="btn btn-gold" href="{{ route('scholarships.index') }}">Find scholarships</a>
-                            </div>
-                        @endif
+                            @if($loop->iteration === 6)
+                                <div class="promo span">
+                                    <div><small>Premium schools</small><h3>Be the first school parents see</h3><p>Top of search, homepage feature and spotlight adverts.</p></div>
+                                    <a class="btn btn-brand" href="{{ route('contact') }}">See school plans</a>
+                                </div>
+                            @endif
+                            @if($loop->iteration === 12)
+                                <div class="promo span alt-promo">
+                                    <div><small>For students</small><h3>UNEB past papers with answers</h3><p>PLE, UCE and UACE papers to download and revise.</p></div>
+                                    <a class="btn btn-gold" href="{{ route('contact') }}">Get past papers</a>
+                                </div>
+                            @endif
+                            @if($loop->iteration === 15)
+                                <div class="big span">
+                                    <div><small>Opportunities</small><h3>Scholarships and bursaries open now</h3><p>Funding for primary, secondary, university and TVET.</p></div>
+                                    <a class="btn btn-gold" href="{{ route('scholarships.index') }}">Find scholarships</a>
+                                </div>
+                            @endif
                     </div>
 
-                    <div class="pagination">
-                        <span>Showing {{ number_format($schools->firstItem() ?? 0) }}–{{ number_format($schools->lastItem() ?? 0) }} of {{ number_format($schools->total()) }} schools</span>
+                    <div class="pagination pg">
                         {{ $schools->onEachSide(1)->links() }}
                     </div>
                 @else

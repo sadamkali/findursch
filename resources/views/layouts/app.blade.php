@@ -12,9 +12,10 @@
     <link rel="icon" type="image/png" href="/favicon.png">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- These page styles are safely scoped to their page wrappers; load them directly so Livewire route rendering cannot skip them. --}}
-    <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=2">
     <link rel="stylesheet" href="{{ asset('css/events-reference.css') }}?v=2">
     <link rel="stylesheet" href="{{ asset('css/events-listing-reference.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=3">
+    <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=1">
     @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}">@endif
     @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}">@endif
     @if (request()->routeIs('scholarships.*'))<link rel="stylesheet" href="{{ asset('css/scholarships-reference.css') }}">@endif
@@ -40,7 +41,11 @@
         </div>
     </div>
 
-    <header x-data="{ mobileMenuOpen: false }" @keydown.escape.window="mobileMenuOpen = false" class="site-header">
+    <header
+        x-data="{ mobileMenuOpen: false }"
+        x-init="$watch('mobileMenuOpen', value => { document.body.classList.toggle('site-menu-open', value); if (value) { $nextTick(() => $refs.mobileClose.focus()); } else { $nextTick(() => $refs.mobileOpen.focus()); } })"
+        @keydown.escape.window="mobileMenuOpen = false"
+        class="site-header">
         <div class="site-wrap site-header__inner">
             <a href="{{ route('home') }}" class="site-logo" aria-label="FindurSch home">
                 <span>Find<b>UR</b>SCH</span>
@@ -63,7 +68,7 @@
                     @elseif (auth()->user()->hasRole('school_owner'))
                         <a class="site-account-link" href="{{ $dashboardUrl }}/owner">School dashboard</a>
                     @else
-                        <a class="site-account-link" href="{{ route('user.dashboard') }}">My account</a>
+                        <a class="site-account-link" href="{{ route('user.home') }}">My account</a>
                     @endif
                     <form method="POST" action="{{ route('logout') }}" class="site-logout-form">@csrf
                         <button type="submit" class="site-account-link">Log out</button>
@@ -74,39 +79,68 @@
                 <a href="{{ $dashboardUrl }}/register?type=school_owner" class="site-header__cta">List your school</a>
                 <button type="button"
                     class="site-menu-toggle"
-                    @click="mobileMenuOpen = !mobileMenuOpen"
+                    x-ref="mobileOpen"
+                    @click="mobileMenuOpen = true"
                     :aria-expanded="mobileMenuOpen.toString()"
                     aria-controls="mobile-primary-navigation"
-                    aria-label="Toggle navigation">
+                    aria-label="Open menu">
                     <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
                     <svg x-cloak x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="m6 6 12 12M18 6 6 18"/></svg>
                 </button>
             </div>
         </div>
 
-        <div id="mobile-primary-navigation" x-cloak x-show="mobileMenuOpen" x-transition.opacity.duration.150ms class="site-mobile-nav">
-            <nav class="site-wrap" aria-label="Mobile navigation">
-                <a @click="mobileMenuOpen = false" href="{{ route('home') }}">Home</a>
-                <a @click="mobileMenuOpen = false" href="{{ route('schools.index') }}">Find a school</a>
-                <a @click="mobileMenuOpen = false" href="{{ route('compare') }}">Compare schools</a>
-                <a @click="mobileMenuOpen = false" href="{{ route('articles.index') }}">News &amp; guides</a>
+        <button type="button" class="site-mobile-overlay" x-cloak x-show="mobileMenuOpen"
+            x-transition.opacity.duration.250ms @click="mobileMenuOpen = false" aria-label="Close navigation"></button>
+
+        <aside id="mobile-primary-navigation" class="site-mobile-drawer" role="dialog" aria-modal="true"
+            aria-label="FindURSCH navigation" x-cloak x-show="mobileMenuOpen"
+            x-transition:enter="site-drawer-transition" x-transition:enter-start="site-drawer-from" x-transition:enter-end="site-drawer-to"
+            x-transition:leave="site-drawer-transition" x-transition:leave-start="site-drawer-to" x-transition:leave-end="site-drawer-from"
+            @keydown.tab="
+                const focusable = [...$el.querySelectorAll('a[href], button:not([disabled])')];
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                if ($event.shiftKey && document.activeElement === first) { $event.preventDefault(); last.focus(); }
+                else if (!$event.shiftKey && document.activeElement === last) { $event.preventDefault(); first.focus(); }
+            ">
+            <div class="site-mobile-drawer__head">
+                <a href="{{ route('home') }}" class="site-logo" aria-label="FindurSch home">Find<b>UR</b>SCH</a>
+                <button type="button" class="site-mobile-drawer__close" x-ref="mobileClose" @click="mobileMenuOpen = false" aria-label="Close menu">×</button>
+            </div>
+
+            <nav class="site-mobile-drawer__links" aria-label="Mobile navigation">
+                <a @click="mobileMenuOpen = false" href="{{ route('home') }}" @class(['is-active' => request()->routeIs('home')])>Home</a>
+                <a @click="mobileMenuOpen = false" href="{{ route('schools.index') }}" @class(['is-active' => request()->routeIs('schools.*', 'district.*', 'search')])>Schools</a>
+                <a @click="mobileMenuOpen = false" href="{{ route('compare') }}" @class(['is-active' => request()->routeIs('compare')])>Compare</a>
+                <a @click="mobileMenuOpen = false" href="{{ route('scholarships.index') }}" @class(['is-active' => request()->routeIs('scholarships.*')])>Scholarships</a>
+                <a @click="mobileMenuOpen = false" href="{{ route('news.index') }}" @class(['is-active' => request()->routeIs('news.*')])>News</a>
+                <a @click="mobileMenuOpen = false" href="{{ route('articles.index') }}" @class(['is-active' => request()->routeIs('articles.*')])>Blogs</a>
+                <a @click="mobileMenuOpen = false" href="{{ route('events.index') }}" @class(['is-active' => request()->routeIs('events.*')])>Events</a>
+                <hr>
+                <a @click="mobileMenuOpen = false" href="{{ route('about') }}">About FindURSCH</a>
+                <a @click="mobileMenuOpen = false" href="{{ route('contact') }}">Contact</a>
+                <a @click="mobileMenuOpen = false" href="{{ $dashboardUrl }}/register?type=school_owner">List your school</a>
+            </nav>
+
+            <div class="site-mobile-drawer__footer">
                 @guest
-                    <a @click="mobileMenuOpen = false" href="{{ $dashboardUrl }}/login?returnTo=%2Faccount">Log in</a>
+                    <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ $dashboardUrl }}/login?returnTo=%2Faccount" @click="mobileMenuOpen = false">Sign in</a>
+                    <a class="site-mobile-drawer__button site-mobile-drawer__button--gold" href="{{ $dashboardUrl }}/register?type=school_owner&returnTo=%2Faccount" @click="mobileMenuOpen = false">Register</a>
                 @else
                     @if (auth()->user()->hasRole('admin'))
-                        <a @click="mobileMenuOpen = false" href="{{ $dashboardUrl }}/admin">Admin dashboard</a>
+                        <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ $dashboardUrl }}/admin" @click="mobileMenuOpen = false">Admin dashboard</a>
                     @elseif (auth()->user()->hasRole('school_owner'))
-                        <a @click="mobileMenuOpen = false" href="{{ $dashboardUrl }}/owner">School dashboard</a>
+                        <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ $dashboardUrl }}/owner" @click="mobileMenuOpen = false">School dashboard</a>
                     @else
-                        <a @click="mobileMenuOpen = false" href="{{ route('user.dashboard') }}">My account</a>
+                        <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ route('user.home') }}" @click="mobileMenuOpen = false">My account</a>
                     @endif
                     <form method="POST" action="{{ route('logout') }}">@csrf
-                        <button type="submit" class="site-mobile-nav__logout">Log out</button>
+                        <button type="submit" class="site-mobile-drawer__button site-mobile-drawer__button--gold">Log out</button>
                     </form>
                 @endguest
-                <a @click="mobileMenuOpen = false" href="{{ $dashboardUrl }}/register?type=school_owner" class="site-mobile-nav__cta">List your school</a>
-            </nav>
-        </div>
+            </div>
+        </aside>
     </header>
 
     <div x-data="compareBar" x-cloak x-show="schools.length > 0" class="compare-bar">
