@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use App\Http\Middleware\EnsureSiteIsNotInMaintenance;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Vercel terminates HTTPS before forwarding requests to the container.
         // Trust forwarded headers so Laravel generates HTTPS route and asset URLs.
         $middleware->trustProxies(at: '*');
+
+        $middleware->web(append: [EnsureSiteIsNotInMaintenance::class]);
 
         $middleware->alias([
             'role' => RoleMiddleware::class,

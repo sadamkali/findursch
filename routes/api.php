@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AdminWorkspaceController;
+use App\Http\Controllers\Api\AdminTemplateController;
 use App\Http\Controllers\Api\DashboardAuthController;
 use App\Http\Controllers\Api\OwnerWorkspaceController;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +12,8 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [DashboardAuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('/register', [DashboardAuthController::class, 'register'])->middleware('throttle:5,1');
     Route::post('/register-school', [DashboardAuthController::class, 'registerSchool'])->middleware('throttle:5,1');
+    Route::post('/verify-admin-code', [DashboardAuthController::class, 'verifyAdminCode'])->middleware('throttle:10,1');
+    Route::post('/accept-admin-invite', [AdminTemplateController::class, 'acceptInvitation'])->middleware('throttle:10,1');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [DashboardAuthController::class, 'me']);
@@ -19,10 +22,21 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-Route::middleware(['auth:sanctum', 'role:admin'])
+Route::middleware(['auth:sanctum'])
     ->prefix('admin')
     ->group(function () {
         Route::get('/overview', [AdminWorkspaceController::class, 'overview']);
+        Route::get('/template-settings', [AdminTemplateController::class, 'settings']);
+        Route::put('/template-settings', [AdminTemplateController::class, 'updateSettings']);
+        Route::get('/template-access', [AdminTemplateController::class, 'access']);
+        Route::post('/template-access/roles', [AdminTemplateController::class, 'createRole']);
+        Route::put('/template-access/roles/{role}', [AdminTemplateController::class, 'updateRole']);
+        Route::post('/template-access/reset', [AdminTemplateController::class, 'resetRoles']);
+        Route::post('/template-access/invitations', [AdminTemplateController::class, 'inviteAdmin']);
+        Route::patch('/template-access/users/{user}', [AdminTemplateController::class, 'updateAdmin']);
+        Route::post('/template-access/users/{user}/countries/{country}/approve', [AdminTemplateController::class, 'approveCountry']);
+        Route::delete('/template-access/users/{user}', [AdminTemplateController::class, 'deleteAdmin']);
+        Route::post('/template-access/sign-out-others', [AdminTemplateController::class, 'signOutOthers']);
         Route::get('/{resource}', [AdminWorkspaceController::class, 'index'])
             ->whereIn('resource', ['schools', 'verification', 'owners', 'parents', 'enquiries', 'reviews', 'articles', 'article-categories', 'events', 'scholarships', 'school-news', 'advertisements', 'settings', 'plans', 'subscriptions', 'payments', 'activity', 'contacts', 'locations']);
         Route::post('/articles', [AdminWorkspaceController::class, 'storeArticle']);
@@ -40,6 +54,8 @@ Route::middleware(['auth:sanctum', 'role:admin|school_owner'])
 
         Route::get('/schools/{school}/profile', [OwnerWorkspaceController::class, 'profile']);
         Route::put('/schools/{school}/profile', [OwnerWorkspaceController::class, 'profile']);
+        Route::get('/schools/{school}/admissions', [OwnerWorkspaceController::class, 'admissions']);
+        Route::put('/schools/{school}/admissions', [OwnerWorkspaceController::class, 'admissions']);
         Route::get('/schools/{school}/facilities', [OwnerWorkspaceController::class, 'facilities']);
         Route::put('/schools/{school}/facilities', [OwnerWorkspaceController::class, 'facilities']);
 

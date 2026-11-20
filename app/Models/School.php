@@ -27,6 +27,8 @@ class School extends Model implements HasMedia
         'latitude', 'longitude', 'address', 'town', 'po_box',
         'nearest_landmark', 'maps_url', 'ownership', 'religious_affiliation',
         'phone', 'email', 'website', 'whatsapp', 'facebook_url', 'instagram_url',
+        'admissions_open', 'admission_classes', 'admission_deadline', 'application_fee',
+        'admissions_contact', 'admission_requirements', 'how_to_apply',
         'boarding_type', 'gender_policy', 'student_count_approx',
         'fees_from', 'fees_to', 'activities', 'referral_source',
         'status', 'verification_status',
@@ -37,6 +39,8 @@ class School extends Model implements HasMedia
 
     protected $casts = [
         'is_featured' => 'boolean',
+        'admissions_open' => 'boolean',
+        'admission_deadline' => 'date',
         'featured_until' => 'date',
         'rating_average' => 'decimal:2',
         'submitted_at' => 'datetime',

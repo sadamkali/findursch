@@ -9,11 +9,13 @@ use App\Models\Region;
 use App\Models\School;
 use App\Models\SchoolType;
 use App\Models\SchoolVideo;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -137,7 +139,8 @@ class DashboardAuthController extends Controller
         }
 
         $email = Str::lower(trim($data['email']));
-        $user = DB::transaction(function () use ($data, $schoolData, $email, $youtubeId) {
+        $approvalRequired = filter_var(Setting::get('schools_require_approval', '1'), FILTER_VALIDATE_BOOLEAN);
+        $user = DB::transaction(function () use ($data, $schoolData, $email, $youtubeId, $approvalRequired) {
             $user = User::query()->create([
                 'name' => trim($data['first_name'].' '.$data['last_name']),
                 'email' => $email,
@@ -177,8 +180,9 @@ class DashboardAuthController extends Controller
                 'fees_to' => $schoolData['fees_to'] ?? null,
                 'activities' => $schoolData['activities'] ?? null,
                 'referral_source' => $schoolData['referral_source'] ?? null,
-                'status' => 'pending',
-                'verification_status' => 'pending',
+                'status' => $approvalRequired ? 'pending' : 'active',
+                'verification_status' => $approvalRequired ? 'pending' : 'verified',
+                'verified_at' => $approvalRequired ? null : now(),
                 'submitted_at' => now(),
             ]);
 
@@ -245,8 +249,77 @@ class DashboardAuthController extends Controller
             return response()->json(['message' => 'This account is not active. Contact FindurSch administration.'], 403);
         }
 
-        if (! $user->hasAnyRole(['school_owner', 'admin', 'parent'])) {
+        $isAdmin = $user->hasRole('admin') || $user->getAllPermissions()->isNotEmpty();
+        if (! $user->hasAnyRole(['school_owner', 'parent']) && ! $isAdmin) {
             return response()->json(['message' => 'This account does not have access to the FindurSch workspace.'], 403);
+        }
+
+        $countryCode = strtoupper(substr((string) ($request->header('X-Vercel-IP-Country') ?? $request->header('CF-IPCountry') ?? ''), 0, 2));
+        if ($isAdmin && ! $user->hasRole('admin') && preg_match('/^[A-Z]{2}$/', $countryCode)) {
+            $country = DB::table('admin_login_countries')
+                ->where('user_id', $user->id)
+                ->where('country_code', $countryCode)
+                ->first();
+            $blockNewCountries = filter_var(Setting::get('block_new_country_signins', '0'), FILTER_VALIDATE_BOOLEAN);
+
+            if (! $country) {
+                $hasApprovedCountry = DB::table('admin_login_countries')
+                    ->where('user_id', $user->id)
+                    ->whereNotNull('approved_at')
+                    ->exists();
+
+                DB::table('admin_login_countries')->insert([
+                    'user_id' => $user->id,
+                    'country_code' => $countryCode,
+                    'first_seen_at' => now(),
+                    'approved_at' => $hasApprovedCountry && $blockNewCountries ? null : now(),
+                    'approved_by' => $hasApprovedCountry && $blockNewCountries ? null : $user->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                if ($hasApprovedCountry && $blockNewCountries) {
+                    $this->notifyOwnerOfNewCountry($user, $countryCode);
+                    return response()->json([
+                        'message' => 'Sign-in from a new country is blocked until the FindurSch owner approves this location.',
+                    ], 403);
+                }
+            } elseif ($blockNewCountries && ! $country->approved_at) {
+                $this->notifyOwnerOfNewCountry($user, $countryCode);
+                return response()->json([
+                    'message' => 'Sign-in from this country is awaiting approval from the FindurSch owner.',
+                ], 403);
+            }
+        }
+
+        if ($isAdmin && filter_var(Setting::get('require_two_step', '0'), FILTER_VALIDATE_BOOLEAN)) {
+            $code = (string) random_int(100000, 999999);
+            DB::table('admin_login_challenges')->where('user_id', $user->id)->whereNull('used_at')->delete();
+            $challengeId = DB::table('admin_login_challenges')->insertGetId([
+                'user_id' => $user->id,
+                'code_hash' => Hash::make($code),
+                'ip_address' => $request->ip(),
+                'user_agent' => substr((string) $request->userAgent(), 0, 2000),
+                'expires_at' => now()->addMinutes(10),
+                'used_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            try {
+                Mail::raw(
+                    "Your FindurSch administrator sign-in code is ".$code.". It expires in 10 minutes. Do not share this code.",
+                    fn ($message) => $message->to($user->email)->subject('FindurSch sign-in verification code')
+                );
+            } catch (\Throwable $exception) {
+                DB::table('admin_login_challenges')->where('id', $challengeId)->delete();
+                report($exception);
+                return response()->json(['message' => 'The verification code could not be emailed. Check the backend mail configuration.'], 503);
+            }
+            return response()->json([
+                'requires_two_step' => true,
+                'challenge_id' => $challengeId,
+                'email' => $user->email,
+            ]);
         }
 
         return $this->issueDashboardSession($user, (bool) ($credentials['remember'] ?? true));
@@ -254,19 +327,31 @@ class DashboardAuthController extends Controller
 
     private function issueDashboardSession(User $user, bool $remember = true): JsonResponse
     {
-        $token = $user->createToken(
-            'findursch-dashboard',
-            ['*'],
-            now()->addDays($remember ? 30 : 1)
-        )->plainTextToken;
+        $isAdmin = $user->hasRole('admin') || $user->getAllPermissions()->isNotEmpty();
+        $timeout = max(30, (int) Setting::get('admin_session_timeout_minutes', 120));
+        $expiresAt = $isAdmin ? now()->addMinutes($timeout) : now()->addDays($remember ? 30 : 1);
+        $token = $user->createToken('findursch-dashboard', ['*'], $expiresAt)->plainTextToken;
 
         $user->forceFill(['last_login_at' => now()])->save();
 
         $roles = $user->getRoleNames();
+        $permissions = $user->getAllPermissions()->pluck('name')->values();
 
-        $redirectTo = $user->hasRole('admin')
-            ? '/admin'
-            : ($user->hasRole('school_owner') ? '/owner' : '/parent');
+        if ($isAdmin && ! $user->hasRole('admin') && filter_var(Setting::get('admin_signin_alerts', '1'), FILTER_VALIDATE_BOOLEAN)) {
+            try {
+                $recipients = User::query()->role('admin')->where('status', 'active')->pluck('email')->filter()->unique()->all();
+                foreach ($recipients as $recipient) {
+                    Mail::raw(
+                        "An administrator signed in to FindurSch.\nAccount: ".$user->email."\nTime: ".now()->toDateTimeString()."\nIP: ".(request()->ip() ?? 'Not available')."\nDevice: ".substr((string) request()->userAgent(), 0, 500),
+                        fn ($message) => $message->to($recipient)->subject('FindurSch administrator sign-in alert')
+                    );
+                }
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
+
+        $redirectTo = $isAdmin ? '/admin' : ($user->hasRole('school_owner') ? '/owner' : '/parent');
 
         return response()->json([
             'token' => $token,
@@ -275,6 +360,7 @@ class DashboardAuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'roles' => $roles,
+                'permissions' => $permissions,
             ],
             'redirectTo' => $redirectTo,
         ]);
@@ -307,8 +393,33 @@ class DashboardAuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'roles' => $user->getRoleNames(),
+                'permissions' => $user->getAllPermissions()->pluck('name')->values(),
             ],
         ]);
+    }
+
+    public function verifyAdminCode(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'challenge_id' => ['required', 'integer'],
+            'email' => ['required', 'email', 'max:255'],
+            'code' => ['required', 'digits:6'],
+            'remember' => ['sometimes', 'boolean'],
+        ]);
+
+        $challenge = DB::table('admin_login_challenges')
+            ->where('id', $data['challenge_id'])
+            ->whereNull('used_at')
+            ->first();
+        abort_unless($challenge && now()->lessThan($challenge->expires_at), 422, 'This verification code has expired. Sign in again to request a new code.');
+
+        $user = User::query()->findOrFail($challenge->user_id);
+        abort_unless(strtolower($user->email) === strtolower($data['email']), 422, 'The verification code does not match this account.');
+        abort_unless($user->status === 'active' && ($user->hasRole('admin') || $user->getAllPermissions()->isNotEmpty()), 403, 'Administrator access is no longer active for this account.');
+        abort_unless(Hash::check($data['code'], $challenge->code_hash), 422, 'The verification code is incorrect.');
+
+        DB::table('admin_login_challenges')->where('id', $challenge->id)->update(['used_at' => now(), 'updated_at' => now()]);
+        return $this->issueDashboardSession($user, (bool) ($data['remember'] ?? true));
     }
 
     public function logout(Request $request): JsonResponse
@@ -340,4 +451,21 @@ class DashboardAuthController extends Controller
             ? $candidate
             : null;
     }
+
+    private function notifyOwnerOfNewCountry(User $user, string $countryCode): void
+    {
+        try {
+            $owners = User::query()->role('admin')->where('status', 'active')->pluck('email')->filter()->unique()->all();
+            foreach ($owners as $email) {
+                Mail::raw(
+                    "A FindurSch administrator attempted to sign in from a new country.\nAccount: ".$user->email."\nCountry code: ".$countryCode."\nTime: ".now()->toDateTimeString()."\nThe sign-in was blocked until you approve this country in Admin users.",
+                    fn ($message) => $message->to($email)->subject('FindurSch sign-in blocked from a new country')
+                );
+            }
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
+    }
+
+
 }

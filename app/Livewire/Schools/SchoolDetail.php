@@ -5,6 +5,7 @@ namespace App\Livewire\Schools;
 use App\Models\School;
 use App\Models\SchoolView;
 use App\Models\SchoolPost;
+use App\Models\Setting;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -48,6 +49,7 @@ class SchoolDetail extends Component
             'contacts',
             'approvedReviews' => fn ($query) => $query->latest()->with('user'),
             'media',
+            'activeSubscription.plan',
         ]);
 
         if (auth()->check()) {
@@ -177,13 +179,16 @@ class SchoolDetail extends Component
             return;
         }
 
+        $requiresApproval = filter_var(Setting::get('reviews_require_approval', '1'), FILTER_VALIDATE_BOOLEAN);
+
         $this->school->reviews()->create([
             'user_id' => auth()->id(),
             'reviewer_type' => $validated['reviewerType'],
             'rating' => $validated['reviewRating'],
             'title' => $validated['reviewTitle'],
             'body' => $validated['reviewBody'],
-            'status' => 'pending',
+            'status' => $requiresApproval ? 'pending' : 'approved',
+            'moderated_at' => $requiresApproval ? null : now(),
         ]);
 
         $this->reset('reviewTitle', 'reviewBody');
@@ -209,6 +214,7 @@ class SchoolDetail extends Component
             'schoolEvents' => $schoolPosts->where('type', 'event')->sortBy('starts_at')->values(),
             'schoolNews' => $schoolPosts->where('type', 'news')->values(),
             'schoolBursaries' => $schoolPosts->where('type', 'bursary')->sortBy('deadline')->values(),
+            'admissionsVisible' => in_array($this->school->activeSubscription?->plan?->slug, ['standard', 'premium'], true),
         ]);
     }
 }

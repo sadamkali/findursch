@@ -25,6 +25,8 @@ class Review extends Model
         'owner_response',
         'owner_responded_at',
         'helpful_count',
+        'moderated_by',
+        'moderated_at',
     ];
 
     protected function casts(): array

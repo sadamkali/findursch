@@ -165,6 +165,38 @@
                     <?php endif; ?>
                 </section>
 
+                @if($admissionsVisible && ($school->admissions_open || filled($school->admission_classes) || filled($school->admission_requirements) || filled($school->how_to_apply)))
+                    <section class="sref-card sref-pad" id="admissions">
+                        <h2>Admissions <span>information</span></h2>
+                        <div class="sref-about-meta">
+                            <span>{{ $school->admissions_open ? 'Admissions are open' : 'Admissions are currently closed' }}</span>
+                            @if($school->admission_deadline)<span>Deadline: {{ $school->admission_deadline->format('d M Y') }}</span>@endif
+                            @if(filled($school->application_fee))<span>Application / interview fee: {{ $school->application_fee }}</span>@endif
+                        </div>
+                        @if(filled($school->admission_classes))
+                            <p class="sref-description"><strong>Classes admitting:</strong> {{ $school->admission_classes }}</p>
+                        @endif
+                        @if(filled($school->admissions_contact))
+                            <p class="sref-description"><strong>Admissions contact:</strong> {{ $school->admissions_contact }}</p>
+                        @endif
+                        @if(filled($school->admission_requirements))
+                            <h3>Requirements</h3>
+                            <ul class="sref-facilities">
+                                @foreach(preg_split('/\r\n|\r|\n/', $school->admission_requirements) as $requirement)
+                                    @if(trim($requirement))<li>{{ trim($requirement) }}</li>@endif
+                                @endforeach
+                            </ul>
+                        @endif
+                        @if(filled($school->how_to_apply))
+                            <h3>How to apply</h3>
+                            <div class="sref-description">{{ $school->how_to_apply }}</div>
+                        @endif
+                        @if($school->admissions_open)
+                            <button type="button" class="sref-btn sref-btn--brand sref-btn--sm" x-on:click="$refs.enquiryDialog.showModal()">Apply for admission</button>
+                        @endif
+                    </section>
+                @endif
+
                 <section class="sref-card sref-pad" id="facilities">
                     <h2>Our <span>facilities</span></h2>
                     <?php if ($school->facilities->isNotEmpty()): ?>

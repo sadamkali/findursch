@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\School;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class ReviewController extends Controller
@@ -24,10 +25,13 @@ class ReviewController extends Controller
             ])->withInput();
         }
 
+        $requiresApproval = filter_var(Setting::get('reviews_require_approval', '1'), FILTER_VALIDATE_BOOLEAN);
+
         $school->reviews()->create([
             ...$data,
             'user_id' => $request->user()->id,
-            'status' => 'pending',
+            'status' => $requiresApproval ? 'pending' : 'approved',
+            'moderated_at' => $requiresApproval ? null : now(),
         ]);
 
         return back()->with('success', 'Your review has been submitted and will appear after moderation.');

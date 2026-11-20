@@ -91,9 +91,72 @@ class OwnerWorkspaceController extends Controller
             $record->update($changes);
         }
 
-        $record->load(['type', 'district', 'subCounty']);
+        $record->load(['type', 'district', 'subCounty', 'activeSubscription.plan']);
+        $record->setAttribute('logo_url', $record->getFirstMedia('logo')?->getUrl());
+        $plan = $record->activeSubscription?->plan;
+        $galleryCount = $record->getMedia('gallery')->count();
+        $done = [
+            'info' => filled($record->description) && (filled($record->phone) || filled($record->email)),
+            'logo' => $record->getMedia('logo')->isNotEmpty(),
+            'photos' => $galleryCount > 0,
+            'cover' => $record->getMedia('cover')->isNotEmpty(),
+            'programmes' => $record->programs()->exists(),
+            'facilities' => $record->facilities()->exists(),
+            'admissions' => filled($record->admission_classes) && filled($record->admissions_contact),
+            'location' => ($record->latitude !== null && $record->longitude !== null) || (filled($record->address) && (filled($record->maps_url) || filled($record->town))),
+        ];
+        $planSlug = $plan?->slug ?? 'free';
+        $planName = $plan?->name ?? 'Free';
+        $planLabel = $planSlug === 'free' ? 'Basic' : $planName;
 
-        return response()->json(['data' => ['school' => $record]]);
+        return response()->json(['data' => [
+            'school' => $record,
+            'completion' => $done,
+            'plan' => [
+                'slug' => $planSlug,
+                'name' => $planLabel,
+                'features' => $plan?->features ?? ['Basic listing', 'Contact info display', '1 photo upload'],
+            ],
+            'gallery_count' => $galleryCount,
+            'public_url' => rtrim((string) config('app.url'), '/').'/schools/'.$record->slug,
+        ]]);
+    }
+
+    public function admissions(Request $request, int $school): JsonResponse
+    {
+        $record = $this->school($request, $school);
+
+        if ($request->isMethod('put') || $request->isMethod('patch')) {
+            $data = $request->validate([
+                'admissions_open' => ['required', 'boolean'],
+                'admission_classes' => ['nullable', 'string', 'max:500'],
+                'admission_deadline' => ['nullable', 'date'],
+                'application_fee' => ['nullable', 'string', 'max:120'],
+                'admissions_contact' => ['nullable', 'string', 'max:180'],
+                'admission_requirements' => ['nullable', 'string', 'max:10000'],
+                'how_to_apply' => ['nullable', 'string', 'max:10000'],
+            ]);
+
+            if ($data['admissions_open'] && (! filled($data['admission_classes'] ?? null) || ! filled($data['admissions_contact'] ?? null))) {
+                return response()->json([
+                    'message' => 'While admissions are open, add the classes you are admitting and an admissions contact.',
+                ], 422);
+            }
+
+            // Admissions are separate from core school identity. Saving them does not
+            // reset verification or public listing status.
+            $record->forceFill($data)->save();
+        }
+
+        $record->load('activeSubscription.plan');
+        $plan = $record->activeSubscription?->plan;
+        $slug = $plan?->slug ?? 'free';
+
+        return response()->json(['data' => [
+            'school' => $record,
+            'public_visible' => in_array($slug, ['standard', 'premium'], true),
+            'plan' => ['slug' => $slug, 'name' => $plan?->name ?? 'Free'],
+        ]]);
     }
 
     public function facilities(Request $request, int $school): JsonResponse
@@ -190,7 +253,7 @@ class OwnerWorkspaceController extends Controller
 
     public function media(Request $request, int $school, string $collection, ?int $mediaId = null): JsonResponse
     {
-        abort_unless(in_array($collection, ['cover', 'gallery'], true), 404);
+        abort_unless(in_array($collection, ['cover', 'gallery', 'logo'], true), 404);
         $record = $this->school($request, $school);
 
         if ($request->isMethod('post')) {
@@ -204,7 +267,7 @@ class OwnerWorkspaceController extends Controller
             }
 
             $request->validate([
-                'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+                'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.($collection === 'logo' ? 2048 : 10240)],
             ]);
 
             $media = $record->addMediaFromRequest('image')->toMediaCollection($collection);

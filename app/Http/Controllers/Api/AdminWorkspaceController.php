@@ -19,8 +19,9 @@ use Illuminate\Validation\ValidationException;
 
 class AdminWorkspaceController extends Controller
 {
-    public function overview(): JsonResponse
+    public function overview(Request $request): JsonResponse
     {
+        $this->authorizeWorkspacePermission($request, 'admin.schools.view');
         $activity = DB::getSchemaBuilder()->hasTable('activity_log')
             ? DB::table('activity_log')->orderByDesc('created_at')->limit(8)->get([
                 'id', 'description', 'subject_type', 'subject_id', 'created_at',
@@ -52,6 +53,19 @@ class AdminWorkspaceController extends Controller
 
     public function index(Request $request, string $resource): JsonResponse
     {
+        $permission = match ($resource) {
+            'owners', 'parents' => 'admin.users.view',
+            'enquiries', 'contacts' => 'admin.enquiries.view',
+            'reviews' => 'admin.reviews.moderate',
+            'articles', 'article-categories', 'events', 'scholarships', 'school-news' => 'admin.content.publish',
+            'advertisements' => 'admin.ads.manage',
+            'settings' => 'admin.system.edit_site_settings',
+            'plans' => 'admin.billing.edit_plans',
+            'payments', 'subscriptions' => 'admin.billing.view_payments',
+            'activity' => 'admin.system.view_audit_log',
+            default => 'admin.schools.view',
+        };
+        $this->authorizeWorkspacePermission($request, $permission);
         $search = trim((string) $request->query('q', ''));
         $status = $request->query('status');
 
@@ -311,6 +325,48 @@ class AdminWorkspaceController extends Controller
 
     public function update(Request $request, string $resource, int $id): JsonResponse
     {
+        if (in_array($resource, ['schools', 'verification'], true)) {
+            $fields = array_keys($request->all());
+            $permissions = [];
+
+            $editableFields = [
+                'name', 'tagline', 'description', 'address', 'phone', 'email', 'website',
+                'whatsapp', 'boarding_type', 'gender_policy', 'type_id', 'district_id',
+                'sub_county_id', 'student_count_approx', 'founded_year', 'rejection_reason',
+            ];
+            if (array_intersect($fields, $editableFields) !== []) {
+                $permissions[] = 'admin.schools.edit_any';
+            }
+            if (array_intersect($fields, ['verification_status']) !== [] ||
+                in_array($request->input('status'), ['pending', 'active', 'rejected'], true)) {
+                $permissions[] = 'admin.schools.approve';
+            }
+            if ($request->input('status') === 'suspended') {
+                $permissions[] = 'admin.schools.suspend';
+            }
+            if (array_intersect($fields, ['is_featured', 'featured_until']) !== []) {
+                $permissions[] = 'admin.schools.feature';
+            }
+            if ($permissions === []) {
+                $permissions[] = 'admin.schools.edit_any';
+            }
+            foreach (array_unique($permissions) as $permission) {
+                $this->authorizeWorkspacePermission($request, $permission);
+            }
+        } else {
+            $permission = match ($resource) {
+                'owners', 'parents' => 'admin.users.manage',
+                'enquiries' => 'admin.enquiries.reply',
+                'reviews' => 'admin.reviews.moderate',
+                'articles', 'events', 'scholarships', 'school-news' => 'admin.content.publish',
+                'advertisements' => 'admin.ads.manage',
+                'settings' => 'admin.system.edit_site_settings',
+                'plans' => 'admin.billing.edit_plans',
+                'contacts' => 'admin.enquiries.reply',
+                default => 'admin.schools.view',
+            };
+            $this->authorizeWorkspacePermission($request, $permission);
+        }
         switch ($resource) {
             case 'schools':
             case 'verification':
@@ -502,6 +558,7 @@ class AdminWorkspaceController extends Controller
 
     public function storeAdvertisement(Request $request): JsonResponse
     {
+        $this->authorizeWorkspacePermission($request, 'admin.ads.manage');
         $data = $request->validate([
             'title' => ['required', 'string', 'min:2', 'max:180'],
             'placement' => ['required', 'in:school_spotlight,homepage_banner,search_feature'],
@@ -532,6 +589,7 @@ class AdminWorkspaceController extends Controller
 
     public function storeArticle(Request $request): JsonResponse
     {
+        $this->authorizeWorkspacePermission($request, 'admin.content.publish');
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'excerpt' => ['nullable', 'string', 'max:2000'],
@@ -559,4 +617,10 @@ class AdminWorkspaceController extends Controller
 
         return response()->json(['data' => $article->load(['category', 'author'])], 201);
     }
+    private function authorizeWorkspacePermission(Request $request, string $permission): void
+    {
+        $user = $request->user();
+        abort_unless($user && ($user->hasRole('admin') || $user->can($permission)), 403, 'Your administrator role does not have permission to view or change this section.');
+    }
+
 }

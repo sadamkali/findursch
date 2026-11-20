@@ -1,11 +1,20 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
+    @php
+        $siteSettings = \App\Models\Setting::query()
+            ->whereIn('key', ['site_name', 'site_description', 'meta_title', 'support_email', 'support_phone', 'support_whatsapp'])
+            ->pluck('value', 'key');
+        $siteName = $siteSettings['site_name'] ?? 'FindURSCH';
+        $siteSupportEmail = $siteSettings['support_email'] ?? '';
+        $siteSupportPhone = $siteSettings['support_phone'] ?? '';
+        $siteSupportWhatsapp = preg_replace('/\\D+/', '', (string) ($siteSettings['support_whatsapp'] ?? ''));
+    @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'FindURSCH — Find the right school in Uganda' }}</title>
-    <meta name="description" content="{{ $description ?? 'Discover, compare and learn about schools across Uganda with FindurSch.' }}">
+    <title>{{ $title ?? ($siteSettings['meta_title'] ?? 'FindURSCH — Find the right school in Uganda') }}</title>
+    <meta name="description" content="{{ $description ?? ($siteSettings['site_description'] ?? 'Discover, compare and learn about schools across Uganda with FindurSch.') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
@@ -76,7 +85,7 @@
         @keydown.escape.window="mobileMenuOpen = false"
         class="site-header">
         <div class="site-wrap site-header__inner">
-            <a href="{{ route('home') }}" class="site-logo" aria-label="FindurSch home">Find<b>UR</b>SCH</a>
+            <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">@if($siteName === 'FindURSCH')Find<b>UR</b>SCH@else{{ $siteName }}@endif</a>
 
             <nav class="site-nav" aria-label="Primary navigation">
                 @foreach($primaryNavigation as $item)
@@ -121,7 +130,7 @@
                 else if (!$event.shiftKey && document.activeElement === last) { $event.preventDefault(); first.focus(); }
             ">
             <div class="site-mobile-drawer__head">
-                <a href="{{ route('home') }}" class="site-logo" aria-label="FindurSch home">Find<b>UR</b>SCH</a>
+                <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">@if($siteName === 'FindURSCH')Find<b>UR</b>SCH@else{{ $siteName }}@endif</a>
                 <button type="button" class="site-mobile-drawer__close" x-ref="mobileClose" @click="mobileMenuOpen = false" aria-label="Close menu">×</button>
             </div>
 
@@ -164,7 +173,7 @@
         <div class="site-wrap">
             <div class="site-footer__grid">
                 <div class="site-footer__brand">
-                    <a href="{{ route('home') }}" class="site-logo site-logo--footer">Find<b>UR</b>SCH</a>
+                    <a href="{{ route('home') }}" class="site-logo site-logo--footer">@if($siteName === 'FindURSCH')Find<b>UR</b>SCH@else{{ $siteName }}@endif</a>
                     <p>Uganda's school discovery, comparison and admissions platform, with school profiles, news, events, jobs and scholarships.</p>
                     <p class="site-footer__location">Kampala, Uganda</p>
                 </div>
@@ -191,6 +200,9 @@
                         <li><a href="{{ $dashboardUrl }}/register?type=school_owner">List your school</a></li>
                         <li><a href="{{ $dashboardUrl }}/login?returnTo=%2Faccount">School owner login</a></li>
                         <li><a href="{{ route('contact') }}">Get in touch</a></li>
+                        @if($siteSupportEmail)<li><a href="mailto:{{ $siteSupportEmail }}">{{ $siteSupportEmail }}</a></li>@endif
+                        @if($siteSupportPhone)<li><a href="tel:{{ preg_replace('/[^0-9+]/', '', $siteSupportPhone) }}">{{ $siteSupportPhone }}</a></li>@endif
+                        @if($siteSupportWhatsapp)<li><a href="https://wa.me/{{ $siteSupportWhatsapp }}" target="_blank" rel="noopener">WhatsApp support</a></li>@endif
                         <li><a href="{{ route('legal.terms') }}">Terms and conditions</a></li>
                         <li><a href="{{ route('legal.privacy') }}">Privacy policy</a></li>
                     </ul>
@@ -198,7 +210,7 @@
             </div>
             <div class="site-footer__bar">
                 <div>
-                    <span>© {{ date('Y') }} FindURSCH. All rights reserved.</span>
+                    <span>© {{ date('Y') }} {{ $siteName }}. All rights reserved.</span>
                     <span class="site-footer__legal"><a href="{{ route('legal.privacy') }}">Privacy</a><a href="{{ route('legal.terms') }}">Terms</a></span>
                 </div>
                 <div class="site-footer__promo">
