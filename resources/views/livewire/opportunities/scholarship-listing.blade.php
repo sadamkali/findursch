@@ -27,9 +27,9 @@
             <button type="button" class="{{ $category === 'videos' ? 'on' : '' }}" wire:click="setCategory('videos')" aria-selected="{{ $category === 'videos' ? 'true' : 'false' }}">School videos</button>
         </div>
 
-        <form class="bar" wire:submit.prevent="$refresh">
+        <div class="bar">
             <input type="search" wire:model.live.debounce.350ms="search" placeholder="Search scholarships, schools or courses" aria-label="Search scholarships">
-            <button class="btn btn-brand" type="submit">Search</button>
+            <button class="btn btn-brand" type="button" wire:click="$refresh">Search</button>
             <select wire:model.live="category" aria-label="Category">
                 <option value="all">All categories</option>
                 <option value="primary">Primary school</option>
@@ -48,7 +48,7 @@
                 <option value="closed">Closed</option>
             </select>
             <a class="btn btn-gold" href="{{ route('contact') }}">+ Post a scholarship</a>
-        </form>
+        </div>
 
         <div class="note" role="note">
             <i>!</i>

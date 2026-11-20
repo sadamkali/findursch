@@ -1,14 +1,14 @@
 <?php
 
-namespace App\\Livewire\\Opportunities;
+namespace App\Livewire\Opportunities;
 
-use App\\Models\\SchoolPost;
-use App\\Models\\SchoolVideo;
-use Illuminate\\Database\\Eloquent\\Builder;
-use Livewire\\Attributes\\Layout;
-use Livewire\\Attributes\\Url;
-use Livewire\\Component;
-use Livewire\\WithPagination;
+use App\Models\SchoolPost;
+use App\Models\SchoolVideo;
+use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 class ScholarshipListing extends Component
