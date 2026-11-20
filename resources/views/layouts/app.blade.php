@@ -12,6 +12,7 @@
                 'site_account_actions_enabled', 'site_header_cta_label', 'site_footer_enabled',
                 'site_footer_explore_enabled', 'site_footer_resources_enabled', 'site_footer_support_enabled',
                 'site_footer_social_enabled', 'site_footer_promo_enabled', 'site_footer_copyright_text',
+                'primary_color', 'accent_color', 'font_display', 'font_body',
             ])
             ->pluck('value', 'key');
         $siteName = $siteSettings['site_name'] ?? 'FindURSCH';
@@ -34,6 +35,10 @@
         $siteFooterPromoEnabled = filter_var($siteSettings['site_footer_promo_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
         $siteHeaderCtaLabel = $siteSettings['site_header_cta_label'] ?? 'List your school';
         $siteFooterCopyright = $siteSettings['site_footer_copyright_text'] ?? '';
+        $sitePrimaryColor = is_string($siteSettings['primary_color'] ?? null) && preg_match('/^#[0-9a-fA-F]{6}$/', $siteSettings['primary_color']) ? $siteSettings['primary_color'] : '#0c5a49';
+        $siteAccentColor = is_string($siteSettings['accent_color'] ?? null) && preg_match('/^#[0-9a-fA-F]{6}$/', $siteSettings['accent_color']) ? $siteSettings['accent_color'] : '#f0b030';
+        $siteDisplayFont = in_array($siteSettings['font_display'] ?? '', ['Playfair Display', 'DM Serif Display'], true) ? $siteSettings['font_display'] : 'Playfair Display';
+        $siteBodyFont = in_array($siteSettings['font_body'] ?? '', ['Inter', 'system-ui'], true) ? $siteSettings['font_body'] : 'Inter';
     @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -47,6 +52,28 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: {{ $sitePrimaryColor }};
+            --brand-dark: color-mix(in srgb, {{ $sitePrimaryColor }} 78%, #000);
+            --brand-deep: color-mix(in srgb, {{ $sitePrimaryColor }} 55%, #000);
+            --gold: {{ $siteAccentColor }};
+            --gold-dark: color-mix(in srgb, {{ $siteAccentColor }} 78%, #000);
+            --accent: {{ $siteAccentColor }};
+            --accent-dk: color-mix(in srgb, {{ $siteAccentColor }} 78%, #000);
+            --display-font: '{{ $siteDisplayFont }}', Georgia, serif;
+            --font-display: '{{ $siteDisplayFont }}', Georgia, serif;
+            --font-body: '{{ $siteBodyFont }}', system-ui, sans-serif;
+            --color-primary: {{ $sitePrimaryColor }};
+            --color-primary-500: {{ $sitePrimaryColor }};
+            --color-primary-600: color-mix(in srgb, {{ $sitePrimaryColor }} 78%, #000);
+            --color-primary-700: color-mix(in srgb, {{ $sitePrimaryColor }} 55%, #000);
+            --color-accent: {{ $siteAccentColor }};
+            --color-accent-500: {{ $siteAccentColor }};
+            --color-accent-600: color-mix(in srgb, {{ $siteAccentColor }} 78%, #000);
+        }
+        body { font-family: '{{ $siteBodyFont }}', system-ui, sans-serif; }
+    </style>
     <link rel="icon" href="{{ $siteFaviconUrl ?: '/favicon.png' }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- These page styles are safely scoped to their page wrappers; load them directly so Livewire route rendering cannot skip them. --}}
