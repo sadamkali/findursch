@@ -82,13 +82,11 @@ class AdManagerController extends Controller
         $pending = $banners->where('effective_status', 'pending');
         $endingSoon = $active->filter(fn ($banner) => $banner->ends_at && Carbon::parse($banner->ends_at)->between(now(), now()->addDays(7)));
 
-        $usedCampaignsByPlacement = $active
-            ->filter(fn ($banner) => ! (bool) $banner->is_house && (bool) $banner->is_paid)
-            ->groupBy('placement_id')
-            ->map(fn ($items) => $items->pluck('campaign_id')->unique()->count());
+        $liveBannersByPlacement = $active->groupBy('placement_id');
 
+        // A live FindUrSch house banner is a fallback, not an empty placement.
         $emptyPlacements = $placements->filter(
-            fn ($placement) => (int) ($usedCampaignsByPlacement[$placement->id] ?? 0) === 0
+            fn ($placement) => ($liveBannersByPlacement[$placement->id] ?? collect())->isEmpty()
         )->count();
 
         return response()->json([
