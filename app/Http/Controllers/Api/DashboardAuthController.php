@@ -366,7 +366,7 @@ class DashboardAuthController extends Controller
                 if ($request->hasFile('cover')) {
                     $school->addMediaFromRequest('cover')->toMediaCollection('cover');
                 }
-            } catch (\\Throwable $exception) {
+            } catch (\Throwable $exception) {
                 report($exception);
                 throw ValidationException::withMessages([
                     'images' => ['We could not save one of the selected school images. Your registration was not completed. Please try again or submit without the images and add them from your dashboard.'],
