@@ -2,7 +2,7 @@
     <a class="rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
 
     <div class="wrap">
-        <a class="ad slim" href="{{ route('contact') }}">Promote your education event<small>Reach parents, students and school communities across Uganda · Contact our team</small></a>
+        <x-site-ad-banner placement="top" />
 
         <nav class="crumbs" aria-label="Breadcrumb">
             <a href="{{ route('home') }}">Home</a><span>›</span><a href="{{ route('events.index') }}">Events</a><span>›</span><b>{{ $event->title }}</b>
@@ -120,7 +120,7 @@
                     </div>
                 @endif
 
-                <a class="ad side" href="{{ route('contact') }}">Advertise with FindURSCH<small>Reach parents and school communities across Uganda</small></a>
+                <x-site-ad-banner placement="side" />
 
                 @if($spotlightSchool)
                     <a class="spl" href="{{ route('schools.show', $spotlightSchool) }}">
@@ -159,9 +159,9 @@
             </div>
         @endif
 
-        <div class="banner">
-            <a class="ad" href="{{ route('contact') }}">Wide advertising placement<small>Enquire about FindURSCH banner advertising</small></a>
-            <a class="ad alt" href="{{ route('register') }}">List your school<small>Help families discover your school</small></a>
+        <div class="banner" aria-label="Sponsored banners">
+            <x-site-ad-banner placement="foot1" />
+            <x-site-ad-banner placement="foot2" />
         </div>
     </div>
 </div>
