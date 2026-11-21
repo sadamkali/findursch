@@ -7,10 +7,7 @@
     @endphp
 
     <a class="blogs-rtab" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
-    <a class="blogs-ad-slim" href="{{ route('contact') }}">
-        <span>Advertise with FindURSCH</span>
-        <small>Reach parents, students and school communities across Uganda · Contact our team</small>
-    </a>
+<x-site-ad-banner placement="top" />
 
     <section class="blogs-phead">
         <div class="blogs-wrap">
@@ -248,5 +245,9 @@
             <div><small>FindURSCH</small><h2>{{ $isNews ? 'The latest education updates for every school community' : 'Useful information for every school journey' }}</h2><p>{{ $isNews ? 'Follow school announcements, education developments and useful updates from across Uganda.' : 'Discover schools, read education stories and compare the options available to your family.' }}</p></div>
             <a class="blogs-btn blogs-btn-gold" href="{{ route('schools.index') }}">Explore schools</a>
         </section>
+        <div class="banner" aria-label="Sponsored banners">
+            <x-site-ad-banner placement="foot1" />
+            <x-site-ad-banner placement="foot2" />
+        </div>
     </main>
 </div>
