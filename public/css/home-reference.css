@@ -535,18 +535,18 @@
   }
 }
 
-/* Keep the carousel controls overlaid at the bottom of the hero, with a little extra clearance below the CTA. */
+/* Keep the carousel controls overlaid, with a little more breathing room below the slide CTA. */
 .findursch-home-reference .hero {
-  padding-bottom: 88px;
+  padding-bottom: 100px;
 }
 .findursch-home-reference .hero-carousel-controls {
-  bottom: 10px;
+  bottom: 6px;
 }
 @media (max-width: 640px) {
   .findursch-home-reference .hero {
-    padding-bottom: 82px;
+    padding-bottom: 94px;
   }
   .findursch-home-reference .hero-carousel-controls {
-    bottom: 8px;
+    bottom: 4px;
   }
 }
