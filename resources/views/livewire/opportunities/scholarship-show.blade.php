@@ -1,6 +1,6 @@
 <div class="resource-page">
     <a class="blogs-rtab" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
-    <div class="blogs-ad-slim"><span>Scholarship and bursary listings</span><small>Check all details directly with the publishing school · <a href="{{ route('contact') }}">Contact FindURSCH</a></small></div>
+    <x-site-ad-banner placement="top" />
     <main class="blogs-wrap resource-detail-wrap">
         <nav class="resource-crumbs"><a href="{{ route('home') }}">Home</a><span>›</span><a href="{{ route('scholarships.index') }}">Scholarships</a><span>›</span><b>{{ $scholarship->title }}</b></nav>
         <div class="resource-detail-grid">
@@ -20,6 +20,7 @@
                     <p class="resource-sidebar-warning">Contact the school to confirm eligibility, required documents and application arrangements. FindURSCH does not collect scholarship application fees.</p>
                     <a class="blogs-btn blogs-btn-brand" href="{{ route('schools.show', $scholarship->school) }}">Contact the school</a>
                 </div>
+                <x-site-ad-banner placement="side" />
             </aside>
         </div>
         @if($related->isNotEmpty())
@@ -27,5 +28,9 @@
                 <div class="resource-related-grid">@foreach($related as $item)<a href="{{ route('scholarships.show', $item) }}"><small>{{ $item->deadline?->format('d M Y') ?? 'Deadline not listed' }}</small><b>{{ $item->title }}</b><span>{{ $item->school?->name }}</span></a>@endforeach</div>
             </section>
         @endif
+        <div class="banner" aria-label="Sponsored banners">
+            <x-site-ad-banner placement="foot1" />
+            <x-site-ad-banner placement="foot2" />
+        </div>
     </main>
 </div>
