@@ -1,12 +1,7 @@
 <div class="news-page">
     <a class="news-register-tab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
 
-    <div class="news-wrap">
-        <a class="news-ad news-ad--slim" href="{{ route('contact') }}">
-            Promote your education story or school
-            <small>Reach parents and school communities across Uganda · Contact FindURSCH</small>
-        </a>
-    </div>
+    <x-site-ad-banner placement="top" />
 
     <section class="news-heading">
         <h1>School <em>News &amp; Updates</em> in Uganda</h1>
@@ -227,5 +222,9 @@
             <div><small>FindURSCH newsroom</small><h2>Have an education story to share?</h2><p>Tell us about a school announcement, community achievement or education development that matters to families.</p></div>
             <a href="{{ route('contact') }}">Share a story <span aria-hidden="true">→</span></a>
         </section>
+        <div class="banner" aria-label="Sponsored banners">
+            <x-site-ad-banner placement="foot1" />
+            <x-site-ad-banner placement="foot2" />
+        </div>
     </main>
 </div>
