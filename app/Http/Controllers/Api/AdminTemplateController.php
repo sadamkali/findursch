@@ -106,6 +106,10 @@ class AdminTemplateController extends Controller
             'site_favicon' => '',
             'site_apple_touch_icon' => '',
             'site_social_image' => '',
+            // Dashboard-only brand assets. Defaults reuse the current approved R2 brand artwork.
+            'dashboard_logo' => 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/694ca722-e686-401e-ab6a-17e4d593137e.png',
+            'dashboard_mark' => 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_mobile_logo/e527a232-1bf6-4574-b9af-34c3f6ccc81f.png',
+            'dashboard_favicon' => 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_mobile_logo/e527a232-1bf6-4574-b9af-34c3f6ccc81f.png',
             'primary_color' => '#0c5a49',
             'accent_color' => '#f0b030',
             'font_display' => 'Playfair Display',
@@ -199,6 +203,7 @@ class AdminTemplateController extends Controller
     private function settingGroup(string $key): string
     {
         if (str_starts_with($key, 'admin_') || in_array($key, ['require_two_step', 'admin_signin_alerts', 'block_new_country_signins'], true)) return 'security';
+        if (in_array($key, ['dashboard_logo', 'dashboard_mark', 'dashboard_favicon'], true)) return 'dashboard-branding';
         if ($key === 'site_navigation') return 'navigation';
         if (str_starts_with($key, 'site_footer_')) return 'footer';
         if (in_array($key, ['site_topbar_enabled', 'site_navigation_enabled', 'site_account_actions_enabled', 'site_header_cta_label'], true)) return 'header';
@@ -210,6 +215,25 @@ class AdminTemplateController extends Controller
         if (str_ends_with($key, '_url')) return 'social';
         if (in_array($key, ['schools_require_approval', 'reviews_require_approval', 'maintenance_mode'], true)) return 'publishing';
         return 'general';
+    }
+
+    /**
+     * Publicly exposes only the non-sensitive dashboard logo URLs used before sign-in.
+     * These assets are public images stored in Cloudflare R2.
+     */
+    public function publicDashboardBranding(): JsonResponse
+    {
+        $keys = ['dashboard_logo', 'dashboard_mark', 'dashboard_favicon'];
+        $defaults = $this->settingDefaults();
+        $values = Setting::query()->whereIn('key', $keys)->pluck('value', 'key')->all();
+
+        return response()->json([
+            'data' => [
+                'dashboard_logo' => $values['dashboard_logo'] ?? $defaults['dashboard_logo'],
+                'dashboard_mark' => $values['dashboard_mark'] ?? $defaults['dashboard_mark'],
+                'dashboard_favicon' => $values['dashboard_favicon'] ?? $defaults['dashboard_favicon'],
+            ],
+        ])->header('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
     }
 
     public function settings(Request $request): JsonResponse
@@ -357,12 +381,17 @@ class AdminTemplateController extends Controller
                 'site_favicon',
                 'site_apple_touch_icon',
                 'site_social_image',
+                'dashboard_logo',
+                'dashboard_mark',
+                'dashboard_favicon',
             ];
             $asset = $data['asset'] ?? 'homepage_slide';
-            abort_unless(in_array($asset, $assets, true), 422, 'Choose a valid website brand asset.');
+            abort_unless(in_array($asset, $assets, true), 422, 'Choose a valid brand image.');
             $directory = $asset === 'homepage_slide'
                 ? 'site-media/homepage-carousel'
-                : 'site-media/branding/'.$asset;
+                : (str_starts_with($asset, 'dashboard_')
+                    ? 'dashboard-media/branding/'.$asset
+                    : 'site-media/branding/'.$asset);
         } elseif ($data['scope'] === 'advertisements') {
             abort_unless(
                 $user && ($user->hasRole('admin') || $user->hasRole('school_owner') || $user->can('admin.ads.manage')),
