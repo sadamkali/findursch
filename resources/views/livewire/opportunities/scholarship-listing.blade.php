@@ -1,12 +1,7 @@
 <div class="findursch-scholarships">
     <a class="rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
 
-    <div class="wrap">
-        <div class="ad slim">
-            <span>Advertise with FindURSCH</span>
-            <small>Reach parents, students and school communities across Uganda · <a href="{{ route('contact') }}">Enquire about advertising</a></small>
-        </div>
-    </div>
+    <x-site-ad-banner placement="top" />
 
     <section class="phead">
         <h1>Scholarships &amp; <em>Bursaries</em> in Uganda</h1>
@@ -190,15 +185,9 @@
                 @endif
             @endforeach
 
-            <div class="banner">
-                <a class="ad" href="{{ route('contact') }}">
-                    Advertise with FindURSCH
-                    <small>Reach parents and students across Uganda · Enquire about placements</small>
-                </a>
-                <a class="ad alt" href="{{ route('register') }}">
-                    Promote your school
-                    <small>Create a school profile for families to discover</small>
-                </a>
+            <div class="banner" aria-label="Sponsored banners">
+                <x-site-ad-banner placement="foot1" />
+                <x-site-ad-banner placement="foot2" />
             </div>
         @elseif($category === 'videos')
             <section class="sec video-section">
