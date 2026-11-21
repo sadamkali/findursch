@@ -196,7 +196,7 @@
                             <div><h3>Have a story?</h3><p>Share news from your school, a community event or a policy update that matters to families.</p><a href="{{ route('contact') }}">Submit a story →</a></div>
                         </div>
                     @elseif($loop->iteration === 8)
-                        <div class="news-strip news-strip--light"><div><small>Advertise</small><h3>Put your brand in front of parents and students</h3><p>Reach families across Uganda with FindURSCH placements.</p></div><a href="{{ route('contact') }}">Advertise with us →</a></div>
+                        <x-site-ad-banner placement="inlist" />
                     @endif
                 @empty
                     <div class="news-empty"><h3>No published news yet</h3><p>Education news and school updates will appear here when stories are published.</p></div>
