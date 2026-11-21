@@ -149,11 +149,7 @@
                 @endif
 
                 @if($loop->iteration === 6)
-                    <div class="band advertise-band">
-                        <h3>Reach parents, students and school communities</h3>
-                        <p>Ask about advertising and promotion opportunities on FindURSCH.</p>
-                        <a class="btn btn-gold" href="{{ route('contact') }}">Advertise with us</a>
-                    </div>
+                    <x-site-ad-banner placement="inlist" />
 
                     <section class="sec video-section">
                         <div class="head cat">
