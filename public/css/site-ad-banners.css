@@ -73,3 +73,37 @@
     width: calc(100% - 24px);
   }
 }
+
+.site-ad-slot__whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: #128c7e;
+  color: #fff;
+  font: 700 12px/1.2 Inter, system-ui, sans-serif;
+  text-decoration: none;
+  box-shadow: 0 2px 7px rgb(18 140 126 / 16%);
+  transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.site-ad-slot__whatsapp:hover {
+  background: #0b766b;
+  color: #fff;
+  box-shadow: 0 4px 11px rgb(18 140 126 / 22%);
+  transform: translateY(-1px);
+}
+.site-ad-slot__whatsapp:focus-visible {
+  outline: 3px solid rgb(18 140 126 / 35%);
+  outline-offset: 3px;
+}
+.site-ad-slot__whatsapp svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  flex: 0 0 16px;
+}
