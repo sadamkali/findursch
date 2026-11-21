@@ -97,5 +97,9 @@
             <div><small>FOR SCHOOL COMMUNITIES</small><h2>Have an event to share?</h2><p>Contact FindURSCH about promoting school events and open days to families across Uganda.</p></div>
             <a class="ed-button" href="{{ route('contact') }}">Contact FindURSCH <b aria-hidden="true">→</b></a>
         </section>
+        <div class="banner" aria-label="Sponsored banners">
+            <x-site-ad-banner placement="foot1" />
+            <x-site-ad-banner placement="foot2" />
+        </div>
     </main>
 </div>
