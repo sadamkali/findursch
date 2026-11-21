@@ -107,9 +107,9 @@ class AdminTemplateController extends Controller
             'site_apple_touch_icon' => '',
             'site_social_image' => '',
             // Dashboard-only brand assets. Defaults reuse the current approved R2 brand artwork.
-            'dashboard_logo' => 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/694ca722-e686-401e-ab6a-17e4d593137e.png',
-            'dashboard_mark' => 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_mobile_logo/e527a232-1bf6-4574-b9af-34c3f6ccc81f.png',
-            'dashboard_favicon' => 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_mobile_logo/e527a232-1bf6-4574-b9af-34c3f6ccc81f.png',
+            'dashboard_logo' => 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/04e4be58-8896-4389-bdf5-41df98dc4390.png',
+            'dashboard_mark' => 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_mobile_logo/dec9d1e6-f5db-41fa-bca4-3dba371e801f.png',
+            'dashboard_favicon' => 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_favicon/b3a07092-d41b-44ba-9ba6-86243efcc20b.png',
             'primary_color' => '#0c5a49',
             'accent_color' => '#f0b030',
             'font_display' => 'Playfair Display',
