@@ -104,8 +104,17 @@ class DashboardAuthController extends Controller
         return response()->json([
             'data' => [
                 'school_types' => SchoolType::query()->where('is_active', true)->orderBy('order')->get(['id', 'name']),
-                'regions' => Region::query()->orderBy('name')->get(['id', 'name']),
-                'districts' => \App\Models\District::query()->orderBy('name')->get(['id', 'name', 'region_id']),
+                'regions' => Region::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+                'districts' => \App\Models\District::query()
+                    ->where('is_active', true)
+                    ->whereHas('region', fn ($query) => $query->where('is_active', true))
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'region_id']),
+                'towns' => DB::table('sub_counties')
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'district_id']),
+                'allow_custom_town' => filter_var(Setting::get('school_locations_allow_custom_town', '1'), FILTER_VALIDATE_BOOLEAN),
                 'curricula' => Curriculum::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
                 'facilities' => Facility::query()->where('is_active', true)->orderBy('category')->orderBy('name')->get(['id', 'name', 'category']),
                 'form_fields' => collect($config['fields'] ?? [])->where('enabled', true)->whereNotNull('registration_step')->sortBy('sort_order')->values(),
@@ -166,11 +175,13 @@ class DashboardAuthController extends Controller
             'school.founded_year' => ['nullable', 'integer', 'min:1800', 'max:'.date('Y')],
             'school.website' => ['nullable', 'url', 'max:255'],
             'school.description' => ['required', 'string', 'min:30', 'max:1500'],
-            'school.region_id' => ['required', 'integer', 'exists:regions,id'],
+            'school.region_id' => ['required', 'integer', Rule::exists('regions', 'id')->where('is_active', true)],
             'school.district_id' => [
                 'required',
                 'integer',
-                Rule::exists('districts', 'id')->where(fn ($query) => $query->where('region_id', $request->input('school.region_id'))),
+                Rule::exists('districts', 'id')->where(fn ($query) => $query
+                    ->where('region_id', $request->input('school.region_id'))
+                    ->where('is_active', true)),
             ],
             'school.town' => ['required', 'string', 'max:120'],
             'school.po_box' => ['nullable', 'string', 'max:120'],
@@ -195,6 +206,21 @@ class DashboardAuthController extends Controller
 
         $customFieldValues = $this->validateCustomFieldValues($request, 'registration');
         $schoolData = $data['school'];
+        $townName = trim((string) preg_replace('/\s+/u', ' ', (string) $schoolData['town']));
+        $schoolData['town'] = $townName;
+        $districtId = (int) $schoolData['district_id'];
+        $existingTown = DB::table('sub_counties')
+            ->where('district_id', $districtId)
+            ->where('is_active', true)
+            ->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($townName)])
+            ->first();
+        $allowCustomTown = filter_var(Setting::get('school_locations_allow_custom_town', '1'), FILTER_VALIDATE_BOOLEAN);
+        if (! $existingTown && ! $allowCustomTown) {
+            throw ValidationException::withMessages([
+                'school.town' => ['Choose a listed town or area. Contact the school support team to add another location.'],
+            ]);
+        }
+
         if (isset($schoolData['fees_from'], $schoolData['fees_to']) && (float) $schoolData['fees_to'] < (float) $schoolData['fees_from']) {
             throw ValidationException::withMessages([
                 'school.fees_to' => ['Fees to must be equal to or greater than fees from.'],
@@ -220,7 +246,7 @@ class DashboardAuthController extends Controller
 
         $email = Str::lower(trim($data['email']));
         $approvalRequired = filter_var(Setting::get('schools_require_approval', '1'), FILTER_VALIDATE_BOOLEAN);
-        $user = DB::transaction(function () use ($data, $schoolData, $email, $youtubeId, $approvalRequired, $customFieldValues) {
+        $user = DB::transaction(function () use ($data, $schoolData, $email, $youtubeId, $approvalRequired, $customFieldValues, $existingTown, $allowCustomTown, $townName, $districtId) {
             $user = User::query()->create([
                 'name' => trim($data['first_name'].' '.$data['last_name']),
                 'email' => $email,
@@ -237,7 +263,8 @@ class DashboardAuthController extends Controller
             $school = School::query()->create([
                 'owner_id' => $user->id,
                 'type_id' => (int) $schoolData['type_id'],
-                'district_id' => (int) $schoolData['district_id'],
+                'district_id' => $districtId,
+                'sub_county_id' => $existingTown?->id,
                 'name' => trim($schoolData['name']),
                 'ownership' => $schoolData['ownership'],
                 'tagline' => null,
@@ -266,6 +293,35 @@ class DashboardAuthController extends Controller
                 'verified_at' => $approvalRequired ? null : now(),
                 'submitted_at' => now(),
             ]);
+
+            if (! $existingTown && $allowCustomTown) {
+                $normalizedTown = mb_strtolower($townName);
+                $pendingSuggestion = DB::table('location_suggestions')
+                    ->where('district_id', $districtId)
+                    ->where('normalized_name', $normalizedTown)
+                    ->where('status', 'pending')
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($pendingSuggestion) {
+                    DB::table('location_suggestions')->where('id', $pendingSuggestion->id)->update([
+                        'school_count' => DB::raw('school_count + 1'),
+                        'updated_at' => now(),
+                    ]);
+                } else {
+                    DB::table('location_suggestions')->insert([
+                        'district_id' => $districtId,
+                        'suggested_name' => $townName,
+                        'normalized_name' => $normalizedTown,
+                        'source_school_id' => $school->id,
+                        'suggested_by' => $user->id,
+                        'school_count' => 1,
+                        'status' => 'pending',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
 
             if (! empty($schoolData['curriculum_id'])) {
                 $school->curricula()->sync([(int) $schoolData['curriculum_id']]);
