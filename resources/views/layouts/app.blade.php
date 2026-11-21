@@ -4,7 +4,8 @@
     @php
         $siteSettings = \App\Models\Setting::query()
             ->whereIn('key', [
-                'site_name', 'site_tagline', 'site_description', 'site_logo', 'site_favicon',
+                'site_name', 'site_tagline', 'site_description', 'site_logo', 'site_horizontal_logo', 'site_homepage_logo',
+                'site_footer_logo', 'site_mobile_logo', 'site_favicon', 'site_apple_touch_icon', 'site_social_image',
                 'meta_title', 'meta_description', 'meta_keywords',
                 'support_email', 'support_phone', 'support_whatsapp', 'contact_address',
                 'facebook_url', 'twitter_url', 'instagram_url', 'youtube_url',
@@ -19,7 +20,14 @@
         $siteTagline = $siteSettings['site_tagline'] ?? 'Discover and compare schools across Uganda';
         $siteDescription = $siteSettings['site_description'] ?? 'Uganda’s school discovery and comparison platform.';
         $siteLogoUrl = filled($siteSettings['site_logo'] ?? null) ? $siteSettings['site_logo'] : asset('brand/findursch-logo.png');
+        $siteHorizontalLogoUrl = filled($siteSettings['site_horizontal_logo'] ?? null) ? $siteSettings['site_horizontal_logo'] : $siteLogoUrl;
+        $siteHomepageLogoUrl = filled($siteSettings['site_homepage_logo'] ?? null) ? $siteSettings['site_homepage_logo'] : $siteHorizontalLogoUrl;
+        $siteHeaderLogoUrl = request()->routeIs('home') ? $siteHomepageLogoUrl : $siteHorizontalLogoUrl;
+        $siteMobileLogoUrl = filled($siteSettings['site_mobile_logo'] ?? null) ? $siteSettings['site_mobile_logo'] : $siteHeaderLogoUrl;
+        $siteFooterLogoUrl = filled($siteSettings['site_footer_logo'] ?? null) ? $siteSettings['site_footer_logo'] : $siteLogoUrl;
+        $siteSocialImageUrl = filled($siteSettings['site_social_image'] ?? null) ? $siteSettings['site_social_image'] : $siteLogoUrl;
         $siteFaviconUrl = filled($siteSettings['site_favicon'] ?? null) ? $siteSettings['site_favicon'] : asset('brand/findursch-icon.png');
+        $siteAppleTouchIconUrl = filled($siteSettings['site_apple_touch_icon'] ?? null) ? $siteSettings['site_apple_touch_icon'] : asset('brand/apple-touch-icon.png');
         $siteAddress = $siteSettings['contact_address'] ?? 'Kampala, Uganda';
         $siteSupportEmail = $siteSettings['support_email'] ?? '';
         $siteSupportPhone = $siteSettings['support_phone'] ?? '';
@@ -48,13 +56,17 @@
     @if(!empty($siteSettings['meta_keywords']))<meta name="keywords" content="{{ $siteSettings['meta_keywords'] }}">@endif
     <meta property="og:title" content="{{ $title ?? ($siteSettings['meta_title'] ?? $siteName) }}">
     <meta property="og:description" content="{{ $description ?? ($siteSettings['meta_description'] ?? $siteDescription) }}">
-    @if($siteLogoUrl)<meta property="og:image" content="{{ $siteLogoUrl }}">@endif
+    @if($siteSocialImageUrl)
+        <meta property="og:image" content="{{ $siteSocialImageUrl }}">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:image" content="{{ $siteSocialImageUrl }}">
+    @endif
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 
-    <link rel="icon" type="image/png" href="{{ $siteFaviconUrl }}">
-    <link rel="apple-touch-icon" href="{{ asset('brand/apple-touch-icon.png') }}">
+    <link rel="icon" href="{{ $siteFaviconUrl }}">
+    <link rel="apple-touch-icon" href="{{ $siteAppleTouchIconUrl }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- These page styles are safely scoped to their page wrappers; load them directly so Livewire route rendering cannot skip them. --}}
     <link rel="stylesheet" href="{{ asset('css/events-reference.css') }}?v=2">
@@ -168,7 +180,7 @@
         class="site-header">
         <div class="site-wrap site-header__inner">
             <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">
-                @if($siteLogoUrl)<img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" style="max-height:44px;max-width:200px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
+                @if($siteHeaderLogoUrl)<img src="{{ $siteHeaderLogoUrl }}" alt="{{ $siteName }}" style="max-height:44px;max-width:200px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
             </a>
 
             @if($siteNavigationEnabled)
@@ -222,7 +234,7 @@
             ">
             <div class="site-mobile-drawer__head">
                 <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">
-                @if($siteLogoUrl)<img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" style="max-height:44px;max-width:200px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
+                @if($siteMobileLogoUrl)<img src="{{ $siteMobileLogoUrl }}" alt="{{ $siteName }}" style="max-height:44px;max-width:200px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
             </a>
                 <button type="button" class="site-mobile-drawer__close" x-ref="mobileClose" @click="mobileMenuOpen = false" aria-label="Close menu">×</button>
             </div>
@@ -271,7 +283,7 @@
             <div class="site-footer__grid">
                 <div class="site-footer__brand">
                     <a href="{{ route('home') }}" class="site-logo site-logo--footer">
-                        @if($siteLogoUrl)<img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" style="max-height:48px;max-width:220px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
+                        @if($siteFooterLogoUrl)<img src="{{ $siteFooterLogoUrl }}" alt="{{ $siteName }}" style="max-height:48px;max-width:220px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
                     </a>
                     <p>{{ $siteDescription }}</p>
                     @if($siteAddress)<p class="site-footer__location">{{ $siteAddress }}</p>@endif

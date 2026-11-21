@@ -97,7 +97,13 @@ class AdminTemplateController extends Controller
             'site_tagline' => "Uganda's School Discovery Platform",
             'site_description' => 'Discover, compare and learn about schools across Uganda with FindurSch.',
             'site_logo' => '',
+            'site_horizontal_logo' => '',
+            'site_homepage_logo' => '',
+            'site_footer_logo' => '',
+            'site_mobile_logo' => '',
             'site_favicon' => '',
+            'site_apple_touch_icon' => '',
+            'site_social_image' => '',
             'primary_color' => '#0c5a49',
             'accent_color' => '#f0b030',
             'font_display' => 'Playfair Display',
@@ -196,7 +202,7 @@ class AdminTemplateController extends Controller
         if (in_array($key, ['site_topbar_enabled', 'site_navigation_enabled', 'site_account_actions_enabled', 'site_header_cta_label'], true)) return 'header';
         if (str_starts_with($key, 'homepage_hero') || $key === 'homepage_slides') return 'homepage';
         if (str_starts_with($key, 'homepage_')) return 'display';
-        if (in_array($key, ['primary_color', 'accent_color', 'font_display', 'font_body', 'site_logo', 'site_favicon'], true)) return 'branding';
+        if (in_array($key, ['primary_color', 'accent_color', 'font_display', 'font_body', 'site_logo', 'site_horizontal_logo', 'site_homepage_logo', 'site_footer_logo', 'site_mobile_logo', 'site_favicon', 'site_apple_touch_icon', 'site_social_image'], true)) return 'branding';
         if (in_array($key, ['meta_title', 'meta_description', 'meta_keywords'], true)) return 'seo';
         if (in_array($key, ['support_email', 'support_phone', 'support_whatsapp', 'contact_address'], true)) return 'contact';
         if (str_ends_with($key, '_url')) return 'social';
@@ -292,7 +298,9 @@ class AdminTemplateController extends Controller
                     'support_email' => ['nullable', 'email', 'max:255'],
                     'support_phone', 'support_whatsapp' => ['nullable', 'string', 'max:40'],
                     'contact_address' => ['nullable', 'string', 'max:255'],
-                    'site_logo', 'site_favicon', 'homepage_hero_image_url',
+                    'site_logo', 'site_horizontal_logo', 'site_homepage_logo', 'site_footer_logo',
+                    'site_mobile_logo', 'site_favicon', 'site_apple_touch_icon', 'site_social_image',
+                    'homepage_hero_image_url',
                     'facebook_url', 'twitter_url', 'instagram_url', 'youtube_url' => ['nullable', 'url', 'max:2048'],
                     'primary_color', 'accent_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
                     'font_display' => ['required', 'in:Playfair Display,DM Serif Display'],
