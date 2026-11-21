@@ -46,20 +46,6 @@
   letter-spacing: .05em;
   pointer-events: none;
 }
-.site-ad-footer-placements {
-  display: none;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  align-items: start;
-  gap: 16px;
-  width: min(100% - 32px, 1200px);
-  margin: 24px auto;
-}
-.site-ad-footer-placements .site-ad-slot {
-  width: 100%;
-}
-.site-ad-footer-placements:has(.site-ad-slot) {
-  display: grid;
-}
 @media (max-width: 640px) {
   .site-ad-slot--top {
     width: calc(100% - 24px);
@@ -67,10 +53,6 @@
   }
   .site-ad-slot--side {
     max-width: 300px;
-  }
-  .site-ad-footer-placements {
-    grid-template-columns: 1fr;
-    width: calc(100% - 24px);
   }
 }
 
@@ -145,10 +127,19 @@
   min-height: 220px;
   aspect-ratio: 6 / 5;
 }
-.site-ad-slot--foot1 .site-ad-slot__placeholder,
-.site-ad-slot--foot2 .site-ad-slot__placeholder {
+.site-ad-slot--foot1 .site-ad-slot__placeholder {
   min-height: 96px;
   aspect-ratio: 3.64 / 1;
+}
+.site-ad-slot--foot2 .site-ad-slot__placeholder {
+  min-height: 96px;
+  aspect-ratio: 2.34 / 1;
+}
+
+/* Preserve the exact 728 × 90 holder size inside the school directory heading grid. */
+.school-directory-reference .phead .site-ad-slot--top {
+  width: 100%;
+  margin: 0;
 }
 @media (max-width: 640px) {
   .site-ad-slot__placeholder {
