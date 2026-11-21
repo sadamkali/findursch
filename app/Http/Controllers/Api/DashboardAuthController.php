@@ -59,6 +59,10 @@ class DashboardAuthController extends Controller
             if ($type === 'checkbox' && $value === null) $value = false;
             if (is_string($value)) $value = trim($value);
             $required = (bool) ($field['required'] ?? false);
+            if ($type === 'checkbox' && $required && ! in_array($value, [true, 1, '1'], true)) {
+                $errors['custom_fields.'.$key] = ['Please confirm '.$field['label'].'.'];
+                continue;
+            }
             $empty = $value === null || $value === '' || $value === [];
             if ($empty && ! $required) continue;
             if ($empty && $required) {
