@@ -47,7 +47,7 @@
   pointer-events: none;
 }
 .site-ad-footer-placements {
-  display: grid;
+  display: none;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   align-items: start;
   gap: 16px;
@@ -56,6 +56,9 @@
 }
 .site-ad-footer-placements .site-ad-slot {
   width: 100%;
+}
+.site-ad-footer-placements:has(.site-ad-slot) {
+  display: grid;
 }
 @media (max-width: 640px) {
   .site-ad-slot--top {
