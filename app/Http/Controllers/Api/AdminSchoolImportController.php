@@ -1,21 +1,21 @@
 <?php
 
-namespace App\\Http\\Controllers\\Api;
+namespace App\Http\Controllers\Api;
 
-use App\\Http\\Controllers\\Controller;
-use App\\Models\\Curriculum;
-use App\\Models\\District;
-use App\\Models\\Region;
-use App\\Models\\School;
-use App\\Models\\SchoolType;
-use Illuminate\\Http\\JsonResponse;
-use Illuminate\\Http\\Request;
-use Illuminate\\Http\\UploadedFile;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Support\\Facades\\Validator;
-use Illuminate\\Support\\Str;
-use Illuminate\\Validation\\ValidationException;
-use PhpOffice\\PhpSpreadsheet\\IOFactory;
+use App\Http\Controllers\Controller;
+use App\Models\Curriculum;
+use App\Models\District;
+use App\Models\Region;
+use App\Models\School;
+use App\Models\SchoolType;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class AdminSchoolImportController extends Controller
 {
@@ -110,7 +110,7 @@ class AdminSchoolImportController extends Controller
             $spreadsheet = $reader->load($file->getRealPath());
             $sheetRows = $spreadsheet->getActiveSheet()->toArray(null, true, true, false);
             $spreadsheet->disconnectWorksheets();
-        } catch (\\Throwable $exception) {
+        } catch (\Throwable $exception) {
             throw ValidationException::withMessages([
                 'file' => 'This file could not be read. Upload a valid CSV or Excel workbook.',
             ]);
@@ -243,7 +243,7 @@ class AdminSchoolImportController extends Controller
                 'name' => $name,
                 'tagline' => $values['tagline'] ?? null,
                 'description' => $values['description'] ?? null,
-                'founded_year' => $values['founded_year'] !== '' ? $values['founded_year'] : null,
+                'founded_year' => ($values['founded_year'] ?? '') !== '' ? $values['founded_year'] : null,
                 'registration_number' => $values['registration_number'] ?? null,
                 'town' => $values['town'] ?? null,
                 'address' => $values['address'] ?? null,
@@ -268,7 +268,7 @@ class AdminSchoolImportController extends Controller
                 'founded_year' => ['nullable', 'integer', 'min:1800', 'max:'.now()->year],
                 'registration_number' => ['nullable', 'string', 'max:60'],
                 'town' => ['nullable', 'string', 'max:120'],
-                'address' => ['nullable', 'string', 'max:'.(int) config('validation.school_address_max', 10000)],
+                'address' => ['nullable', 'string', 'max:10000'],
                 'phone' => ['nullable', 'string', 'max:30'],
                 'email' => ['nullable', 'email', 'max:255'],
                 'website' => ['nullable', 'url', 'max:255'],
