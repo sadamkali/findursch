@@ -28,6 +28,7 @@ Route::middleware(['auth:sanctum'])
         Route::get('/overview', [AdminWorkspaceController::class, 'overview']);
         Route::get('/template-settings', [AdminTemplateController::class, 'settings']);
         Route::put('/template-settings', [AdminTemplateController::class, 'updateSettings']);
+        Route::post('/media-upload', [AdminTemplateController::class, 'uploadMedia']);
         Route::get('/template-access', [AdminTemplateController::class, 'access']);
         Route::post('/template-access/roles', [AdminTemplateController::class, 'createRole']);
         Route::put('/template-access/roles/{role}', [AdminTemplateController::class, 'updateRole']);

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -330,6 +331,78 @@ class AdminTemplateController extends Controller
         }
 
         return response()->json(['message' => 'Settings saved.', 'data' => ['settings' => $values]]);
+    }
+
+    public function uploadMedia(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'scope' => ['required', 'in:site-media,advertisements'],
+            'asset' => ['nullable', 'string', 'max:80'],
+            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,avif', 'max:4096'],
+        ]);
+
+        $user = $request->user();
+        if ($data['scope'] === 'site-media') {
+            $this->requirePermission($request, 'admin.system.edit_site_settings');
+            $assets = [
+                'site_logo',
+                'site_horizontal_logo',
+                'site_homepage_logo',
+                'site_footer_logo',
+                'site_mobile_logo',
+                'site_favicon',
+                'site_apple_touch_icon',
+                'site_social_image',
+            ];
+            abort_unless(in_array($data['asset'] ?? '', $assets, true), 422, 'Choose a valid website brand asset.');
+            $directory = 'site-media/branding/'.$data['asset'];
+        } else {
+            abort_unless(
+                $user && ($user->hasRole('admin') || $user->hasRole('school_owner') || $user->can('admin.ads.manage')),
+                403,
+                'You do not have permission to upload an advertisement image.'
+            );
+            $directory = 'advertisements/'.$user->getKey();
+        }
+
+        $disk = config('filesystems.disks.filebase', []);
+        if (blank($disk['key'] ?? null) || blank($disk['secret'] ?? null) || blank($disk['bucket'] ?? null)) {
+            return response()->json([
+                'message' => 'Filebase storage is not fully configured. Check FILEBASE_KEY, FILEBASE_SECRET and FILEBASE_BUCKET in the public website production environment.',
+            ], 503);
+        }
+
+        try {
+            $file = $request->file('file');
+            $extension = strtolower($file->guessExtension() ?: $file->getClientOriginalExtension());
+            $filename = Str::uuid()->toString().'.'.$extension;
+            $path = Storage::disk('filebase')->putFileAs(
+                $directory,
+                $file,
+                $filename,
+                [
+                    'visibility' => 'public',
+                    'ContentType' => $file->getMimeType(),
+                    'CacheControl' => 'public, max-age=31536000',
+                ]
+            );
+
+            if (! $path) {
+                throw new RuntimeException('Filebase did not confirm the uploaded object.');
+            }
+
+            return response()->json([
+                'url' => Storage::disk('filebase')->url($path),
+                'pathname' => $path,
+                'storage' => 'filebase',
+            ], 201);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return response()->json([
+                'message' => 'Filebase could not store this image. Check the bucket access, credentials and public-read settings, then try again.',
+            ], 502);
+        }
     }
 
     public function access(Request $request): JsonResponse
