@@ -148,7 +148,7 @@ class AdminFormController extends Controller
         abort_unless($permissions['can_edit_fields'] || $permissions['can_manage_options'], 403, 'You do not have permission to change form settings.');
         $request->validate(['config' => ['required', 'array']]);
         $config = $this->normalizeConfig($request->input('config', []));
-        $currentDraft = $this->settingArray('school_forms_draft', $this->settingArray('school_forms_published', $this->emptyConfig())));
+        $currentDraft = $this->settingArray('school_forms_draft', $this->settingArray('school_forms_published', $this->emptyConfig()));
         $currentDraft = $this->normalizeConfig($currentDraft);
         $published = $this->normalizeConfig($this->settingArray('school_forms_published', $this->emptyConfig()));
         $publishedKeys = collect($published['fields'])->keyBy('id');
