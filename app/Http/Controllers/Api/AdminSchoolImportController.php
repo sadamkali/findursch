@@ -236,24 +236,30 @@ class AdminSchoolImportController extends Controller
             $gender = Str::lower(trim((string) ($values['gender_policy'] ?? 'mixed'))) ?: 'mixed';
             $gender = str_replace([' ', '-'], '_', $gender);
 
+            $optional = function (string $key) use ($values): ?string {
+                $value = trim((string) ($values[$key] ?? ''));
+
+                return $value === '' ? null : $value;
+            };
+
             $data = [
                 'owner_id' => null,
                 'type_id' => $schoolType?->id,
                 'district_id' => $district?->id,
                 'name' => $name,
-                'tagline' => $values['tagline'] ?? null,
-                'description' => $values['description'] ?? null,
-                'founded_year' => ($values['founded_year'] ?? '') !== '' ? $values['founded_year'] : null,
-                'registration_number' => $values['registration_number'] ?? null,
-                'town' => $values['town'] ?? null,
-                'address' => $values['address'] ?? null,
-                'phone' => $values['phone'] ?? null,
-                'email' => $values['email'] ?? null,
-                'website' => $values['website'] ?? null,
-                'whatsapp' => $values['whatsapp'] ?? null,
+                'tagline' => $optional('tagline'),
+                'description' => $optional('description'),
+                'founded_year' => $optional('founded_year'),
+                'registration_number' => $optional('registration_number'),
+                'town' => $optional('town'),
+                'address' => $optional('address'),
+                'phone' => $optional('phone'),
+                'email' => $optional('email'),
+                'website' => $optional('website'),
+                'whatsapp' => $optional('whatsapp'),
                 'boarding_type' => $boarding,
                 'gender_policy' => $gender,
-                'student_count_approx' => ($values['student_count_approx'] ?? '') !== '' ? $values['student_count_approx'] : null,
+                'student_count_approx' => $optional('student_count_approx'),
                 // Bulk-imported listings are always held for administrator review.
                 'status' => 'pending',
                 'verification_status' => 'pending',
