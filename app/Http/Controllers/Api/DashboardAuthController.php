@@ -101,7 +101,7 @@ class DashboardAuthController extends Controller
             'data' => [
                 'school_types' => SchoolType::query()->where('is_active', true)->orderBy('order')->get(['id', 'name']),
                 'regions' => Region::query()->orderBy('name')->get(['id', 'name']),
-                'districts' => \\App\\Models\\District::query()->orderBy('name')->get(['id', 'name', 'region_id']),
+                'districts' => \App\Models\District::query()->orderBy('name')->get(['id', 'name', 'region_id']),
                 'curricula' => Curriculum::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
                 'facilities' => Facility::query()->where('is_active', true)->orderBy('category')->orderBy('name')->get(['id', 'name', 'category']),
                 'form_fields' => collect($config['fields'] ?? [])->where('enabled', true)->whereNotNull('registration_step')->sortBy('sort_order')->values(),
