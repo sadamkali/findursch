@@ -223,10 +223,7 @@
                 </section>
 
                 @if($sectionIndex === 2)
-                    <section class="blogs-strip">
-                        <div><small>For school communities</small><h3>Reach parents and students on FindURSCH</h3><p>Talk to our team about promoting your school, service or education programme.</p></div>
-                        <a class="blogs-btn blogs-btn-gold" href="{{ route('contact') }}">Advertise with us</a>
-                    </section>
+                    <x-site-ad-banner placement="inlist" />
                 @elseif($sectionIndex === 5)
                     <section class="blogs-duo">
                         <div class="blogs-band"><h3>Have a story to share?</h3><p>We welcome useful perspectives and experiences from parents, teachers and students.</p><a class="blogs-btn blogs-btn-gold" href="{{ route('contact') }}">Contact the editorial team</a></div>
