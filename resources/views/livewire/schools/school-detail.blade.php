@@ -383,9 +383,7 @@
                     <?php endif; ?>
                 </section>
 
-                <div class="sref-advert">
-                    <div>Your advert here<small>300 × 250</small></div>
-                </div>
+                <x-site-ad-banner placement="side" />
 
                 <section class="sref-box">
                     <h5>Find us on social media</h5>
