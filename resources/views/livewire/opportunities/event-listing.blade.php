@@ -13,10 +13,7 @@
         </div>
     </header>
 
-    <div class="ed-ad">
-        <div><small>FOR SCHOOLS &amp; ORGANISERS</small><strong>Promote your education event</strong><span>Reach parents, students and school communities across Uganda</span></div>
-        <a href="{{ route('contact') }}">Contact our team <b aria-hidden="true">→</b></a>
-    </div>
+    <x-site-ad-banner placement="top" />
 
     <main class="ed-shell ed-main">
         <section class="ed-toolbar" aria-label="Search and filter events">
