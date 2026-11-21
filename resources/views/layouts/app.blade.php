@@ -73,7 +73,7 @@
     <link rel="stylesheet" href="{{ asset('css/events-listing-reference.css') }}?v=1">
     <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=3">
     <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=3">
-    <link rel="stylesheet" href="{{ asset('css/site-ad-banners.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/site-ad-banners.css') }}?v=2">
     @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}">@endif
     @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}">@endif
     @if (request()->routeIs('scholarships.*'))<link rel="stylesheet" href="{{ asset('css/scholarships-reference.css') }}">@endif
