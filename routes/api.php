@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AdminWorkspaceController;
+use App\Http\Controllers\Api\AdminSchoolImportController;
 use App\Http\Controllers\Api\AdminFormController;
 use App\Http\Controllers\Api\AdminTemplateController;
 use App\Http\Controllers\Api\AdManagerController;
