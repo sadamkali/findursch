@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
-    "backend-v2": {
+    "backend-next": {
       "root": ".",
       "entrypoint": "Dockerfile",
       "runtime": "container"
@@ -11,7 +11,7 @@
     {
       "source": "/(.*)",
       "destination": {
-        "service": "backend-v2"
+        "service": "backend-next"
       }
     }
   ]
