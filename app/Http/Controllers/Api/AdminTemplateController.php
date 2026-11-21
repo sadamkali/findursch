@@ -108,6 +108,7 @@ class AdminTemplateController extends Controller
             'site_social_image' => '',
             // Dashboard-only brand assets. Defaults reuse the current approved R2 brand artwork.
             'dashboard_logo' => 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/04e4be58-8896-4389-bdf5-41df98dc4390.png',
+            'dashboard_login_logo' => 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/04e4be58-8896-4389-bdf5-41df98dc4390.png',
             'dashboard_mark' => 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_mobile_logo/dec9d1e6-f5db-41fa-bca4-3dba371e801f.png',
             'dashboard_favicon' => 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_favicon/b3a07092-d41b-44ba-9ba6-86243efcc20b.png',
             'primary_color' => '#0c5a49',
@@ -203,7 +204,7 @@ class AdminTemplateController extends Controller
     private function settingGroup(string $key): string
     {
         if (str_starts_with($key, 'admin_') || in_array($key, ['require_two_step', 'admin_signin_alerts', 'block_new_country_signins'], true)) return 'security';
-        if (in_array($key, ['dashboard_logo', 'dashboard_mark', 'dashboard_favicon'], true)) return 'dashboard-branding';
+        if (in_array($key, ['dashboard_logo', 'dashboard_login_logo', 'dashboard_mark', 'dashboard_favicon'], true)) return 'dashboard-branding';
         if ($key === 'site_navigation') return 'navigation';
         if (str_starts_with($key, 'site_footer_')) return 'footer';
         if (in_array($key, ['site_topbar_enabled', 'site_navigation_enabled', 'site_account_actions_enabled', 'site_header_cta_label'], true)) return 'header';
@@ -223,15 +224,18 @@ class AdminTemplateController extends Controller
      */
     public function publicDashboardBranding(): JsonResponse
     {
-        $keys = ['dashboard_logo', 'dashboard_mark', 'dashboard_favicon'];
+        $keys = ['dashboard_logo', 'dashboard_login_logo', 'dashboard_mark', 'dashboard_favicon', 'site_logo', 'site_horizontal_logo'];
         $defaults = $this->settingDefaults();
         $values = Setting::query()->whereIn('key', $keys)->pluck('value', 'key')->all();
 
         return response()->json([
             'data' => [
                 'dashboard_logo' => $values['dashboard_logo'] ?? $defaults['dashboard_logo'],
+                'dashboard_login_logo' => $values['dashboard_login_logo'] ?? $defaults['dashboard_login_logo'],
                 'dashboard_mark' => $values['dashboard_mark'] ?? $defaults['dashboard_mark'],
                 'dashboard_favicon' => $values['dashboard_favicon'] ?? $defaults['dashboard_favicon'],
+                'site_logo' => $values['site_logo'] ?? $defaults['site_logo'],
+                'site_horizontal_logo' => $values['site_horizontal_logo'] ?? $defaults['site_horizontal_logo'],
             ],
         ])->header('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
     }
@@ -326,6 +330,7 @@ class AdminTemplateController extends Controller
                     'contact_address' => ['nullable', 'string', 'max:255'],
                     'site_logo', 'site_horizontal_logo', 'site_homepage_logo', 'site_footer_logo',
                     'site_mobile_logo', 'site_favicon', 'site_apple_touch_icon', 'site_social_image',
+                    'dashboard_logo', 'dashboard_login_logo', 'dashboard_mark', 'dashboard_favicon',
                     'homepage_hero_image_url',
                     'facebook_url', 'twitter_url', 'instagram_url', 'youtube_url' => ['nullable', 'url', 'max:2048'],
                     'primary_color', 'accent_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
@@ -382,6 +387,7 @@ class AdminTemplateController extends Controller
                 'site_apple_touch_icon',
                 'site_social_image',
                 'dashboard_logo',
+                'dashboard_login_logo',
                 'dashboard_mark',
                 'dashboard_favicon',
             ];
