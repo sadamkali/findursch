@@ -34,6 +34,8 @@
                     {!! $article->body !!}
                 </section>
 
+                <x-site-ad-banner placement="art" />
+
                 <div class="article-category-tags"><span>TOPIC</span><a href="{{ request()->routeIs('news.show') ? route('news.index', ['category' => $article->category_id]) : route('articles.index', ['category' => $article->category_id]) }}">{{ $article->category?->name ?? 'Education' }}</a></div>
                 <section class="article-story-cta">
                     <div><small>Have a story to share?</small><h2>Help parents and school communities stay informed</h2><p>Contact FindURSCH about a school announcement, education story or useful community update.</p></div>
@@ -60,7 +62,7 @@
                     </div>
                 @endif
 
-                <div class="resource-sidebar-promo"><small>Explore schools</small><h3>Compare school options across Uganda</h3><p>Browse verified profiles, locations, curricula and available school information.</p><a class="blogs-btn blogs-btn-gold" href="{{ route('schools.index') }}">Find a school</a></div>
+                <x-site-ad-banner placement="side" />
                 <div class="article-sidebar-links"><a href="{{ route('events.index') }}">Upcoming school events →</a><a href="{{ route('scholarships.index') }}">Scholarships and bursaries →</a><a href="{{ route('articles.index') }}">More education blogs →</a></div>
             </aside>
         </div>
