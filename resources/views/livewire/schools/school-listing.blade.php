@@ -10,10 +10,7 @@
                 <h1>Find a school in Uganda</h1>
                 <p>Discover <b>{{ number_format($allSchoolCount) }}</b> verified nursery, primary, secondary, vocational and international schools across all districts of Uganda. Compare by location, curriculum and fees.</p>
             </div>
-            <a href="{{ route('contact') }}" class="ad top">
-                Your advert here
-                <small>728 × 90</small>
-            </a>
+            <x-site-ad-banner placement="top" />
         </div>
     </section>
 
