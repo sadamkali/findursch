@@ -29,7 +29,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="icon" type="image/png" href="{{ asset('brand/findursch-icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('brand/apple-touch-icon.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
@@ -40,10 +41,9 @@
     <aside class="account-workspace-sidebar" :class="{ 'is-open': sidebarOpen }" aria-label="Account navigation">
         <div class="account-workspace-brand">
             <a href="{{ route('home') }}" class="account-workspace-brand-mark" aria-label="FindurSch home">
-                <span class="account-workspace-brand-icon">F</span>
-                <span>FindurSch</span>
+                <img src="{{ asset('brand/findursch-logo.png') }}" alt="FindurSch" width="184" height="41" style="display:block;width:184px;height:auto;max-height:40px;object-fit:contain;object-position:left center">
             </a>
-            <span class="account-workspace-brand-caption">YOUR ACCOUNT</span>
+            <span class="account-workspace-brand-caption" style="padding-left:0">YOUR ACCOUNT</span>
         </div>
 
         <div class="account-workspace-user">

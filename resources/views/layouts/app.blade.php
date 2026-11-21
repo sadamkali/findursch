@@ -18,8 +18,8 @@
         $siteName = $siteSettings['site_name'] ?? 'FindURSCH';
         $siteTagline = $siteSettings['site_tagline'] ?? 'Discover and compare schools across Uganda';
         $siteDescription = $siteSettings['site_description'] ?? 'Uganda’s school discovery and comparison platform.';
-        $siteLogoUrl = $siteSettings['site_logo'] ?? '';
-        $siteFaviconUrl = $siteSettings['site_favicon'] ?? '';
+        $siteLogoUrl = filled($siteSettings['site_logo'] ?? null) ? $siteSettings['site_logo'] : asset('brand/findursch-logo.png');
+        $siteFaviconUrl = filled($siteSettings['site_favicon'] ?? null) ? $siteSettings['site_favicon'] : asset('brand/findursch-icon.png');
         $siteAddress = $siteSettings['contact_address'] ?? 'Kampala, Uganda';
         $siteSupportEmail = $siteSettings['support_email'] ?? '';
         $siteSupportPhone = $siteSettings['support_phone'] ?? '';
@@ -53,7 +53,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 
-    <link rel="icon" href="{{ $siteFaviconUrl ?: '/favicon.png' }}">
+    <link rel="icon" type="image/png" href="{{ $siteFaviconUrl }}">
+    <link rel="apple-touch-icon" href="{{ asset('brand/apple-touch-icon.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- These page styles are safely scoped to their page wrappers; load them directly so Livewire route rendering cannot skip them. --}}
     <link rel="stylesheet" href="{{ asset('css/events-reference.css') }}?v=2">
