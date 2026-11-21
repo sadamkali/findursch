@@ -197,12 +197,6 @@ class AdManagerController extends Controller
         ]);
 
         $whatsappPhone = $this->normalizeWhatsappPhone($data['whatsapp_phone'] ?? null);
-        if (array_key_exists('whatsapp_phone', $data)) {
-            DB::table('site_ad_campaigns')->where('id', $campaignId)->update([
-                'whatsapp_phone' => $whatsappPhone,
-                'updated_at' => now(),
-            ]);
-        }
 
         $placement = DB::table('site_ad_placements')->where('id', $data['placement_id'])->first();
         $correctDimensions = (
@@ -243,6 +237,13 @@ class AdManagerController extends Controller
         if ($isFallback && $status === 'approved') {
             DB::table('site_ad_placements')->where('id', $data['placement_id'])->update([
                 'fallback_banner_id' => $id,
+                'updated_at' => now(),
+            ]);
+        }
+
+        if (array_key_exists('whatsapp_phone', $data)) {
+            DB::table('site_ad_campaigns')->where('id', $campaignId)->update([
+                'whatsapp_phone' => $whatsappPhone,
                 'updated_at' => now(),
             ]);
         }
