@@ -105,7 +105,14 @@ class AdminSchoolImportController extends Controller
     private function prepareRows(UploadedFile $file): array
     {
         try {
-            $reader = IOFactory::createReaderForFile($file->getRealPath());
+            $extension = strtolower($file->getClientOriginalExtension());
+            $readerType = match ($extension) {
+                'csv', 'txt' => 'Csv',
+                'xls' => 'Xls',
+                'xlsx' => 'Xlsx',
+                default => throw new \\UnexpectedValueException('Unsupported import file type.'),
+            };
+            $reader = IOFactory::createReader($readerType);
             $reader->setReadDataOnly(true);
             $spreadsheet = $reader->load($file->getRealPath());
             $sheetRows = $spreadsheet->getActiveSheet()->toArray(null, true, true, false);
