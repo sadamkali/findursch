@@ -66,6 +66,23 @@ return [
          * The bucket must be configured as public in the Filebase console
          * for public school images; keep the access keys server-side only.
          */
+        /*
+         * Cloudflare R2 uses the S3-compatible API. Public delivery is handled
+         * by the bucket's public URL; do not send S3 ACL/visibility headers.
+         */
+        'r2' => [
+            'driver' => 's3',
+            'key' => env('R2_ACCESS_KEY_ID'),
+            'secret' => env('R2_SECRET_ACCESS_KEY'),
+            'region' => env('R2_REGION', 'auto'),
+            'bucket' => env('R2_BUCKET'),
+            'url' => env('R2_PUBLIC_URL'),
+            'endpoint' => env('R2_ENDPOINT'),
+            'use_path_style_endpoint' => false,
+            'throw' => true,
+            'report' => true,
+        ],
+
         'filebase' => [
             'driver' => 's3',
             'key' => env('FILEBASE_KEY'),

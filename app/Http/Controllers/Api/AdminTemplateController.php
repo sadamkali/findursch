@@ -369,10 +369,18 @@ class AdminTemplateController extends Controller
             $directory = 'advertisements/'.$user->getKey();
         }
 
-        $disk = config('filesystems.disks.filebase', []);
-        if (blank($disk['key'] ?? null) || blank($disk['secret'] ?? null) || blank($disk['bucket'] ?? null)) {
+        $storageDisk = (string) config('media-library.disk_name', 'filebase');
+        abort_unless(in_array($storageDisk, ['filebase', 'r2'], true), 503, 'Media storage is not configured.');
+
+        $disk = config('filesystems.disks.'.$storageDisk, []);
+        $storageIsMissing = blank($disk['key'] ?? null)
+            || blank($disk['secret'] ?? null)
+            || blank($disk['bucket'] ?? null)
+            || ($storageDisk === 'r2' && (blank($disk['endpoint'] ?? null) || blank($disk['url'] ?? null)));
+
+        if ($storageIsMissing) {
             return response()->json([
-                'message' => 'Filebase storage is not fully configured. Check FILEBASE_KEY, FILEBASE_SECRET and FILEBASE_BUCKET in the public website production environment.',
+                'message' => strtoupper($storageDisk).' storage is not fully configured. Check the storage credentials, bucket and public URL in the backend environment.',
             ], 503);
         }
 
@@ -380,31 +388,38 @@ class AdminTemplateController extends Controller
             $file = $request->file('file');
             $extension = strtolower($file->guessExtension() ?: $file->getClientOriginalExtension());
             $filename = Str::uuid()->toString().'.'.$extension;
-            $path = Storage::disk('filebase')->putFileAs(
+            $options = [
+                'ContentType' => $file->getMimeType(),
+                'CacheControl' => 'public, max-age=31536000',
+            ];
+
+            // Filebase supports S3 visibility headers. R2 public delivery is
+            // configured at bucket/domain level and does not use object ACLs.
+            if ($storageDisk === 'filebase') {
+                $options['visibility'] = 'public';
+            }
+
+            $path = Storage::disk($storageDisk)->putFileAs(
                 $directory,
                 $file,
                 $filename,
-                [
-                    'visibility' => 'public',
-                    'ContentType' => $file->getMimeType(),
-                    'CacheControl' => 'public, max-age=31536000',
-                ]
+                $options
             );
 
             if (! $path) {
-                throw new RuntimeException('Filebase did not confirm the uploaded object.');
+                throw new RuntimeException($storageDisk.' did not confirm the uploaded object.');
             }
 
             return response()->json([
-                'url' => Storage::disk('filebase')->url($path),
+                'url' => Storage::disk($storageDisk)->url($path),
                 'pathname' => $path,
-                'storage' => 'filebase',
+                'storage' => $storageDisk,
             ], 201);
         } catch (\Throwable $exception) {
             report($exception);
 
             return response()->json([
-                'message' => 'Filebase could not store this image. Check the bucket access, credentials and public-read settings, then try again.',
+                'message' => 'The selected media storage could not store this image. Check the storage credentials and bucket configuration, then try again.',
             ], 502);
         }
     }
