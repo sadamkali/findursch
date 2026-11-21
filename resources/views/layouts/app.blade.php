@@ -65,8 +65,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 
-    <link rel="icon" href="{{ $siteFaviconUrl }}">
-    <link rel="apple-touch-icon" href="{{ $siteAppleTouchIconUrl }}">
+    <link rel="icon" href="{{ $siteFaviconUrl }}" onerror="this.onerror=null;this.href='{{ asset('brand/findursch-icon.png') }}';">
+    <link rel="apple-touch-icon" href="{{ $siteAppleTouchIconUrl }}" onerror="this.onerror=null;this.href='{{ asset('brand/apple-touch-icon.png') }}';">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- These page styles are safely scoped to their page wrappers; load them directly so Livewire route rendering cannot skip them. --}}
     <link rel="stylesheet" href="{{ asset('css/events-reference.css') }}?v=2">
@@ -180,7 +180,7 @@
         class="site-header">
         <div class="site-wrap site-header__inner">
             <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">
-                @if($siteHeaderLogoUrl)<img src="{{ $siteHeaderLogoUrl }}" alt="{{ $siteName }}" style="max-height:44px;max-width:200px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
+                @if($siteHeaderLogoUrl)<img src="{{ $siteHeaderLogoUrl }}" alt="{{ $siteName }}" onerror="this.onerror=null;this.src='{{ asset('brand/findursch-logo.png') }}';" style="max-height:44px;max-width:200px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
             </a>
 
             @if($siteNavigationEnabled)
@@ -234,7 +234,7 @@
             ">
             <div class="site-mobile-drawer__head">
                 <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">
-                @if($siteMobileLogoUrl)<img src="{{ $siteMobileLogoUrl }}" alt="{{ $siteName }}" style="max-height:44px;max-width:200px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
+                @if($siteMobileLogoUrl)<img src="{{ $siteMobileLogoUrl }}" alt="{{ $siteName }}" onerror="this.onerror=null;this.src='{{ asset('brand/findursch-logo.png') }}';" style="max-height:44px;max-width:200px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
             </a>
                 <button type="button" class="site-mobile-drawer__close" x-ref="mobileClose" @click="mobileMenuOpen = false" aria-label="Close menu">×</button>
             </div>
@@ -283,7 +283,7 @@
             <div class="site-footer__grid">
                 <div class="site-footer__brand">
                     <a href="{{ route('home') }}" class="site-logo site-logo--footer">
-                        @if($siteFooterLogoUrl)<img src="{{ $siteFooterLogoUrl }}" alt="{{ $siteName }}" style="max-height:48px;max-width:220px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
+                        @if($siteFooterLogoUrl)<img src="{{ $siteFooterLogoUrl }}" alt="{{ $siteName }}" onerror="this.onerror=null;this.src='{{ asset('brand/findursch-logo.png') }}';" style="max-height:48px;max-width:220px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
                     </a>
                     <p>{{ $siteDescription }}</p>
                     @if($siteAddress)<p class="site-footer__location">{{ $siteAddress }}</p>@endif
