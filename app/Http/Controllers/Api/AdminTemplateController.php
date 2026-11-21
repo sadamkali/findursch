@@ -345,6 +345,7 @@ class AdminTemplateController extends Controller
         if ($data['scope'] === 'site-media') {
             $this->requirePermission($request, 'admin.system.edit_site_settings');
             $assets = [
+                'homepage_slide',
                 'site_logo',
                 'site_horizontal_logo',
                 'site_homepage_logo',
@@ -354,8 +355,11 @@ class AdminTemplateController extends Controller
                 'site_apple_touch_icon',
                 'site_social_image',
             ];
-            abort_unless(in_array($data['asset'] ?? '', $assets, true), 422, 'Choose a valid website brand asset.');
-            $directory = 'site-media/branding/'.$data['asset'];
+            $asset = $data['asset'] ?? 'homepage_slide';
+            abort_unless(in_array($asset, $assets, true), 422, 'Choose a valid website brand asset.');
+            $directory = $asset === 'homepage_slide'
+                ? 'site-media/homepage-carousel'
+                : 'site-media/branding/'.$asset;
         } else {
             abort_unless(
                 $user && ($user->hasRole('admin') || $user->hasRole('school_owner') || $user->can('admin.ads.manage')),
