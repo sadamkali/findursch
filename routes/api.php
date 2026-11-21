@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AdminWorkspaceController;
 use App\Http\Controllers\Api\AdminFormController;
 use App\Http\Controllers\Api\AdminTemplateController;
 use App\Http\Controllers\Api\AdManagerController;
+use App\Http\Controllers\Api\AdminLocationController;
 use App\Http\Controllers\Api\DashboardAuthController;
 use App\Http\Controllers\Api\OwnerWorkspaceController;
 use Illuminate\Support\Facades\Route;
@@ -36,18 +37,18 @@ Route::middleware(['auth:sanctum'])
         Route::delete('/ad-banners/{banner}', [AdManagerController::class, 'deleteBanner']);
         Route::put('/ad-placements', [AdManagerController::class, 'updatePlacements']);
 
-        Route::get('/location-manager', [\\App\\Http\\Controllers\\Api\\AdminLocationController::class, 'index']);
-        Route::post('/location-manager/{level}', [\\App\\Http\\Controllers\\Api\\AdminLocationController::class, 'store'])
+        Route::get('/location-manager', [AdminLocationController::class, 'index']);
+        Route::post('/location-manager/{level}', [AdminLocationController::class, 'store'])
             ->whereIn('level', ['regions', 'districts', 'towns']);
-        Route::patch('/location-manager/{level}/{id}', [\\App\\Http\\Controllers\\Api\\AdminLocationController::class, 'update'])
+        Route::patch('/location-manager/{level}/{id}', [AdminLocationController::class, 'update'])
             ->whereIn('level', ['regions', 'districts', 'towns'])
             ->whereNumber('id');
-        Route::delete('/location-manager/{level}/{id}', [\\App\\Http\\Controllers\\Api\\AdminLocationController::class, 'destroy'])
+        Route::delete('/location-manager/{level}/{id}', [AdminLocationController::class, 'destroy'])
             ->whereIn('level', ['regions', 'districts', 'towns'])
             ->whereNumber('id');
-        Route::put('/location-manager/settings', [\\App\\Http\\Controllers\\Api\\AdminLocationController::class, 'updateSettings']);
-        Route::post('/location-manager/import', [\\App\\Http\\Controllers\\Api\\AdminLocationController::class, 'import']);
-        Route::post('/location-suggestions/{suggestion}/review', [\\App\\Http\\Controllers\\Api\\AdminLocationController::class, 'reviewSuggestion'])
+        Route::put('/location-manager/settings', [AdminLocationController::class, 'updateSettings']);
+        Route::post('/location-manager/import', [AdminLocationController::class, 'import']);
+        Route::post('/location-suggestions/{suggestion}/review', [AdminLocationController::class, 'reviewSuggestion'])
             ->whereNumber('suggestion');
 
         Route::get('/form-fields', [AdminFormController::class, 'index']);
