@@ -158,6 +158,9 @@
                         @forelse($upcomingEvents as $event)
                             <li>
                                 <a href="{{ route('events.show', $event) }}">
+                                    @if($event->image_url || $event->school?->getFirstMediaUrl('cover'))
+                                        <img src="{{ $event->image_url ?: $event->school?->getFirstMediaUrl('cover') }}" alt="{{ $event->image_alt ?: ($event->title ?? 'School event') }}" loading="lazy" style="width:44px;height:44px;object-fit:cover;border-radius:10px;flex-shrink:0;">
+                                    @endif
                                     <span class="date">{{ $event->starts_at?->format('d') }}<small>{{ strtoupper($event->starts_at?->format('M')) }}</small></span>
                                     <div><strong>{{ $event->title }}</strong><span>{{ $event->school?->name }}</span></div>
                                 </a>
@@ -216,8 +219,8 @@
                     @endphp
                     <a class="card prem" href="{{ route('school-news.show', $featuredSchoolUpdate) }}">
                         <div class="ph d">
-                            @if($featuredSchoolUpdate->school?->getFirstMediaUrl('cover'))
-                                <img src="{{ $featuredSchoolUpdate->school->getFirstMediaUrl('cover') }}" alt="" loading="lazy">
+                            @if($featuredSchoolUpdate->image_url || $featuredSchoolUpdate->school?->getFirstMediaUrl('cover'))
+                                <img src="{{ $featuredSchoolUpdate->image_url ?: $featuredSchoolUpdate->school?->getFirstMediaUrl('cover') }}" alt="{{ $featuredSchoolUpdate->image_alt ?: ($featuredSchoolUpdate->school?->name ?? $featuredSchoolUpdate->title) }}" loading="lazy">
                             @else
                                 <span class="ph-initials">{{ strtoupper(mb_substr($featuredSchoolUpdate->school?->name ?? 'FS', 0, 2)) }}</span>
                             @endif

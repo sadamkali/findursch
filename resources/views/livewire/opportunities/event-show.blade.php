@@ -30,8 +30,8 @@
 
                 <div class="hd">
                     <div class="poster ph">
-                        @if($event->school?->getFirstMediaUrl('cover'))
-                            <img src="{{ $event->school->getFirstMediaUrl('cover') }}" alt="{{ $event->school->name }} event poster">
+                        @if($event->image_url || $event->school?->getFirstMediaUrl('cover'))
+                            <img src="{{ $event->image_url ?: $event->school?->getFirstMediaUrl('cover') }}" alt="{{ $event->image_alt ?: (($event->school?->name ?? $event->title).' event poster') }}">
                         @else
                             <div class="poster-placeholder"><strong>FindURSCH</strong><small>School community event</small></div>
                         @endif

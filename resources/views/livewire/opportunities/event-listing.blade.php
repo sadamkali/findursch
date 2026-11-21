@@ -45,8 +45,8 @@
                     @endphp
                     <article class="ed-card" wire:key="event-listing-{{ $event->id }}">
                         <a class="ed-card-media" href="{{ route('events.show', $event) }}" aria-label="View {{ $event->title }}">
-                            @if($event->school?->getFirstMediaUrl('cover'))
-                                <img src="{{ $event->school->getFirstMediaUrl('cover') }}" alt="{{ $event->school->name }}" loading="lazy">
+                            @if($event->image_url || $event->school?->getFirstMediaUrl('cover'))
+                                <img src="{{ $event->image_url ?: $event->school?->getFirstMediaUrl('cover') }}" alt="{{ $event->image_alt ?: ($event->school?->name ?? $event->title) }}" loading="lazy">
                             @else
                                 <span class="ed-card-placeholder"><b>FindURSCH</b><small>School community event</small></span>
                             @endif

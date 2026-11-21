@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\School;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -336,8 +337,10 @@ class AdminTemplateController extends Controller
     public function uploadMedia(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'scope' => ['required', 'in:site-media,advertisements'],
+            'scope' => ['required', 'in:site-media,advertisements,articles,school-posts'],
             'asset' => ['nullable', 'string', 'max:80'],
+            'school_id' => ['required_if:scope,school-posts', 'nullable', 'integer', 'exists:schools,id'],
+            'post_type' => ['required_if:scope,school-posts', 'nullable', 'in:event,news,bursary'],
             'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,avif', 'max:4096'],
         ]);
 
@@ -360,13 +363,31 @@ class AdminTemplateController extends Controller
             $directory = $asset === 'homepage_slide'
                 ? 'site-media/homepage-carousel'
                 : 'site-media/branding/'.$asset;
-        } else {
+        } elseif ($data['scope'] === 'advertisements') {
             abort_unless(
                 $user && ($user->hasRole('admin') || $user->hasRole('school_owner') || $user->can('admin.ads.manage')),
                 403,
                 'You do not have permission to upload an advertisement image.'
             );
             $directory = 'advertisements/'.$user->getKey();
+        } elseif ($data['scope'] === 'articles') {
+            abort_unless(
+                $user && ($user->hasRole('admin') || $user->can('admin.content.publish')),
+                403,
+                'You do not have permission to upload an article image.'
+            );
+            $directory = 'articles/'.$user->getKey();
+        } else {
+            abort_unless($user, 401);
+            $school = School::query()->findOrFail((int) $data['school_id']);
+            abort_unless(
+                $user->hasRole('admin')
+                    || $user->can('admin.content.publish')
+                    || (int) $school->owner_id === (int) $user->getKey(),
+                403,
+                'You do not have permission to upload an image for this school.'
+            );
+            $directory = 'schools/'.$school->getKey().'/posts/'.$data['post_type'];
         }
 
         $storageDisk = (string) config('media-library.disk_name', 'filebase');

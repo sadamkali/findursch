@@ -93,6 +93,7 @@ class OwnerWorkspaceController extends Controller
 
         $record->load(['type', 'district', 'subCounty', 'activeSubscription.plan']);
         $record->setAttribute('logo_url', $record->getFirstMedia('logo')?->getUrl());
+        $record->setAttribute('badge_url', $record->getFirstMedia('badge')?->getUrl());
         $plan = $record->activeSubscription?->plan;
         $galleryCount = $record->getMedia('gallery')->count();
         $done = [
@@ -253,7 +254,7 @@ class OwnerWorkspaceController extends Controller
 
     public function media(Request $request, int $school, string $collection, ?int $mediaId = null): JsonResponse
     {
-        abort_unless(in_array($collection, ['cover', 'gallery', 'logo'], true), 404);
+        abort_unless(in_array($collection, ['cover', 'gallery', 'logo', 'badge'], true), 404);
         $record = $this->school($request, $school);
 
         if ($request->isMethod('post')) {
@@ -267,7 +268,7 @@ class OwnerWorkspaceController extends Controller
             }
 
             $request->validate([
-                'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.($collection === 'logo' ? 2048 : 10240)],
+                'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.(in_array($collection, ['logo', 'badge'], true) ? 2048 : 10240)],
             ]);
 
             $media = $record->addMediaFromRequest('image')->toMediaCollection($collection);
@@ -346,6 +347,8 @@ class OwnerWorkspaceController extends Controller
             $rules = [
                 'title' => ['required', 'string', 'min:2', 'max:255'],
                 'description' => ['required', 'string', 'max:10000'],
+                'image_url' => ['nullable', 'url', 'max:2048'],
+                'image_alt' => ['nullable', 'string', 'max:255'],
             ];
 
             if ($postType === 'event') {

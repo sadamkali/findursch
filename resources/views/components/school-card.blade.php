@@ -13,6 +13,11 @@
                 </div>
             @endif
 
+            @if($school->getFirstMediaUrl('badge') || $school->getFirstMediaUrl('logo'))
+                <span class="absolute bottom-3 left-3 flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl border-2 border-white bg-white p-1 shadow-md">
+                    <img src="{{ $school->getFirstMediaUrl('badge') ?: $school->getFirstMediaUrl('logo') }}" alt="{{ $school->name }} badge" class="h-full w-full object-contain" loading="lazy">
+                </span>
+            @endif
             @if($school->is_featured)
                 <span class="absolute right-3 top-3 rounded-badge border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700">Featured</span>
             @endif
