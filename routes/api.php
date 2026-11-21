@@ -38,6 +38,7 @@ Route::middleware(['auth:sanctum'])
         Route::put('/ad-placements', [AdManagerController::class, 'updatePlacements']);
 
         Route::get('/location-manager', [AdminLocationController::class, 'index']);
+        Route::post('/location-manager/import', [AdminLocationController::class, 'import']);
         Route::post('/location-manager/{level}', [AdminLocationController::class, 'store'])
             ->whereIn('level', ['regions', 'districts', 'towns']);
         Route::patch('/location-manager/{level}/{id}', [AdminLocationController::class, 'update'])
@@ -47,7 +48,6 @@ Route::middleware(['auth:sanctum'])
             ->whereIn('level', ['regions', 'districts', 'towns'])
             ->whereNumber('id');
         Route::put('/location-manager/settings', [AdminLocationController::class, 'updateSettings']);
-        Route::post('/location-manager/import', [AdminLocationController::class, 'import']);
         Route::post('/location-suggestions/{suggestion}/review', [AdminLocationController::class, 'reviewSuggestion'])
             ->whereNumber('suggestion');
 
