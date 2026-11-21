@@ -27,6 +27,7 @@ class AdminTemplateController extends Controller
             ['Schools', 'Feature schools on the homepage', 'admin.schools.feature', [1, 1, 1, 0]],
             ['Schools', 'Suspend a school', 'admin.schools.suspend', [1, 1, 0, 0]],
             ['Schools', 'Delete a school', 'admin.schools.delete', [1, 0, 0, 0]],
+            ['Locations', 'Manage regions, districts and towns or areas', 'admin.locations.manage', [1, 1, 0, 0]],
             ['Reviews', 'Moderate reviews', 'admin.reviews.moderate', [1, 1, 1, 1]],
             ['Content', 'Publish articles and blogs', 'admin.content.publish', [1, 1, 1, 0]],
             ['Content', 'Approve submitted stories', 'admin.content.approve', [1, 1, 1, 0]],
