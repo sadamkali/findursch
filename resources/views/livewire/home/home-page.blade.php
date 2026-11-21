@@ -233,10 +233,6 @@
         <div class="cols sec" @if(!$homepageDisplaySettings['sidebar'] || (!$homepageDisplaySettings['videos'] && !$homepageDisplaySettings['scholarships'] && !$homepageDisplaySettings['banner_ads'])) style="grid-template-columns:minmax(0,1fr)" @endif>
             @if($homepageDisplaySettings['videos'] || $homepageDisplaySettings['scholarships'] || $homepageDisplaySettings['banner_ads'])
             <div class="stack">
-                @if($homepageDisplaySettings['banner_ads'])
-                    <x-site-ad-banner placement="inlist" />
-                @endif
-
                 @if($homepageDisplaySettings['videos'])
                 <div>
                     <div class="head"><h2>Featured <span>school videos</span></h2><a class="more" href="{{ route('schools.index') }}">All videos</a></div>
@@ -369,6 +365,13 @@
     @endif
 
 
+
+    @if($homepageDisplaySettings['banner_ads'])
+    <section class="banner" aria-label="Sponsored banners">
+        <x-site-ad-banner placement="foot1" />
+        <x-site-ad-banner placement="foot2" />
+    </section>
+    @endif
 
     @if($homepageDisplaySettings['cta'])
     <section class="cta">
