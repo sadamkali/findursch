@@ -14,6 +14,7 @@ use App\Models\SchoolMessageCampaign;
 use App\Models\SchoolPost;
 use App\Models\SchoolProgram;
 use App\Models\SchoolVideo;
+use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -56,6 +57,81 @@ class OwnerWorkspaceController extends Controller
         ]);
     }
 
+    private function publishedFormConfig(): array
+    {
+        $value = Setting::get('school_forms_published');
+        if (is_array($value)) return $value;
+        if (! is_string($value) || trim($value) === '') return ['version' => 1, 'fields' => [], 'option_lists' => []];
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : ['version' => 1, 'fields' => [], 'option_lists' => []];
+    }
+
+    private function profileCustomFieldDefinitions(): array
+    {
+        $config = $this->publishedFormConfig();
+        $lists = collect($config['option_lists'] ?? [])->keyBy('key');
+        return collect($config['fields'] ?? [])
+            ->filter(fn ($field) => is_array($field) && ! empty($field['enabled']) && ! empty($field['profile_enabled']))
+            ->sortBy('sort_order')
+            ->map(function ($field) use ($lists) {
+                $list = $lists->get((string) ($field['option_list'] ?? ''), []);
+                return [
+                    'key' => $field['key'],
+                    'label' => $field['label'],
+                    'type' => $field['type'],
+                    'help' => $field['help'] ?? '',
+                    'required' => (bool) ($field['required'] ?? false),
+                    'options' => collect($list['options'] ?? [])->where('enabled', true)->pluck('value')->values()->all(),
+                ];
+            })->values()->all();
+    }
+
+    private function saveProfileCustomFields(Request $request, School $school): array
+    {
+        $existing = is_array($school->custom_fields) ? $school->custom_fields : [];
+        $incoming = $request->input('custom_fields', []);
+        if (! is_array($incoming)) {
+            throw \\Illuminate\\Validation\\ValidationException::withMessages(['custom_fields' => ['Additional school details are not valid.']]);
+        }
+
+        $definitions = collect($this->profileCustomFieldDefinitions())->keyBy('key');
+        $errors = [];
+        foreach ($definitions as $key => $field) {
+            if (! array_key_exists($key, $incoming)) continue;
+            $value = $incoming[$key];
+            if (is_string($value)) $value = trim($value);
+            $empty = $value === null || $value === '' || $value === [];
+            if ($empty && ! empty($field['required'])) {
+                $errors['custom_fields.'.$key] = ['Please complete '.$field['label'].'.'];
+                continue;
+            }
+            if ($empty) {
+                $existing[$key] = null;
+                continue;
+            }
+            $rules = match ($field['type']) {
+                'number' => ['required', 'numeric', 'min:0'],
+                'url' => ['required', 'url', 'max:2000'],
+                'email' => ['required', 'email', 'max:255'],
+                'date' => ['required', 'date'],
+                'checkbox' => ['required', 'boolean'],
+                'select' => ['required', 'string', \\Illuminate\\Validation\\Rule::in($field['options'])],
+                'checkboxes' => ['required', 'array', 'min:1'],
+                'phone' => ['required', 'string', 'max:50'],
+                'textarea' => ['required', 'string', 'max:5000'],
+                default => ['required', 'string', 'max:500'],
+            };
+            $validator = Validator::make(['value' => $value], ['value' => $rules]);
+            if ($validator->fails()) {
+                $errors['custom_fields.'.$key] = ['Enter a valid value for '.$field['label'].'.'];
+                continue;
+            }
+            $existing[$key] = $validator->validated()['value'];
+        }
+        if ($errors) throw \\Illuminate\\Validation\\ValidationException::withMessages($errors);
+        return $existing;
+    }
+
     public function profile(Request $request, int $school): JsonResponse
     {
         $record = $this->school($request, $school);
@@ -70,9 +146,14 @@ class OwnerWorkspaceController extends Controller
                 'email' => ['nullable', 'email', 'max:255'],
                 'website' => ['nullable', 'url', 'max:255'],
                 'whatsapp' => ['nullable', 'string', 'max:30'],
+                'custom_fields' => ['sometimes', 'array'],
             ]);
 
+            unset($validated['custom_fields']);
             $changes = $validated;
+            if ($request->exists('custom_fields')) {
+                $changes['custom_fields'] = $this->saveProfileCustomFields($request, $record);
+            }
 
             // Owners must re-submit material profile edits for review. Administrators
             // can correct public data without silently resetting verification status.
@@ -112,6 +193,7 @@ class OwnerWorkspaceController extends Controller
 
         return response()->json(['data' => [
             'school' => $record,
+            'custom_profile_fields' => $this->profileCustomFieldDefinitions(),
             'completion' => $done,
             'plan' => [
                 'slug' => $planSlug,
