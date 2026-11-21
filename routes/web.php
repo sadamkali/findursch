@@ -22,6 +22,7 @@ use App\Livewire\User\SavedSchools;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\Api\AdManagerController;
 use App\Models\School;
 use App\Models\District;
 use App\Models\User;
@@ -91,6 +92,7 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('legal.privacy');
 Route::get('/terms-and-conditions', [PageController::class, 'terms'])->name('legal.terms');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/ad-banner/{banner}/click', [AdManagerController::class, 'click'])->whereNumber('banner')->name('site-ad-banner.click');
 
 // =============== CENTRALIZED AUTHENTICATION ===============
 Route::get('/login', function (Request $request) use ($dashboardUrl) {
