@@ -30,6 +30,8 @@ Route::middleware(['auth:sanctum'])
     ->prefix('admin')
     ->group(function () {
         Route::get('/overview', [AdminWorkspaceController::class, 'overview']);
+        Route::post('/schools/import/preview', [AdminSchoolImportController::class, 'preview'])->middleware('throttle:10,1');
+        Route::post('/schools/import', [AdminSchoolImportController::class, 'import'])->middleware('throttle:5,1');
         Route::get('/ad-manager', [AdManagerController::class, 'index']);
         Route::post('/ad-campaigns', [AdManagerController::class, 'storeCampaign']);
         Route::post('/ad-campaigns/{campaign}/banners', [AdManagerController::class, 'storeBanner']);
