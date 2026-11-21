@@ -37,6 +37,7 @@ Route::middleware(['auth:sanctum'])
         Route::delete('/ad-banners/{banner}', [AdManagerController::class, 'deleteBanner']);
         Route::put('/ad-placements', [AdManagerController::class, 'updatePlacements']);
 
+        // Keep the static import route before the dynamic {level} route below.
         Route::get('/location-manager', [AdminLocationController::class, 'index']);
         Route::post('/location-manager/import', [AdminLocationController::class, 'import']);
         Route::post('/location-manager/{level}', [AdminLocationController::class, 'store'])
