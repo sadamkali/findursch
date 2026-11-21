@@ -34,7 +34,7 @@
             $campaignGroups = $paidBanners->groupBy('campaign_id')->map(function ($items) {
                 return [
                     'average_impressions' => (float) $items->avg('impressions'),
-                    'banners' => $items->sortBy(['impressions', 'id'])->values(),
+                    'banners' => $items->sortBy(fn ($banner) => [(int) $banner->impressions, (int) $banner->id])->values(),
                 ];
             });
 
@@ -69,7 +69,7 @@
                     'b.impressions',
                 ]);
 
-            $siteAdBanner = $houseBanners->sortBy(['impressions', 'id'])->first();
+            $siteAdBanner = $houseBanners->sortBy(fn ($banner) => [(int) $banner->impressions, (int) $banner->id])->first();
         }
 
         if ($siteAdBanner) {
