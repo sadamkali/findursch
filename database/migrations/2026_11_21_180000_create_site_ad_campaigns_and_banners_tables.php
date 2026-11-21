@@ -20,6 +20,7 @@ return new class extends Migration
                 $table->unsignedSmallInteger('capacity')->default(1);
                 $table->boolean('show_ad_label')->default(true);
                 $table->unsignedBigInteger('fallback_banner_id')->nullable();
+                $table->index('fallback_banner_id');
                 $table->timestamps();
             });
         }
@@ -38,6 +39,7 @@ return new class extends Migration
                 $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
                 $table->timestamps();
                 $table->index(['is_house', 'is_paid']);
+                $table->index('created_by');
             });
         }
 
