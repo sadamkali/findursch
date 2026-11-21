@@ -155,19 +155,6 @@ class HomePage extends Component
 
         $insightArticles = $insightArticlesQuery->limit(4)->get();
 
-        $activeAds = SchoolAdvertisement::query()
-            ->where('status', 'active')
-            ->where(fn ($query) => $query->whereNull('starts_at')->orWhere('starts_at', '<=', now()))
-            ->where(fn ($query) => $query->whereNull('ends_at')->orWhere('ends_at', '>=', now()))
-            ->where(fn ($query) => $query->where('is_platform_ad', true)
-                ->orWhereHas('school', fn ($school) => $school->publiclyVisible()))
-            ->with('school:id,name,slug')
-            ->orderByDesc('is_platform_ad')
-            ->latest('created_at')
-            ->get();
-
-        $homeSidebarAd = $activeAds->firstWhere('placement', 'school_spotlight');
-        $homeBannerAds = $activeAds->where('placement', 'homepage_banner')->take(2)->values();
         $homepageSettings = Setting::query()
             ->whereIn('key', [
                 'homepage_hero_image_url', 'homepage_slides',
@@ -254,8 +241,6 @@ class HomePage extends Component
             'latestSchoolUpdates',
             'featuredReviews',
             'insightArticles',
-            'homeSidebarAd',
-            'homeBannerAds',
             'heroImageUrl',
             'homepageSlides',
             'homepageDisplaySettings',
