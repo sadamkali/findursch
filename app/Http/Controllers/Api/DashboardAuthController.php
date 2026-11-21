@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -23,15 +24,88 @@ use Spatie\Permission\Models\Role;
 
 class DashboardAuthController extends Controller
 {
+    private function publishedFormConfig(): array
+    {
+        $value = Setting::get('school_forms_published');
+        if (is_array($value)) return $value;
+        if (! is_string($value) || trim($value) === '') return ['version' => 1, 'fields' => [], 'option_lists' => []];
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : ['version' => 1, 'fields' => [], 'option_lists' => []];
+    }
+
+    private function validateCustomFieldValues(Request $request, string $target): array
+    {
+        $values = $request->input('custom_fields', []);
+        if (! is_array($values)) {
+            throw ValidationException::withMessages(['custom_fields' => ['The additional school details are not in a valid format.']]);
+        }
+
+        $config = $this->publishedFormConfig();
+        $lists = collect($config['option_lists'] ?? [])->keyBy('key');
+        $result = [];
+        $errors = [];
+
+        foreach (($config['fields'] ?? []) as $field) {
+            if (! is_array($field) || empty($field['enabled'])) continue;
+            $applies = $target === 'registration'
+                ? ! empty($field['registration_step'])
+                : ! empty($field['profile_enabled']);
+            if (! $applies) continue;
+
+            $key = (string) ($field['key'] ?? '');
+            if ($key === '') continue;
+            $type = (string) ($field['type'] ?? 'text');
+            $value = $values[$key] ?? null;
+            if ($type === 'checkbox' && $value === null) $value = false;
+            if (is_string($value)) $value = trim($value);
+            $required = (bool) ($field['required'] ?? false);
+            $empty = $value === null || $value === '' || $value === [];
+            if ($empty && ! $required) continue;
+            if ($empty && $required) {
+                $errors['custom_fields.'.$key] = ['Please complete '.$field['label'].'.'];
+                continue;
+            }
+
+            $options = collect($lists->get((string) ($field['option_list'] ?? ''), [])['options'] ?? [])
+                ->where('enabled', true)->pluck('value')->all();
+            $rules = match ($type) {
+                'number' => ['required', 'numeric', 'min:0'],
+                'url' => ['required', 'url', 'max:2000'],
+                'email' => ['required', 'email', 'max:255'],
+                'date' => ['required', 'date'],
+                'checkbox' => ['required', 'boolean'],
+                'select' => ['required', 'string', Rule::in($options)],
+                'checkboxes' => ['required', 'array', 'min:'.($required ? 1 : 0)],
+                'phone' => ['required', 'string', 'max:50'],
+                'textarea' => ['required', 'string', 'max:'.max(1, (int) ($field['max_length'] ?? 5000))],
+                default => ['required', 'string', 'max:'.max(1, (int) ($field['max_length'] ?? 500))],
+            };
+            $validationRules = ['value' => $rules];
+            if ($type === 'checkboxes') $validationRules['value.*'] = [Rule::in($options)];
+            $validator = Validator::make(['value' => $value], $validationRules);
+            if ($validator->fails()) {
+                $errors['custom_fields.'.$key] = ['Enter a valid value for '.$field['label'].'.'];
+                continue;
+            }
+            $result[$key] = $validator->validated()['value'];
+        }
+
+        if ($errors) throw ValidationException::withMessages($errors);
+        return $result;
+    }
+
     public function registrationOptions(): JsonResponse
     {
+        $config = $this->publishedFormConfig();
         return response()->json([
             'data' => [
                 'school_types' => SchoolType::query()->where('is_active', true)->orderBy('order')->get(['id', 'name']),
                 'regions' => Region::query()->orderBy('name')->get(['id', 'name']),
-                'districts' => \App\Models\District::query()->orderBy('name')->get(['id', 'name', 'region_id']),
+                'districts' => \\App\\Models\\District::query()->orderBy('name')->get(['id', 'name', 'region_id']),
                 'curricula' => Curriculum::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
                 'facilities' => Facility::query()->where('is_active', true)->orderBy('category')->orderBy('name')->get(['id', 'name', 'category']),
+                'form_fields' => collect($config['fields'] ?? [])->where('enabled', true)->whereNotNull('registration_step')->sortBy('sort_order')->values(),
+                'option_lists' => $config['option_lists'] ?? [],
             ],
         ]);
     }
@@ -77,6 +151,7 @@ class DashboardAuthController extends Controller
             'phone' => ['required', 'string', 'max:30', 'regex:/^\+?[0-9 ]{9,15}$/'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'custom_fields' => ['sometimes', 'array'],
             'school.name' => ['required', 'string', 'min:2', 'max:255'],
             'school.type_id' => ['required', 'integer', Rule::exists('school_types', 'id')->where('is_active', true)],
             'school.ownership' => ['required', Rule::in(['Private', 'Government', 'Faith-based', 'NGO / Community'])],
@@ -114,6 +189,7 @@ class DashboardAuthController extends Controller
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
+        $customFieldValues = $this->validateCustomFieldValues($request, 'registration');
         $schoolData = $data['school'];
         if (isset($schoolData['fees_from'], $schoolData['fees_to']) && (float) $schoolData['fees_to'] < (float) $schoolData['fees_from']) {
             throw ValidationException::withMessages([
@@ -140,7 +216,7 @@ class DashboardAuthController extends Controller
 
         $email = Str::lower(trim($data['email']));
         $approvalRequired = filter_var(Setting::get('schools_require_approval', '1'), FILTER_VALIDATE_BOOLEAN);
-        $user = DB::transaction(function () use ($data, $schoolData, $email, $youtubeId, $approvalRequired) {
+        $user = DB::transaction(function () use ($data, $schoolData, $email, $youtubeId, $approvalRequired, $customFieldValues) {
             $user = User::query()->create([
                 'name' => trim($data['first_name'].' '.$data['last_name']),
                 'email' => $email,
@@ -162,6 +238,7 @@ class DashboardAuthController extends Controller
                 'ownership' => $schoolData['ownership'],
                 'tagline' => null,
                 'description' => trim($schoolData['description']),
+                'custom_fields' => $customFieldValues,
                 'founded_year' => $schoolData['founded_year'] ?? null,
                 'address' => trim($schoolData['address']),
                 'town' => trim($schoolData['town']),
