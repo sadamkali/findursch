@@ -109,10 +109,7 @@
                     @endif
                 </section>
 
-                <a class="ad side" href="{{ route('contact') }}">
-                    Your advert here
-                    <small>300 × 250</small>
-                </a>
+                <x-site-ad-banner placement="side" />
 
                 <section class="card box">
                     <h5>Fee range (UGX)</h5>
@@ -129,13 +126,7 @@
                     </div>
                 </section>
 
-                <section class="promo2">
-                    <small>Advertise</small>
-                    <h3>Put your brand in front of parents and students</h3>
-                    <p>Reach families across Uganda every month.</p>
-                    <ul><li>Banner placements</li><li>School spotlights</li><li>Featured school videos</li></ul>
-                    <a class="btn btn-gold" href="{{ route('contact') }}">Advertise with us</a>
-                </section>
+
             </aside>
 
             <section class="results" aria-label="School results">
@@ -203,10 +194,7 @@
                                 </div>
                             </article>
                             @if($loop->iteration === 6)
-                                <div class="promo span">
-                                    <div><small>Premium schools</small><h3>Be the first school parents see</h3><p>Top of search, homepage feature and spotlight adverts.</p></div>
-                                    <a class="btn btn-brand" href="{{ route('contact') }}">See school plans</a>
-                                </div>
+                                <div class="span"><x-site-ad-banner placement="inlist" /></div>
                             @endif
                             @if($loop->iteration === 12)
                                 <div class="promo span alt-promo">
@@ -223,13 +211,7 @@
                         @endforeach
                     </div>
 
-                    @if($searchFeatureAd)
-                        <a class="promo span" href="{{ $searchFeatureAd->destination_url ?: route('schools.index') }}" target="{{ $searchFeatureAd->destination_url ? '_blank' : '_self' }}" rel="{{ $searchFeatureAd->destination_url ? 'noopener noreferrer' : '' }}">
-                            @if($searchFeatureAd->image_url)<img src="{{ $searchFeatureAd->image_url }}" alt="{{ $searchFeatureAd->image_alt ?: $searchFeatureAd->title }}" loading="lazy" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:12px">@endif
-                            <div><small>Featured placement</small><h3>{{ $searchFeatureAd->title }}</h3><p>{{ $searchFeatureAd->description }}</p></div>
-                            <span class="btn btn-brand">{{ $searchFeatureAd->cta_label ?: 'Learn more' }}</span>
-                        </a>
-                    @endif
+
 
                     <div class="pagination pg">
                         {{ $schools->onEachSide(1)->links() }}
