@@ -27,6 +27,9 @@ Route::middleware(['auth:sanctum'])
     ->prefix('admin')
     ->group(function () {
         Route::get('/overview', [AdminWorkspaceController::class, 'overview']);
+        Route::get('/form-fields', [AdminFormController::class, 'index']);
+        Route::put('/form-fields/draft', [AdminFormController::class, 'saveDraft']);
+        Route::post('/form-fields/publish', [AdminFormController::class, 'publish']);
         Route::get('/template-settings', [AdminTemplateController::class, 'settings']);
         Route::put('/template-settings', [AdminTemplateController::class, 'updateSettings']);
         Route::post('/media-upload', [AdminTemplateController::class, 'uploadMedia']);
