@@ -82,6 +82,7 @@ class OwnerWorkspaceController extends Controller
                     'help' => $field['help'] ?? '',
                     'required' => (bool) ($field['required'] ?? false),
                     'options' => collect($list['options'] ?? [])->where('enabled', true)->pluck('value')->values()->all(),
+                    'max_length' => (int) ($field['max_length'] ?? 500),
                 ];
             })->values()->all();
     }
@@ -101,6 +102,10 @@ class OwnerWorkspaceController extends Controller
             $value = $incoming[$key];
             if (is_string($value)) $value = trim($value);
             $empty = $value === null || $value === '' || $value === [];
+            if ($field['type'] === 'checkbox' && ! empty($field['required']) && ! in_array($value, [true, 1, '1'], true)) {
+                $errors['custom_fields.'.$key] = ['Please confirm '.$field['label'].'.'];
+                continue;
+            }
             if ($empty && ! empty($field['required'])) {
                 $errors['custom_fields.'.$key] = ['Please complete '.$field['label'].'.'];
                 continue;
@@ -121,7 +126,9 @@ class OwnerWorkspaceController extends Controller
                 'textarea' => ['required', 'string', 'max:5000'],
                 default => ['required', 'string', 'max:500'],
             };
-            $validator = Validator::make(['value' => $value], ['value' => $rules]);
+            $validationRules = ['value' => $rules];
+            if ($field['type'] === 'checkboxes') $validationRules['value.*'] = [Rule::in($field['options'])];
+            $validator = Validator::make(['value' => $value], $validationRules);
             if ($validator->fails()) {
                 $errors['custom_fields.'.$key] = ['Enter a valid value for '.$field['label'].'.'];
                 continue;
