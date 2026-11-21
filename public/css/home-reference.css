@@ -261,3 +261,276 @@
   .findursch-home-reference .hero-carousel-controls{bottom:16px}
   .findursch-home-reference .hero-carousel-arrow{width:30px;height:30px}
 }
+
+
+/* Responsive refinements for tablets and phones. Keep every homepage section inside the viewport. */
+.findursch-home-reference {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+.findursch-home-reference .wrap,
+.findursch-home-reference main,
+.findursch-home-reference section,
+.findursch-home-reference .cols > *,
+.findursch-home-reference .news > *,
+.findursch-home-reference .ins > *,
+.findursch-home-reference .stack,
+.findursch-home-reference aside {
+  min-width: 0;
+}
+.findursch-home-reference .wrap {
+  width: 100%;
+}
+.findursch-home-reference .search,
+.findursch-home-reference .search input,
+.findursch-home-reference .search select {
+  min-width: 0;
+}
+.findursch-home-reference .head {
+  flex-wrap: wrap;
+}
+.findursch-home-reference .head h2 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.findursch-home-reference .row > div:last-child,
+.findursch-home-reference .prem .b,
+.findursch-home-reference .spot .t {
+  min-width: 0;
+}
+.findursch-home-reference .banner[aria-label="Sponsored banners"] {
+  width: min(100% - 48px, 900px);
+  max-width: 900px;
+  min-width: 0;
+}
+.findursch-home-reference .banner[aria-label="Sponsored banners"] > .site-ad-slot {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+@media (max-width: 1100px) {
+  .findursch-home-reference .hero {
+    min-height: 440px;
+    min-height: clamp(420px, 72svh, 560px);
+    padding: 54px clamp(20px, 4vw, 42px) 78px;
+  }
+  .findursch-home-reference .hero h1 {
+    max-width: 720px;
+    font-size: clamp(36px, 5vw, 46px);
+    line-height: 1.12;
+  }
+  .findursch-home-reference .hero p {
+    max-width: 600px;
+  }
+  .findursch-home-reference .cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .findursch-home-reference .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .findursch-home-reference .news {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .findursch-home-reference .news .lead {
+    grid-column: 1 / -1;
+  }
+  .findursch-home-reference .ins {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .findursch-home-reference .ins > :first-child {
+    grid-column: 1 / -1;
+  }
+  .findursch-home-reference .vids {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .findursch-home-reference .banner[aria-label="Sponsored banners"] {
+    margin: 38px auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .findursch-home-reference {
+    font-size: 14px;
+  }
+  .findursch-home-reference .wrap {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .findursch-home-reference .hero {
+    min-height: 430px;
+    min-height: clamp(410px, 72svh, 540px);
+    padding: 48px 18px 76px;
+    background-position: center;
+  }
+  .findursch-home-reference .hero h1 {
+    font-size: clamp(32px, 7.2vw, 40px);
+    line-height: 1.13;
+    overflow-wrap: anywhere;
+  }
+  .findursch-home-reference .hero p {
+    margin: 16px auto 22px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .findursch-home-reference .search {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.72fr);
+    gap: 6px;
+    width: 100%;
+    max-width: 560px;
+    padding: 9px;
+    border-radius: 16px;
+  }
+  .findursch-home-reference .search input {
+    grid-column: 1 / -1;
+    width: 100%;
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .findursch-home-reference .search select {
+    width: 100%;
+    max-width: none;
+    min-height: 44px;
+    padding: 10px 8px;
+    border: 0;
+    border-right: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .findursch-home-reference .search .btn {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 12px;
+    justify-content: center;
+  }
+  .findursch-home-reference .hero-slide-cta {
+    max-width: 100%;
+    white-space: normal;
+  }
+  .findursch-home-reference .hero-carousel-controls {
+    bottom: 12px;
+  }
+  .findursch-home-reference .sec {
+    padding-top: 36px;
+  }
+  .findursch-home-reference .head {
+    align-items: flex-start;
+    gap: 8px 14px;
+  }
+  .findursch-home-reference .head h2 {
+    font-size: 22px;
+    line-height: 1.2;
+  }
+  .findursch-home-reference .cards,
+  .findursch-home-reference .news,
+  .findursch-home-reference .ins,
+  .findursch-home-reference .vids {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .findursch-home-reference .news .lead,
+  .findursch-home-reference .ins > :first-child {
+    grid-column: auto;
+  }
+  .findursch-home-reference .school .ph {
+    height: 180px;
+  }
+  .findursch-home-reference .spot {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .findursch-home-reference .spot > .ph {
+    min-height: 0;
+    height: 190px;
+  }
+  .findursch-home-reference .spot .t {
+    padding: 20px;
+  }
+  .findursch-home-reference .strip {
+    width: 100%;
+    max-width: none;
+    margin: 24px 0 0;
+    padding: 18px;
+    align-items: flex-start;
+  }
+  .findursch-home-reference aside {
+    width: 100%;
+  }
+  .findursch-home-reference aside > * {
+    min-width: 0;
+  }
+  .findursch-home-reference .band {
+    align-items: flex-start;
+    padding: 22px 18px;
+  }
+  .findursch-home-reference .band h3 {
+    font-size: 21px;
+  }
+  .findursch-home-reference .band .acts {
+    width: 100%;
+    flex-direction: column;
+  }
+  .findursch-home-reference .band .acts .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .findursch-home-reference .banner[aria-label="Sponsored banners"] {
+    width: calc(100% - 36px);
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    margin: 30px auto;
+  }
+  .findursch-home-reference .cta {
+    padding: 44px 18px;
+  }
+  .findursch-home-reference .cta h2 {
+    font-size: clamp(25px, 7vw, 30px);
+    line-height: 1.2;
+  }
+  .findursch-home-reference .cta .acts {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .findursch-home-reference .cta .acts .btn {
+    width: 100%;
+    justify-content: center;
+    white-space: normal;
+  }
+  .findursch-home-reference .tab {
+    top: auto;
+    bottom: 18px;
+    padding: 12px 6px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 420px) {
+  .findursch-home-reference .wrap {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .findursch-home-reference .hero {
+    min-height: 420px;
+    padding-inline: 14px;
+  }
+  .findursch-home-reference .hero h1 {
+    font-size: clamp(29px, 8.4vw, 34px);
+  }
+  .findursch-home-reference .search {
+    grid-template-columns: minmax(0, 1fr);
+    border-radius: 14px;
+  }
+  .findursch-home-reference .search input {
+    grid-column: auto;
+  }
+  .findursch-home-reference .search select {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .findursch-home-reference .head h2 {
+    font-size: 20px;
+  }
+  .findursch-home-reference .banner[aria-label="Sponsored banners"] {
+    width: calc(100% - 28px);
+  }
+}
