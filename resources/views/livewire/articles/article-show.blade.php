@@ -1,6 +1,6 @@
 <div class="resource-page">
     <a class="blogs-rtab" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
-    <div class="blogs-ad-slim"><span>FindURSCH news and education stories</span><small>Share useful stories with parents, learners and school communities across Uganda</small></div>
+    <x-site-ad-banner placement="top" />
 
     <main class="blogs-wrap resource-detail-wrap article-detail-wrap">
         <nav class="resource-crumbs"><a href="{{ route('home') }}">Home</a><span>›</span><a href="{{ request()->routeIs('news.show') ? route('news.index') : route('articles.index') }}">{{ request()->routeIs('news.show') ? 'News' : 'Blogs' }}</a><span>›</span><a href="{{ request()->routeIs('news.show') ? route('news.index', ['category' => $article->category_id]) : route('articles.index', ['category' => $article->category_id]) }}">{{ $article->category?->name ?? 'Education' }}</a><span>›</span><b>{{ $article->title }}</b></nav>
