@@ -150,6 +150,14 @@ class AdminFormController extends Controller
         $config = $this->normalizeConfig($request->input('config', []));
         $currentDraft = $this->settingArray('school_forms_draft', $this->settingArray('school_forms_published', $this->emptyConfig())));
         $currentDraft = $this->normalizeConfig($currentDraft);
+        $published = $this->normalizeConfig($this->settingArray('school_forms_published', $this->emptyConfig()));
+        $publishedKeys = collect($published['fields'])->keyBy('id');
+        foreach ($config['fields'] as $field) {
+            $existingPublished = $publishedKeys->get($field['id']);
+            if ($existingPublished && $existingPublished['key'] !== $field['key']) {
+                abort(422, 'A field key cannot be changed after the field has been published. This protects existing school answers.');
+            }
+        }
 
         if (! $permissions['can_edit_fields'] && $config['fields'] !== $currentDraft['fields']) {
             abort(403, 'Your role can manage option lists but cannot edit fields.');
