@@ -1,6 +1,6 @@
 <div class="resource-page">
     <a class="blogs-rtab" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
-    <div class="blogs-ad-slim"><span>School news on FindURSCH</span><small>Updates and announcements shared by school communities across Uganda</small></div>
+    <x-site-ad-banner placement="top" />
     <main class="blogs-wrap resource-detail-wrap">
         <nav class="resource-crumbs"><a href="{{ route('home') }}">Home</a><span>›</span><a href="{{ route('news.index') }}">News</a><span>›</span><a href="{{ route('schools.show', $post->school) }}">{{ $post->school?->name }}</a><span>›</span><b>{{ $post->title }}</b></nav>
         <div class="resource-detail-grid article-detail-grid">
@@ -16,6 +16,7 @@
             </article>
             <aside class="resource-detail-sidebar">
                 <div class="resource-sidebar-promo"><small>School profile</small><h3>{{ $post->school?->name }}</h3><p>View this school's profile, contact information, facilities and admissions details.</p><a class="blogs-btn blogs-btn-gold" href="{{ route('schools.show', $post->school) }}">View school</a></div>
+                <x-site-ad-banner placement="side" />
                 <div class="article-sidebar-links"><a href="{{ route('events.index') }}">School events →</a><a href="{{ route('scholarships.index') }}">Scholarships and bursaries →</a><a href="{{ route('news.index') }}">Latest education news →</a></div>
             </aside>
         </div>
