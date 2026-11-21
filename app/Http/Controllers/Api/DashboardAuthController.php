@@ -201,6 +201,7 @@ class DashboardAuthController extends Controller
             'school.facility_ids.*' => ['integer', 'distinct', Rule::exists('facilities', 'id')->where('is_active', true)],
             'terms_accepted' => ['accepted'],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'badge' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
@@ -237,16 +238,31 @@ class DashboardAuthController extends Controller
             }
         }
 
-        if (($request->hasFile('logo') || $request->hasFile('cover')) &&
-            config('filesystems.disks.'.config('media-library.disk_name', 'public').'.driver') !== 's3') {
-            return response()->json([
-                'message' => 'Image uploads are not available yet. Your image storage must be configured before adding a logo or cover photo. Remove the selected images to submit your registration.',
-            ], 503);
+        $hasRegistrationImages = $request->hasFile('logo') || $request->hasFile('badge') || $request->hasFile('cover');
+        if ($hasRegistrationImages) {
+            $mediaDiskName = (string) config('media-library.disk_name', 'public');
+            $mediaDisk = (array) config('filesystems.disks.'.$mediaDiskName, []);
+            $mediaStorageReady = ($mediaDisk['driver'] ?? null) === 's3'
+                && filled($mediaDisk['key'] ?? null)
+                && filled($mediaDisk['secret'] ?? null)
+                && filled($mediaDisk['bucket'] ?? null);
+
+            if (in_array($mediaDiskName, ['r2', 'filebase'], true)) {
+                $mediaStorageReady = $mediaStorageReady
+                    && filled($mediaDisk['endpoint'] ?? null)
+                    && filled($mediaDisk['url'] ?? null);
+            }
+
+            if (! $mediaStorageReady) {
+                return response()->json([
+                    'message' => 'School image storage is not fully configured. You can remove the selected images and submit your school details, then add the logo, badge and cover photo from your dashboard.',
+                ], 503);
+            }
         }
 
         $email = Str::lower(trim($data['email']));
         $approvalRequired = filter_var(Setting::get('schools_require_approval', '1'), FILTER_VALIDATE_BOOLEAN);
-        $user = DB::transaction(function () use ($data, $schoolData, $email, $youtubeId, $approvalRequired, $customFieldValues, $existingTown, $allowCustomTown, $townName, $districtId) {
+        $user = DB::transaction(function () use ($request, $data, $schoolData, $email, $youtubeId, $approvalRequired, $customFieldValues, $existingTown, $allowCustomTown, $townName, $districtId) {
             $user = User::query()->create([
                 'name' => trim($data['first_name'].' '.$data['last_name']),
                 'email' => $email,
@@ -340,18 +356,36 @@ class DashboardAuthController extends Controller
                 ]);
             }
 
+            try {
+                if ($request->hasFile('logo')) {
+                    $school->addMediaFromRequest('logo')->toMediaCollection('logo');
+                }
+                if ($request->hasFile('badge')) {
+                    $school->addMediaFromRequest('badge')->toMediaCollection('badge');
+                }
+                if ($request->hasFile('cover')) {
+                    $school->addMediaFromRequest('cover')->toMediaCollection('cover');
+                }
+            } catch (\\Throwable $exception) {
+                report($exception);
+                throw ValidationException::withMessages([
+                    'images' => ['We could not save one of the selected school images. Your registration was not completed. Please try again or submit without the images and add them from your dashboard.'],
+                ]);
+            }
+
             return $user;
         });
 
         $school = $user->ownedSchools()->latest()->firstOrFail();
-        if ($request->hasFile('logo')) {
-            $school->addMediaFromRequest('logo')->toMediaCollection('logo');
-        }
-        if ($request->hasFile('cover')) {
-            $school->addMediaFromRequest('cover')->toMediaCollection('cover');
-        }
 
-        return $this->issueDashboardSession($user);
+        return $this->issueDashboardSession($user, true, [
+            'registration' => [
+                'school_name' => $school->name,
+                'school_status' => $school->status,
+                'verification_status' => $school->verification_status,
+                'requires_review' => ! ($school->status === 'active' && $school->verification_status === 'verified'),
+            ],
+        ]);
     }
 
     public function login(Request $request): JsonResponse
@@ -462,7 +496,7 @@ class DashboardAuthController extends Controller
         return $this->issueDashboardSession($user, (bool) ($credentials['remember'] ?? true));
     }
 
-    private function issueDashboardSession(User $user, bool $remember = true): JsonResponse
+    private function issueDashboardSession(User $user, bool $remember = true, array $additional = []): JsonResponse
     {
         $isAdmin = $user->hasRole('admin') || $user->getAllPermissions()->isNotEmpty();
         $timeout = max(30, (int) Setting::get('admin_session_timeout_minutes', 120));
@@ -500,6 +534,7 @@ class DashboardAuthController extends Controller
                 'permissions' => $permissions,
             ],
             'redirectTo' => $redirectTo,
+            ...$additional,
         ]);
     }
 
