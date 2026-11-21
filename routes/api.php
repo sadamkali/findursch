@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AdminWorkspaceController;
 use App\Http\Controllers\Api\AdminFormController;
 use App\Http\Controllers\Api\AdminTemplateController;
+use App\Http\Controllers\Api\AdManagerController;
 use App\Http\Controllers\Api\DashboardAuthController;
 use App\Http\Controllers\Api\OwnerWorkspaceController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,13 @@ Route::middleware(['auth:sanctum'])
     ->prefix('admin')
     ->group(function () {
         Route::get('/overview', [AdminWorkspaceController::class, 'overview']);
+        Route::get('/ad-manager', [AdManagerController::class, 'index']);
+        Route::post('/ad-campaigns', [AdManagerController::class, 'storeCampaign']);
+        Route::post('/ad-campaigns/{campaign}/banners', [AdManagerController::class, 'storeBanner']);
+        Route::patch('/ad-banners/{banner}', [AdManagerController::class, 'updateBanner']);
+        Route::delete('/ad-banners/{banner}', [AdManagerController::class, 'deleteBanner']);
+        Route::put('/ad-placements', [AdManagerController::class, 'updatePlacements']);
+
         Route::get('/form-fields', [AdminFormController::class, 'index']);
         Route::put('/form-fields/draft', [AdminFormController::class, 'saveDraft']);
         Route::post('/form-fields/publish', [AdminFormController::class, 'publish']);
