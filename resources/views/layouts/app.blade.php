@@ -73,6 +73,7 @@
     <link rel="stylesheet" href="{{ asset('css/events-listing-reference.css') }}?v=1">
     <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=3">
     <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=3">
+    <link rel="stylesheet" href="{{ asset('css/site-ad-banners.css') }}?v=1">
     @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}">@endif
     @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}">@endif
     @if (request()->routeIs('scholarships.*'))<link rel="stylesheet" href="{{ asset('css/scholarships-reference.css') }}">@endif
@@ -262,6 +263,8 @@
         @endif
     </header>
 
+    <x-site-ad-banner placement="top" />
+
     <div x-data="compareBar" x-cloak x-show="schools.length > 0" class="compare-bar">
         <div class="site-wrap compare-bar__inner">
             <p><strong x-text="schools.length"></strong> of 3 schools selected to compare</p>
@@ -276,6 +279,11 @@
         {{ $slot ?? '' }}
         @yield('content')
     </main>
+
+    <div class="site-ad-footer-placements" aria-label="Sponsored banners">
+        <x-site-ad-banner placement="foot1" />
+        <x-site-ad-banner placement="foot2" />
+    </div>
 
     @if($siteFooterEnabled)
     <footer class="site-footer">
