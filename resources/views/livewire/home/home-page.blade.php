@@ -121,20 +121,7 @@
             @if($homepageDisplaySettings['sidebar'])
             <aside>
                 @if($homepageDisplaySettings['banner_ads'])
-                @if($homeSidebarAd)
-                    <a class="ad ad-primary ad-managed" href="{{ $homeSidebarAd->destination_url ?: route('schools.index') }}" target="{{ $homeSidebarAd->destination_url ? '_blank' : '_self' }}" rel="{{ $homeSidebarAd->destination_url ? 'noopener noreferrer' : '' }}">
-                        @if($homeSidebarAd->image_url)<img src="{{ $homeSidebarAd->image_url }}" alt="{{ $homeSidebarAd->image_alt ?: $homeSidebarAd->title }}" loading="lazy">@endif
-                        <span>{{ $homeSidebarAd->title }}</span>
-                        <small>{{ $homeSidebarAd->description }}</small>
-                        <b class="ad-cta">{{ $homeSidebarAd->cta_label ?: 'Learn more' }} →</b>
-                    </a>
-                @else
-                    <a class="ad ad-primary" href="{{ route('contact') }}">
-                        <span>Advertise with FindURSCH</span>
-                        <small>Reach parents and students across Uganda</small>
-                        <b class="ad-cta">Advertise with us →</b>
-                    </a>
-                @endif
+                    <x-site-ad-banner placement="side" />
                 @endif
 
                 @if($homepageDisplaySettings['categories'])
@@ -247,10 +234,7 @@
             @if($homepageDisplaySettings['videos'] || $homepageDisplaySettings['scholarships'] || $homepageDisplaySettings['banner_ads'])
             <div class="stack">
                 @if($homepageDisplaySettings['banner_ads'])
-                <div class="band">
-                    <div><small>Advertise with us</small><h3>Reach parents and students every month</h3><p>Promote your school, business or service to families across Uganda.</p></div>
-                    <div class="acts"><a class="btn btn-gold" href="{{ route('contact') }}">Advertise</a><a class="btn btn-ghost" href="{{ route('contact') }}">Send inquiry</a></div>
-                </div>
+                    <x-site-ad-banner placement="inlist" />
                 @endif
 
                 @if($homepageDisplaySettings['videos'])
@@ -310,14 +294,7 @@
                     <a class="foot" href="{{ route('contact') }}">Enquire about job listings</a>
                 </div>
 
-                @if($homepageDisplaySettings['banner_ads'])
-                <a class="promo" href="{{ route('contact') }}">
-                    <small>Advertise</small>
-                    <h3>Put your brand in front of parents</h3>
-                    <p>Reach families across Uganda every month with a FindURSCH promotion.</p>
-                    <span class="btn btn-gold">Advertise with us</span>
-                </a>
-                @endif
+
 
                 @if($homepageDisplaySettings['reviews'])
                 <div class="card box">
@@ -391,19 +368,7 @@
     </section>
     @endif
 
-    @if($homepageDisplaySettings['banner_ads'])
-    <div class="banner">
-        @forelse($homeBannerAds as $ad)
-            <a class="ad ad-wide ad-managed" href="{{ $ad->destination_url ?: route('schools.index') }}" target="{{ $ad->destination_url ? '_blank' : '_self' }}" rel="{{ $ad->destination_url ? 'noopener noreferrer' : '' }}">
-                @if($ad->image_url)<img src="{{ $ad->image_url }}" alt="{{ $ad->image_alt ?: $ad->title }}" loading="lazy">@endif
-                <span>{{ $ad->title }}</span><small>{{ $ad->description }}</small><b class="ad-cta">{{ $ad->cta_label ?: 'Learn more' }} →</b>
-            </a>
-        @empty
-            <a class="ad ad-wide" href="{{ route('contact') }}"><span>Promote your school or service</span><small>Reach parents and students across Uganda</small><b class="ad-cta">Advertise with us →</b></a>
-            <a class="ad ad-alt" href="{{ route('register') }}"><span>School profile promotion</span><small>Help families discover your school</small><b class="ad-cta">List your school →</b></a>
-        @endforelse
-    </div>
-    @endif
+
 
     @if($homepageDisplaySettings['cta'])
     <section class="cta">
