@@ -110,7 +110,7 @@ class AdminSchoolImportController extends Controller
                 'csv', 'txt' => 'Csv',
                 'xls' => 'Xls',
                 'xlsx' => 'Xlsx',
-                default => throw new \\UnexpectedValueException('Unsupported import file type.'),
+                default => throw new \UnexpectedValueException('Unsupported import file type.'),
             };
             $reader = IOFactory::createReader($readerType);
             $reader->setReadDataOnly(true);
