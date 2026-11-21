@@ -91,7 +91,7 @@ class OwnerWorkspaceController extends Controller
         $existing = is_array($school->custom_fields) ? $school->custom_fields : [];
         $incoming = $request->input('custom_fields', []);
         if (! is_array($incoming)) {
-            throw \\Illuminate\\Validation\\ValidationException::withMessages(['custom_fields' => ['Additional school details are not valid.']]);
+            throw \Illuminate\Validation\\ValidationException::withMessages(['custom_fields' => ['Additional school details are not valid.']]);
         }
 
         $definitions = collect($this->profileCustomFieldDefinitions())->keyBy('key');
@@ -115,7 +115,7 @@ class OwnerWorkspaceController extends Controller
                 'email' => ['required', 'email', 'max:255'],
                 'date' => ['required', 'date'],
                 'checkbox' => ['required', 'boolean'],
-                'select' => ['required', 'string', \\Illuminate\\Validation\\Rule::in($field['options'])],
+                'select' => ['required', 'string', \Illuminate\Validation\\Rule::in($field['options'])],
                 'checkboxes' => ['required', 'array', 'min:1'],
                 'phone' => ['required', 'string', 'max:50'],
                 'textarea' => ['required', 'string', 'max:5000'],
@@ -128,7 +128,7 @@ class OwnerWorkspaceController extends Controller
             }
             $existing[$key] = $validator->validated()['value'];
         }
-        if ($errors) throw \\Illuminate\\Validation\\ValidationException::withMessages($errors);
+        if ($errors) throw \Illuminate\Validation\\ValidationException::withMessages($errors);
         return $existing;
     }
 
