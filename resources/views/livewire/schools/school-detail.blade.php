@@ -99,11 +99,12 @@
             <div class="sref-stack">
                 <div class="sref-school-heading">
                     <div class="sref-school-top">
-                        <div class="sref-school-logo">
-                            <?php if ($school->getFirstMediaUrl('logo')): ?>
-                                <img src="{{ $school->getFirstMediaUrl('logo') }}" alt="{{ $school->name }} logo">
+                        <div class="sref-school-logo {{ ($school->getFirstMediaUrl('badge') || $school->getFirstMediaUrl('logo')) ? '' : 'sref-school-logo--placeholder' }}">
+                            <?php $schoolIdentityImage = $school->getFirstMediaUrl('badge') ?: $school->getFirstMediaUrl('logo'); ?>
+                            <?php if ($schoolIdentityImage): ?>
+                                <img src="{{ $schoolIdentityImage }}" alt="{{ $school->name }} school badge">
                             <?php else: ?>
-                                {{ strtoupper(mb_substr($school->name, 0, 2)) }}
+                                <span>School badge</span>
                             <?php endif; ?>
                         </div>
                         <div class="sref-school-copy">
