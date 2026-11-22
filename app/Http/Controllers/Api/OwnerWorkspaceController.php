@@ -291,7 +291,7 @@ class OwnerWorkspaceController extends Controller
     {
         $record = $this->school($request, $school);
 
-        if ($request->isMethod('post')) {
+        if ($request->isMethod('post') || $request->isMethod('patch')) {
             $validated = $request->validate([
                 'name' => ['required', 'string', 'min:2', 'max:180'],
                 'level' => ['nullable', 'string', 'max:60'],
@@ -329,7 +329,7 @@ class OwnerWorkspaceController extends Controller
     {
         $record = $this->school($request, $school);
 
-        if ($request->isMethod('post')) {
+        if ($request->isMethod('post') || $request->isMethod('patch')) {
             $validated = $request->validate([
                 'program_id' => [
                     'nullable',
