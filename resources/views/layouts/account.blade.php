@@ -17,6 +17,13 @@
         'user.profile' => 'Profile settings',
         default => 'My account',
     };
+    $accountThemeSettings = \App\Models\Setting::query()
+        ->whereIn('key', ['primary_color', 'accent_color', 'font_display', 'font_body'])
+        ->pluck('value', 'key');
+    $accountPrimaryColor = is_string($accountThemeSettings['primary_color'] ?? null) && preg_match('/^#[0-9a-fA-F]{6}$/', $accountThemeSettings['primary_color']) ? $accountThemeSettings['primary_color'] : '#0c5a49';
+    $accountAccentColor = is_string($accountThemeSettings['accent_color'] ?? null) && preg_match('/^#[0-9a-fA-F]{6}$/', $accountThemeSettings['accent_color']) ? $accountThemeSettings['accent_color'] : '#f0b030';
+    $accountDisplayFont = in_array($accountThemeSettings['font_display'] ?? '', ['Playfair Display', 'DM Serif Display'], true) ? $accountThemeSettings['font_display'] : 'Playfair Display';
+    $accountBodyFont = in_array($accountThemeSettings['font_body'] ?? '', ['Inter', 'system-ui'], true) ? $accountThemeSettings['font_body'] : 'Inter';
 @endphp
 <!DOCTYPE html>
 <html lang="en" class="h-full">
@@ -28,12 +35,26 @@
     <meta name="description" content="Manage your FindurSch account.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ asset('brand/findursch-icon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('brand/apple-touch-icon.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=1">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: {{ $accountPrimaryColor }};
+            --brand-dark: color-mix(in srgb, {{ $accountPrimaryColor }} 78%, #000);
+            --brand-deep: color-mix(in srgb, {{ $accountPrimaryColor }} 55%, #000);
+            --gold: {{ $accountAccentColor }};
+            --gold-dark: color-mix(in srgb, {{ $accountAccentColor }} 78%, #000);
+            --accent: {{ $accountAccentColor }};
+            --accent-dk: color-mix(in srgb, {{ $accountAccentColor }} 78%, #000);
+            --display-font: '{{ $accountDisplayFont }}', Georgia, serif;
+            --font-display: '{{ $accountDisplayFont }}', Georgia, serif;
+            --font-body: '{{ $accountBodyFont }}', system-ui, sans-serif;
+        }
+        body { font-family: '{{ $accountBodyFont }}', system-ui, sans-serif; }
+    </style>
+    <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=2">
     @livewireStyles
 </head>
 <body class="h-full antialiased">
