@@ -75,7 +75,8 @@ class DashboardAuthController extends Controller
             $options = collect($lists->get((string) ($field['option_list'] ?? ''), [])['options'] ?? [])
                 ->where('enabled', true)->pluck('value')->all();
             $minLength = max(0, (int) ($field['min_length'] ?? 0));
-            $maxLength = max(1, (int) ($field['max_length'] ?? ($type === 'textarea' ? 5000 : 500)));
+            $rawMaxLength = (int) ($field['max_length'] ?? 0);
+            $maxLength = $rawMaxLength > 0 ? max(1, min(5000, $rawMaxLength)) : ($type === 'textarea' ? 5000 : 500);
             $minValue = is_numeric($field['min_value'] ?? null) ? $field['min_value'] : 0;
             $numberBounds = is_numeric($field['max_value'] ?? null) ? ['max:'.$field['max_value']] : [];
             $lengthRules = array_filter([
