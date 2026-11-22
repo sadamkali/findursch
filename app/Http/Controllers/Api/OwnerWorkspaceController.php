@@ -83,6 +83,10 @@ class OwnerWorkspaceController extends Controller
             ->sortBy('sort_order')
             ->map(function ($field) use ($lists) {
                 $list = $lists->get((string) ($field['option_list'] ?? ''), []);
+                $rawMaxLength = (int) ($field['max_length'] ?? 0);
+                $maxLength = $rawMaxLength > 0
+                    ? max(1, min(5000, $rawMaxLength))
+                    : (($field['type'] ?? '') === 'textarea' ? 5000 : 500);
                 return [
                     'key' => $field['key'],
                     'label' => $field['label'],
@@ -92,7 +96,7 @@ class OwnerWorkspaceController extends Controller
                     'required' => (bool) ($field['required'] ?? false),
                     'options' => collect($list['options'] ?? [])->where('enabled', true)->pluck('value')->values()->all(),
                     'min_length' => (int) ($field['min_length'] ?? 0),
-                    'max_length' => (int) ($field['max_length'] ?? 500),
+                    'max_length' => $maxLength,
                     'min_value' => $field['min_value'] ?? null,
                     'max_value' => $field['max_value'] ?? null,
                     'rows' => (int) ($field['rows'] ?? 3),
