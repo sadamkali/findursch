@@ -54,7 +54,7 @@
         }
         body { font-family: '{{ $accountBodyFont }}', system-ui, sans-serif; }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=3">
     @livewireStyles
 </head>
 <body class="h-full antialiased">
