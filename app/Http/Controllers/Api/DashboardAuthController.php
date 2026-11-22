@@ -98,6 +98,73 @@ class DashboardAuthController extends Controller
         return $result;
     }
 
+
+    private function registrationChoices(): array
+    {
+        $defaults = [
+            'school_roles' => [
+                ['value' => 'Director / Proprietor', 'label' => 'Director / Proprietor', 'enabled' => true],
+                ['value' => 'Head teacher / Principal', 'label' => 'Head teacher / Principal', 'enabled' => true],
+                ['value' => 'Deputy head teacher', 'label' => 'Deputy head teacher', 'enabled' => true],
+                ['value' => 'Administrator', 'label' => 'Administrator', 'enabled' => true],
+                ['value' => 'Bursar', 'label' => 'Bursar', 'enabled' => true],
+                ['value' => 'Marketing officer', 'label' => 'Marketing officer', 'enabled' => true],
+                ['value' => 'Other', 'label' => 'Other', 'enabled' => true],
+            ],
+            'ownerships' => [
+                ['value' => 'Private', 'label' => 'Private', 'enabled' => true],
+                ['value' => 'Government', 'label' => 'Government', 'enabled' => true],
+                ['value' => 'Faith-based', 'label' => 'Faith-based', 'enabled' => true],
+                ['value' => 'NGO / Community', 'label' => 'NGO / Community', 'enabled' => true],
+            ],
+            'gender_policies' => [
+                ['value' => 'mixed', 'label' => 'Mixed (boys and girls)', 'enabled' => true],
+                ['value' => 'boys', 'label' => 'Boys only', 'enabled' => true],
+                ['value' => 'girls', 'label' => 'Girls only', 'enabled' => true],
+            ],
+            'boarding_types' => [
+                ['value' => 'day', 'label' => 'Day', 'enabled' => true],
+                ['value' => 'boarding', 'label' => 'Boarding', 'enabled' => true],
+                ['value' => 'mixed', 'label' => 'Day and boarding', 'enabled' => true],
+            ],
+            'religious_affiliations' => [
+                ['value' => 'Non-denominational', 'label' => 'Non-denominational', 'enabled' => true],
+                ['value' => 'Catholic', 'label' => 'Catholic', 'enabled' => true],
+                ['value' => 'Anglican', 'label' => 'Anglican', 'enabled' => true],
+                ['value' => 'Pentecostal', 'label' => 'Pentecostal', 'enabled' => true],
+                ['value' => 'Seventh-day Adventist', 'label' => 'Seventh-day Adventist', 'enabled' => true],
+                ['value' => 'Muslim', 'label' => 'Muslim', 'enabled' => true],
+                ['value' => 'None', 'label' => 'None', 'enabled' => true],
+            ],
+            'referral_sources' => [
+                ['value' => 'search_engine', 'label' => 'Search engine', 'enabled' => true],
+                ['value' => 'social_media', 'label' => 'Social media', 'enabled' => true],
+                ['value' => 'another_school', 'label' => 'Another school', 'enabled' => true],
+                ['value' => 'word_of_mouth', 'label' => 'Word of mouth', 'enabled' => true],
+                ['value' => 'findursch_team', 'label' => 'Your team contacted us', 'enabled' => true],
+                ['value' => 'other', 'label' => 'Other', 'enabled' => true],
+            ],
+        ];
+
+        $saved = Setting::get('school_registration_choices');
+        if (is_string($saved)) {
+            $decoded = json_decode($saved, true);
+            $saved = is_array($decoded) ? $decoded : [];
+        }
+
+        return array_replace($defaults, is_array($saved) ? $saved : []);
+    }
+
+    private function activeRegistrationChoiceValues(string $key): array
+    {
+        return collect($this->registrationChoices()[$key] ?? [])
+            ->filter(fn ($option) => is_array($option) && (bool) ($option['enabled'] ?? true))
+            ->pluck('value')
+            ->filter(fn ($value) => is_string($value) && trim($value) !== '')
+            ->values()
+            ->all();
+    }
+
     public function registrationOptions(): JsonResponse
     {
         $config = $this->publishedFormConfig();
@@ -117,6 +184,7 @@ class DashboardAuthController extends Controller
                 'allow_custom_town' => filter_var(Setting::get('school_locations_allow_custom_town', '1'), FILTER_VALIDATE_BOOLEAN),
                 'curricula' => Curriculum::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
                 'facilities' => Facility::query()->where('is_active', true)->orderBy('category')->orderBy('name')->get(['id', 'name', 'category']),
+                'registration_choices' => $this->registrationChoices(),
                 'form_fields' => collect($config['fields'] ?? [])->where('enabled', true)->whereNotNull('registration_step')->sortBy('sort_order')->values(),
                 'option_lists' => $config['option_lists'] ?? [],
             ],
@@ -160,18 +228,18 @@ class DashboardAuthController extends Controller
         $data = $request->validate([
             'first_name' => ['required', 'string', 'min:1', 'max:100'],
             'last_name' => ['required', 'string', 'min:1', 'max:100'],
-            'school_role' => ['required', 'string', 'max:80'],
+            'school_role' => ['required', 'string', 'max:80', Rule::in($this->activeRegistrationChoiceValues('school_roles'))],
             'phone' => ['required', 'string', 'max:30', 'regex:/^\+?[0-9 ]{9,15}$/'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'custom_fields' => ['sometimes', 'array'],
             'school.name' => ['required', 'string', 'min:2', 'max:255'],
             'school.type_id' => ['required', 'integer', Rule::exists('school_types', 'id')->where('is_active', true)],
-            'school.ownership' => ['required', Rule::in(['Private', 'Government', 'Faith-based', 'NGO / Community'])],
+            'school.ownership' => ['required', Rule::in($this->activeRegistrationChoiceValues('ownerships'))],
             'school.curriculum_id' => ['nullable', 'integer', Rule::exists('curricula', 'id')->where('is_active', true)],
-            'school.gender_policy' => ['nullable', Rule::in(['mixed', 'boys', 'girls'])],
-            'school.boarding_type' => ['nullable', Rule::in(['day', 'boarding', 'mixed'])],
-            'school.religious_affiliation' => ['nullable', 'string', 'max:100'],
+            'school.gender_policy' => ['nullable', Rule::in($this->activeRegistrationChoiceValues('gender_policies'))],
+            'school.boarding_type' => ['nullable', Rule::in($this->activeRegistrationChoiceValues('boarding_types'))],
+            'school.religious_affiliation' => ['nullable', Rule::in($this->activeRegistrationChoiceValues('religious_affiliations'))],
             'school.founded_year' => ['nullable', 'integer', 'min:1800', 'max:'.date('Y')],
             'school.website' => ['nullable', 'url', 'max:255'],
             'school.description' => ['required', 'string', 'min:30', 'max:1500'],
@@ -196,7 +264,7 @@ class DashboardAuthController extends Controller
             'school.youtube_url' => ['nullable', 'url', 'max:500'],
             'school.facebook_url' => ['nullable', 'url', 'max:500'],
             'school.instagram_url' => ['nullable', 'url', 'max:500'],
-            'school.referral_source' => ['nullable', 'string', 'max:120'],
+            'school.referral_source' => ['nullable', Rule::in($this->activeRegistrationChoiceValues('referral_sources'))],
             'school.facility_ids' => ['nullable', 'array', 'max:100'],
             'school.facility_ids.*' => ['integer', 'distinct', Rule::exists('facilities', 'id')->where('is_active', true)],
             'terms_accepted' => ['accepted'],
