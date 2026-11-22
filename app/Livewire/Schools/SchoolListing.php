@@ -137,6 +137,9 @@ class SchoolListing extends Component
             ->publiclyVisible()
             ->with([
                 'district.region',
+                'county',
+                'subCounty',
+                'parish',
                 'type',
                 'curricula',
                 'media',

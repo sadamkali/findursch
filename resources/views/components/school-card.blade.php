@@ -37,7 +37,12 @@
             @endif
             <div class="mb-3 flex items-center text-sm text-gray-500">
                 <svg class="mr-1 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span>{{ $school->district?->name }}</span>
+                <span>{{ collect([
+                    $school->district?->name,
+                    $school->county?->name,
+                    $school->subCounty?->name,
+                    $school->parish?->name,
+                ])->filter()->unique()->implode(', ') }}</span>
             </div>
             <div class="flex items-center justify-between border-t border-gray-100 pt-3">
                 <div class="flex items-center">
