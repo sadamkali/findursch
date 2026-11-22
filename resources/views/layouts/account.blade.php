@@ -32,6 +32,8 @@
     <link rel="icon" type="image/png" href="{{ asset('brand/findursch-icon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('brand/apple-touch-icon.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=1">
     @livewireStyles
 </head>
 <body class="h-full antialiased">

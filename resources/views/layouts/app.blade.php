@@ -101,6 +101,7 @@
         }
         body { font-family: '{{ $siteBodyFont }}', system-ui, sans-serif; }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=1">
 </head>
 <body class="h-full bg-white text-gray-900 antialiased">
     @php
