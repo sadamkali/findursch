@@ -320,61 +320,195 @@ class AdminLocationController extends Controller
         ];
 
         DB::transaction(function () use ($data, &$counts) {
-            foreach ($data['items'] as $item) {
-                $regionName = $this->cleanName($item['region']);
-                $districtName = $this->cleanName($item['district']);
-                $townName = $this->cleanName((string) ($item['town'] ?? ''));
+            $items = collect($data['items'])->map(fn (array $item) => [
+                'region' => $this->cleanName($item['region']),
+                'district' => $this->cleanName($item['district']),
+                'town' => $this->cleanName((string) ($item['town'] ?? '')),
+            ])->all();
 
-                $region = $this->findByName('regions', $regionName);
-                if (! $region) {
-                    $regionId = DB::table('regions')->insertGetId([
-                        'name' => $regionName,
-                        'slug' => $this->slugFor('regions', $regionName),
-                        'is_active' => true,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                    $region = DB::table('regions')->where('id', $regionId)->first();
-                    $counts['regions_created']++;
-                } else {
+            $makeSlug = static function (string $name, array &$usedSlugs): string {
+                $base = Str::slug($name);
+                $base = $base !== '' ? $base : 'location';
+                $candidate = $base;
+                $suffix = 2;
+
+                while (isset($usedSlugs[$candidate])) {
+                    $candidate = $base.'-'.$suffix++;
+                }
+
+                $usedSlugs[$candidate] = true;
+
+                return $candidate;
+            };
+
+            $insertInChunks = static function (string $table, array $rows): void {
+                foreach (array_chunk($rows, 500) as $chunk) {
+                    DB::table($table)->insert($chunk);
+                }
+            };
+
+            /*
+             * Resolve and insert regions in batches. The map is updated as soon
+             * as a new name is queued so repeated rows count as existing without
+             * creating duplicate records.
+             */
+            $regions = DB::table('regions')->get(['id', 'name', 'slug']);
+            $regionIdsByName = [];
+            $usedRegionSlugs = [];
+
+            foreach ($regions as $region) {
+                $key = $this->normalized($region->name);
+                if (! array_key_exists($key, $regionIdsByName)) {
+                    $regionIdsByName[$key] = (int) $region->id;
+                }
+                $usedRegionSlugs[$region->slug] = true;
+            }
+
+            $newRegions = [];
+            foreach ($items as $item) {
+                $key = $this->normalized($item['region']);
+                if (array_key_exists($key, $regionIdsByName)) {
                     $counts['regions_existing']++;
-                }
-
-                $district = $this->findByName('districts', $districtName, 'region_id', (int) $region->id);
-                if (! $district) {
-                    $districtId = DB::table('districts')->insertGetId([
-                        'region_id' => $region->id,
-                        'name' => $districtName,
-                        'slug' => $this->slugFor('districts', $districtName),
-                        'school_count' => 0,
-                        'is_featured' => false,
-                        'is_active' => true,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                    $district = DB::table('districts')->where('id', $districtId)->first();
-                    $counts['districts_created']++;
-                } else {
-                    $counts['districts_existing']++;
-                }
-
-                if ($townName === '') {
                     continue;
                 }
 
-                if ($this->findByName('sub_counties', $townName, 'district_id', (int) $district->id)) {
-                    $counts['towns_existing']++;
-                } else {
-                    DB::table('sub_counties')->insert([
-                        'district_id' => $district->id,
-                        'name' => $townName,
-                        'slug' => $this->slugFor('sub_counties', $townName),
-                        'is_active' => true,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                    $counts['towns_created']++;
+                $regionIdsByName[$key] = null;
+                $newRegions[] = [
+                    'name' => $item['region'],
+                    'slug' => $makeSlug($item['region'], $usedRegionSlugs),
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+                $counts['regions_created']++;
+            }
+
+            if ($newRegions !== []) {
+                $insertInChunks('regions', $newRegions);
+                $regions = DB::table('regions')->get(['id', 'name', 'slug']);
+                $regionIdsByName = [];
+                foreach ($regions as $region) {
+                    $key = $this->normalized($region->name);
+                    if (! array_key_exists($key, $regionIdsByName)) {
+                        $regionIdsByName[$key] = (int) $region->id;
+                    }
                 }
+            }
+
+            $regionIds = array_values(array_unique(array_map(
+                fn (array $item) => $regionIdsByName[$this->normalized($item['region'])],
+                $items
+            )));
+
+            /*
+             * Resolve districts using their parent region, then insert only the
+             * missing combinations. Slugs remain unique across the whole table.
+             */
+            $districts = DB::table('districts')
+                ->whereIn('region_id', $regionIds)
+                ->get(['id', 'region_id', 'name', 'slug']);
+            $districtIdsByKey = [];
+            $usedDistrictSlugs = [];
+
+            foreach ($districts as $district) {
+                $key = (int) $district->region_id.'|'.$this->normalized($district->name);
+                if (! array_key_exists($key, $districtIdsByKey)) {
+                    $districtIdsByKey[$key] = (int) $district->id;
+                }
+                $usedDistrictSlugs[$district->slug] = true;
+            }
+
+            $newDistricts = [];
+            foreach ($items as $item) {
+                $regionId = $regionIdsByName[$this->normalized($item['region'])];
+                $key = $regionId.'|'.$this->normalized($item['district']);
+
+                if (array_key_exists($key, $districtIdsByKey)) {
+                    $counts['districts_existing']++;
+                    continue;
+                }
+
+                $districtIdsByKey[$key] = null;
+                $newDistricts[] = [
+                    'region_id' => $regionId,
+                    'name' => $item['district'],
+                    'slug' => $makeSlug($item['district'], $usedDistrictSlugs),
+                    'school_count' => 0,
+                    'is_featured' => false,
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+                $counts['districts_created']++;
+            }
+
+            if ($newDistricts !== []) {
+                $insertInChunks('districts', $newDistricts);
+                $districts = DB::table('districts')
+                    ->whereIn('region_id', $regionIds)
+                    ->get(['id', 'region_id', 'name', 'slug']);
+                $districtIdsByKey = [];
+                foreach ($districts as $district) {
+                    $key = (int) $district->region_id.'|'.$this->normalized($district->name);
+                    if (! array_key_exists($key, $districtIdsByKey)) {
+                        $districtIdsByKey[$key] = (int) $district->id;
+                    }
+                }
+            }
+
+            $districtIds = array_values(array_unique(array_map(
+                fn (array $item) => $districtIdsByKey[
+                    $regionIdsByName[$this->normalized($item['region'])].'|'.$this->normalized($item['district'])
+                ],
+                $items
+            )));
+
+            /*
+             * Towns and areas are optional. Resolve them by district and insert
+             * missing names in batches, keeping existing school assignments intact.
+             */
+            $towns = DB::table('sub_counties')
+                ->whereIn('district_id', $districtIds)
+                ->get(['id', 'district_id', 'name', 'slug']);
+            $townExistsByKey = [];
+            $usedTownSlugs = [];
+
+            foreach ($towns as $town) {
+                $key = (int) $town->district_id.'|'.$this->normalized($town->name);
+                $townExistsByKey[$key] = true;
+                $usedTownSlugs[$town->slug] = true;
+            }
+
+            $newTowns = [];
+            foreach ($items as $item) {
+                if ($item['town'] === '') {
+                    continue;
+                }
+
+                $districtKey = $regionIdsByName[$this->normalized($item['region'])]
+                    .'|'.$this->normalized($item['district']);
+                $districtId = $districtIdsByKey[$districtKey];
+                $key = $districtId.'|'.$this->normalized($item['town']);
+
+                if (isset($townExistsByKey[$key])) {
+                    $counts['towns_existing']++;
+                    continue;
+                }
+
+                $townExistsByKey[$key] = true;
+                $newTowns[] = [
+                    'district_id' => $districtId,
+                    'name' => $item['town'],
+                    'slug' => $makeSlug($item['town'], $usedTownSlugs),
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+                $counts['towns_created']++;
+            }
+
+            if ($newTowns !== []) {
+                $insertInChunks('sub_counties', $newTowns);
             }
         });
 
