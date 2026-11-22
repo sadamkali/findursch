@@ -35,6 +35,10 @@ Route::middleware(['auth:sanctum'])
         Route::post('/schools/import/preview', [AdminSchoolImportController::class, 'preview'])->middleware('throttle:10,1');
         Route::get('/school-owner-options', [AdminWorkspaceController::class, 'schoolOwnerOptions']);
         Route::post('/schools', [AdminWorkspaceController::class, 'createSchool']);
+        Route::get('/schools/{id}/editor', [AdminWorkspaceController::class, 'schoolEditor'])->whereNumber('id');
+        Route::patch('/schools/{id}/editor', [AdminWorkspaceController::class, 'updateSchoolEditor'])->whereNumber('id');
+        Route::patch('/schools/{id}/owner-profile', [AdminWorkspaceController::class, 'updateSchoolOwnerProfile'])->whereNumber('id');
+        Route::post('/schools/{id}/owner-password', [AdminWorkspaceController::class, 'setSchoolOwnerPassword'])->whereNumber('id');
         Route::post('/schools/{id}/owner', [AdminWorkspaceController::class, 'updateSchoolOwner'])->whereNumber('id');
         Route::post('/schools/{id}/owner-invitation', [AdminWorkspaceController::class, 'resendSchoolOwnerInvitation'])->whereNumber('id');
         Route::post('/schools/import', [AdminSchoolImportController::class, 'import'])->middleware('throttle:5,1');
