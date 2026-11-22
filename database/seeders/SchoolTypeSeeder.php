@@ -24,10 +24,21 @@ class SchoolTypeSeeder extends Seeder
         ];
 
         foreach ($types as $type) {
-            SchoolType::updateOrCreate(
-                ['slug' => Str::slug($type['name'])],
-                array_merge($type, ['is_active' => true])
-            );
+            $model = SchoolType::query()
+                ->whereRaw('LOWER(BTRIM(name)) = ?', [mb_strtolower(trim($type['name']))])
+                ->first();
+
+            if (! $model) {
+                $model = SchoolType::query()->where('slug', Str::slug($type['name']))->first();
+            }
+
+            if (! $model) {
+                $model = new SchoolType();
+                $model->slug = Str::slug($type['name']);
+            }
+
+            $model->fill(array_merge($type, ['is_active' => true]));
+            $model->save();
         }
     }
 }
