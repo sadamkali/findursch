@@ -320,7 +320,7 @@
             @endif
         </div>
         @endif
-    </main>
+    </div>
 
     @if($homepageDisplaySettings['insights'])
     <section class="tinted">
