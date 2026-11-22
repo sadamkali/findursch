@@ -1,9 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+<section class="py-12" style="background-color:var(--brand);">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <p class="text-sm font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.76)">FindurSch policies</p><h1 class="mt-2 text-4xl font-semibold" style="font-family: 'DM Serif Display', serif; color:#fff;">Terms and conditions</h1><p class="mt-3 text-sm" style="color:rgba(255,255,255,.88)">Last updated: 17 November 2026</p>
+    </div>
+</section>
 <section class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-    <p class="text-sm font-semibold uppercase tracking-wider text-primary">FindurSch policies</p><h1 class="mt-2 text-4xl font-semibold text-gray-900" style="font-family: 'DM Serif Display', serif;">Terms and conditions</h1><p class="mt-3 text-sm text-gray-500">Last updated: 17 November 2026</p>
-    <div class="prose prose-gray mt-8 max-w-none">
+    <div class="prose prose-gray max-w-none">
         <p>These terms describe the basic rules for using FindurSch. By accessing the platform, you agree to use it lawfully and responsibly.</p>
         <h2>Purpose of the platform</h2><p>FindurSch helps users discover and compare school information, save listings, send inquiries and read or submit reviews. It is an information and communication service. It does not itself enrol learners or guarantee admission, school quality, availability or outcomes.</p>
         <h2>School information</h2><p>We aim to review school listings, but information may be incomplete, outdated or changed by a school. A verified label indicates that a listing has passed the platform's review process; it is not a guarantee of every statement or a government accreditation. Confirm fees, admissions, facilities and current requirements directly with the school.</p>

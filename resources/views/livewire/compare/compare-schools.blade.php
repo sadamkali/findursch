@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="bg-gray-50 py-8">
+<div class="py-8" style="background-color:var(--brand);">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h1 class="text-4xl font-normal mb-4" style="font-family: 'DM Serif Display', serif;">Compare Schools</h1>
-        <p class="text-gray-600">Side-by-side comparison of up to 3 schools</p>
+        <h1 class="text-4xl font-normal mb-4" style="font-family: 'DM Serif Display', serif; color:#fff;">Compare Schools</h1>
+        <p style="color:rgba(255,255,255,.88)">Side-by-side comparison of up to 3 schools</p>
     </div>
 </div>
 

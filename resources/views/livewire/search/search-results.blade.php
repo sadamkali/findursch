@@ -1,11 +1,11 @@
 <div>
-<div class="bg-gray-50 py-8">
+<div class="py-8" style="background-color:var(--brand);">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h1 class="text-3xl font-normal mb-4" style="font-family: 'DM Serif Display', serif;">
+        <h1 class="text-3xl font-normal mb-4" style="font-family: 'DM Serif Display', serif; color:#fff;">
             Search Results
-            @if($q) <span class="text-primary font-normal">for "{{ $q }}"</span> @endif
+            @if($q) <span class="font-normal" style="color:#fff">for "{{ $q }}"</span> @endif
         </h1>
-        <p class="text-gray-600">{{ $schools->total() }} schools found</p>
+        <p style="color:rgba(255,255,255,.88)">{{ $schools->total() }} schools found</p>
     </div>
 </div>
 

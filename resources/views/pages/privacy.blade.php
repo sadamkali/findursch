@@ -1,9 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+<section class="py-12" style="background-color:var(--brand);">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <p class="text-sm font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.76)">FindurSch policies</p><h1 class="mt-2 text-4xl font-semibold" style="font-family: 'DM Serif Display', serif; color:#fff;">Privacy policy</h1><p class="mt-3 text-sm" style="color:rgba(255,255,255,.88)">Last updated: 17 November 2026</p>
+    </div>
+</section>
 <section class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-    <p class="text-sm font-semibold uppercase tracking-wider text-primary">FindurSch policies</p><h1 class="mt-2 text-4xl font-semibold text-gray-900" style="font-family: 'DM Serif Display', serif;">Privacy policy</h1><p class="mt-3 text-sm text-gray-500">Last updated: 17 November 2026</p>
-    <div class="prose prose-gray mt-8 max-w-none">
+    <div class="prose prose-gray max-w-none">
         <p>This page explains the information FindurSch uses to operate its school discovery and account services. It is a platform privacy notice, not a substitute for advice on applicable Ugandan data-protection requirements.</p>
         <h2>Information we collect</h2><ul><li><strong>Account information:</strong> name, email address, phone number and account profile details you provide.</li><li><strong>School interactions:</strong> saved schools, school inquiries, reviews and responses associated with your account.</li><li><strong>Messages:</strong> information you submit through the contact form.</li><li><strong>Technical visit information:</strong> when a school profile is opened, the platform currently records the school viewed, date and time, IP address, session identifier and referring page where available.</li></ul>
         <h2>How information is used</h2><p>Information is used to operate user accounts, show saved schools and account history, send school inquiries to the appropriate listing, moderate reviews, respond to contact messages, protect the service and understand how school listings are used.</p>
