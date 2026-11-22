@@ -372,6 +372,10 @@ class AdminFormController extends Controller
             if ($type === 'number' && $minValue !== null && $maxValue !== null && $minValue > $maxValue) {
                 abort(422, 'A number field minimum cannot be greater than its maximum.');
             }
+            $rawMaxLength = (int) ($field['max_length'] ?? 0);
+            $normalizedMaxLength = $rawMaxLength > 0
+                ? max(1, min(5000, $rawMaxLength))
+                : ($type === 'textarea' ? 5000 : 500);
             $seenIds[$id] = true;
             $seenKeys[$key] = true;
             $normalizedFields[] = [
@@ -387,7 +391,7 @@ class AdminFormController extends Controller
                 'profile_enabled' => $profileEnabled,
                 'option_list' => $optionList !== '' ? $optionList : null,
                 'min_length' => max(0, min(5000, (int) ($field['min_length'] ?? 0))),
-                'max_length' => max(0, min(5000, (int) ($field['max_length'] ?? 0))),
+                'max_length' => $normalizedMaxLength,
                 'min_value' => $minValue,
                 'max_value' => $maxValue,
                 'rows' => max(2, min(12, (int) ($field['rows'] ?? 4))),
