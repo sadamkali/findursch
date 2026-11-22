@@ -437,13 +437,15 @@ class AdminWorkspaceController extends Controller
         ]);
 
         $permissions = ['admin.schools.edit_any'];
-        if ($request->has('status') || $request->has('verification_status')) {
-            $permissions[] = 'admin.schools.approve';
+        $statusChanged = $data['status'] !== $school->status;
+        $verificationChanged = $data['verification_status'] !== $school->verification_status;
+        if ($statusChanged || $verificationChanged) {
+            $permissions[] = $data['status'] === 'suspended'
+                ? 'admin.schools.suspend'
+                : 'admin.schools.approve';
         }
-        if ($data['status'] === 'suspended') {
-            $permissions[] = 'admin.schools.suspend';
-        }
-        if ($request->has('is_featured') || $request->has('featured_until')) {
+        if ((bool) $data['is_featured'] !== (bool) $school->is_featured ||
+            ($data['featured_until'] ?? null) !== optional($school->featured_until)->format('Y-m-d')) {
             $permissions[] = 'admin.schools.feature';
         }
         foreach (array_unique($permissions) as $permission) {
