@@ -32,7 +32,7 @@
         </div>
     </section>
 
-    <main class="wrap">
+    <div class="wrap">
         @if($homepageDisplaySettings['featured_schools'] || $homepageDisplaySettings['sidebar'])
         <div class="cols sec" @if(!$homepageDisplaySettings['featured_schools'] || !$homepageDisplaySettings['sidebar']) style="grid-template-columns:minmax(0,1fr)" @endif>
             @if($homepageDisplaySettings['featured_schools'])
@@ -42,10 +42,10 @@
                     <a class="more" href="{{ route('schools.index') }}">View all</a>
                 </div>
 
-                <div class="slider">
-                    <span class="arrow l" aria-hidden="true">‹</span>
-                    <span class="arrow r" aria-hidden="true">›</span>
-                    <div class="cards">
+                <div class="slider" x-data="schoolCarousel">
+                    <button type="button" class="arrow l" x-show="pages > 1" @click="previous()" aria-label="Previous featured schools">‹</button>
+                    <button type="button" class="arrow r" x-show="pages > 1" @click="next()" aria-label="Next featured schools">›</button>
+                    <div class="cards" x-ref="track" @scroll.debounce.80ms="sync()">
                         @forelse($featuredSchools as $school)
                             <a class="card school" href="{{ route('schools.show', $school) }}">
                                 @php
@@ -88,7 +88,11 @@
                         @endif
                     </div>
                 </div>
-                <div class="dots" aria-hidden="true"><i></i><i class="on"></i><i></i></div>
+                <div class="school-carousel-dots" x-show="pages > 1" aria-label="Featured school pages">
+                    <template x-for="page in pages" :key="page">
+                        <button type="button" :class="{on: activePage === page - 1}" @click="go(page - 1)" :aria-label="'Show featured schools page ' + page" :aria-current="activePage === page - 1 ? 'true' : 'false'"></button>
+                    </template>
+                </div>
 
                 @if($spotlightSchool)
                     <div class="card spot">
