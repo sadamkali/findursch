@@ -690,7 +690,7 @@ class AdminLocationController extends Controller
     {
         $this->authorizeManage($request);
         $data = $request->validate([
-            'action' => ['required', 'in:approve,merge,reject'],
+            'action' => ['required', 'in:merge,reject'],
             'target_town_id' => ['required_if:action,merge', 'nullable', 'integer'],
         ]);
 
@@ -708,28 +708,12 @@ class AdminLocationController extends Controller
             return response()->json(['message' => 'Town suggestion rejected.']);
         }
 
-        if ($data['action'] === 'approve') {
-            $town = $this->findByName('sub_counties', $suggestion->suggested_name, 'district_id', (int) $suggestion->district_id);
-            if (! $town) {
-                $id = DB::table('sub_counties')->insertGetId([
-                    'district_id' => $suggestion->district_id,
-                    'name' => $suggestion->suggested_name,
-                    'slug' => $this->slugFor('sub_counties', $suggestion->suggested_name),
-                    'is_active' => true,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-                $town = DB::table('sub_counties')->where('id', $id)->first();
-            } else {
-                DB::table('sub_counties')->where('id', $town->id)->update(['is_active' => true, 'updated_at' => now()]);
-            }
-        } else {
-            $town = DB::table('sub_counties')
-                ->where('id', $data['target_town_id'])
-                ->where('district_id', $suggestion->district_id)
-                ->first();
-            abort_unless($town, 422, 'Choose a town or area in the same district.');
-        }
+        $town = DB::table('sub_counties')
+            ->where('id', $data['target_town_id'])
+            ->where('district_id', $suggestion->district_id)
+            ->whereNotNull('county_id')
+            ->first();
+        abort_unless($town, 422, 'Choose an approved subcounty under a county in the same district.');
 
         DB::transaction(function () use ($suggestion, $town, $request, $suggestionId, $data) {
             DB::table('schools')
@@ -742,7 +726,7 @@ class AdminLocationController extends Controller
                 ]);
 
             DB::table('location_suggestions')->where('id', $suggestionId)->update([
-                'status' => $data['action'] === 'approve' ? 'approved' : 'merged',
+                'status' => 'merged',
                 'target_sub_county_id' => $town->id,
                 'reviewed_by' => $request->user()->id,
                 'reviewed_at' => now(),
@@ -751,7 +735,7 @@ class AdminLocationController extends Controller
         });
 
         return response()->json([
-            'message' => $data['action'] === 'approve' ? 'Town added to the approved list.' : 'School locations merged into the selected town.',
+            'message' => 'School locations merged into the selected subcounty.',
         ]);
     }
 }
