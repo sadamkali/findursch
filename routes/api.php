@@ -33,6 +33,7 @@ Route::middleware(['auth:sanctum'])
     ->group(function () {
         Route::get('/overview', [AdminWorkspaceController::class, 'overview']);
         Route::post('/schools/import/preview', [AdminSchoolImportController::class, 'preview'])->middleware('throttle:10,1');
+        Route::get('/school-editor-options', [AdminWorkspaceController::class, 'schoolEditorOptions']);
         Route::get('/school-owner-options', [AdminWorkspaceController::class, 'schoolOwnerOptions']);
         Route::post('/schools', [AdminWorkspaceController::class, 'createSchool']);
         Route::get('/schools/{id}/editor', [AdminWorkspaceController::class, 'schoolEditor'])->whereNumber('id');
