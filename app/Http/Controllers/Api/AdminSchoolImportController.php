@@ -8,10 +8,13 @@ use App\Models\District;
 use App\Models\Region;
 use App\Models\School;
 use App\Models\SchoolType;
+use App\Models\User;
+use App\Services\SchoolOwnerAccountService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -46,30 +49,58 @@ class AdminSchoolImportController extends Controller
             ], 422);
         }
 
-        $created = DB::transaction(function () use ($rows): int {
+        $result = DB::transaction(function () use ($rows): array {
             $count = 0;
+            $invitationOwners = [];
+            $ownerAccounts = app(SchoolOwnerAccountService::class);
 
             foreach ($rows as $row) {
                 if (! $row['ready']) {
                     continue;
                 }
 
-                $school = School::query()->create($row['data']);
+                $owner = $ownerAccounts->resolveOrCreate($row['owner'], (int) $row['data']['district_id']);
+                $school = School::query()->create([
+                    ...$row['data'],
+                    'owner_id' => $owner['user']->id,
+                ]);
 
                 if ($row['curriculum_ids'] !== []) {
                     $school->curricula()->sync($row['curriculum_ids']);
                 }
 
+                if ($owner['invitation_pending']) {
+                    $invitationOwners[$owner['user']->id] = $owner['user'];
+                }
+
                 $count++;
             }
 
-            return $count;
+            return ['count' => $count, 'invitation_owners' => array_values($invitationOwners)];
         });
 
+        $sentInvitations = 0;
+        $failedInvitations = 0;
+        $ownerAccounts = app(SchoolOwnerAccountService::class);
+        foreach ($result['invitation_owners'] as $owner) {
+            try {
+                if ($ownerAccounts->sendInvitation($owner) === Password::RESET_LINK_SENT) {
+                    $sentInvitations++;
+                } else {
+                    $failedInvitations++;
+                }
+            } catch (\\Throwable $exception) {
+                report($exception);
+                $failedInvitations++;
+            }
+        }
+
         return response()->json([
-            'message' => $created.' school record'.($created === 1 ? '' : 's').' imported successfully. They have been sent for review.',
+            'message' => $result['count'].' school record'.($result['count'] === 1 ? '' : 's').' imported successfully. Each school has an assigned owner account and is awaiting review.',
             'data' => [
-                'imported_rows' => $created,
+                'imported_rows' => $result['count'],
+                'owner_invitations_sent' => $sentInvitations,
+                'owner_invitations_failed' => $failedInvitations,
                 'file_name' => $file->getClientOriginalName(),
             ],
         ]);
@@ -100,7 +131,7 @@ class AdminSchoolImportController extends Controller
      * resolve names against the existing reference lists and validate every
      * record before anything is written to the database.
      *
-     * @return array<int, array{row_number:int, school_name:string, region:string, district:string, school_type:string, errors:array<int,string>, ready:bool, data:array<string,mixed>, curriculum_ids:array<int,int>}>
+     * @return array<int, array{row_number:int, school_name:string, region:string, district:string, school_type:string, owner:array<string,mixed>, errors:array<int,string>, ready:bool, data:array<string,mixed>, curriculum_ids:array<int,int>}>
      */
     private function prepareRows(UploadedFile $file): array
     {
@@ -142,6 +173,13 @@ class AdminSchoolImportController extends Controller
             'whatsapp_number' => 'whatsapp',
             'founded' => 'founded_year',
             'registration_no' => 'registration_number',
+            'representative_name' => 'owner_name',
+            'account_owner_name' => 'owner_name',
+            'owner' => 'owner_name',
+            'representative_email' => 'owner_email',
+            'account_owner_email' => 'owner_email',
+            'representative_phone' => 'owner_phone',
+            'account_owner_phone' => 'owner_phone',
         ];
 
         $headerIndex = null;
@@ -161,7 +199,7 @@ class AdminSchoolImportController extends Controller
                 $candidate[$header] = (int) $column;
             }
 
-            if (count(array_intersect(['school_name', 'school_type', 'region', 'district'], array_keys($candidate))) === 4) {
+            if (count(array_intersect(['school_name', 'school_type', 'region', 'district', 'owner_name', 'owner_email'], array_keys($candidate))) === 6) {
                 $headerIndex = (int) $index;
                 $headerMap = $candidate;
                 break;
@@ -201,9 +239,18 @@ class AdminSchoolImportController extends Controller
             $regionName = trim((string) ($values['region'] ?? ''));
             $districtName = trim((string) ($values['district'] ?? ''));
             $typeName = trim((string) ($values['school_type'] ?? ''));
+            $ownerName = trim((string) ($values['owner_name'] ?? ''));
+            $ownerEmail = Str::lower(trim((string) ($values['owner_email'] ?? '')));
+            $ownerPhone = trim((string) ($values['owner_phone'] ?? ''));
 
             if ($name === '') {
                 $errors[] = 'School Name is required.';
+            }
+            if ($ownerName === '') {
+                $errors[] = 'Owner Name is required so the school can receive a login account.';
+            }
+            if ($ownerEmail === '' || ! filter_var($ownerEmail, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'A valid Owner Email is required for the school login account.';
             }
 
             $region = $regionName !== ''
@@ -249,8 +296,21 @@ class AdminSchoolImportController extends Controller
                 return $value === '' ? null : $value;
             };
 
+            $ownerDetails = [
+                'name' => $ownerName,
+                'email' => $ownerEmail,
+                'phone' => $ownerPhone,
+            ];
+            if ($ownerEmail !== '' && filter_var($ownerEmail, FILTER_VALIDATE_EMAIL)) {
+                $existingOwner = User::query()->whereRaw('LOWER(email) = ?', [$ownerEmail])->first();
+                if ($existingOwner && $existingOwner->user_type !== 'school_owner') {
+                    $errors[] = 'Owner Email already belongs to a non-school-owner account. Use a school-owner account or another email.';
+                } elseif ($existingOwner && (in_array($existingOwner->status, ['suspended', 'banned'], true) || ($existingOwner->status === 'inactive' && ! $existingOwner->owner_invitation_pending))) {
+                    $errors[] = 'The selected school-owner account is inactive or restricted. Reactivate it before importing this school.';
+                }
+            }
+
             $data = [
-                'owner_id' => null,
                 'type_id' => $schoolType?->id,
                 'district_id' => $district?->id,
                 'name' => $name,
@@ -330,6 +390,7 @@ class AdminSchoolImportController extends Controller
                 'region' => $regionName,
                 'district' => $districtName,
                 'school_type' => $typeName,
+                'owner' => $ownerDetails,
                 'errors' => array_values(array_unique($errors)),
                 'ready' => $errors === [],
                 'data' => $data,
@@ -365,6 +426,11 @@ class AdminSchoolImportController extends Controller
                 'region' => $row['region'],
                 'district' => $row['district'],
                 'school_type' => $row['school_type'],
+                'owner_name' => $row['owner']['name'],
+                'owner_email' => $row['owner']['email'],
+                'owner_account_action' => User::query()->whereRaw('LOWER(email) = ?', [$row['owner']['email']])->where('user_type', 'school_owner')->exists()
+                    ? 'Link existing account'
+                    : 'Create account and send invitation',
                 'errors' => $row['errors'],
                 'ready' => $row['ready'],
             ], array_slice($rows, 0, 40)),

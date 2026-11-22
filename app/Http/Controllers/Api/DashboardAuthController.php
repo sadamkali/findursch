@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -440,6 +441,51 @@ class DashboardAuthController extends Controller
                 'requires_review' => ! ($school->status === 'active' && $school->verification_status === 'verified'),
             ],
         ]);
+    }
+
+
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email', 'max:255'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $status = Password::broker()->reset(
+            [
+                'token' => $data['token'],
+                'email' => Str::lower(trim($data['email'])),
+                'password' => $data['password'],
+                'password_confirmation' => $request->input('password_confirmation'),
+            ],
+            function (User $user, string $password): void {
+                $invitationPending = (bool) $user->owner_invitation_pending && $user->status === 'inactive';
+
+                $updates = ['password' => $password];
+                if ($invitationPending) {
+                    $updates['status'] = 'active';
+                    $updates['owner_invitation_pending'] = false;
+                    $updates['email_verified_at'] = now();
+                }
+
+                $user->forceFill($updates)->save();
+                $user->tokens()->delete();
+            }
+        );
+
+        if ($status !== Password::PASSWORD_RESET) {
+            $message = match ($status) {
+                Password::INVALID_TOKEN => 'This password setup link is invalid or has expired. Ask the FindUrSch administrator to send a new invitation.',
+                Password::INVALID_USER => 'No account was found for that email address.',
+                Password::RESET_THROTTLED => 'A password change was attempted recently. Wait before trying again.',
+                default => 'The password could not be changed. Request a new setup invitation.',
+            };
+
+            return response()->json(['message' => $message], $status === Password::RESET_THROTTLED ? 429 : 422);
+        }
+
+        return response()->json(['message' => 'Your password has been set. You can now sign in to your school account.']);
     }
 
     public function login(Request $request): JsonResponse

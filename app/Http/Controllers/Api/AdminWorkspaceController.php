@@ -10,9 +10,11 @@ use App\Models\Review;
 use App\Models\School;
 use App\Models\SchoolPost;
 use App\Models\User;
+use App\Services\SchoolOwnerAccountService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -85,7 +87,7 @@ class AdminWorkspaceController extends Controller
                 $query = School::query()->with([
                     'district:id,name',
                     'type:id,name',
-                    'owner:id,name,email',
+                    'owner:id,name,email,phone,status,owner_invitation_pending',
                     'media' => fn ($query) => $query->whereIn('collection_name', ['logo', 'badge']),
                 ]);
 
@@ -329,6 +331,176 @@ class AdminWorkspaceController extends Controller
         return response()->json(['data' => $items]);
     }
 
+
+    public function createSchool(Request $request, SchoolOwnerAccountService $ownerAccounts): JsonResponse
+    {
+        $this->authorizeWorkspacePermission($request, 'admin.schools.edit_any');
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:255'],
+            'type_id' => ['required', 'integer', 'exists:school_types,id'],
+            'district_id' => ['required', 'integer', 'exists:districts,id'],
+            'sub_county_id' => ['nullable', 'integer', 'exists:sub_counties,id'],
+            'owner_mode' => ['required', 'in:existing,new'],
+            'owner_user_id' => ['required_if:owner_mode,existing', 'nullable', 'integer', 'exists:users,id'],
+            'owner_name' => ['required_if:owner_mode,new', 'nullable', 'string', 'min:2', 'max:255'],
+            'owner_email' => ['required_if:owner_mode,new', 'nullable', 'email', 'max:255'],
+            'owner_phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'website' => ['nullable', 'url', 'max:255'],
+            'address' => ['nullable', 'string', 'max:1000'],
+            'description' => ['nullable', 'string', 'max:10000'],
+            'registration_number' => ['nullable', 'string', 'max:60'],
+            'founded_year' => ['nullable', 'integer', 'min:1800', 'max:'.now()->year],
+            'boarding_type' => ['nullable', 'in:boarding,day,mixed'],
+            'gender_policy' => ['nullable', 'in:boys,girls,mixed'],
+        ]);
+
+        $result = DB::transaction(function () use ($data, $ownerAccounts) {
+            $owner = $ownerAccounts->resolveOrCreate([
+                'user_id' => $data['owner_mode'] === 'existing' ? $data['owner_user_id'] : null,
+                'name' => $data['owner_name'] ?? null,
+                'email' => $data['owner_email'] ?? null,
+                'phone' => $data['owner_phone'] ?? null,
+            ], (int) $data['district_id']);
+
+            $school = School::query()->create([
+                'owner_id' => $owner['user']->id,
+                'name' => trim($data['name']),
+                'type_id' => (int) $data['type_id'],
+                'district_id' => (int) $data['district_id'],
+                'sub_county_id' => $data['sub_county_id'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'email' => isset($data['email']) ? Str::lower(trim($data['email'])) : null,
+                'website' => $data['website'] ?? null,
+                'address' => $data['address'] ?? null,
+                'description' => $data['description'] ?? null,
+                'registration_number' => $data['registration_number'] ?? null,
+                'founded_year' => $data['founded_year'] ?? null,
+                'boarding_type' => $data['boarding_type'] ?? 'day',
+                'gender_policy' => $data['gender_policy'] ?? 'mixed',
+                'status' => 'pending',
+                'verification_status' => 'pending',
+                'is_featured' => false,
+                'submitted_at' => now(),
+            ]);
+
+            return [
+                'school' => $school,
+                'owner' => $owner['user'],
+                'invite' => $owner['invitation_pending'],
+            ];
+        });
+
+        $invitationStatus = $result['invite']
+            ? $ownerAccounts->sendInvitation($result['owner'])
+            : null;
+
+        return response()->json([
+            'message' => $result['invite']
+                ? 'School created and its owner account was assigned. A password setup invitation has been sent.'
+                : 'School created and linked to the selected school-owner account.',
+            'data' => $result['school']->fresh(['district', 'type', 'owner']),
+            'owner_invitation' => $invitationStatus,
+        ], 201);
+    }
+
+    public function schoolOwnerOptions(Request $request): JsonResponse
+    {
+        $this->authorizeWorkspacePermission($request, 'admin.schools.view');
+        $search = trim((string) $request->query('q', ''));
+
+        $query = User::query()
+            ->where('user_type', 'school_owner')
+            ->where(function ($builder) {
+                $builder->where('status', 'active')
+                    ->orWhere(function ($pending) {
+                        $pending->where('status', 'inactive')
+                            ->where('owner_invitation_pending', true);
+                    });
+            })
+            ->withCount('ownedSchools')
+            ->orderBy('name');
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $builder->where('name', 'ilike', '%'.$search.'%')
+                    ->orWhere('email', 'ilike', '%'.$search.'%')
+                    ->orWhere('phone', 'ilike', '%'.$search.'%');
+            });
+        }
+
+        return response()->json([
+            'data' => $query->limit(100)->get([
+                'id', 'name', 'email', 'phone', 'status', 'owner_invitation_pending',
+            ]),
+        ]);
+    }
+
+    public function updateSchoolOwner(Request $request, int $id, SchoolOwnerAccountService $ownerAccounts): JsonResponse
+    {
+        $this->authorizeWorkspacePermission($request, 'admin.schools.edit_any');
+        $school = School::query()->findOrFail($id);
+
+        $data = $request->validate([
+            'owner_user_id' => ['required_without:owner_email', 'nullable', 'integer', 'exists:users,id'],
+            'owner_name' => ['required_without:owner_user_id', 'nullable', 'string', 'min:2', 'max:255'],
+            'owner_email' => ['required_without:owner_user_id', 'nullable', 'email', 'max:255'],
+            'owner_phone' => ['nullable', 'string', 'max:30'],
+        ]);
+
+        $result = DB::transaction(function () use ($data, $school, $ownerAccounts) {
+            $owner = $ownerAccounts->resolveOrCreate([
+                'user_id' => $data['owner_user_id'] ?? null,
+                'name' => $data['owner_name'] ?? null,
+                'email' => $data['owner_email'] ?? null,
+                'phone' => $data['owner_phone'] ?? null,
+            ], (int) $school->district_id);
+
+            $school->forceFill(['owner_id' => $owner['user']->id])->save();
+
+            return [
+                'owner' => $owner['user'],
+                'invite' => $owner['invitation_pending'],
+            ];
+        });
+
+        $invitationStatus = $result['invite']
+            ? $ownerAccounts->sendInvitation($result['owner'])
+            : null;
+
+        return response()->json([
+            'message' => $result['invite']
+                ? 'School owner account assigned. A password setup invitation has been sent.'
+                : 'School owner account assigned successfully.',
+            'data' => $school->fresh(['district', 'type', 'owner']),
+            'owner_invitation' => $invitationStatus,
+        ]);
+    }
+
+    public function resendSchoolOwnerInvitation(Request $request, int $id, SchoolOwnerAccountService $ownerAccounts): JsonResponse
+    {
+        $this->authorizeWorkspacePermission($request, 'admin.schools.edit_any');
+        $school = School::query()->with('owner')->findOrFail($id);
+        $owner = $school->owner;
+
+        abort_unless($owner && $owner->user_type === 'school_owner', 422, 'This school does not have a valid school-owner account.');
+        abort_unless((bool) $owner->owner_invitation_pending, 422, 'This owner account has already completed password setup.');
+
+        $status = $ownerAccounts->sendInvitation($owner);
+
+        if ($status !== Password::RESET_LINK_SENT) {
+            return response()->json([
+                'message' => $status === Password::RESET_THROTTLED
+                    ? 'An invitation was sent recently. Wait one minute before sending another.'
+                    : 'The invitation could not be sent. Check the email delivery settings and try again.',
+            ], $status === Password::RESET_THROTTLED ? 429 : 422);
+        }
+
+        return response()->json(['message' => 'A new password setup invitation has been sent to '.$owner->email.'.']);
+    }
+
     public function update(Request $request, string $resource, int $id): JsonResponse
     {
         if (in_array($resource, ['schools', 'verification'], true)) {
@@ -338,7 +510,12 @@ class AdminWorkspaceController extends Controller
             $editableFields = [
                 'name', 'tagline', 'description', 'address', 'phone', 'email', 'website',
                 'whatsapp', 'boarding_type', 'gender_policy', 'type_id', 'district_id',
-                'sub_county_id', 'student_count_approx', 'founded_year', 'rejection_reason',
+                'sub_county_id', 'student_count_approx', 'founded_year', 'registration_number',
+                'ownership', 'religious_affiliation', 'town', 'po_box', 'nearest_landmark',
+                'maps_url', 'facebook_url', 'instagram_url', 'fees_from', 'fees_to', 'activities',
+                'custom_fields', 'admissions_open', 'admission_classes', 'admission_deadline',
+                'application_fee', 'admissions_contact', 'admission_requirements', 'how_to_apply',
+                'rejection_reason',
             ];
             if (array_intersect($fields, $editableFields) !== []) {
                 $permissions[] = 'admin.schools.edit_any';
@@ -386,6 +563,26 @@ class AdminWorkspaceController extends Controller
                     'email' => ['sometimes', 'nullable', 'email', 'max:255'],
                     'website' => ['sometimes', 'nullable', 'url', 'max:255'],
                     'whatsapp' => ['sometimes', 'nullable', 'string', 'max:30'],
+                    'registration_number' => ['sometimes', 'nullable', 'string', 'max:60'],
+                    'ownership' => ['sometimes', 'nullable', 'string', 'max:100'],
+                    'religious_affiliation' => ['sometimes', 'nullable', 'string', 'max:100'],
+                    'town' => ['sometimes', 'nullable', 'string', 'max:120'],
+                    'po_box' => ['sometimes', 'nullable', 'string', 'max:120'],
+                    'nearest_landmark' => ['sometimes', 'nullable', 'string', 'max:255'],
+                    'maps_url' => ['sometimes', 'nullable', 'url', 'max:500'],
+                    'facebook_url' => ['sometimes', 'nullable', 'url', 'max:500'],
+                    'instagram_url' => ['sometimes', 'nullable', 'url', 'max:500'],
+                    'fees_from' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+                    'fees_to' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+                    'activities' => ['sometimes', 'nullable', 'string', 'max:5000'],
+                    'custom_fields' => ['sometimes', 'nullable', 'array'],
+                    'admissions_open' => ['sometimes', 'boolean'],
+                    'admission_classes' => ['sometimes', 'nullable', 'string', 'max:1000'],
+                    'admission_deadline' => ['sometimes', 'nullable', 'date'],
+                    'application_fee' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+                    'admissions_contact' => ['sometimes', 'nullable', 'string', 'max:255'],
+                    'admission_requirements' => ['sometimes', 'nullable', 'string', 'max:10000'],
+                    'how_to_apply' => ['sometimes', 'nullable', 'string', 'max:10000'],
                     'boarding_type' => ['sometimes', 'in:boarding,day,mixed'],
                     'gender_policy' => ['sometimes', 'in:boys,girls,mixed'],
                     'type_id' => ['sometimes', 'integer', 'exists:school_types,id'],

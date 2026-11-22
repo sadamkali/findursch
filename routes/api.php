@@ -17,6 +17,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [DashboardAuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('/register', [DashboardAuthController::class, 'register'])->middleware('throttle:5,1');
     Route::post('/register-school', [DashboardAuthController::class, 'registerSchool'])->middleware('throttle:5,1');
+    Route::post('/reset-password', [DashboardAuthController::class, 'resetPassword'])->middleware('throttle:5,1');
     Route::post('/verify-admin-code', [DashboardAuthController::class, 'verifyAdminCode'])->middleware('throttle:10,1');
     Route::post('/accept-admin-invite', [AdminTemplateController::class, 'acceptInvitation'])->middleware('throttle:10,1');
 
@@ -32,6 +33,10 @@ Route::middleware(['auth:sanctum'])
     ->group(function () {
         Route::get('/overview', [AdminWorkspaceController::class, 'overview']);
         Route::post('/schools/import/preview', [AdminSchoolImportController::class, 'preview'])->middleware('throttle:10,1');
+        Route::get('/school-owner-options', [AdminWorkspaceController::class, 'schoolOwnerOptions']);
+        Route::post('/schools', [AdminWorkspaceController::class, 'createSchool']);
+        Route::post('/schools/{id}/owner', [AdminWorkspaceController::class, 'updateSchoolOwner'])->whereNumber('id');
+        Route::post('/schools/{id}/owner-invitation', [AdminWorkspaceController::class, 'resendSchoolOwnerInvitation'])->whereNumber('id');
         Route::post('/schools/import', [AdminSchoolImportController::class, 'import'])->middleware('throttle:5,1');
         Route::get('/ad-manager', [AdManagerController::class, 'index']);
         Route::post('/ad-campaigns', [AdManagerController::class, 'storeCampaign']);

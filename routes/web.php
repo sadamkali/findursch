@@ -112,7 +112,10 @@ Route::get('/register', function () use ($dashboardUrl) {
 })->name('register');
 
 Route::get('/forgot-password', fn () => redirect()->away($dashboardUrl().'/login'))->name('password.request');
-Route::get('/reset-password/{token}', fn () => redirect()->away($dashboardUrl().'/login'))->name('password.reset');
+Route::get('/reset-password/{token}', function (string $token, Request $request) use ($dashboardUrl) {
+    $email = rawurlencode((string) $request->query('email', ''));
+    return redirect()->away($dashboardUrl().'/reset-password/'.$token.'?email='.$email);
+})->name('password.reset');
 
 // A short-lived, single-use Sanctum token transfers the parent session back to this origin.
 Route::get('/auth/dashboard-callback', function (Request $request) {
