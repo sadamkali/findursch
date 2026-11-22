@@ -11,6 +11,7 @@ use App\Models\SchoolType;
 use App\Models\SchoolVideo;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\SchoolMediaStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -307,25 +308,10 @@ class DashboardAuthController extends Controller
         }
 
         $hasRegistrationImages = $request->hasFile('logo') || $request->hasFile('badge') || $request->hasFile('cover');
-        if ($hasRegistrationImages) {
-            $mediaDiskName = (string) config('media-library.disk_name', 'public');
-            $mediaDisk = (array) config('filesystems.disks.'.$mediaDiskName, []);
-            $mediaStorageReady = ($mediaDisk['driver'] ?? null) === 's3'
-                && filled($mediaDisk['key'] ?? null)
-                && filled($mediaDisk['secret'] ?? null)
-                && filled($mediaDisk['bucket'] ?? null);
-
-            if (in_array($mediaDiskName, ['r2', 'filebase'], true)) {
-                $mediaStorageReady = $mediaStorageReady
-                    && filled($mediaDisk['endpoint'] ?? null)
-                    && filled($mediaDisk['url'] ?? null);
-            }
-
-            if (! $mediaStorageReady) {
-                return response()->json([
-                    'message' => 'School image storage is not fully configured. You can remove the selected images and submit your school details, then add the logo, badge and cover photo from your dashboard.',
-                ], 503);
-            }
+        if ($hasRegistrationImages && ! SchoolMediaStorage::isConfigured()) {
+            return response()->json([
+                'message' => 'School image storage is not fully configured. You can remove the selected images and submit your school details, then add the logo, badge and cover photo from your dashboard.',
+            ], 503);
         }
 
         $email = Str::lower(trim($data['email']));
