@@ -15,6 +15,7 @@ use App\Models\SchoolPost;
 use App\Models\SchoolProgram;
 use App\Models\SchoolVideo;
 use App\Models\Setting;
+use App\Services\SchoolMediaStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -194,6 +195,7 @@ class OwnerWorkspaceController extends Controller
         $done = [
             'info' => filled($record->description) && (filled($record->phone) || filled($record->email)),
             'logo' => $record->getMedia('logo')->isNotEmpty(),
+            'badge' => $record->getMedia('badge')->isNotEmpty(),
             'photos' => $galleryCount > 0,
             'cover' => $record->getMedia('cover')->isNotEmpty(),
             'programmes' => $record->programs()->exists(),
@@ -355,12 +357,9 @@ class OwnerWorkspaceController extends Controller
         $record = $this->school($request, $school);
 
         if ($request->isMethod('post')) {
-            $diskName = config('media-library.disk_name', 'public');
-            $diskDriver = config('filesystems.disks.'.$diskName.'.driver');
-
-            if ($diskDriver !== 's3') {
+            if (! SchoolMediaStorage::isConfigured()) {
                 return response()->json([
-                    'message' => 'Permanent image storage is not configured. Set MEDIA_DISK to an S3-compatible disk before uploading school photos.',
+                    'message' => 'School image storage is not fully configured. Please check the Cloudflare R2 storage settings before uploading a school logo, badge or photo.',
                 ], 503);
             }
 
@@ -368,19 +367,51 @@ class OwnerWorkspaceController extends Controller
                 'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.(in_array($collection, ['logo', 'badge'], true) ? 2048 : 10240)],
             ]);
 
-            $media = $record->addMediaFromRequest('image')->toMediaCollection($collection);
+            try {
+                // The logo and badge collections are single-file collections.
+                // Saving a replacement therefore updates the school's current image.
+                $media = $record->addMediaFromRequest('image')->toMediaCollection($collection);
+            } catch (\\Throwable $exception) {
+                report($exception);
+
+                return response()->json([
+                    'message' => 'The school image could not be saved to permanent storage. Please try again.',
+                ], 502);
+            }
 
             return response()->json([
-                'data' => ['record' => ['id' => $media->id, 'name' => $media->name, 'url' => $media->getUrl()]],
+                'data' => [
+                    'record' => [
+                        'id' => $media->id,
+                        'name' => $media->name,
+                        'collection' => $collection,
+                        'url' => $media->getUrl(),
+                    ],
+                    'logo_url' => $record->getFirstMedia('logo')?->getUrl(),
+                    'badge_url' => $record->getFirstMedia('badge')?->getUrl(),
+                    'identity_url' => $record->getFirstMedia('badge')?->getUrl()
+                        ?: $record->getFirstMedia('logo')?->getUrl(),
+                ],
             ], 201);
         }
 
         if ($request->isMethod('delete')) {
             abort_unless($mediaId, 404);
-            $media = $record->media()->where('collection_name', $collection)->whereKey($mediaId)->firstOrFail();
+            $media = $record->media()
+                ->where('collection_name', $collection)
+                ->whereKey($mediaId)
+                ->firstOrFail();
             $media->delete();
 
-            return response()->json(['message' => 'Image removed.']);
+            return response()->json([
+                'message' => 'Image removed.',
+                'data' => [
+                    'logo_url' => $record->getFirstMedia('logo')?->getUrl(),
+                    'badge_url' => $record->getFirstMedia('badge')?->getUrl(),
+                    'identity_url' => $record->getFirstMedia('badge')?->getUrl()
+                        ?: $record->getFirstMedia('logo')?->getUrl(),
+                ],
+            ]);
         }
 
         return response()->json([
@@ -388,8 +419,13 @@ class OwnerWorkspaceController extends Controller
                 'records' => $record->getMedia($collection)->map(fn ($media) => [
                     'id' => $media->id,
                     'title' => $media->name,
+                    'collection' => $collection,
                     'url' => $media->getUrl(),
                 ])->values(),
+                'logo_url' => $record->getFirstMedia('logo')?->getUrl(),
+                'badge_url' => $record->getFirstMedia('badge')?->getUrl(),
+                'identity_url' => $record->getFirstMedia('badge')?->getUrl()
+                    ?: $record->getFirstMedia('logo')?->getUrl(),
             ],
         ]);
     }
