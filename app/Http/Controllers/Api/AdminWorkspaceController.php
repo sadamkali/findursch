@@ -9,11 +9,13 @@ use App\Models\Inquiry;
 use App\Models\Review;
 use App\Models\School;
 use App\Models\SchoolPost;
+use App\Models\SubCounty;
 use App\Models\User;
 use App\Services\SchoolOwnerAccountService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Str;
@@ -331,6 +333,222 @@ class AdminWorkspaceController extends Controller
         return response()->json(['data' => $items]);
     }
 
+
+    public function schoolEditor(Request $request, int $id): JsonResponse
+    {
+        $this->authorizeWorkspacePermission($request, 'admin.schools.edit_any');
+
+        $school = School::query()
+            ->with([
+                'type:id,name',
+                'district:id,name,region_id',
+                'district.region:id,name',
+                'subCounty:id,name,district_id',
+                'owner:id,name,email,phone,school_role,status,owner_invitation_pending',
+                'curricula:id,name,slug,abbreviation,is_active',
+                'facilities:id,name,category',
+                'programs:id,school_id,curriculum_id,name,level,duration,description,is_active',
+                'programs.curriculum:id,name,abbreviation',
+                'fees:id,school_id,program_id,category,label,amount,currency,period,academic_year,notes,is_active',
+                'fees.program:id,name',
+                'contacts:id,school_id,type,value,label,is_primary',
+            ])
+            ->findOrFail($id);
+
+        $school->setAttribute('media_assets', collect(['logo', 'badge', 'cover', 'gallery'])
+            ->flatMap(fn (string $collection) => $school->getMedia($collection)->map(fn ($media) => [
+                'id' => $media->id,
+                'name' => $media->name,
+                'collection' => $collection,
+                'url' => $media->getUrl(),
+            ]))
+            ->values());
+
+        return response()->json([
+            'data' => [
+                'school' => $school,
+                'options' => [
+                    'school_types' => \App\Models\SchoolType::query()->where('is_active', true)->orderBy('order')->get(['id', 'name']),
+                    'regions' => \App\Models\Region::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+                    'districts' => \App\Models\District::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'region_id']),
+                    'sub_counties' => SubCounty::query()->orderBy('name')->get(['id', 'name', 'district_id']),
+                    'curricula' => \App\Models\Curriculum::query()->orderBy('name')->get(['id', 'name', 'abbreviation', 'is_active']),
+                    'facilities' => \App\Models\Facility::query()->where('is_active', true)->orderBy('category')->orderBy('name')->get(['id', 'name', 'category']),
+                ],
+            ],
+        ]);
+    }
+
+    public function updateSchoolEditor(Request $request, int $id): JsonResponse
+    {
+        $this->authorizeWorkspacePermission($request, 'admin.schools.edit_any');
+        $school = School::query()->findOrFail($id);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:255'],
+            'tagline' => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:10000'],
+            'type_id' => ['required', 'integer', 'exists:school_types,id'],
+            'district_id' => ['required', 'integer', 'exists:districts,id'],
+            'sub_county_id' => ['nullable', 'integer', 'exists:sub_counties,id'],
+            'town' => ['nullable', 'string', 'max:120'],
+            'address' => ['nullable', 'string', 'max:1000'],
+            'po_box' => ['nullable', 'string', 'max:120'],
+            'nearest_landmark' => ['nullable', 'string', 'max:255'],
+            'maps_url' => ['nullable', 'url', 'max:500'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'registration_number' => ['nullable', 'string', 'max:60'],
+            'founded_year' => ['nullable', 'integer', 'min:1800', 'max:'.now()->year],
+            'ownership' => ['nullable', 'string', 'max:100'],
+            'religious_affiliation' => ['nullable', 'string', 'max:100'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'website' => ['nullable', 'url', 'max:255'],
+            'whatsapp' => ['nullable', 'string', 'max:30'],
+            'facebook_url' => ['nullable', 'url', 'max:500'],
+            'instagram_url' => ['nullable', 'url', 'max:500'],
+            'boarding_type' => ['required', 'in:boarding,day,mixed'],
+            'gender_policy' => ['required', 'in:boys,girls,mixed'],
+            'student_count_approx' => ['nullable', 'integer', 'min:0'],
+            'fees_from' => ['nullable', 'numeric', 'min:0'],
+            'fees_to' => ['nullable', 'numeric', 'min:0'],
+            'activities' => ['nullable', 'string', 'max:5000'],
+            'referral_source' => ['nullable', 'string', 'max:120'],
+            'admissions_open' => ['required', 'boolean'],
+            'admission_classes' => ['nullable', 'string', 'max:500'],
+            'admission_deadline' => ['nullable', 'date'],
+            'application_fee' => ['nullable', 'string', 'max:120'],
+            'admissions_contact' => ['nullable', 'string', 'max:180'],
+            'admission_requirements' => ['nullable', 'string', 'max:10000'],
+            'how_to_apply' => ['nullable', 'string', 'max:10000'],
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string', 'max:1000'],
+            'custom_fields' => ['sometimes', 'array'],
+            'curriculum_ids' => ['sometimes', 'array', 'max:20'],
+            'curriculum_ids.*' => ['integer', 'distinct', 'exists:curricula,id'],
+            'facility_ids' => ['sometimes', 'array', 'max:100'],
+            'facility_ids.*' => ['integer', 'distinct', 'exists:facilities,id'],
+            'status' => ['required', 'in:draft,pending,active,suspended,rejected'],
+            'verification_status' => ['required', 'in:unverified,pending,verified'],
+            'is_featured' => ['required', 'boolean'],
+            'featured_until' => ['nullable', 'date'],
+            'rejection_reason' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $permissions = ['admin.schools.edit_any'];
+        if ($request->has('status') || $request->has('verification_status')) {
+            $permissions[] = 'admin.schools.approve';
+        }
+        if ($data['status'] === 'suspended') {
+            $permissions[] = 'admin.schools.suspend';
+        }
+        if ($request->has('is_featured') || $request->has('featured_until')) {
+            $permissions[] = 'admin.schools.feature';
+        }
+        foreach (array_unique($permissions) as $permission) {
+            $this->authorizeWorkspacePermission($request, $permission);
+        }
+
+        DB::transaction(function () use ($school, $data, $request) {
+            $curriculumIds = $data['curriculum_ids'] ?? null;
+            $facilityIds = $data['facility_ids'] ?? null;
+            unset($data['curriculum_ids'], $data['facility_ids']);
+
+            if (($data['verification_status'] ?? null) === 'verified') {
+                $data['verified_at'] = $school->verified_at ?? now();
+                $data['verified_by'] = $school->verified_by ?? $request->user()->id;
+                $data['rejection_reason'] = null;
+            } elseif (($data['verification_status'] ?? null) !== 'verified') {
+                $data['verified_at'] = null;
+                $data['verified_by'] = null;
+            }
+            if ($data['status'] === 'rejected') {
+                $data['verification_status'] = 'unverified';
+                $data['verified_at'] = null;
+                $data['verified_by'] = null;
+            }
+
+            $school->forceFill($data)->save();
+
+            if ($curriculumIds !== null) {
+                $school->curricula()->sync($curriculumIds);
+            }
+            if ($facilityIds !== null) {
+                $school->facilities()->sync($facilityIds);
+            }
+        });
+
+        return response()->json([
+            'message' => 'The complete school profile has been saved.',
+            'data' => $school->fresh([
+                'type:id,name',
+                'district:id,name,region_id',
+                'district.region:id,name',
+                'subCounty:id,name,district_id',
+                'owner:id,name,email,phone,school_role,status,owner_invitation_pending',
+                'curricula:id,name,slug,abbreviation,is_active',
+                'facilities:id,name,category',
+            ]),
+        ]);
+    }
+
+    public function updateSchoolOwnerProfile(Request $request, int $id): JsonResponse
+    {
+        $this->authorizeWorkspacePermission($request, 'admin.schools.edit_any');
+        $school = School::query()->with('owner')->findOrFail($id);
+        $owner = $school->owner;
+
+        abort_unless($owner && $owner->user_type === 'school_owner', 422, 'This school does not have a valid school-owner account.');
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$owner->id],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'school_role' => ['nullable', 'string', 'max:80'],
+        ]);
+
+        $owner->forceFill($data)->save();
+
+        return response()->json([
+            'message' => 'School-owner account details updated.',
+            'data' => [
+                'id' => $owner->id,
+                'name' => $owner->name,
+                'email' => $owner->email,
+                'phone' => $owner->phone,
+                'school_role' => $owner->school_role,
+                'status' => $owner->status,
+                'owner_invitation_pending' => (bool) $owner->owner_invitation_pending,
+            ],
+        ]);
+    }
+
+    public function setSchoolOwnerPassword(Request $request, int $id): JsonResponse
+    {
+        $this->authorizeWorkspacePermission($request, 'admin.schools.edit_any');
+        $school = School::query()->with('owner')->findOrFail($id);
+        $owner = $school->owner;
+
+        abort_unless($owner && $owner->user_type === 'school_owner', 422, 'This school does not have a valid school-owner account.');
+
+        $data = $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'max:128'],
+        ]);
+
+        $owner->forceFill([
+            'password' => Hash::make($data['password']),
+            'owner_invitation_pending' => false,
+            'status' => $owner->status === 'inactive' ? 'active' : $owner->status,
+        ])->save();
+
+        // A manually reset password signs out any previous owner sessions.
+        $owner->tokens()->delete();
+
+        return response()->json([
+            'message' => 'The school-owner password has been updated and existing sessions have been signed out.',
+        ]);
+    }
 
     public function createSchool(Request $request, SchoolOwnerAccountService $ownerAccounts): JsonResponse
     {
