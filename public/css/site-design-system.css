@@ -1064,3 +1064,435 @@ h1, h2, h3, h4, h5, h6 {
         width: calc(100% - 28px) !important;
     }
 }
+
+
+/* --------------------------------------------------------------------------
+   Reference HTML alignment — shared baseline for every public route.
+   The uploaded FindURSCH pages are the source of truth for these values.
+   -------------------------------------------------------------------------- */
+:root {
+    --brand: #0c5a49 !important;
+    --brand-dark: #083f33 !important;
+    --brand-deep: #052a22 !important;
+    --gold: #f0b030 !important;
+    --gold-dark: #d99a1a !important;
+    --accent: #f0b030 !important;
+    --accent-dk: #d99a1a !important;
+    --display-font: 'Playfair Display', Georgia, serif !important;
+    --font-display: 'Playfair Display', Georgia, serif !important;
+    --font-body: 'Inter', system-ui, sans-serif !important;
+    --fd-brand: #0c5a49;
+    --fd-brand-dark: #083f33;
+    --fd-brand-deep: #052a22;
+    --fd-accent: #f0b030;
+    --fd-accent-dark: #d99a1a;
+    --fd-tint: #f1f6f3;
+    --fd-line: #e4e8e6;
+    --fd-ink: #1b2420;
+    --fd-muted: #5d6b65;
+    --fd-display: 'Playfair Display', Georgia, serif;
+    --fd-body: 'Inter', system-ui, sans-serif;
+}
+
+html, body {
+    font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+body,
+body.antialiased,
+body.h-full {
+    font-size: 15px !important;
+    line-height: 1.55 !important;
+    color: #1b2420 !important;
+}
+
+:where(h1, h2, h3, h4, h5, h6, .site-logo, .blogs-page h1, .news-page h1, .event-reference h1, .event-directory-reference h1, .findursch-scholarships h1, .school-directory-reference h1, .school-detail-reference h1) {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    letter-spacing: 0 !important;
+}
+
+:where(p, li, label, small, input, select, textarea, button, table, th, td) {
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+:where(.site-wrap, .wrap, .blogs-wrap, .news-wrap, .ed-shell, .ed-wrap, .resource-detail-wrap, .site-footer__inner) {
+    width: min(1280px, calc(100% - 48px)) !important;
+    max-width: 1280px !important;
+    margin-inline: auto !important;
+    box-sizing: border-box;
+}
+
+body .mx-auto.max-w-7xl {
+    width: min(1280px, calc(100% - 48px)) !important;
+    max-width: 1280px !important;
+}
+
+body .account-workspace-content > section {
+    width: min(1280px, calc(100% - 48px)) !important;
+    max-width: 1280px !important;
+}
+
+/* The shared header now follows the 32px + 64px measurements in the templates. */
+.site-topbar {
+    min-height: 32px !important;
+    background: #083f33 !important;
+    color: #fff !important;
+    font-size: 12.5px !important;
+}
+
+.site-topbar__inner {
+    min-height: 32px !important;
+    gap: 22px !important;
+    display: flex;
+    align-items: center;
+}
+
+.site-topbar__message {
+    font-size: 12.5px !important;
+    line-height: 1 !important;
+}
+
+.site-topbar__actions {
+    gap: 22px !important;
+    align-items: center;
+}
+
+.site-topbar__signin,
+.site-topbar__contact,
+.site-topbar__signup {
+    color: #fff !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    text-decoration: none;
+}
+
+.site-topbar__signup:hover,
+.site-topbar__signin:hover,
+.site-topbar__contact:hover {
+    color: #fff !important;
+    opacity: .82;
+    text-decoration: underline;
+    transform: none !important;
+}
+
+.site-header {
+    min-height: 64px !important;
+    background: #0c5a49 !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.18) !important;
+}
+
+.site-header__inner {
+    min-height: 64px !important;
+    height: 64px !important;
+    gap: 28px !important;
+}
+
+.site-header__inner > .site-logo {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    max-width: 220px;
+    font-family: 'Playfair Display', Georgia, serif !important;
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    letter-spacing: -.3px !important;
+}
+
+.site-header__inner > .site-logo img {
+    display: block;
+    max-width: 200px !important;
+    max-height: 44px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain;
+    object-position: left center;
+}
+
+.site-nav {
+    gap: 4px !important;
+    margin: 0 auto !important;
+    align-items: center;
+}
+
+.site-nav a {
+    min-height: 0 !important;
+    padding: 8px 14px !important;
+    border-radius: 8px !important;
+    color: rgba(255,255,255,.96) !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+}
+
+.site-nav a:hover,
+.site-nav a.is-active {
+    background: rgba(255,255,255,.16) !important;
+    color: #fff !important;
+}
+
+.site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.site-header__cta {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px !important;
+    padding: 0 20px !important;
+    border: 1.5px solid #fff !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: #fff !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.site-header__cta:hover {
+    border-color: #fff !important;
+    background: rgba(255,255,255,.12) !important;
+    color: #fff !important;
+    transform: none !important;
+}
+
+.site-account-link {
+    color: #fff !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+.site-menu-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px !important;
+}
+
+.site-menu-toggle svg {
+    width: 22px;
+    height: 22px;
+}
+
+.site-mobile-drawer {
+    font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+.site-mobile-drawer__links a {
+    border-radius: 8px !important;
+    font-size: 14px;
+}
+
+.site-mobile-drawer__button {
+    min-height: 42px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+}
+
+.site-footer {
+    background: #052a22 !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+.site-footer h2 {
+    font-family: 'Inter', system-ui, sans-serif !important;
+    letter-spacing: 0 !important;
+}
+
+.site-footer__brand .site-logo img {
+    max-height: 48px !important;
+    max-width: 220px !important;
+    width: auto !important;
+}
+
+.site-footer .btn-footer {
+    min-height: 36px !important;
+    padding: 0 18px !important;
+    border: 1px solid #fff !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: #fff !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}
+
+/* Exact component sizing shared by all reference pages. */
+:where(
+    .btn, .btn-primary, .btn-secondary, .btn-accent, .btn-brand, .btn-gold,
+    .btn-red, .btn-search, .blogs-btn, .news-toolbar button, .news-digest,
+    .go, .sform button
+) {
+    min-height: 42px !important;
+    height: 42px;
+    padding: 0 20px !important;
+    border-radius: 8px !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+}
+
+.findursch-home-reference .btn-red,
+.findursch-home-reference .hero .search button {
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 0 26px !important;
+    border-radius: 999px !important;
+    font-size: 14px !important;
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]), select, textarea) {
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 14px !important;
+}
+
+:where(.resource-page, .blogs-page, .news-page, .event-reference, .event-directory-reference, .findursch-scholarships, .school-directory-reference, .school-detail-reference) {
+    font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+:where(.resource-page h1, .resource-page h2, .resource-page h3, .blogs-page h1, .blogs-page h2, .news-page h1, .news-page h2, .event-reference h1, .event-reference h2, .event-directory-reference h1, .event-directory-reference h2, .findursch-scholarships h1, .findursch-scholarships h2, .school-directory-reference h1, .school-detail-reference h1) {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    letter-spacing: 0 !important;
+}
+
+:where(.crumbs, .resource-crumbs, .blogs-crumbs, .ed-crumbs) {
+    font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+:where(.prose, .prose-gray) {
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 15px !important;
+    line-height: 1.75 !important;
+}
+
+/* Legacy routes without an individual reference HTML use the same 1280px,
+   green/cream palette, Playfair headings, Inter body and restrained cards. */
+body main > .mx-auto,
+body main > section > .mx-auto,
+body main > div > .mx-auto,
+body main .max-w-6xl,
+body main .max-w-5xl {
+    max-width: 1280px;
+}
+
+body main .rounded-xl.border,
+body main .rounded-2xl.border,
+body main .rounded-lg.border {
+    border-color: #e4e8e6 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 12px rgba(6,45,35,.055);
+}
+
+body main .bg-gray-50,
+body main .bg-slate-50 {
+    background: #f1f6f3 !important;
+}
+
+body main .text-gray-500,
+body main .text-slate-500 {
+    color: #5d6b65 !important;
+}
+
+body main .text-primary,
+body main .text-emerald-700 {
+    color: #0c5a49 !important;
+}
+
+body main .bg-primary,
+body main .bg-emerald-700 {
+    background-color: #0c5a49 !important;
+}
+
+body main button,
+body main a[class*="rounded"][class*="bg-primary"] {
+    font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+body main h1,
+body main h2,
+body main h3 {
+    color: #1b2420;
+}
+
+/* Keep the reference's mobile header and horizontal gutters predictable. */
+@media (max-width: 1000px) {
+    .site-header__inner {
+        min-height: 64px !important;
+        height: 64px !important;
+        gap: 14px !important;
+    }
+
+    .site-header__inner > .site-logo img {
+        max-width: 184px !important;
+        max-height: 42px !important;
+    }
+
+    .site-header__cta {
+        display: none !important;
+    }
+}
+
+@media (max-width: 760px) {
+    :where(.site-wrap, .wrap, .blogs-wrap, .news-wrap, .ed-shell, .ed-wrap, .resource-detail-wrap, .site-footer__inner) {
+        width: calc(100% - 32px) !important;
+    }
+
+    body .mx-auto.max-w-7xl,
+    body .account-workspace-content > section {
+        width: calc(100% - 32px) !important;
+    }
+
+    .site-topbar__inner {
+        min-height: 32px !important;
+        width: calc(100% - 32px) !important;
+        gap: 10px !important;
+    }
+
+    .site-topbar__message {
+        max-width: 52%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .site-topbar__actions {
+        gap: 10px !important;
+    }
+
+    .site-header__inner {
+        min-height: 64px !important;
+        height: 64px !important;
+        gap: 10px !important;
+    }
+
+    .site-menu-toggle {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 420px) {
+    .site-topbar__message {
+        display: none;
+    }
+
+    .site-topbar__inner {
+        justify-content: flex-end;
+    }
+
+    .site-topbar__actions {
+        gap: 12px !important;
+    }
+}
