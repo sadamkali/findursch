@@ -102,11 +102,12 @@ class AdminLocationController extends Controller
                 $join->on('school_totals.region_id', '=', 'r.id');
             })
             ->orderBy('r.name')
-            ->selectRaw('COALESCE(district_totals.districts_count, 0)::integer as districts_count')
-            ->selectRaw('COALESCE(school_totals.schools_count, 0)::integer as schools_count')
-            ->get([
+            ->select([
                 'r.id', 'r.name', 'r.slug', 'r.is_active',
             ])
+            ->selectRaw('COALESCE(district_totals.districts_count, 0)::integer as districts_count')
+            ->selectRaw('COALESCE(school_totals.schools_count, 0)::integer as schools_count')
+            ->get()
             ->map(function ($region) {
                 $region->districts_count = (int) ($region->districts_count ?? 0);
                 $region->schools_count = (int) ($region->schools_count ?? 0);
@@ -134,12 +135,13 @@ class AdminLocationController extends Controller
             })
             ->orderBy('r.name')
             ->orderBy('d.name')
-            ->selectRaw('COALESCE(school_totals.schools_count, 0)::integer as schools_count')
-            ->selectRaw('COALESCE(town_totals.towns_count, 0)::integer as towns_count')
-            ->get([
+            ->select([
                 'd.id', 'd.region_id', 'd.name', 'd.slug', 'd.school_count',
                 'd.is_featured', 'd.is_active', 'r.name as region_name',
             ])
+            ->selectRaw('COALESCE(school_totals.schools_count, 0)::integer as schools_count')
+            ->selectRaw('COALESCE(town_totals.towns_count, 0)::integer as towns_count')
+            ->get()
             ->map(function ($district) {
                 $district->schools_count = (int) ($district->schools_count ?? 0);
                 $district->towns_count = (int) ($district->towns_count ?? 0);
