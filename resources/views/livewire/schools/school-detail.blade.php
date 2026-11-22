@@ -12,6 +12,11 @@
     $primaryEmail = $school->email ?: $school->contacts->firstWhere('type', 'email')?->value;
     $primaryWhatsapp = $school->whatsapp ?: $school->contacts->firstWhere('type', 'whatsapp')?->value;
     $whatsappDigits = preg_replace('/\D+/', '', (string) $primaryWhatsapp);
+    if (str_starts_with($whatsappDigits, '0')) {
+        $whatsappDigits = '256'.substr($whatsappDigits, 1);
+    } elseif (strlen($whatsappDigits) === 9) {
+        $whatsappDigits = '256'.$whatsappDigits;
+    }
     $website = $school->website ?: $school->contacts->firstWhere('type', 'website')?->value;
     $websiteUrl = $website
         ? (\Illuminate\Support\Str::startsWith($website, ['http://', 'https://']) ? $website : 'https://'.$website)
@@ -24,9 +29,12 @@
     $displayPhone = $primaryPhone ?: 'Not provided';
     $displayEmail = $primaryEmail ?: 'Not provided';
     $displayLocation = $locationText !== '' ? $locationText.', Uganda' : 'Not provided';
+    $mapLocationParts = collect([$school->address, $subCountyName, $districtName, $regionName])
+        ->filter()
+        ->values();
     $mapQuery = filled($school->latitude) && filled($school->longitude)
         ? $school->latitude.','.$school->longitude
-        : trim(collect([$school->address, $subCountyName, $districtName, $regionName, 'Uganda'])->filter()->implode(', '));
+        : ($mapLocationParts->isNotEmpty() ? $mapLocationParts->push('Uganda')->implode(', ') : '');
     $mapUrl = $mapQuery !== ''
         ? 'https://www.google.com/maps/search/?api=1&query='.urlencode($mapQuery)
         : null;
@@ -40,10 +48,10 @@
 
     $quickFacts = [
         ['label' => 'Type', 'value' => $school->type?->name ?: 'Not provided', 'color' => '#d33'],
-        ['label' => 'Ownership', 'value' => 'Not provided', 'color' => '#d33'],
-        ['label' => 'Gender', 'value' => match($school->gender_policy) { 'boys' => 'Boys only', 'girls' => 'Girls only', default => 'Mixed (boys & girls)' }, 'color' => '#2f9e5a'],
-        ['label' => 'Religion', 'value' => 'Not provided', 'color' => '#6b5bd2'],
-        ['label' => 'Residence', 'value' => match($school->boarding_type) { 'boarding' => 'Boarding', 'mixed' => 'Day & boarding', default => 'Day school' }, 'color' => '#f0b030'],
+        ['label' => 'Ownership', 'value' => $school->ownership ?: 'Not provided', 'color' => '#d33'],
+        ['label' => 'Gender', 'value' => match($school->gender_policy) { 'boys' => 'Boys only', 'girls' => 'Girls only', 'mixed' => 'Mixed', default => 'Not provided' }, 'color' => '#2f9e5a'],
+        ['label' => 'Religion', 'value' => $school->religious_affiliation ?: 'Not provided', 'color' => '#6b5bd2'],
+        ['label' => 'Residence', 'value' => match($school->boarding_type) { 'boarding' => 'Boarding', 'mixed' => 'Day & boarding', 'day' => 'Day school', default => 'Not provided' }, 'color' => '#f0b030'],
         ['label' => 'Curriculum', 'value' => $school->curricula->pluck('name')->filter()->implode(', ') ?: 'Not provided', 'color' => '#f0b030'],
     ];
 @endphp
@@ -108,19 +116,30 @@
                                 <span class="sref-tag">{{ match($school->gender_policy) { 'boys' => 'Boys', 'girls' => 'Girls', default => 'Mixed' } }}</span>
                             </div>
                             <div class="sref-contact-line">
-                                <?php if ($primaryPhone): ?><span>{{ $primaryPhone }}</span><?php endif; ?>
-                                <?php if ($primaryEmail): ?><span>{{ $primaryEmail }}</span><?php endif; ?>
-                                <?php if ($locationText !== ''): ?><span>{{ $locationText }}<?php if ($regionName): ?>, Uganda<?php endif; ?></span><?php endif; ?>
+                                @if($primaryPhone)
+                                    <a href="tel:{{ preg_replace('/[^\d+]/', '', (string) $primaryPhone) }}">{{ $primaryPhone }}</a>
+                                @endif
+                                @if($primaryEmail)
+                                    <a href="mailto:{{ $primaryEmail }}">{{ $primaryEmail }}</a>
+                                @endif
+                                @if($websiteUrl)
+                                    <a href="{{ $websiteUrl }}" target="_blank" rel="noopener noreferrer">School website</a>
+                                @endif
+                                @if($locationText !== '')
+                                    <span>{{ $locationText }}, Uganda</span>
+                                @endif
                             </div>
                         </div>
                     </div>
 
                     <div class="sref-actions">
-                        <button type="button" class="sref-btn sref-btn--brand sref-btn--sm" x-on:click="$refs.enquiryDialog.showModal()">Apply for admission</button>
+                        @if($school->canReceiveInquiries())
+                            <button type="button" class="sref-btn sref-btn--brand sref-btn--sm" x-on:click="$refs.enquiryDialog.showModal()">{{ $school->admissions_open ? 'Apply for admission' : 'Send admission enquiry' }}</button>
+                        @endif
                         <?php if ($whatsappDigits !== ''): ?>
                             <a class="sref-btn sref-btn--wa sref-btn--sm" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp</a>
                         <?php endif; ?>
-                        <button type="button" class="sref-btn sref-btn--line sref-btn--sm" x-data="{copied:false}" x-on:click="navigator.clipboard.writeText(window.location.href).then(() => copied = true).catch(() => copied = false)" x-text="copied ? 'Link copied' : 'Share'">Share</button>
+                        <button type="button" class="sref-btn sref-btn--line sref-btn--sm" x-data="{copied:false}" x-on:click="navigator.clipboard.writeText(window.location.href).then(() => copied = true).catch(() => { window.prompt('Copy this school page link', window.location.href); copied = true; })" x-text="copied ? 'Link copied' : 'Share'">Share</button>
                         <?php if (auth()->check()): ?>
                             <button type="button" class="sref-btn sref-btn--line sref-btn--sm" wire:click="toggleSave">{{ $this->isSaved() ? '♥ Saved' : '♡ Save' }}</button>
                         <?php else: ?>
@@ -130,10 +149,16 @@
 
                     <nav class="sref-tabs" aria-label="Profile sections" x-data="{active:'about'}">
                         <a href="#about" x-on:click="active='about'" :class="active === 'about' ? 'is-active' : ''">About</a>
+                        @if($admissionsVisible && ($school->admissions_open || filled($school->admission_classes) || filled($school->admission_requirements) || filled($school->how_to_apply)))
+                            <a href="#admissions" x-on:click="active='admissions'" :class="active === 'admissions' ? 'is-active' : ''">Admissions</a>
+                        @endif
                         <a href="#facilities" x-on:click="active='facilities'" :class="active === 'facilities' ? 'is-active' : ''">Facilities</a>
                         <a href="#events" x-on:click="active='events'" :class="active === 'events' ? 'is-active' : ''">Events</a>
-                        <a href="#gallery" x-on:click="active='gallery'" :class="active === 'gallery' ? 'is-active' : ''">Gallery</a>
+                        @if($profileImages->isNotEmpty())
+                            <a href="#gallery" x-on:click="active='gallery'" :class="active === 'gallery' ? 'is-active' : ''">Gallery</a>
+                        @endif
                         <a href="#news" x-on:click="active='news'" :class="active === 'news' ? 'is-active' : ''">News</a>
+                        <a href="#reviews" x-on:click="active='reviews'" :class="active === 'reviews' ? 'is-active' : ''">Reviews</a>
                     </nav>
                 </div>
 
@@ -310,27 +335,42 @@
 
             {{-- RIGHT SIDEBAR: same card types and item order as the uploaded HTML --}}
             <aside class="sref-sidebar">
-                <section class="sref-join">
-                    <h3>Ready to join {{ $school->name }}?</h3>
-                    <p>Applications are open. Apply today and secure a place for your child.</p>
-                    <button type="button" class="sref-btn sref-btn--gold sref-btn--block" x-on:click="$refs.enquiryDialog.showModal()">Apply for admission</button>
-                    <button type="button" class="sref-btn sref-btn--ghost sref-btn--block" x-on:click="$refs.enquiryDialog.showModal()">Send enquiry</button>
-                </section>
+                @if($school->canReceiveInquiries())
+                    <section class="sref-join">
+                        <h3>Ready to join {{ $school->name }}?</h3>
+                        <p>{{ $school->admissions_open ? 'Admissions are open. Send an enquiry to confirm available places and entry requirements.' : 'Admissions are not currently listed as open. Contact the school to ask about the next intake.' }}</p>
+                        <button type="button" class="sref-btn sref-btn--gold sref-btn--block" x-on:click="$refs.enquiryDialog.showModal()">{{ $school->admissions_open ? 'Apply for admission' : 'Ask about admissions' }}</button>
+                        <button type="button" class="sref-btn sref-btn--ghost sref-btn--block" x-on:click="$refs.enquiryDialog.showModal()">Send enquiry</button>
+                    </section>
+                @endif
 
-                <section class="sref-contact">
-                    <h3>Contact the school</h3>
-                    <div class="sref-contact-item"><i>☎</i><div><small>Phone</small><b>{{ $displayPhone }}</b></div></div>
-                    <div class="sref-contact-item"><i>✉</i><div><small>Email</small><b>{{ $displayEmail }}</b></div></div>
-                    <div class="sref-contact-item"><i>⌂</i><div><small>Location</small><b>{{ $displayLocation }}</b></div></div>
-                    <div class="sref-contact-actions">
-                        <button type="button" class="sref-btn sref-btn--gold sref-btn--sm" x-on:click="$refs.enquiryDialog.showModal()">Apply now</button>
-                        <?php if ($whatsappDigits !== ''): ?>
-                            <a class="sref-btn sref-btn--ghost sref-btn--sm" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp us</a>
-                        <?php else: ?>
-                            <span class="sref-btn sref-btn--ghost sref-btn--sm is-disabled">WhatsApp us</span>
-                        <?php endif; ?>
-                    </div>
-                </section>
+                @if($primaryPhone || $primaryEmail || $websiteUrl || $locationText !== '')
+                    <section class="sref-contact">
+                        <h3>Contact the school</h3>
+                        @if($primaryPhone)
+                            <a class="sref-contact-item" href="tel:{{ preg_replace('/[^\d+]/', '', (string) $primaryPhone) }}"><i>☎</i><div><small>Phone</small><b>{{ $primaryPhone }}</b></div></a>
+                        @endif
+                        @if($primaryEmail)
+                            <a class="sref-contact-item" href="mailto:{{ $primaryEmail }}"><i>✉</i><div><small>Email</small><b>{{ $primaryEmail }}</b></div></a>
+                        @endif
+                        @if($websiteUrl)
+                            <a class="sref-contact-item" href="{{ $websiteUrl }}" target="_blank" rel="noopener noreferrer"><i>↗</i><div><small>Website</small><b>Visit school website</b></div></a>
+                        @endif
+                        @if($locationText !== '')
+                            <div class="sref-contact-item"><i>⌂</i><div><small>Location</small><b>{{ $displayLocation }}</b></div></div>
+                        @endif
+                        @if($school->canReceiveInquiries() || $whatsappDigits !== '')
+                            <div class="sref-contact-actions">
+                                @if($school->canReceiveInquiries())
+                                    <button type="button" class="sref-btn sref-btn--gold sref-btn--sm" x-on:click="$refs.enquiryDialog.showModal()">Send enquiry</button>
+                                @endif
+                                @if($whatsappDigits !== '')
+                                    <a class="sref-btn sref-btn--ghost sref-btn--sm" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener noreferrer">WhatsApp us</a>
+                                @endif
+                            </div>
+                        @endif
+                    </section>
+                @endif
 
                 <section class="sref-box">
                     <h5>Quick facts</h5>
@@ -355,31 +395,33 @@
 
                 <x-site-ad-banner placement="side" />
 
-                <section class="sref-box">
-                    <h5>Find us on social media</h5>
-                    <div class="sref-social">
-                        <?php if ($facebook): ?><a class="sref-btn sref-btn--facebook" href="{{ $facebook }}" target="_blank" rel="noopener">Facebook</a><?php else: ?><span class="sref-btn sref-btn--inactive">Facebook</span><?php endif; ?>
-                        <?php if ($twitter): ?><a class="sref-btn sref-btn--x" href="{{ $twitter }}" target="_blank" rel="noopener">Twitter / X</a><?php else: ?><span class="sref-btn sref-btn--inactive">Twitter / X</span><?php endif; ?>
-                        <?php if ($whatsappDigits): ?><a class="sref-btn sref-btn--wa" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener">WhatsApp</a><?php else: ?><span class="sref-btn sref-btn--inactive">WhatsApp</span><?php endif; ?>
-                        <button type="button" class="sref-btn sref-btn--line" x-data="{copied:false}" x-on:click="navigator.clipboard.writeText(window.location.href).then(() => copied = true)" x-text="copied ? 'Link copied' : 'Copy link'">Copy link</button>
-                    </div>
-                </section>
+                @if($facebook || $twitter || $instagram || $whatsappDigits !== '' || $websiteUrl)
+                    <section class="sref-box">
+                        <h5>Connect with the school</h5>
+                        <div class="sref-social">
+                            @if($facebook)<a class="sref-btn sref-btn--facebook" href="{{ $facebook }}" target="_blank" rel="noopener noreferrer">Facebook</a>@endif
+                            @if($twitter)<a class="sref-btn sref-btn--x" href="{{ $twitter }}" target="_blank" rel="noopener noreferrer">Twitter / X</a>@endif
+                            @if($instagram)<a class="sref-btn sref-btn--line" href="{{ $instagram }}" target="_blank" rel="noopener noreferrer">Instagram</a>@endif
+                            @if($whatsappDigits !== '')<a class="sref-btn sref-btn--wa" href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener noreferrer">WhatsApp</a>@endif
+                            @if($websiteUrl)<a class="sref-btn sref-btn--line" href="{{ $websiteUrl }}" target="_blank" rel="noopener noreferrer">Website</a>@endif
+                        </div>
+                    </section>
+                @endif
 
-                <section class="sref-box">
-                    <h5>Location</h5>
-                    <dl class="sref-location-list">
-                        <div><dt>Region</dt><dd class="is-link">{{ $regionName ?: 'Not provided' }}</dd></div>
-                        <div><dt>District</dt><dd class="is-link">{{ $districtName ?: 'Not provided' }}</dd></div>
-                        <div><dt>County</dt><dd>Not provided</dd></div>
-                        <div><dt>Sub-county</dt><dd>{{ $subCountyName ?: 'Not provided' }}</dd></div>
-                        <div><dt>Village</dt><dd>Not provided</dd></div>
-                    </dl>
-                    <?php if ($mapUrl): ?>
-                        <div class="sref-map"><div><a href="{{ $mapUrl }}" target="_blank" rel="noopener">View on Google Maps</a>{{ $locationText ?: 'Uganda' }}</div></div>
-                    <?php else: ?>
-                        <div class="sref-map"><div>Map location has not been provided.</div></div>
-                    <?php endif; ?>
-                </section>
+                @if($regionName || $districtName || $subCountyName || filled($school->address) || $mapUrl)
+                    <section class="sref-box">
+                        <h5>Location</h5>
+                        <dl class="sref-location-list">
+                            @if($regionName)<div><dt>Region</dt><dd>{{ $regionName }}</dd></div>@endif
+                            @if($districtName)<div><dt>District</dt><dd>{{ $districtName }}</dd></div>@endif
+                            @if($subCountyName)<div><dt>Sub-county</dt><dd>{{ $subCountyName }}</dd></div>@endif
+                            @if(filled($school->address))<div><dt>Address</dt><dd>{{ $school->address }}</dd></div>@endif
+                        </dl>
+                        @if($mapUrl)
+                            <div class="sref-map"><div><a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer">View on Google Maps</a></div></div>
+                        @endif
+                    </section>
+                @endif
             </aside>
         </div>
     </main>

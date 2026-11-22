@@ -1680,3 +1680,10 @@ a, button { -webkit-tap-highlight-color: transparent; }
   .sref-gallery-primary--1 { grid-auto-rows: 210px; }
   .sref-gallery-primary--2 { grid-auto-rows: 145px; }
 }
+
+
+/* Profile details that are actionable should read and behave like links. */
+.sref-contact-line a { color: inherit; overflow-wrap: anywhere; text-decoration: none; }
+.sref-contact-line a:hover { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+.sref-contact-item { color: inherit; text-decoration: none; }
+.sref-contact-item:hover b { text-decoration: underline; text-underline-offset: 3px; }
