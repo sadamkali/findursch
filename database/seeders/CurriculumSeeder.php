@@ -1,9 +1,9 @@
 <?php
 
-namespace Database\\Seeders;
+namespace Database\Seeders;
 
-use App\\Models\\Curriculum;
-use Illuminate\\Database\\Seeder;
+use App\Models\Curriculum;
+use Illuminate\Database\Seeder;
 
 class CurriculumSeeder extends Seeder
 {
