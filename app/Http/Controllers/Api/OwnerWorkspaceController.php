@@ -29,7 +29,12 @@ class OwnerWorkspaceController extends Controller
         $isAdmin = $user->hasRole('admin');
         $schoolsQuery = $isAdmin ? School::query() : $user->ownedSchools();
         $schools = $schoolsQuery
-            ->with(['type', 'district', 'activeSubscription.plan'])
+            ->with([
+                'type',
+                'district',
+                'activeSubscription.plan',
+                'media' => fn ($query) => $query->whereIn('collection_name', ['logo', 'badge']),
+            ])
             ->withCount(['inquiries', 'approvedReviews'])
             ->latest()
             ->limit($isAdmin ? 500 : 100)
@@ -37,6 +42,8 @@ class OwnerWorkspaceController extends Controller
             ->map(fn (School $school) => [
                 'id' => $school->id,
                 'name' => $school->name,
+                'logo_url' => $school->getFirstMedia('logo')?->getUrl(),
+                'badge_url' => $school->getFirstMedia('badge')?->getUrl(),
                 'status' => $school->status,
                 'verification_status' => $school->verification_status,
                 'type' => $school->type ? ['name' => $school->type->name] : null,
