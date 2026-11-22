@@ -415,8 +415,34 @@ class AdminFormController extends Controller
         $permissions = $this->permissions($request);
         abort_unless($permissions['can_view'], 403, 'You do not have permission to view form settings.');
 
-        $published = $this->normalizeConfig($this->settingArray('school_forms_published', $this->emptyConfig()));
+        $storedPublished = Setting::get('school_forms_published');
+        if (is_string($storedPublished)) {
+            $decodedPublished = json_decode($storedPublished, true);
+            $storedPublished = is_array($decodedPublished) ? $decodedPublished : [];
+        }
+        $storedPublished = is_array($storedPublished) ? $storedPublished : [];
+        $hasPublishedRegistrationOptions = array_key_exists('registration_options', $storedPublished);
+
+        $published = $this->normalizeConfig($storedPublished ?: $this->emptyConfig());
         $draft = $this->normalizeConfig($this->settingArray('school_forms_draft', $published));
+
+        // Before the new manager is first published, show the actual published
+        // state as empty. This keeps the generated defaults in the draft and
+        // makes the first Publish action available to apply them to registration.
+        if (! $hasPublishedRegistrationOptions) {
+            $published['registration_options'] = [
+                'school_types' => [],
+                'curricula' => [],
+                'facilities' => [],
+                'school_roles' => [],
+                'ownerships' => [],
+                'gender_policies' => [],
+                'boarding_types' => [],
+                'religious_affiliations' => [],
+                'referral_sources' => [],
+            ];
+        }
+
         $history = $this->settingArray('school_forms_history', []);
 
         return response()->json(['data' => [
