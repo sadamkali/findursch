@@ -200,15 +200,15 @@ class SchoolListing extends Component
             ->get();
 
         $districts = District::query()
+            ->where('is_active', true)
             ->with('region')
             ->withCount(['schools as public_listing_count' => fn ($schools) => $schools->publiclyVisible()])
             ->orderByDesc('public_listing_count')
             ->orderBy('name')
-            ->limit(8)
             ->get();
 
         $regions = Region::query()
-            ->whereHas('districts.schools', fn ($schools) => $schools->publiclyVisible())
+            ->where('is_active', true)
             ->orderBy('name')
             ->get();
 
@@ -227,7 +227,7 @@ class SchoolListing extends Component
             'schools' => $query->paginate(15)->withQueryString(),
             'schoolTypes' => $schoolTypes,
             'districts' => $districts,
-            'allDistricts' => District::query()->orderBy('name')->get(['id', 'name']),
+            'allDistricts' => District::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'regions' => $regions,
             'curricula' => Curriculum::query()->where('is_active', true)->orderBy('name')->get(),
             'allSchoolCount' => School::query()->publiclyVisible()->count(),
