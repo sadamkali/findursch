@@ -405,6 +405,7 @@ class AdminWorkspaceController extends Controller
             'tagline' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:10000'],
             'type_id' => ['required', 'integer', 'exists:school_types,id'],
+            'region_id' => ['required', 'integer', 'exists:regions,id'],
             'district_id' => ['required', 'integer', 'exists:districts,id'],
             'sub_county_id' => ['nullable', 'integer', 'exists:sub_counties,id'],
             'town' => ['nullable', 'string', 'max:120'],
@@ -633,6 +634,28 @@ class AdminWorkspaceController extends Controller
             'owner_school_role' => ['nullable', 'string', 'max:80'],
             'owner_password' => ['nullable', 'string', 'min:8', 'confirmed', 'max:128'],
         ]);
+
+        $districtMatchesRegion = \\App\\Models\\District::query()
+            ->whereKey($data['district_id'])
+            ->where('region_id', $data['region_id'])
+            ->exists();
+        if (! $districtMatchesRegion) {
+            throw ValidationException::withMessages([
+                'district_id' => ['Choose a district within the selected region.'],
+            ]);
+        }
+
+        if (filled($data['sub_county_id'] ?? null)) {
+            $subCountyMatchesDistrict = SubCounty::query()
+                ->whereKey($data['sub_county_id'])
+                ->where('district_id', $data['district_id'])
+                ->exists();
+            if (! $subCountyMatchesDistrict) {
+                throw ValidationException::withMessages([
+                    'sub_county_id' => ['Choose a sub-county within the selected district.'],
+                ]);
+            }
+        }
 
         $data['status'] = $data['status'] ?? 'pending';
         $data['verification_status'] = $data['verification_status'] ?? 'unverified';
