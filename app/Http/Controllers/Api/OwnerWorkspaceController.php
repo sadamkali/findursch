@@ -371,7 +371,7 @@ class OwnerWorkspaceController extends Controller
                 // The logo and badge collections are single-file collections.
                 // Saving a replacement therefore updates the school's current image.
                 $media = $record->addMediaFromRequest('image')->toMediaCollection($collection);
-            } catch (\\Throwable $exception) {
+            } catch (\Throwable $exception) {
                 report($exception);
 
                 return response()->json([
