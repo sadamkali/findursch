@@ -50,6 +50,7 @@
                             <a class="card school" href="{{ route('schools.show', $school) }}">
                                 @php
                                     $schoolPhoto = $school->getFirstMediaUrl('cover');
+                                    $schoolBadgeUrl = $school->getFirstMediaUrl('badge') ?: $school->getFirstMediaUrl('logo');
                                     $photoTone = $loop->iteration === 2 ? 'b' : ($loop->iteration === 3 ? 'c' : '');
                                 @endphp
                                 <div class="ph {{ $photoTone }}">
@@ -58,6 +59,13 @@
                                     @else
                                         <span class="ph-initials">{{ strtoupper(mb_substr($school->name, 0, 2)) }}</span>
                                     @endif
+                                    <span class="school-badge-mark" aria-label="{{ $school->name }} school badge">
+                                        @if($schoolBadgeUrl)
+                                            <img src="{{ $schoolBadgeUrl }}" alt="{{ $school->name }} badge" loading="lazy">
+                                        @else
+                                            <span>Badge</span>
+                                        @endif
+                                    </span>
                                 </div>
                                 <div class="b">
                                     <span class="kick">{{ $school->type?->name ?? 'School' }}</span>
