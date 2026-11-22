@@ -379,6 +379,22 @@ class AdminWorkspaceController extends Controller
         ]);
     }
 
+    public function schoolEditorOptions(Request $request): JsonResponse
+    {
+        $this->authorizeWorkspacePermission($request, 'admin.schools.edit_any');
+
+        return response()->json([
+            'data' => [
+                'school_types' => \\App\\Models\\SchoolType::query()->where('is_active', true)->orderBy('order')->get(['id', 'name']),
+                'regions' => \\App\\Models\\Region::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+                'districts' => \\App\\Models\\District::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'region_id']),
+                'sub_counties' => SubCounty::query()->orderBy('name')->get(['id', 'name', 'district_id']),
+                'curricula' => \\App\\Models\\Curriculum::query()->orderBy('name')->get(['id', 'name', 'abbreviation', 'is_active']),
+                'facilities' => \\App\\Models\\Facility::query()->where('is_active', true)->orderBy('category')->orderBy('name')->get(['id', 'name', 'category']),
+            ],
+        ]);
+    }
+
     public function updateSchoolEditor(Request $request, int $id): JsonResponse
     {
         $this->authorizeWorkspacePermission($request, 'admin.schools.edit_any');
@@ -561,73 +577,202 @@ class AdminWorkspaceController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'min:2', 'max:255'],
+            'tagline' => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:10000'],
             'type_id' => ['required', 'integer', 'exists:school_types,id'],
             'district_id' => ['required', 'integer', 'exists:districts,id'],
             'sub_county_id' => ['nullable', 'integer', 'exists:sub_counties,id'],
+            'town' => ['nullable', 'string', 'max:120'],
+            'address' => ['nullable', 'string', 'max:1000'],
+            'po_box' => ['nullable', 'string', 'max:120'],
+            'nearest_landmark' => ['nullable', 'string', 'max:255'],
+            'maps_url' => ['nullable', 'url', 'max:500'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'registration_number' => ['nullable', 'string', 'max:60'],
+            'founded_year' => ['nullable', 'integer', 'min:1800', 'max:'.now()->year],
+            'ownership' => ['nullable', 'string', 'max:100'],
+            'religious_affiliation' => ['nullable', 'string', 'max:100'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'website' => ['nullable', 'url', 'max:255'],
+            'whatsapp' => ['nullable', 'string', 'max:30'],
+            'facebook_url' => ['nullable', 'url', 'max:500'],
+            'instagram_url' => ['nullable', 'url', 'max:500'],
+            'boarding_type' => ['required', 'in:boarding,day,mixed'],
+            'gender_policy' => ['required', 'in:boys,girls,mixed'],
+            'student_count_approx' => ['nullable', 'integer', 'min:0'],
+            'fees_from' => ['nullable', 'numeric', 'min:0'],
+            'fees_to' => ['nullable', 'numeric', 'min:0'],
+            'activities' => ['nullable', 'string', 'max:5000'],
+            'referral_source' => ['nullable', 'string', 'max:120'],
+            'admissions_open' => ['required', 'boolean'],
+            'admission_classes' => ['nullable', 'string', 'max:500'],
+            'admission_deadline' => ['nullable', 'date'],
+            'application_fee' => ['nullable', 'string', 'max:120'],
+            'admissions_contact' => ['nullable', 'string', 'max:180'],
+            'admission_requirements' => ['nullable', 'string', 'max:10000'],
+            'how_to_apply' => ['nullable', 'string', 'max:10000'],
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string', 'max:1000'],
+            'custom_fields' => ['sometimes', 'array'],
+            'curriculum_ids' => ['sometimes', 'array', 'max:20'],
+            'curriculum_ids.*' => ['integer', 'distinct', 'exists:curricula,id'],
+            'facility_ids' => ['sometimes', 'array', 'max:100'],
+            'facility_ids.*' => ['integer', 'distinct', 'exists:facilities,id'],
+            'status' => ['sometimes', 'in:draft,pending,active,suspended,rejected'],
+            'verification_status' => ['sometimes', 'in:unverified,pending,verified'],
+            'is_featured' => ['sometimes', 'boolean'],
+            'featured_until' => ['nullable', 'date'],
+            'rejection_reason' => ['nullable', 'string', 'max:2000'],
             'owner_mode' => ['required', 'in:existing,new'],
             'owner_user_id' => ['required_if:owner_mode,existing', 'nullable', 'integer', 'exists:users,id'],
             'owner_name' => ['required_if:owner_mode,new', 'nullable', 'string', 'min:2', 'max:255'],
             'owner_email' => ['required_if:owner_mode,new', 'nullable', 'email', 'max:255'],
             'owner_phone' => ['nullable', 'string', 'max:30'],
-            'phone' => ['nullable', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'website' => ['nullable', 'url', 'max:255'],
-            'address' => ['nullable', 'string', 'max:1000'],
-            'description' => ['nullable', 'string', 'max:10000'],
-            'registration_number' => ['nullable', 'string', 'max:60'],
-            'founded_year' => ['nullable', 'integer', 'min:1800', 'max:'.now()->year],
-            'boarding_type' => ['nullable', 'in:boarding,day,mixed'],
-            'gender_policy' => ['nullable', 'in:boys,girls,mixed'],
+            'owner_school_role' => ['nullable', 'string', 'max:80'],
+            'owner_password' => ['nullable', 'string', 'min:8', 'confirmed', 'max:128'],
         ]);
 
-        $result = DB::transaction(function () use ($data, $ownerAccounts) {
+        $data['status'] = $data['status'] ?? 'pending';
+        $data['verification_status'] = $data['verification_status'] ?? 'unverified';
+        $data['is_featured'] = (bool) ($data['is_featured'] ?? false);
+
+        $permissions = ['admin.schools.edit_any'];
+        if ($data['status'] === 'suspended') {
+            $permissions[] = 'admin.schools.suspend';
+        } elseif (in_array($data['status'], ['active', 'rejected'], true) ||
+            $data['verification_status'] !== 'unverified') {
+            $permissions[] = 'admin.schools.approve';
+        }
+        if ($data['is_featured'] || filled($data['featured_until'] ?? null)) {
+            $permissions[] = 'admin.schools.feature';
+        }
+        foreach (array_unique($permissions) as $permission) {
+            $this->authorizeWorkspacePermission($request, $permission);
+        }
+
+        $result = DB::transaction(function () use ($data, $ownerAccounts, $request) {
             $owner = $ownerAccounts->resolveOrCreate([
-                'user_id' => $data['owner_mode'] === 'existing' ? $data['owner_user_id'] : null,
+                'user_id' => $data['owner_mode'] === 'existing' ? ($data['owner_user_id'] ?? null) : null,
                 'name' => $data['owner_name'] ?? null,
                 'email' => $data['owner_email'] ?? null,
                 'phone' => $data['owner_phone'] ?? null,
             ], (int) $data['district_id']);
 
+            if (filled($data['owner_school_role'] ?? null)) {
+                $owner['user']->forceFill(['school_role' => trim($data['owner_school_role'])])->save();
+            }
+
+            $hasManualPassword = filled($data['owner_password'] ?? null);
+            if ($hasManualPassword) {
+                $owner['user']->forceFill([
+                    'password' => Hash::make($data['owner_password']),
+                    'owner_invitation_pending' => false,
+                    'status' => $owner['user']->status === 'inactive' && $owner['user']->owner_invitation_pending
+                        ? 'active'
+                        : $owner['user']->status,
+                ])->save();
+            }
+
+            $status = $data['status'];
+            $verificationStatus = $data['verification_status'];
+            if ($status === 'rejected') {
+                $verificationStatus = 'unverified';
+            }
+
             $school = School::query()->create([
                 'owner_id' => $owner['user']->id,
                 'name' => trim($data['name']),
+                'tagline' => $data['tagline'] ?? null,
+                'description' => $data['description'] ?? null,
                 'type_id' => (int) $data['type_id'],
                 'district_id' => (int) $data['district_id'],
                 'sub_county_id' => $data['sub_county_id'] ?? null,
+                'town' => $data['town'] ?? null,
+                'address' => $data['address'] ?? null,
+                'po_box' => $data['po_box'] ?? null,
+                'nearest_landmark' => $data['nearest_landmark'] ?? null,
+                'maps_url' => $data['maps_url'] ?? null,
+                'latitude' => $data['latitude'] ?? null,
+                'longitude' => $data['longitude'] ?? null,
+                'registration_number' => $data['registration_number'] ?? null,
+                'founded_year' => $data['founded_year'] ?? null,
+                'ownership' => $data['ownership'] ?? null,
+                'religious_affiliation' => $data['religious_affiliation'] ?? null,
                 'phone' => $data['phone'] ?? null,
                 'email' => isset($data['email']) ? Str::lower(trim($data['email'])) : null,
                 'website' => $data['website'] ?? null,
-                'address' => $data['address'] ?? null,
-                'description' => $data['description'] ?? null,
-                'registration_number' => $data['registration_number'] ?? null,
-                'founded_year' => $data['founded_year'] ?? null,
-                'boarding_type' => $data['boarding_type'] ?? 'day',
-                'gender_policy' => $data['gender_policy'] ?? 'mixed',
-                'status' => 'pending',
-                'verification_status' => 'pending',
-                'is_featured' => false,
+                'whatsapp' => $data['whatsapp'] ?? null,
+                'facebook_url' => $data['facebook_url'] ?? null,
+                'instagram_url' => $data['instagram_url'] ?? null,
+                'boarding_type' => $data['boarding_type'],
+                'gender_policy' => $data['gender_policy'],
+                'student_count_approx' => $data['student_count_approx'] ?? null,
+                'fees_from' => $data['fees_from'] ?? null,
+                'fees_to' => $data['fees_to'] ?? null,
+                'activities' => $data['activities'] ?? null,
+                'referral_source' => $data['referral_source'] ?? null,
+                'admissions_open' => (bool) $data['admissions_open'],
+                'admission_classes' => $data['admission_classes'] ?? null,
+                'admission_deadline' => $data['admission_deadline'] ?? null,
+                'application_fee' => $data['application_fee'] ?? null,
+                'admissions_contact' => $data['admissions_contact'] ?? null,
+                'admission_requirements' => $data['admission_requirements'] ?? null,
+                'how_to_apply' => $data['how_to_apply'] ?? null,
+                'meta_title' => $data['meta_title'] ?? null,
+                'meta_description' => $data['meta_description'] ?? null,
+                'custom_fields' => $data['custom_fields'] ?? [],
+                'status' => $status,
+                'verification_status' => $verificationStatus,
+                'verified_at' => $verificationStatus === 'verified' ? now() : null,
+                'verified_by' => $verificationStatus === 'verified' ? $request->user()->id : null,
+                'is_featured' => $data['is_featured'],
+                'featured_until' => $data['featured_until'] ?? null,
+                'rejection_reason' => $data['rejection_reason'] ?? null,
                 'submitted_at' => now(),
             ]);
+
+            $school->curricula()->sync($data['curriculum_ids'] ?? []);
+            $school->facilities()->sync($data['facility_ids'] ?? []);
 
             return [
                 'school' => $school,
                 'owner' => $owner['user'],
-                'invite' => $owner['invitation_pending'],
+                'invite' => $owner['invitation_pending'] && ! $hasManualPassword,
+                'manual_password' => $hasManualPassword,
             ];
         });
+
+        if ($result['manual_password']) {
+            // The password may belong to an owner shared by multiple schools.
+            $result['owner']->tokens()->delete();
+        }
 
         $invitationStatus = $result['invite']
             ? $ownerAccounts->sendInvitation($result['owner'])
             : null;
         $invitationSent = $invitationStatus === Password::RESET_LINK_SENT;
 
+        $school = $result['school']->fresh([
+            'type:id,name',
+            'district:id,name,region_id',
+            'district.region:id,name',
+            'subCounty:id,name,district_id',
+            'owner:id,name,email,phone,school_role,status,owner_invitation_pending',
+            'curricula:id,name,slug,abbreviation,is_active',
+            'facilities:id,name,category',
+        ]);
+
         return response()->json([
             'message' => $result['invite']
                 ? ($invitationSent
                     ? 'School created and its owner account was assigned. A password setup invitation has been sent.'
                     : 'School created and its owner account was assigned, but the invitation could not be sent. Resend it from the school account panel.')
-                : 'School created and linked to the selected school-owner account.',
-            'data' => $result['school']->fresh(['district', 'type', 'owner']),
+                : ($result['manual_password']
+                    ? 'School created and its owner account was assigned with the password you set.'
+                    : 'School created and linked to the selected school-owner account.'),
+            'data' => $school,
             'owner_invitation' => $invitationStatus,
         ], 201);
     }
