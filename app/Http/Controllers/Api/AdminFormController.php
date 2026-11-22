@@ -77,12 +77,12 @@ class AdminFormController extends Controller
                 $make('religion_none', 'None'),
             ],
             'referral_sources' => [
-                $make('referral_search', 'search_engine', 'Search engine'),
-                $make('referral_social', 'social_media', 'Social media'),
-                $make('referral_school', 'another_school', 'Another school'),
-                $make('referral_word_of_mouth', 'word_of_mouth', 'Word of mouth'),
-                $make('referral_team', 'findursch_team', 'Your team contacted us'),
-                $make('referral_other', 'other', 'Other'),
+                $make('referral_search', 'Search engine'),
+                $make('referral_social', 'Social media'),
+                $make('referral_school', 'Another school'),
+                $make('referral_word_of_mouth', 'Word of mouth'),
+                $make('referral_team', 'Your team contacted us'),
+                $make('referral_other', 'Other'),
             ],
         ];
     }
@@ -207,7 +207,7 @@ class AdminFormController extends Controller
             ];
         }
 
-        if ($normalized !== [] && ! collect($normalized)->contains(fn ($item) => $item['enabled'])) {
+        if (! collect($normalized)->contains(fn ($item) => $item['enabled'])) {
             abort(422, 'Keep at least one active choice in each registration dropdown.');
         }
 
