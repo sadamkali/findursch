@@ -635,7 +635,7 @@ class AdminWorkspaceController extends Controller
             'owner_password' => ['nullable', 'string', 'min:8', 'confirmed', 'max:128'],
         ]);
 
-        $districtMatchesRegion = \\App\\Models\\District::query()
+        $districtMatchesRegion = \App\Models\District::query()
             ->whereKey($data['district_id'])
             ->where('region_id', $data['region_id'])
             ->exists();
