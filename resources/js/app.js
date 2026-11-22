@@ -90,16 +90,18 @@ Alpine.data('homepageHero', (configuredSlides) => ({
 
 Alpine.data('schoolCarousel', () => ({
     activePage: 0,
-    get pages() {
-        const track = this.$refs.track;
-        if (!track || !track.clientWidth) return 1;
-        return Math.max(1, Math.ceil(track.scrollWidth / track.clientWidth));
+    pages: 1,
+    init() {
+        this.$nextTick(() => this.measure());
+        window.addEventListener('resize', () => this.measure());
     },
-    sync() {
+    measure() {
         const track = this.$refs.track;
         if (!track || !track.clientWidth) return;
+        this.pages = Math.max(1, Math.ceil(track.scrollWidth / track.clientWidth));
         this.activePage = Math.min(this.pages - 1, Math.round(track.scrollLeft / track.clientWidth));
     },
+    sync() { this.measure(); },
     go(page) {
         const track = this.$refs.track;
         if (!track) return;
