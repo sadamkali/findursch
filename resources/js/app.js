@@ -87,6 +87,29 @@ Alpine.data('homepageHero', (configuredSlides) => ({
     },
 }));
 
+
+Alpine.data('schoolCarousel', () => ({
+    activePage: 0,
+    get pages() {
+        const track = this.$refs.track;
+        if (!track || !track.clientWidth) return 1;
+        return Math.max(1, Math.ceil(track.scrollWidth / track.clientWidth));
+    },
+    sync() {
+        const track = this.$refs.track;
+        if (!track || !track.clientWidth) return;
+        this.activePage = Math.min(this.pages - 1, Math.round(track.scrollLeft / track.clientWidth));
+    },
+    go(page) {
+        const track = this.$refs.track;
+        if (!track) return;
+        this.activePage = Math.max(0, Math.min(this.pages - 1, page));
+        track.scrollTo({ left: this.activePage * track.clientWidth, behavior: 'smooth' });
+    },
+    next() { this.go(this.activePage + 1); },
+    previous() { this.go(this.activePage - 1); },
+}));
+
 Alpine.data('schoolTabs', () => ({
     active: 'overview',
     setTab(tab) { this.active = tab }
