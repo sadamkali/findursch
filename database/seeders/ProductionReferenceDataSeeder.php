@@ -13,8 +13,6 @@ class ProductionReferenceDataSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            RegionSeeder::class,
-            DistrictSeeder::class,
             SchoolTypeSeeder::class,
             CurriculumSeeder::class,
             FacilitySeeder::class,
