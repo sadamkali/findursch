@@ -407,6 +407,7 @@ class AdminFormController extends Controller
                         'order' => (int) $item['sort_order'],
                     ];
                     $model = ctype_digit($id) ? SchoolType::query()->find((int) $id) : null;
+                    if (! $model) $model = SchoolType::query()->whereRaw('LOWER(BTRIM(name)) = ?', [mb_strtolower(trim($item['name']))])->first();
                     if (! $model) $model = new SchoolType();
                 } elseif ($kind === 'curricula') {
                     $attributes += [
@@ -414,6 +415,7 @@ class AdminFormController extends Controller
                         'description' => $item['description'] ?: null,
                     ];
                     $model = ctype_digit($id) ? Curriculum::query()->find((int) $id) : null;
+                    if (! $model) $model = Curriculum::query()->whereRaw('LOWER(BTRIM(name)) = ?', [mb_strtolower(trim($item['name']))])->first();
                     if (! $model) $model = new Curriculum();
                 } else {
                     $attributes += [
@@ -421,6 +423,7 @@ class AdminFormController extends Controller
                         'icon' => $item['icon'] ?: null,
                     ];
                     $model = ctype_digit($id) ? Facility::query()->find((int) $id) : null;
+                    if (! $model) $model = Facility::query()->whereRaw('LOWER(BTRIM(name)) = ?', [mb_strtolower(trim($item['name']))])->first();
                     if (! $model) $model = new Facility();
                 }
 
