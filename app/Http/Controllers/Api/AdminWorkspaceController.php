@@ -86,6 +86,7 @@ class AdminWorkspaceController extends Controller
                     'district:id,name',
                     'type:id,name',
                     'owner:id,name,email',
+                    'media' => fn ($query) => $query->whereIn('collection_name', ['logo', 'badge']),
                 ]);
 
                 if ($resource === 'verification') {
@@ -123,6 +124,11 @@ class AdminWorkspaceController extends Controller
                     ->orderBy($sort, $direction)
                     ->paginate($perPage)
                     ->appends($request->query());
+
+                $paginator->getCollection()->each(function (School $school) {
+                    $school->setAttribute('logo_url', $school->getFirstMedia('logo')?->getUrl());
+                    $school->setAttribute('badge_url', $school->getFirstMedia('badge')?->getUrl());
+                });
 
                 $summary = [
                     'total' => School::query()->count(),
