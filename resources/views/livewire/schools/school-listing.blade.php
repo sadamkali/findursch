@@ -33,7 +33,7 @@
                 <select wire:model.live="curriculum" aria-label="Curriculum">
                     <option value="">All curricula</option>
                     @foreach($curricula as $curriculumOption)
-                        <option value="{{ $curriculumOption->id }}">{{ $curriculumOption->abbreviation }}</option>
+                        <option value="{{ $curriculumOption->id }}">{{ $curriculumOption->name }}</option>
                     @endforeach
                 </select>
                 <button class="go" type="submit" wire:loading.attr="disabled" wire:target="applyFilters">
@@ -62,7 +62,7 @@
                             <select wire:model.live="curriculum" aria-label="Filter by curriculum">
                                 <option value="">Any curriculum</option>
                                 @foreach($curricula as $curriculumOption)
-                                    <option value="{{ $curriculumOption->id }}">{{ $curriculumOption->abbreviation }}</option>
+                                    <option value="{{ $curriculumOption->id }}">{{ $curriculumOption->name }}</option>
                                 @endforeach
                             </select>
                         </label>
