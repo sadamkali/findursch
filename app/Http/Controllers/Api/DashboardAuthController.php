@@ -74,17 +74,25 @@ class DashboardAuthController extends Controller
 
             $options = collect($lists->get((string) ($field['option_list'] ?? ''), [])['options'] ?? [])
                 ->where('enabled', true)->pluck('value')->all();
+            $minLength = max(0, (int) ($field['min_length'] ?? 0));
+            $maxLength = max(1, (int) ($field['max_length'] ?? ($type === 'textarea' ? 5000 : 500)));
+            $minValue = is_numeric($field['min_value'] ?? null) ? $field['min_value'] : 0;
+            $numberBounds = is_numeric($field['max_value'] ?? null) ? ['max:'.$field['max_value']] : [];
+            $lengthRules = array_filter([
+                $minLength > 0 ? 'min:'.$minLength : null,
+                'max:'.$maxLength,
+            ]);
             $rules = match ($type) {
-                'number' => ['required', 'numeric', 'min:0'],
-                'url' => ['required', 'url', 'max:2000'],
-                'email' => ['required', 'email', 'max:255'],
+                'number' => ['required', 'numeric', 'min:'.$minValue, ...$numberBounds],
+                'url' => ['required', 'url', 'max:'.min(2000, $maxLength), ...($minLength > 0 ? ['min:'.$minLength] : [])],
+                'email' => ['required', 'email', 'max:'.min(255, $maxLength), ...($minLength > 0 ? ['min:'.$minLength] : [])],
                 'date' => ['required', 'date'],
                 'checkbox' => ['required', 'boolean'],
-                'select' => ['required', 'string', Rule::in($options)],
+                'select', 'radio' => ['required', 'string', Rule::in($options)],
                 'checkboxes' => ['required', 'array', 'min:'.($required ? 1 : 0)],
-                'phone' => ['required', 'string', 'max:50'],
-                'textarea' => ['required', 'string', 'max:'.max(1, (int) ($field['max_length'] ?? 5000))],
-                default => ['required', 'string', 'max:'.max(1, (int) ($field['max_length'] ?? 500))],
+                'phone' => ['required', 'string', ...array_values($lengthRules)],
+                'textarea' => ['required', 'string', ...array_values($lengthRules)],
+                default => ['required', 'string', ...array_values($lengthRules)],
             };
             $validationRules = ['value' => $rules];
             if ($type === 'checkboxes') $validationRules['value.*'] = [Rule::in($options)];
