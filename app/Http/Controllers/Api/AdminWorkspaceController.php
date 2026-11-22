@@ -385,12 +385,12 @@ class AdminWorkspaceController extends Controller
 
         return response()->json([
             'data' => [
-                'school_types' => \\App\\Models\\SchoolType::query()->where('is_active', true)->orderBy('order')->get(['id', 'name']),
-                'regions' => \\App\\Models\\Region::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
-                'districts' => \\App\\Models\\District::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'region_id']),
+                'school_types' => \App\Models\SchoolType::query()->where('is_active', true)->orderBy('order')->get(['id', 'name']),
+                'regions' => \App\Models\Region::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+                'districts' => \App\Models\District::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'region_id']),
                 'sub_counties' => SubCounty::query()->orderBy('name')->get(['id', 'name', 'district_id']),
-                'curricula' => \\App\\Models\\Curriculum::query()->orderBy('name')->get(['id', 'name', 'abbreviation', 'is_active']),
-                'facilities' => \\App\\Models\\Facility::query()->where('is_active', true)->orderBy('category')->orderBy('name')->get(['id', 'name', 'category']),
+                'curricula' => \App\Models\Curriculum::query()->orderBy('name')->get(['id', 'name', 'abbreviation', 'is_active']),
+                'facilities' => \App\Models\Facility::query()->where('is_active', true)->orderBy('category')->orderBy('name')->get(['id', 'name', 'category']),
             ],
         ]);
     }
