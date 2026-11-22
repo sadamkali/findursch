@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -17,6 +18,7 @@ return new class extends Migration
             $table->timestamps();
             $table->unique(['district_id', 'name']);
         });
+        DB::statement('ALTER TABLE counties ENABLE ROW LEVEL SECURITY');
 
         Schema::table('sub_counties', function (Blueprint $table) {
             $table->foreignId('county_id')->nullable()->after('district_id')
@@ -33,6 +35,7 @@ return new class extends Migration
             $table->timestamps();
             $table->unique(['sub_county_id', 'name']);
         });
+        DB::statement('ALTER TABLE parishes ENABLE ROW LEVEL SECURITY');
 
         Schema::table('schools', function (Blueprint $table) {
             $table->foreignId('county_id')->nullable()->after('district_id')
