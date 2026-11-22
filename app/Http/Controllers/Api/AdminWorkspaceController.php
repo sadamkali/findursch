@@ -396,10 +396,13 @@ class AdminWorkspaceController extends Controller
         $invitationStatus = $result['invite']
             ? $ownerAccounts->sendInvitation($result['owner'])
             : null;
+        $invitationSent = $invitationStatus === Password::RESET_LINK_SENT;
 
         return response()->json([
             'message' => $result['invite']
-                ? 'School created and its owner account was assigned. A password setup invitation has been sent.'
+                ? ($invitationSent
+                    ? 'School created and its owner account was assigned. A password setup invitation has been sent.'
+                    : 'School created and its owner account was assigned, but the invitation could not be sent. Resend it from the school account panel.')
                 : 'School created and linked to the selected school-owner account.',
             'data' => $result['school']->fresh(['district', 'type', 'owner']),
             'owner_invitation' => $invitationStatus,
@@ -469,10 +472,13 @@ class AdminWorkspaceController extends Controller
         $invitationStatus = $result['invite']
             ? $ownerAccounts->sendInvitation($result['owner'])
             : null;
+        $invitationSent = $invitationStatus === Password::RESET_LINK_SENT;
 
         return response()->json([
             'message' => $result['invite']
-                ? 'School owner account assigned. A password setup invitation has been sent.'
+                ? ($invitationSent
+                    ? 'School owner account assigned. A password setup invitation has been sent.'
+                    : 'School owner account assigned, but the invitation could not be sent. Use Resend invitation to try again.')
                 : 'School owner account assigned successfully.',
             'data' => $school->fresh(['district', 'type', 'owner']),
             'owner_invitation' => $invitationStatus,
