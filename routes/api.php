@@ -57,10 +57,10 @@ Route::middleware(['auth:sanctum'])
         Route::post('/location-manager/{level}', [AdminLocationController::class, 'store'])
             ->whereIn('level', ['regions', 'districts', 'counties', 'sub_counties', 'parishes', 'towns']);
         Route::patch('/location-manager/{level}/{id}', [AdminLocationController::class, 'update'])
-            ->whereIn('level', ['regions', 'districts', 'towns'])
+            ->whereIn('level', ['regions', 'districts', 'counties', 'sub_counties', 'parishes', 'towns'])
             ->whereNumber('id');
         Route::delete('/location-manager/{level}/{id}', [AdminLocationController::class, 'destroy'])
-            ->whereIn('level', ['regions', 'districts', 'towns'])
+            ->whereIn('level', ['regions', 'districts', 'counties', 'sub_counties', 'parishes', 'towns'])
             ->whereNumber('id');
         Route::put('/location-manager/settings', [AdminLocationController::class, 'updateSettings']);
         Route::post('/location-suggestions/{suggestion}/review', [AdminLocationController::class, 'reviewSuggestion'])

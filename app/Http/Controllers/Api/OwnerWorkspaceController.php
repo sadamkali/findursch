@@ -18,9 +18,11 @@ use App\Models\Setting;
 use App\Services\SchoolMediaStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class OwnerWorkspaceController extends Controller
 {
@@ -173,12 +175,47 @@ class OwnerWorkspaceController extends Controller
                 'tagline' => ['nullable', 'string', 'max:255'],
                 'description' => ['nullable', 'string', 'max:10000'],
                 'address' => ['nullable', 'string', 'max:1000'],
+                'district_id' => ['sometimes', 'required', 'integer', 'exists:districts,id'],
+                'county_id' => ['sometimes', 'required', 'integer', 'exists:counties,id'],
+                'sub_county_id' => ['sometimes', 'required', 'integer', 'exists:sub_counties,id'],
+                'parish_id' => ['sometimes', 'nullable', 'integer', 'exists:parishes,id'],
                 'phone' => ['nullable', 'string', 'max:30'],
                 'email' => ['nullable', 'email', 'max:255'],
                 'website' => ['nullable', 'url', 'max:255'],
                 'whatsapp' => ['nullable', 'string', 'max:30'],
                 'custom_fields' => ['sometimes', 'array'],
             ]);
+
+            $locationWasSubmitted = array_intersect(['district_id', 'county_id', 'sub_county_id', 'parish_id'], array_keys($validated)) !== [];
+            if ($locationWasSubmitted) {
+                $districtId = (int) ($validated['district_id'] ?? $record->district_id);
+                $countyId = (int) ($validated['county_id'] ?? $record->county_id);
+                $subCountyId = (int) ($validated['sub_county_id'] ?? $record->sub_county_id);
+                $parishId = filled($validated['parish_id'] ?? null) ? (int) $validated['parish_id'] : null;
+
+                if (! DB::table('districts')->where('id', $districtId)->where('is_active', true)->exists()) {
+                    throw ValidationException::withMessages(['district_id' => ['Choose an active district.']]);
+                }
+                if (! DB::table('counties')->where('id', $countyId)->where('district_id', $districtId)->where('is_active', true)->exists()) {
+                    throw ValidationException::withMessages(['county_id' => ['Choose a county within the selected district.']]);
+                }
+                $subCounty = DB::table('sub_counties')->where('id', $subCountyId)
+                    ->where('district_id', $districtId)->where('county_id', $countyId)
+                    ->where('is_active', true)->first();
+                if (! $subCounty) {
+                    throw ValidationException::withMessages(['sub_county_id' => ['Choose a subcounty within the selected county.']]);
+                }
+                if ($parishId && ! DB::table('parishes')->where('id', $parishId)
+                    ->where('sub_county_id', $subCountyId)->where('is_active', true)->exists()) {
+                    throw ValidationException::withMessages(['parish_id' => ['Choose a parish within the selected subcounty.']]);
+                }
+
+                $validated['district_id'] = $districtId;
+                $validated['county_id'] = $countyId;
+                $validated['sub_county_id'] = $subCountyId;
+                $validated['parish_id'] = $parishId;
+                $validated['town'] = $subCounty->name;
+            }
 
             unset($validated['custom_fields']);
             $changes = $validated;
@@ -203,7 +240,7 @@ class OwnerWorkspaceController extends Controller
             $record->update($changes);
         }
 
-        $record->load(['type', 'district', 'subCounty', 'activeSubscription.plan']);
+        $record->load(['type', 'district.region', 'county', 'subCounty', 'parish', 'activeSubscription.plan']);
         $record->setAttribute('logo_url', $record->getFirstMedia('logo')?->getUrl());
         $record->setAttribute('badge_url', $record->getFirstMedia('badge')?->getUrl());
         $plan = $record->activeSubscription?->plan;
@@ -225,6 +262,12 @@ class OwnerWorkspaceController extends Controller
 
         return response()->json(['data' => [
             'school' => $record,
+            'location_options' => [
+                'districts' => DB::table('districts')->where('is_active', true)->orderBy('name')->get(['id', 'name', 'region_id']),
+                'counties' => DB::table('counties')->where('is_active', true)->orderBy('name')->get(['id', 'name', 'district_id']),
+                'sub_counties' => DB::table('sub_counties')->where('is_active', true)->orderBy('name')->get(['id', 'name', 'district_id', 'county_id']),
+                'parishes' => DB::table('parishes')->where('is_active', true)->orderBy('name')->get(['id', 'name', 'sub_county_id']),
+            ],
             'custom_profile_fields' => $this->profileCustomFieldDefinitions(),
             'completion' => $done,
             'plan' => [

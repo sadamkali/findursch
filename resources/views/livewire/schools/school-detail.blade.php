@@ -27,7 +27,7 @@
     $countyName = $school->county?->name;
     $subCountyName = $school->subCounty?->name;
     $parishName = $school->parish?->name;
-    $locationText = collect([$districtName, $countyName, $subCountyName, $parishName, $regionName])->filter()->unique()->implode(', ');
+    $locationText = collect([$districtName, $countyName, $subCountyName, $parishName])->filter()->unique()->implode(', ');
     $displayPhone = $primaryPhone ?: 'Not provided';
     $displayEmail = $primaryEmail ?: 'Not provided';
     $displayLocation = $locationText !== '' ? $locationText.', Uganda' : 'Not provided';

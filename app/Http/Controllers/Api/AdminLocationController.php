@@ -160,13 +160,15 @@ class AdminLocationController extends Controller
                             ->orWhereRaw('LOWER(TRIM(s.town)) = LOWER(TRIM(t.name))');
                     });
             })
+            ->leftJoin('parishes as p', 'p.sub_county_id', '=', 't.id')
             ->select([
-                't.id', 't.district_id', 't.name', 't.slug', 't.is_active',
+                't.id', 't.district_id', 't.county_id', 't.name', 't.slug', 't.is_active',
                 'd.name as district_name', 'r.name as region_name',
             ])
             ->selectRaw('COUNT(DISTINCT s.id)::integer as schools_count')
+            ->selectRaw('COUNT(DISTINCT p.id)::integer as parishes_count')
             ->groupBy(
-                't.id', 't.district_id', 't.name', 't.slug', 't.is_active',
+                't.id', 't.district_id', 't.county_id', 't.name', 't.slug', 't.is_active',
                 'd.name', 'r.name'
             )
             ->orderBy('r.name')
