@@ -298,12 +298,13 @@ class OwnerWorkspaceController extends Controller
                 'duration' => ['nullable', 'string', 'max:60'],
                 'description' => ['nullable', 'string', 'max:5000'],
                 'curriculum_id' => ['nullable', 'integer', 'exists:curricula,id'],
+                'is_active' => ['sometimes', 'boolean'],
             ]);
 
             if ($request->isMethod('patch')) {
                 abort_unless($programme, 404);
                 $updated = $record->programs()->whereKey($programme)->firstOrFail();
-                $updated->forceFill([...$validated, 'is_active' => $request->boolean('is_active', true)])->save();
+                $updated->forceFill([...$validated, 'is_active' => $validated['is_active'] ?? true])->save();
 
                 return response()->json(['data' => ['record' => $updated->fresh('curriculum')]]);
             }
@@ -342,12 +343,13 @@ class OwnerWorkspaceController extends Controller
                 'period' => ['required', Rule::in(['per_term', 'per_year', 'once_off', 'per_month'])],
                 'academic_year' => ['nullable', 'string', 'max:20'],
                 'notes' => ['nullable', 'string', 'max:2000'],
+                'is_active' => ['sometimes', 'boolean'],
             ]);
 
             if ($request->isMethod('patch')) {
                 abort_unless($fee, 404);
                 $updated = $record->fees()->whereKey($fee)->firstOrFail();
-                $updated->forceFill([...$validated, 'currency' => 'UGX', 'is_active' => $request->boolean('is_active', true)])->save();
+                $updated->forceFill([...$validated, 'currency' => 'UGX', 'is_active' => $validated['is_active'] ?? true])->save();
 
                 return response()->json(['data' => ['record' => $updated->fresh('program')]]);
             }
