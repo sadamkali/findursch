@@ -616,3 +616,37 @@
 @media (max-width: 640px) {
     .findursch-home-reference .slider .cards > .school { flex-basis: 100%; }
 }
+
+
+/* Small school identity mark layered over homepage school cover photos. */
+.findursch-home-reference .school .ph .school-badge-mark {
+    position: absolute;
+    z-index: 2;
+    left: 10px;
+    bottom: 10px;
+    display: flex;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 2px solid #fff;
+    border-radius: 10px;
+    background: #fff;
+    padding: 4px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.2);
+}
+.findursch-home-reference .school .ph .school-badge-mark img {
+    position: static;
+    inset: auto;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.findursch-home-reference .school .ph .school-badge-mark span {
+    color: var(--brand);
+    font: 800 8px/1.2 var(--sans);
+    letter-spacing: .06em;
+    text-align: center;
+    text-transform: uppercase;
+}
