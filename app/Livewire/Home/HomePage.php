@@ -34,7 +34,7 @@ class HomePage extends Component
             ->with(['district', 'type', 'curricula', 'media'])
             ->orderByDesc('is_featured')
             ->latest('created_at')
-            ->limit(3)
+            ->limit(9)
             ->get();
 
         $spotlightSchool = School::query()
