@@ -907,3 +907,160 @@ body .account-workspace-content h3 {
         scroll-behavior: auto !important;
     }
 }
+
+
+/*
+ * Bind every imported/reference page palette and font token to the active
+ * FindUrSch theme. These selectors deliberately override the old per-page
+ * template defaults so no route silently switches back to a different font
+ * or gold/green shade.
+ */
+.findursch-home-reference,
+.school-directory-reference,
+.event-reference,
+.findursch-scholarships {
+    --brand: var(--fd-brand) !important;
+    --brand-dk: var(--fd-brand-dark) !important;
+    --brand-xdk: var(--fd-brand-deep) !important;
+    --accent: var(--fd-accent) !important;
+    --accent-dk: var(--fd-accent-dark) !important;
+    --tint: var(--fd-tint) !important;
+    --line: var(--fd-line) !important;
+    --ink: var(--fd-ink) !important;
+    --mute: var(--fd-muted) !important;
+    --serif: var(--fd-display) !important;
+    --sans: var(--fd-body) !important;
+    --wrap: 1200px !important;
+}
+
+.blogs-page {
+    --blogs-brand: var(--fd-brand) !important;
+    --blogs-brand-dark: var(--fd-brand-dark) !important;
+    --blogs-brand-deep: var(--fd-brand-deep) !important;
+    --blogs-accent: var(--fd-accent) !important;
+    --blogs-accent-dark: var(--fd-accent-dark) !important;
+    --blogs-tint: var(--fd-tint) !important;
+    --blogs-line: var(--fd-line) !important;
+    --blogs-ink: var(--fd-ink) !important;
+    --blogs-muted: var(--fd-muted) !important;
+    --blogs-serif: var(--fd-display) !important;
+    --blogs-sans: var(--fd-body) !important;
+    --blogs-radius: 12px !important;
+}
+
+.resource-page {
+    --rp-brand: var(--fd-brand) !important;
+    --rp-dark: var(--fd-brand-dark) !important;
+    --rp-deep: var(--fd-brand-deep) !important;
+    --rp-gold: var(--fd-accent) !important;
+    --rp-tint: var(--fd-tint) !important;
+    --rp-line: var(--fd-line) !important;
+    --rp-ink: var(--fd-ink) !important;
+    --rp-muted: var(--fd-muted) !important;
+}
+
+.news-page {
+    --nb: var(--fd-brand) !important;
+    --nd: var(--fd-brand-dark) !important;
+    --nx: var(--fd-brand-deep) !important;
+    --na: var(--fd-accent) !important;
+    --nt: var(--fd-tint) !important;
+    --nl: var(--fd-line) !important;
+    --ni: var(--fd-ink) !important;
+    --nm: var(--fd-muted) !important;
+    --ns: var(--fd-display) !important;
+    --nn: var(--fd-body) !important;
+}
+
+.event-directory-reference {
+    --ed-brand: var(--fd-brand) !important;
+    --ed-dark: var(--fd-brand-dark) !important;
+    --ed-deep: var(--fd-brand-deep) !important;
+    --ed-gold: var(--fd-accent) !important;
+    --ed-tint: var(--fd-tint) !important;
+    --ed-line: var(--fd-line) !important;
+    --ed-ink: var(--fd-ink) !important;
+    --ed-muted: var(--fd-muted) !important;
+    --ed-serif: var(--fd-display) !important;
+    --ed-sans: var(--fd-body) !important;
+}
+
+/* The display face is the same even on older utility-based pages that used
+   inline DM Serif Display declarations in their Blade markup. */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--fd-display) !important;
+}
+
+/* Keep the custom event-directory controls on the shared button system. */
+.event-directory-reference .ed-search button,
+.event-directory-reference .ed-button:not(.ed-button-outline) {
+    min-height: 42px;
+    border: 1px solid var(--fd-brand);
+    border-radius: 8px;
+    background: var(--fd-brand);
+    color: #fff;
+    font-family: var(--fd-body);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.event-directory-reference .ed-search button:hover,
+.event-directory-reference .ed-button:not(.ed-button-outline):hover {
+    border-color: var(--fd-brand-dark);
+    background: var(--fd-brand-dark);
+    color: #fff;
+}
+
+.event-directory-reference .ed-button-outline {
+    min-height: 42px;
+    border: 1px solid var(--fd-brand);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--fd-brand);
+    font-family: var(--fd-body);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.event-directory-reference .ed-bottom-cta .ed-button {
+    border-color: var(--fd-accent);
+    background: var(--fd-accent);
+    color: #2b210b;
+}
+
+/* Match the same outer content grid on the newer reference-page families. */
+.findursch-home-reference .wrap,
+.school-directory-reference .wrap,
+.event-reference .wrap,
+.event-directory-reference .ed-shell,
+.blogs-page .blogs-wrap,
+.news-page .news-wrap,
+.resource-page .blogs-wrap {
+    width: min(1200px, calc(100% - 48px)) !important;
+    max-width: 1200px !important;
+    margin-inline: auto;
+}
+
+@media (max-width: 760px) {
+    .findursch-home-reference .wrap,
+    .school-directory-reference .wrap,
+    .event-reference .wrap,
+    .event-directory-reference .ed-shell,
+    .blogs-page .blogs-wrap,
+    .news-page .news-wrap,
+    .resource-page .blogs-wrap {
+        width: calc(100% - 32px) !important;
+    }
+}
+
+@media (max-width: 520px) {
+    .findursch-home-reference .wrap,
+    .school-directory-reference .wrap,
+    .event-reference .wrap,
+    .event-directory-reference .ed-shell,
+    .blogs-page .blogs-wrap,
+    .news-page .news-wrap,
+    .resource-page .blogs-wrap {
+        width: calc(100% - 28px) !important;
+    }
+}
