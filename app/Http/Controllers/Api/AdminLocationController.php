@@ -81,22 +81,55 @@ class AdminLocationController extends Controller
     {
         $this->authorizeView($request);
 
+        // Aggregate counts before joining so the manager loads with a fixed
+        // number of database queries instead of issuing count queries per row.
+        $regionDistrictCounts = DB::table('districts')
+            ->select('region_id')
+            ->selectRaw('COUNT(*)::integer as districts_count')
+            ->groupBy('region_id');
+
+        $regionSchoolCounts = DB::table('schools as s')
+            ->join('districts as d', 'd.id', '=', 's.district_id')
+            ->select('d.region_id')
+            ->selectRaw('COUNT(*)::integer as schools_count')
+            ->groupBy('d.region_id');
+
         $regions = DB::table('regions as r')
+            ->leftJoinSub($regionDistrictCounts, 'district_totals', function ($join) {
+                $join->on('district_totals.region_id', '=', 'r.id');
+            })
+            ->leftJoinSub($regionSchoolCounts, 'school_totals', function ($join) {
+                $join->on('school_totals.region_id', '=', 'r.id');
+            })
             ->orderBy('r.name')
             ->get([
                 'r.id', 'r.name', 'r.slug', 'r.is_active',
             ])
             ->map(function ($region) {
-                $region->districts_count = DB::table('districts')->where('region_id', $region->id)->count();
-                $region->schools_count = DB::table('schools as s')
-                    ->join('districts as d', 'd.id', '=', 's.district_id')
-                    ->where('d.region_id', $region->id)
-                    ->count();
+                $region->districts_count = (int) ($region->districts_count ?? 0);
+                $region->schools_count = (int) ($region->schools_count ?? 0);
                 return $region;
             });
 
+        $districtSchoolCounts = DB::table('schools')
+            ->select('district_id')
+            ->selectRaw('COUNT(*)::integer as schools_count')
+            ->whereNotNull('district_id')
+            ->groupBy('district_id');
+
+        $districtTownCounts = DB::table('sub_counties')
+            ->select('district_id')
+            ->selectRaw('COUNT(*)::integer as towns_count')
+            ->groupBy('district_id');
+
         $districts = DB::table('districts as d')
             ->join('regions as r', 'r.id', '=', 'd.region_id')
+            ->leftJoinSub($districtSchoolCounts, 'school_totals', function ($join) {
+                $join->on('school_totals.district_id', '=', 'd.id');
+            })
+            ->leftJoinSub($districtTownCounts, 'town_totals', function ($join) {
+                $join->on('town_totals.district_id', '=', 'd.id');
+            })
             ->orderBy('r.name')
             ->orderBy('d.name')
             ->get([
@@ -104,31 +137,34 @@ class AdminLocationController extends Controller
                 'd.is_featured', 'd.is_active', 'r.name as region_name',
             ])
             ->map(function ($district) {
-                $district->schools_count = DB::table('schools')->where('district_id', $district->id)->count();
-                $district->towns_count = DB::table('sub_counties')->where('district_id', $district->id)->count();
+                $district->schools_count = (int) ($district->schools_count ?? 0);
+                $district->towns_count = (int) ($district->towns_count ?? 0);
                 return $district;
             });
 
         $towns = DB::table('sub_counties as t')
             ->join('districts as d', 'd.id', '=', 't.district_id')
             ->join('regions as r', 'r.id', '=', 'd.region_id')
-            ->orderBy('r.name')
-            ->orderBy('d.name')
-            ->orderBy('t.name')
-            ->get([
+            ->leftJoin('schools as s', function ($join) {
+                $join->on('s.district_id', '=', 't.district_id')
+                    ->where(function ($query) {
+                        $query->whereColumn('s.sub_county_id', 't.id')
+                            ->orWhereRaw('LOWER(TRIM(s.town)) = LOWER(TRIM(t.name))');
+                    });
+            })
+            ->select([
                 't.id', 't.district_id', 't.name', 't.slug', 't.is_active',
                 'd.name as district_name', 'r.name as region_name',
             ])
-            ->map(function ($town) {
-                $town->schools_count = DB::table('schools')
-                    ->where('district_id', $town->district_id)
-                    ->where(function ($query) use ($town) {
-                        $query->where('sub_county_id', $town->id)
-                            ->orWhereRaw('LOWER(TRIM(town)) = ?', [mb_strtolower(trim($town->name))]);
-                    })
-                    ->count();
-                return $town;
-            });
+            ->selectRaw('COUNT(DISTINCT s.id)::integer as schools_count')
+            ->groupBy(
+                't.id', 't.district_id', 't.name', 't.slug', 't.is_active',
+                'd.name', 'r.name'
+            )
+            ->orderBy('r.name')
+            ->orderBy('d.name')
+            ->orderBy('t.name')
+            ->get();
 
         $suggestions = DB::table('location_suggestions as ls')
             ->join('districts as d', 'd.id', '=', 'ls.district_id')
@@ -166,7 +202,6 @@ class AdminLocationController extends Controller
             ],
         ]);
     }
-
     public function store(Request $request, string $level): JsonResponse
     {
         $this->authorizeManage($request);
