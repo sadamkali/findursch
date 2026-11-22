@@ -300,6 +300,14 @@ class OwnerWorkspaceController extends Controller
                 'curriculum_id' => ['nullable', 'integer', 'exists:curricula,id'],
             ]);
 
+            if ($request->isMethod('patch')) {
+                abort_unless($programme, 404);
+                $updated = $record->programs()->whereKey($programme)->firstOrFail();
+                $updated->forceFill([...$validated, 'is_active' => $request->boolean('is_active', true)])->save();
+
+                return response()->json(['data' => ['record' => $updated->fresh('curriculum')]]);
+            }
+
             $created = $record->programs()->create([...$validated, 'is_active' => true]);
 
             return response()->json(['data' => ['record' => $created]], 201);
@@ -335,6 +343,14 @@ class OwnerWorkspaceController extends Controller
                 'academic_year' => ['nullable', 'string', 'max:20'],
                 'notes' => ['nullable', 'string', 'max:2000'],
             ]);
+
+            if ($request->isMethod('patch')) {
+                abort_unless($fee, 404);
+                $updated = $record->fees()->whereKey($fee)->firstOrFail();
+                $updated->forceFill([...$validated, 'currency' => 'UGX', 'is_active' => $request->boolean('is_active', true)])->save();
+
+                return response()->json(['data' => ['record' => $updated->fresh('program')]]);
+            }
 
             $created = $record->fees()->create([...$validated, 'currency' => 'UGX', 'is_active' => true]);
 
