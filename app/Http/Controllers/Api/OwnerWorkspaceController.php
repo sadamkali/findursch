@@ -88,9 +88,14 @@ class OwnerWorkspaceController extends Controller
                     'label' => $field['label'],
                     'type' => $field['type'],
                     'help' => $field['help'] ?? '',
+                    'placeholder' => $field['placeholder'] ?? '',
                     'required' => (bool) ($field['required'] ?? false),
                     'options' => collect($list['options'] ?? [])->where('enabled', true)->pluck('value')->values()->all(),
+                    'min_length' => (int) ($field['min_length'] ?? 0),
                     'max_length' => (int) ($field['max_length'] ?? 500),
+                    'min_value' => $field['min_value'] ?? null,
+                    'max_value' => $field['max_value'] ?? null,
+                    'rows' => (int) ($field['rows'] ?? 3),
                 ];
             })->values()->all();
     }
@@ -122,17 +127,24 @@ class OwnerWorkspaceController extends Controller
                 $existing[$key] = null;
                 continue;
             }
+            $minLength = max(0, (int) ($field['min_length'] ?? 0));
+            $maxLength = max(1, (int) ($field['max_length'] ?? ($field['type'] === 'textarea' ? 5000 : 500)));
+            $lengthRules = array_values(array_filter([
+                $minLength > 0 ? 'min:'.$minLength : null,
+                'max:'.$maxLength,
+            ]));
+            $minValue = is_numeric($field['min_value'] ?? null) ? $field['min_value'] : 0;
+            $numberBounds = is_numeric($field['max_value'] ?? null) ? ['max:'.$field['max_value']] : [];
             $rules = match ($field['type']) {
-                'number' => ['required', 'numeric', 'min:0'],
-                'url' => ['required', 'url', 'max:2000'],
-                'email' => ['required', 'email', 'max:255'],
+                'number' => ['required', 'numeric', 'min:'.$minValue, ...$numberBounds],
+                'url' => ['required', 'url', 'max:'.min(2000, $maxLength), ...($minLength > 0 ? ['min:'.$minLength] : [])],
+                'email' => ['required', 'email', 'max:'.min(255, $maxLength), ...($minLength > 0 ? ['min:'.$minLength] : [])],
                 'date' => ['required', 'date'],
                 'checkbox' => ['required', 'boolean'],
-                'select' => ['required', 'string', \Illuminate\Validation\Rule::in($field['options'])],
+                'select', 'radio' => ['required', 'string', \Illuminate\Validation\Rule::in($field['options'])],
                 'checkboxes' => ['required', 'array', 'min:1'],
-                'phone' => ['required', 'string', 'max:50'],
-                'textarea' => ['required', 'string', 'max:5000'],
-                default => ['required', 'string', 'max:500'],
+                'phone', 'textarea' => ['required', 'string', ...$lengthRules],
+                default => ['required', 'string', ...$lengthRules],
             };
             $validationRules = ['value' => $rules];
             if ($field['type'] === 'checkboxes') $validationRules['value.*'] = [Rule::in($field['options'])];
