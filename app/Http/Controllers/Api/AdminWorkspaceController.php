@@ -177,14 +177,16 @@ class AdminWorkspaceController extends Controller
                     });
                 }
 
-                $items = $query->limit(100)->get(['id', 'name', 'email', 'phone', 'user_type', 'status', 'email_verified_at', 'created_at'])
+                $items = $query->limit(100)->get(['id', 'name', 'email', 'phone', 'school_role', 'user_type', 'status', 'owner_invitation_pending', 'email_verified_at', 'created_at'])
                     ->map(fn (User $user) => [
                         'id' => $user->id,
                         'name' => $user->name,
                         'email' => $user->email,
                         'phone' => $user->phone,
+                        'school_role' => $user->school_role,
                         'user_type' => $user->user_type,
                         'status' => $user->status,
+                        'owner_invitation_pending' => (bool) $user->owner_invitation_pending,
                         'roles' => $user->getRoleNames(),
                         'email_verified_at' => $user->email_verified_at,
                         'created_at' => $user->created_at,
@@ -898,6 +900,49 @@ class AdminWorkspaceController extends Controller
         return response()->json(['message' => 'A new password setup invitation has been sent to '.$owner->email.'.']);
     }
 
+    public function setOwnerPassword(Request $request, int $id): JsonResponse
+    {
+        $this->authorizeWorkspacePermission($request, 'admin.users.manage');
+        $owner = User::query()->findOrFail($id);
+        abort_unless($owner->user_type === 'school_owner', 404, 'School-owner account not found.');
+
+        $data = $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'max:128'],
+        ]);
+
+        $owner->forceFill([
+            'password' => Hash::make($data['password']),
+            'owner_invitation_pending' => false,
+            'status' => $owner->status === 'inactive' && $owner->owner_invitation_pending ? 'active' : $owner->status,
+        ])->save();
+
+        // Force the owner to sign in again with the new credentials on every device.
+        $owner->tokens()->delete();
+
+        return response()->json([
+            'message' => 'The school-owner password has been updated. Existing sessions have been signed out.',
+        ]);
+    }
+
+    public function resendOwnerInvitation(Request $request, int $id, SchoolOwnerAccountService $ownerAccounts): JsonResponse
+    {
+        $this->authorizeWorkspacePermission($request, 'admin.users.manage');
+        $owner = User::query()->findOrFail($id);
+        abort_unless($owner->user_type === 'school_owner', 404, 'School-owner account not found.');
+        abort_unless((bool) $owner->owner_invitation_pending, 422, 'This owner has already completed password setup.');
+
+        $status = $ownerAccounts->sendInvitation($owner);
+        if ($status !== Password::RESET_LINK_SENT) {
+            return response()->json([
+                'message' => $status === Password::RESET_THROTTLED
+                    ? 'An invitation was sent recently. Wait one minute before sending another.'
+                    : 'The invitation could not be sent. Check email delivery settings and try again.',
+            ], $status === Password::RESET_THROTTLED ? 429 : 422);
+        }
+
+        return response()->json(['message' => 'A new password setup invitation has been sent to '.$owner->email.'.']);
+    }
+
     public function update(Request $request, string $resource, int $id): JsonResponse
     {
         if (in_array($resource, ['schools', 'verification'], true)) {
@@ -1010,10 +1055,20 @@ class AdminWorkspaceController extends Controller
             case 'owners':
             case 'parents':
                 $user = User::query()->findOrFail($id);
-                $data = $request->validate([
+                $isOwnerResource = $resource === 'owners';
+                $rules = [
                     'status' => ['sometimes', 'in:active,inactive,suspended,banned'],
                     'account_type' => ['sometimes', 'in:parent,school_owner,student'],
-                ]);
+                ];
+                if ($isOwnerResource) {
+                    $rules += [
+                        'name' => ['sometimes', 'string', 'min:2', 'max:255'],
+                        'email' => ['sometimes', 'email', 'max:255', 'unique:users,email,'.$user->id],
+                        'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
+                        'school_role' => ['sometimes', 'nullable', 'string', 'max:80'],
+                    ];
+                }
+                $data = $request->validate($rules);
                 abort_unless($data !== [], 422);
 
                 if ($user->is($request->user()) && (($data['status'] ?? 'active') !== 'active' || isset($data['account_type']))) {
@@ -1038,8 +1093,14 @@ class AdminWorkspaceController extends Controller
                     $user->forceFill($data)->save();
                 }
                 return response()->json(['data' => [
-                    'id' => $user->id, 'name' => $user->name, 'email' => $user->email,
-                    'user_type' => $user->user_type, 'status' => $user->status,
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'school_role' => $user->school_role,
+                    'user_type' => $user->user_type,
+                    'status' => $user->status,
+                    'owner_invitation_pending' => (bool) $user->owner_invitation_pending,
                 ]]);
 
             case 'enquiries':
@@ -1072,11 +1133,22 @@ class AdminWorkspaceController extends Controller
             case 'articles':
                 $article = Article::query()->findOrFail($id);
                 $data = $request->validate([
+                    'title' => ['sometimes', 'required', 'string', 'min:2', 'max:255'],
+                    'excerpt' => ['sometimes', 'nullable', 'string', 'max:2000'],
+                    'body' => ['sometimes', 'required', 'string', 'max:500000'],
+                    'category_id' => ['sometimes', 'nullable', 'integer', 'exists:article_categories,id'],
+                    'cover_image' => ['sometimes', 'nullable', 'url', 'max:2048'],
                     'status' => ['sometimes', 'in:draft,published,archived'],
                     'is_featured' => ['sometimes', 'boolean'],
+                    'meta_title' => ['sometimes', 'nullable', 'string', 'max:255'],
+                    'meta_description' => ['sometimes', 'nullable', 'string', 'max:2000'],
                 ]);
+                abort_unless($data !== [], 422);
                 if (($data['status'] ?? null) === 'published' && ! $article->published_at) {
                     $data['published_at'] = now();
+                }
+                if (array_key_exists('body', $data)) {
+                    $data['read_time_minutes'] = max(1, (int) ceil(str_word_count(strip_tags($data['body'])) / 200));
                 }
                 $article->forceFill($data)->save();
                 return response()->json(['data' => $article->fresh(['category', 'author'])]);
@@ -1191,13 +1263,15 @@ class AdminWorkspaceController extends Controller
     {
         $this->authorizeWorkspacePermission($request, 'admin.content.publish');
         $data = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'min:2', 'max:255'],
             'excerpt' => ['nullable', 'string', 'max:2000'],
-            'body' => ['required', 'string'],
+            'body' => ['required', 'string', 'max:500000'],
             'category_id' => ['nullable', 'integer', 'exists:article_categories,id'],
-            'cover_image' => ['nullable', 'url', 'max:255'],
+            'cover_image' => ['nullable', 'url', 'max:2048'],
             'status' => ['required', 'in:draft,published'],
             'is_featured' => ['sometimes', 'boolean'],
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $slugBase = Str::slug($data['title']);
