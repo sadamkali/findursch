@@ -35,9 +35,9 @@
 /* Page title, categories and filters */
 .findursch-scholarships .phead{background:#fff;color:var(--ink);text-align:center;padding:44px 24px 40px;margin-top:24px;border-bottom:1px solid var(--line)}
 .findursch-scholarships .phead h1{font:700 40px/1.2 var(--serif);color:var(--brand)}
-.findursch-scholarships .phead h1 em{color:var(--accent);font-style:normal}
+.findursch-scholarships .phead h1 em{color:#8a5d00;font-style:normal}
 .findursch-scholarships .phead p{max-width:700px;margin:12px auto 0;color:var(--mute)}
-.findursch-scholarships .phead b{color:var(--accent)}
+.findursch-scholarships .phead b{color:#8a5d00}
 .findursch-scholarships .pills{display:flex;gap:8px;overflow-x:auto;padding:20px 0 14px;scrollbar-width:none}
 .findursch-scholarships .pills::-webkit-scrollbar{display:none}
 .findursch-scholarships .pills button{flex:none;height:34px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:#fff;font:500 13px var(--sans);cursor:pointer;color:var(--ink);white-space:nowrap}
