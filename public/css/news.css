@@ -11,7 +11,7 @@
 .news-ad small{color:#e2eee9;font:500 11px/1.5 var(--nn)}
 .news-heading{margin:24px auto 0;background:#fff;color:var(--ni);text-align:center;padding:44px 24px 40px;border-bottom:1px solid var(--nl)}
 .news-heading h1{font:700 clamp(30px,4vw,40px)/1.2 var(--ns);margin:0;color:var(--nb)}
-.news-heading h1 em{color:var(--na);font-style:italic}
+.news-heading h1 em{color:#8a5d00;font-style:italic}
 .news-heading>p{max-width:650px;margin:12px auto 0;color:var(--nm);font-size:14px}
 .news-category-row{display:flex;align-items:center;gap:16px;padding:20px 0 14px}
 .news-pills{display:flex;gap:8px;overflow-x:auto;flex:1;scrollbar-width:none;-webkit-overflow-scrolling:touch}
