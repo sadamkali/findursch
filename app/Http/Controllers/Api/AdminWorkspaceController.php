@@ -439,10 +439,13 @@ class AdminWorkspaceController extends Controller
         $permissions = ['admin.schools.edit_any'];
         $statusChanged = $data['status'] !== $school->status;
         $verificationChanged = $data['verification_status'] !== $school->verification_status;
-        if ($statusChanged || $verificationChanged) {
+        if ($statusChanged) {
             $permissions[] = $data['status'] === 'suspended'
                 ? 'admin.schools.suspend'
                 : 'admin.schools.approve';
+        }
+        if ($verificationChanged) {
+            $permissions[] = 'admin.schools.approve';
         }
         if ((bool) $data['is_featured'] !== (bool) $school->is_featured ||
             ($data['featured_until'] ?? null) !== optional($school->featured_until)->format('Y-m-d')) {
@@ -541,7 +544,7 @@ class AdminWorkspaceController extends Controller
         $owner->forceFill([
             'password' => Hash::make($data['password']),
             'owner_invitation_pending' => false,
-            'status' => $owner->status === 'inactive' ? 'active' : $owner->status,
+            'status' => $owner->status === 'inactive' && $owner->owner_invitation_pending ? 'active' : $owner->status,
         ])->save();
 
         // A manually reset password signs out any previous owner sessions.
