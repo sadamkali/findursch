@@ -102,6 +102,8 @@ class AdminLocationController extends Controller
                 $join->on('school_totals.region_id', '=', 'r.id');
             })
             ->orderBy('r.name')
+            ->selectRaw('COALESCE(district_totals.districts_count, 0)::integer as districts_count')
+            ->selectRaw('COALESCE(school_totals.schools_count, 0)::integer as schools_count')
             ->get([
                 'r.id', 'r.name', 'r.slug', 'r.is_active',
             ])
@@ -132,6 +134,8 @@ class AdminLocationController extends Controller
             })
             ->orderBy('r.name')
             ->orderBy('d.name')
+            ->selectRaw('COALESCE(school_totals.schools_count, 0)::integer as schools_count')
+            ->selectRaw('COALESCE(town_totals.towns_count, 0)::integer as towns_count')
             ->get([
                 'd.id', 'd.region_id', 'd.name', 'd.slug', 'd.school_count',
                 'd.is_featured', 'd.is_active', 'r.name as region_name',
