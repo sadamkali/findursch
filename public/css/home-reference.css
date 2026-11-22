@@ -550,3 +550,27 @@
     bottom: 4px;
   }
 }
+
+/* Keep the slide action button and carousel navigation in separate rows. */
+.findursch-home-reference .hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding-bottom: 48px;
+}
+.findursch-home-reference .hero > div:first-child {
+  width: 100%;
+}
+.findursch-home-reference .hero-carousel-controls {
+  position: relative;
+  inset: auto;
+  margin: 0 auto;
+}
+@media (max-width: 640px) {
+  .findursch-home-reference .hero {
+    gap: 18px;
+    padding-bottom: 40px;
+  }
+}
