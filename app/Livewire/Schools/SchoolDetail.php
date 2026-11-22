@@ -39,7 +39,9 @@ class SchoolDetail extends Component
         $this->school->load([
             'type',
             'district.region',
+            'county',
             'subCounty',
+            'parish',
             'curricula',
             'programs' => fn ($query) => $query->where('is_active', true)->orderBy('name'),
             'programs.curriculum',

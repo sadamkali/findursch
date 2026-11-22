@@ -24,12 +24,14 @@
 
     $regionName = $school->district?->region?->name;
     $districtName = $school->district?->name;
+    $countyName = $school->county?->name;
     $subCountyName = $school->subCounty?->name;
-    $locationText = collect([$districtName, $regionName])->filter()->unique()->implode(', ');
+    $parishName = $school->parish?->name;
+    $locationText = collect([$districtName, $countyName, $subCountyName, $parishName, $regionName])->filter()->unique()->implode(', ');
     $displayPhone = $primaryPhone ?: 'Not provided';
     $displayEmail = $primaryEmail ?: 'Not provided';
     $displayLocation = $locationText !== '' ? $locationText.', Uganda' : 'Not provided';
-    $mapLocationParts = collect([$school->address, $subCountyName, $districtName, $regionName])
+    $mapLocationParts = collect([$school->address, $parishName, $subCountyName, $countyName, $districtName, $regionName])
         ->filter()
         ->values();
     $mapQuery = filled($school->latitude) && filled($school->longitude)
@@ -414,7 +416,9 @@
                         <dl class="sref-location-list">
                             @if($regionName)<div><dt>Region</dt><dd>{{ $regionName }}</dd></div>@endif
                             @if($districtName)<div><dt>District</dt><dd>{{ $districtName }}</dd></div>@endif
-                            @if($subCountyName)<div><dt>Sub-county</dt><dd>{{ $subCountyName }}</dd></div>@endif
+                            @if($countyName)<div><dt>County</dt><dd>{{ $countyName }}</dd></div>@endif
+                            @if($subCountyName)<div><dt>Subcounty</dt><dd>{{ $subCountyName }}</dd></div>@endif
+                            @if($parishName)<div><dt>Parish</dt><dd>{{ $parishName }}</dd></div>@endif
                             @if(filled($school->address))<div><dt>Address</dt><dd>{{ $school->address }}</dd></div>@endif
                         </dl>
                         @if($mapUrl)

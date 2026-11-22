@@ -26,6 +26,11 @@ class District extends Model
         return $this->hasMany(School::class);
     }
 
+    public function counties(): HasMany
+    {
+        return $this->hasMany(County::class);
+    }
+
     public function subCounties(): HasMany
     {
         return $this->hasMany(SubCounty::class);

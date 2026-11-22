@@ -47,7 +47,9 @@ class AdminLocationController extends Controller
         return match ($level) {
             'regions' => 'regions',
             'districts' => 'districts',
-            'towns' => 'sub_counties',
+            'counties' => 'counties',
+            'towns', 'sub_counties' => 'sub_counties',
+            'parishes' => 'parishes',
             default => abort(404, 'Unknown location type.'),
         };
     }
@@ -172,6 +174,30 @@ class AdminLocationController extends Controller
             ->orderBy('t.name')
             ->get();
 
+        $counties = DB::table('counties as c')
+            ->join('districts as d', 'd.id', '=', 'c.district_id')
+            ->join('regions as r', 'r.id', '=', 'd.region_id')
+            ->leftJoin('sub_counties as sc', 'sc.county_id', '=', 'c.id')
+            ->leftJoin('schools as s', 's.county_id', '=', 'c.id')
+            ->select(['c.id', 'c.district_id', 'c.name', 'c.slug', 'c.is_active',
+                'd.name as district_name', 'r.name as region_name'])
+            ->selectRaw('COUNT(DISTINCT sc.id)::integer as sub_counties_count')
+            ->selectRaw('COUNT(DISTINCT s.id)::integer as schools_count')
+            ->groupBy('c.id', 'c.district_id', 'c.name', 'c.slug', 'c.is_active', 'd.name', 'r.name')
+            ->orderBy('r.name')->orderBy('d.name')->orderBy('c.name')->get();
+
+        $parishes = DB::table('parishes as p')
+            ->join('sub_counties as sc', 'sc.id', '=', 'p.sub_county_id')
+            ->join('districts as d', 'd.id', '=', 'sc.district_id')
+            ->join('regions as r', 'r.id', '=', 'd.region_id')
+            ->leftJoin('schools as s', 's.parish_id', '=', 'p.id')
+            ->select(['p.id', 'p.sub_county_id', 'p.name', 'p.slug', 'p.is_active',
+                'sc.name as sub_county_name', 'sc.district_id', 'd.name as district_name', 'r.name as region_name'])
+            ->selectRaw('COUNT(DISTINCT s.id)::integer as schools_count')
+            ->groupBy('p.id', 'p.sub_county_id', 'p.name', 'p.slug', 'p.is_active',
+                'sc.name', 'sc.district_id', 'd.name', 'r.name')
+            ->orderBy('r.name')->orderBy('d.name')->orderBy('sc.name')->orderBy('p.name')->get();
+
         $suggestions = DB::table('location_suggestions as ls')
             ->join('districts as d', 'd.id', '=', 'ls.district_id')
             ->join('regions as r', 'r.id', '=', 'd.region_id')
@@ -190,7 +216,10 @@ class AdminLocationController extends Controller
             'data' => [
                 'regions' => $regions,
                 'districts' => $districts,
+                'counties' => $counties,
                 'towns' => $towns,
+                'sub_counties' => $towns,
+                'parishes' => $parishes,
                 'suggestions' => $suggestions,
                 'settings' => [
                     'allow_custom_town' => filter_var(
@@ -201,7 +230,10 @@ class AdminLocationController extends Controller
                 'summary' => [
                     'regions' => $regions->count(),
                     'districts' => $districts->count(),
+                    'counties' => $counties->count(),
                     'towns' => $towns->count(),
+                    'sub_counties' => $towns->count(),
+                    'parishes' => $parishes->count(),
                     'suggestions_waiting' => $suggestions->count(),
                     'schools_with_location' => DB::table('schools')->whereNotNull('district_id')->count(),
                 ],
@@ -212,42 +244,43 @@ class AdminLocationController extends Controller
     {
         $this->authorizeManage($request);
         $table = $this->tableFor($level);
+        $rules = ['name' => ['required', 'string', 'min:2', 'max:120']];
+        if ($level === 'districts') $rules['region_id'] = ['required', 'integer', 'exists:regions,id'];
+        if ($level === 'counties') $rules['district_id'] = ['required', 'integer', 'exists:districts,id'];
+        if ($level === 'sub_counties') $rules['county_id'] = ['required', 'integer', 'exists:counties,id'];
+        if ($level === 'towns') $rules['district_id'] = ['required', 'integer', 'exists:districts,id'];
+        if ($level === 'parishes') $rules['sub_county_id'] = ['required', 'integer', 'exists:sub_counties,id'];
 
-        $rules = [
-            'name' => ['required', 'string', 'min:2', 'max:120'],
-        ];
-        if ($level === 'districts') {
-            $rules['region_id'] = ['required', 'integer', 'exists:regions,id'];
-        }
-        if ($level === 'towns') {
-            $rules['district_id'] = ['required', 'integer', 'exists:districts,id'];
-        }
         $data = $request->validate($rules);
         $name = $this->cleanName($data['name']);
-
-        $parentColumn = $level === 'districts' ? 'region_id' : ($level === 'towns' ? 'district_id' : null);
-        $parentId = $level === 'districts' ? (int) $data['region_id'] : ($level === 'towns' ? (int) $data['district_id'] : null);
-
-        if ($level === 'districts') {
-            abort_unless(DB::table('regions')->where('id', $parentId)->where('is_active', true)->exists(), 422, 'Choose an active region first.');
+        $parentColumn = match ($level) {
+            'districts' => 'region_id', 'counties' => 'district_id',
+            'sub_counties' => 'county_id', 'towns' => 'district_id',
+            'parishes' => 'sub_county_id', default => null,
+        };
+        $parentId = $parentColumn ? (int) $data[$parentColumn] : null;
+        $parentTable = match ($level) {
+            'districts' => 'regions', 'counties', 'towns' => 'districts',
+            'sub_counties' => 'counties', 'parishes' => 'sub_counties', default => null,
+        };
+        if ($parentTable && ! DB::table($parentTable)->where('id', $parentId)->where('is_active', true)->exists()) {
+            throw ValidationException::withMessages(['name' => ['Choose an active parent location first.']]);
         }
-        if ($level === 'towns') {
-            abort_unless(DB::table('districts')->where('id', $parentId)->where('is_active', true)->exists(), 422, 'Choose an active district first.');
-        }
-
         if ($this->findByName($table, $name, $parentColumn, $parentId)) {
             throw ValidationException::withMessages(['name' => ['That name already exists in this location.']]);
         }
 
+        $extra = [];
+        if ($level === 'sub_counties') {
+            $extra['district_id'] = (int) DB::table('counties')->where('id', $parentId)->value('district_id');
+        } elseif ($level === 'towns') {
+            $extra['county_id'] = null;
+        }
         $id = DB::table($table)->insertGetId([
-            ...($parentColumn ? [$parentColumn => $parentId] : []),
-            'name' => $name,
-            'slug' => $this->slugFor($table, $name),
-            'is_active' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
+            ...($parentColumn ? [$parentColumn => $parentId] : []), ...$extra,
+            'name' => $name, 'slug' => $this->slugFor($table, $name),
+            'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
         ]);
-
         return response()->json([
             'message' => ucfirst(rtrim($level, 's')).' added.',
             'data' => DB::table($table)->where('id', $id)->first(),
@@ -260,7 +293,6 @@ class AdminLocationController extends Controller
         $table = $this->tableFor($level);
         $record = DB::table($table)->where('id', $id)->first();
         abort_unless($record, 404, 'Location not found.');
-
         $data = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'min:2', 'max:120'],
             'is_active' => ['sometimes', 'boolean'],
@@ -270,7 +302,11 @@ class AdminLocationController extends Controller
         $changes = [];
         if (array_key_exists('name', $data)) {
             $name = $this->cleanName($data['name']);
-            $parentColumn = $level === 'districts' ? 'region_id' : ($level === 'towns' ? 'district_id' : null);
+            $parentColumn = match ($level) {
+                'districts' => 'region_id', 'counties' => 'district_id',
+                'sub_counties' => 'county_id', 'towns' => 'district_id',
+                'parishes' => 'sub_county_id', default => null,
+            };
             $parentId = $parentColumn ? (int) $record->{$parentColumn} : null;
             if ($this->findByName($table, $name, $parentColumn, $parentId) &&
                 $this->normalized($record->name) !== $this->normalized($name)) {
@@ -279,20 +315,15 @@ class AdminLocationController extends Controller
             $changes['name'] = $name;
             $changes['slug'] = $this->slugFor($table, $name, $id);
         }
-        if (array_key_exists('is_active', $data)) {
-            $changes['is_active'] = (bool) $data['is_active'];
-        }
+        if (array_key_exists('is_active', $data)) $changes['is_active'] = (bool) $data['is_active'];
         $changes['updated_at'] = now();
-
-        DB::transaction(function () use ($table, $id, $changes, $level, $record) {
+        DB::transaction(function () use ($table, $id, $changes, $level) {
             DB::table($table)->where('id', $id)->update($changes);
-            if ($level === 'towns' && array_key_exists('name', $changes)) {
-                DB::table('schools')
-                    ->where('sub_county_id', $id)
+            if (in_array($level, ['towns', 'sub_counties'], true) && array_key_exists('name', $changes)) {
+                DB::table('schools')->where('sub_county_id', $id)
                     ->update(['town' => $changes['name'], 'updated_at' => now()]);
             }
         });
-
         return response()->json([
             'message' => 'Location updated.',
             'data' => DB::table($table)->where('id', $id)->first(),
@@ -305,25 +336,24 @@ class AdminLocationController extends Controller
         $table = $this->tableFor($level);
         $record = DB::table($table)->where('id', $id)->first();
         abort_unless($record, 404, 'Location not found.');
-
         if ($level === 'regions') {
             abort_if(DB::table('districts')->where('region_id', $id)->exists(), 409, 'This region still contains districts. Hide it instead of deleting it.');
         } elseif ($level === 'districts') {
             $hasSchools = DB::table('schools')->where('district_id', $id)->exists();
-            $hasTowns = DB::table('sub_counties')->where('district_id', $id)->exists();
+            $hasChildren = DB::table('counties')->where('district_id', $id)->exists()
+                || DB::table('sub_counties')->where('district_id', $id)->exists();
             $hasSuggestions = DB::table('location_suggestions')->where('district_id', $id)->exists();
-            abort_if($hasSchools || $hasTowns || $hasSuggestions, 409, 'This district contains schools, towns or suggestions. Hide it instead of deleting it.');
-        } else {
-            $hasSchools = DB::table('schools')->where('sub_county_id', $id)
-                ->orWhere(function ($query) use ($record) {
-                    $query->where('district_id', $record->district_id)
-                        ->whereRaw('LOWER(TRIM(town)) = ?', [mb_strtolower(trim($record->name))]);
-                })->exists();
-            abort_if($hasSchools, 409, 'Schools are using this town or area. Hide it instead of deleting it.');
+            abort_if($hasSchools || $hasChildren || $hasSuggestions, 409, 'This district contains child locations, schools or suggestions. Hide it instead.');
+        } elseif ($level === 'counties') {
+            abort_if(DB::table('sub_counties')->where('county_id', $id)->exists()
+                || DB::table('schools')->where('county_id', $id)->exists(), 409, 'Schools or subcounties use this county. Hide it instead.');
+        } elseif (in_array($level, ['towns', 'sub_counties'], true)) {
+            abort_if(DB::table('parishes')->where('sub_county_id', $id)->exists()
+                || DB::table('schools')->where('sub_county_id', $id)->exists(), 409, 'Schools or parishes use this subcounty. Hide it instead.');
+        } elseif ($level === 'parishes') {
+            abort_if(DB::table('schools')->where('parish_id', $id)->exists(), 409, 'Schools use this parish. Hide it instead.');
         }
-
         DB::table($table)->where('id', $id)->delete();
-
         return response()->json(['message' => 'Location deleted.']);
     }
 
@@ -559,6 +589,99 @@ class AdminLocationController extends Controller
             'message' => 'Location import completed.',
             'data' => $counts,
         ]);
+    }
+
+    public function importSchoolLocations(Request $request): JsonResponse
+    {
+        $this->authorizeManage($request);
+        $data = $request->validate([
+            'items' => ['required', 'array', 'min:1', 'max:2000'],
+            'items.*.school_name' => ['required', 'string', 'min:2', 'max:255'],
+            'items.*.district' => ['required', 'string', 'min:2', 'max:120'],
+            'items.*.county' => ['required', 'string', 'min:2', 'max:120'],
+            'items.*.subcounty' => ['required', 'string', 'min:2', 'max:120'],
+            'items.*.parish' => ['nullable', 'string', 'max:120'],
+        ]);
+
+        $resolved = [];
+        $errors = [];
+        foreach ($data['items'] as $index => $item) {
+            $districts = DB::table('districts')
+                ->whereRaw('LOWER(TRIM(name)) = ?', [$this->normalized($item['district'])])
+                ->get(['id', 'name']);
+            if ($districts->count() !== 1) {
+                $errors[] = 'Row '.($index + 2).': district "'.$item['district'].'" '.($districts->isEmpty() ? 'does not exist.' : 'is ambiguous across regions.');
+                continue;
+            }
+            $district = $districts->first();
+            $school = DB::table('schools')->where('district_id', $district->id)
+                ->whereRaw('LOWER(TRIM(name)) = ?', [$this->normalized($item['school_name'])])
+                ->first(['id']);
+            if (! $school) {
+                $errors[] = 'Row '.($index + 2).': school "'.$item['school_name'].'" was not found in '.$district->name.'.';
+                continue;
+            }
+            $resolved[] = [
+                'school_id' => (int) $school->id, 'district_id' => (int) $district->id,
+                'county' => $this->cleanName($item['county']),
+                'subcounty' => $this->cleanName($item['subcounty']),
+                'parish' => $this->cleanName((string) ($item['parish'] ?? '')),
+            ];
+        }
+        if ($errors !== []) throw ValidationException::withMessages(['file' => $errors]);
+
+        $counts = ['schools_updated' => 0, 'counties_created' => 0, 'sub_counties_created' => 0, 'parishes_created' => 0];
+        DB::transaction(function () use ($resolved, &$counts) {
+            foreach ($resolved as $item) {
+                $county = DB::table('counties')->where('district_id', $item['district_id'])
+                    ->whereRaw('LOWER(TRIM(name)) = ?', [$this->normalized($item['county'])])->first();
+                if (! $county) {
+                    $id = DB::table('counties')->insertGetId([
+                        'district_id' => $item['district_id'], 'name' => $item['county'],
+                        'slug' => $this->slugFor('counties', $item['county']),
+                        'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
+                    ]);
+                    $county = DB::table('counties')->where('id', $id)->first();
+                    $counts['counties_created']++;
+                }
+
+                $sub = DB::table('sub_counties')->where('district_id', $item['district_id'])
+                    ->whereRaw('LOWER(TRIM(name)) = ?', [$this->normalized($item['subcounty'])])
+                    ->where(fn ($q) => $q->whereNull('county_id')->orWhere('county_id', $county->id))->first();
+                if (! $sub) {
+                    $id = DB::table('sub_counties')->insertGetId([
+                        'district_id' => $item['district_id'], 'county_id' => $county->id,
+                        'name' => $item['subcounty'], 'slug' => $this->slugFor('sub_counties', $item['subcounty']),
+                        'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
+                    ]);
+                    $sub = DB::table('sub_counties')->where('id', $id)->first();
+                    $counts['sub_counties_created']++;
+                } elseif (! $sub->county_id) {
+                    DB::table('sub_counties')->where('id', $sub->id)->update(['county_id' => $county->id, 'updated_at' => now()]);
+                }
+
+                $parishId = null;
+                if ($item['parish'] !== '') {
+                    $parish = DB::table('parishes')->where('sub_county_id', $sub->id)
+                        ->whereRaw('LOWER(TRIM(name)) = ?', [$this->normalized($item['parish'])])->first();
+                    if (! $parish) {
+                        $parishId = DB::table('parishes')->insertGetId([
+                            'sub_county_id' => $sub->id, 'name' => $item['parish'],
+                            'slug' => $this->slugFor('parishes', $item['parish']),
+                            'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
+                        ]);
+                        $counts['parishes_created']++;
+                    } else $parishId = (int) $parish->id;
+                }
+
+                DB::table('schools')->where('id', $item['school_id'])->update([
+                    'county_id' => $county->id, 'sub_county_id' => $sub->id,
+                    'parish_id' => $parishId, 'town' => $sub->name, 'updated_at' => now(),
+                ]);
+                $counts['schools_updated']++;
+            }
+        });
+        return response()->json(['message' => $counts['schools_updated'].' school location record(s) updated.', 'data' => $counts]);
     }
 
     public function reviewSuggestion(Request $request, int $suggestionId): JsonResponse

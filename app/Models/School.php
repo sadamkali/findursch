@@ -21,7 +21,7 @@ class School extends Model implements HasMedia
     use HasSlug, InteractsWithMedia, Searchable, LogsActivity;
 
     protected $fillable = [
-        'owner_id', 'type_id', 'district_id', 'sub_county_id', 'custom_fields',
+        'owner_id', 'type_id', 'district_id', 'county_id', 'sub_county_id', 'parish_id', 'custom_fields',
         'name', 'slug', 'tagline', 'description',
         'founded_year', 'registration_number',
         'latitude', 'longitude', 'address', 'town', 'po_box',
@@ -80,9 +80,19 @@ class School extends Model implements HasMedia
         return $this->belongsTo(District::class);
     }
 
+    public function county(): BelongsTo
+    {
+        return $this->belongsTo(County::class);
+    }
+
     public function subCounty(): BelongsTo
     {
         return $this->belongsTo(SubCounty::class);
+    }
+
+    public function parish(): BelongsTo
+    {
+        return $this->belongsTo(Parish::class);
     }
 
     public function owner(): BelongsTo

@@ -188,10 +188,14 @@ class DashboardAuthController extends Controller
                     ->whereHas('region', fn ($query) => $query->where('is_active', true))
                     ->orderBy('name')
                     ->get(['id', 'name', 'region_id']),
-                'towns' => DB::table('sub_counties')
-                    ->where('is_active', true)
-                    ->orderBy('name')
+                'counties' => DB::table('counties')->where('is_active', true)->orderBy('name')
                     ->get(['id', 'name', 'district_id']),
+                'sub_counties' => DB::table('sub_counties')->where('is_active', true)->orderBy('name')
+                    ->get(['id', 'name', 'district_id', 'county_id']),
+                'parishes' => DB::table('parishes')->where('is_active', true)->orderBy('name')
+                    ->get(['id', 'name', 'sub_county_id']),
+                'towns' => DB::table('sub_counties')->where('is_active', true)->orderBy('name')
+                    ->get(['id', 'name', 'district_id', 'county_id']),
                 'allow_custom_town' => filter_var(Setting::get('school_locations_allow_custom_town', '1'), FILTER_VALIDATE_BOOLEAN),
                 'curricula' => Curriculum::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
                 'facilities' => Facility::query()->where('is_active', true)->orderBy('category')->orderBy('name')->get(['id', 'name', 'category']),
@@ -255,6 +259,9 @@ class DashboardAuthController extends Controller
             'school.website' => ['nullable', 'url', 'max:255'],
             'school.description' => ['required', 'string', 'min:30', 'max:1500'],
             'school.region_id' => ['required', 'integer', Rule::exists('regions', 'id')->where('is_active', true)],
+            'school.county_id' => ['required', 'integer', Rule::exists('counties', 'id')->where('is_active', true)],
+            'school.sub_county_id' => ['required', 'integer', Rule::exists('sub_counties', 'id')->where('is_active', true)],
+            'school.parish_id' => ['nullable', 'integer', Rule::exists('parishes', 'id')->where('is_active', true)],
             'school.district_id' => [
                 'required',
                 'integer',
@@ -262,7 +269,7 @@ class DashboardAuthController extends Controller
                     ->where('region_id', $request->input('school.region_id'))
                     ->where('is_active', true)),
             ],
-            'school.town' => ['required', 'string', 'max:120'],
+            'school.town' => ['nullable', 'string', 'max:120'],
             'school.po_box' => ['nullable', 'string', 'max:120'],
             'school.address' => ['required', 'string', 'max:1000'],
             'school.nearest_landmark' => ['nullable', 'string', 'max:255'],
@@ -286,20 +293,28 @@ class DashboardAuthController extends Controller
 
         $customFieldValues = $this->validateCustomFieldValues($request, 'registration');
         $schoolData = $data['school'];
-        $townName = trim((string) preg_replace('/\s+/u', ' ', (string) $schoolData['town']));
-        $schoolData['town'] = $townName;
         $districtId = (int) $schoolData['district_id'];
-        $existingTown = DB::table('sub_counties')
-            ->where('district_id', $districtId)
-            ->where('is_active', true)
-            ->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($townName)])
-            ->first();
-        $allowCustomTown = filter_var(Setting::get('school_locations_allow_custom_town', '1'), FILTER_VALIDATE_BOOLEAN);
-        if (! $existingTown && ! $allowCustomTown) {
-            throw ValidationException::withMessages([
-                'school.town' => ['Choose a listed town or area. Contact the school support team to add another location.'],
-            ]);
+        $countyId = (int) $schoolData['county_id'];
+        $subCountyId = (int) $schoolData['sub_county_id'];
+        $county = DB::table('counties')->where('id', $countyId)
+            ->where('district_id', $districtId)->where('is_active', true)->first();
+        if (! $county) {
+            throw ValidationException::withMessages(['school.county_id' => ['Choose a county within the selected district.']]);
         }
+        $existingTown = DB::table('sub_counties')->where('id', $subCountyId)
+            ->where('district_id', $districtId)->where('county_id', $countyId)
+            ->where('is_active', true)->first();
+        if (! $existingTown) {
+            throw ValidationException::withMessages(['school.sub_county_id' => ['Choose a subcounty within the selected county.']]);
+        }
+        $parishId = isset($schoolData['parish_id']) ? (int) $schoolData['parish_id'] : null;
+        if ($parishId && ! DB::table('parishes')->where('id', $parishId)
+            ->where('sub_county_id', $subCountyId)->where('is_active', true)->exists()) {
+            throw ValidationException::withMessages(['school.parish_id' => ['Choose a parish within the selected subcounty.']]);
+        }
+        $townName = $existingTown->name;
+        $schoolData['town'] = $townName;
+        $allowCustomTown = false;
 
         if (isset($schoolData['fees_from'], $schoolData['fees_to']) && (float) $schoolData['fees_to'] < (float) $schoolData['fees_from']) {
             throw ValidationException::withMessages([
@@ -344,7 +359,9 @@ class DashboardAuthController extends Controller
                 'owner_id' => $user->id,
                 'type_id' => (int) $schoolData['type_id'],
                 'district_id' => $districtId,
-                'sub_county_id' => $existingTown?->id,
+                'county_id' => $countyId,
+                'sub_county_id' => $existingTown->id,
+                'parish_id' => $parishId,
                 'name' => trim($schoolData['name']),
                 'ownership' => $schoolData['ownership'],
                 'tagline' => null,

@@ -345,7 +345,9 @@ class AdminWorkspaceController extends Controller
                 'type:id,name',
                 'district:id,name,region_id',
                 'district.region:id,name',
-                'subCounty:id,name,district_id',
+                'county:id,name,district_id',
+                'subCounty:id,name,district_id,county_id',
+                'parish:id,name,sub_county_id',
                 'owner:id,name,email,phone,school_role,status,owner_invitation_pending',
                 'curricula:id,name,slug,abbreviation,is_active',
                 'facilities:id,name,category',
@@ -373,7 +375,9 @@ class AdminWorkspaceController extends Controller
                     'school_types' => \App\Models\SchoolType::query()->where('is_active', true)->orderBy('order')->get(['id', 'name']),
                     'regions' => \App\Models\Region::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
                     'districts' => \App\Models\District::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'region_id']),
-                    'sub_counties' => SubCounty::query()->orderBy('name')->get(['id', 'name', 'district_id']),
+                    'counties' => DB::table('counties')->where('is_active', true)->orderBy('name')->get(['id', 'name', 'district_id']),
+                'sub_counties' => SubCounty::query()->orderBy('name')->get(['id', 'name', 'district_id', 'county_id']),
+                'parishes' => DB::table('parishes')->where('is_active', true)->orderBy('name')->get(['id', 'name', 'sub_county_id']),
                     'curricula' => \App\Models\Curriculum::query()->orderBy('name')->get(['id', 'name', 'abbreviation', 'is_active']),
                     'facilities' => \App\Models\Facility::query()->where('is_active', true)->orderBy('category')->orderBy('name')->get(['id', 'name', 'category']),
                 ],
@@ -390,7 +394,9 @@ class AdminWorkspaceController extends Controller
                 'school_types' => \App\Models\SchoolType::query()->where('is_active', true)->orderBy('order')->get(['id', 'name']),
                 'regions' => \App\Models\Region::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
                 'districts' => \App\Models\District::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'region_id']),
-                'sub_counties' => SubCounty::query()->orderBy('name')->get(['id', 'name', 'district_id']),
+                'counties' => DB::table('counties')->where('is_active', true)->orderBy('name')->get(['id', 'name', 'district_id']),
+                'sub_counties' => SubCounty::query()->orderBy('name')->get(['id', 'name', 'district_id', 'county_id']),
+                'parishes' => DB::table('parishes')->where('is_active', true)->orderBy('name')->get(['id', 'name', 'sub_county_id']),
                 'curricula' => \App\Models\Curriculum::query()->orderBy('name')->get(['id', 'name', 'abbreviation', 'is_active']),
                 'facilities' => \App\Models\Facility::query()->where('is_active', true)->orderBy('category')->orderBy('name')->get(['id', 'name', 'category']),
             ],
@@ -409,7 +415,9 @@ class AdminWorkspaceController extends Controller
             'type_id' => ['required', 'integer', 'exists:school_types,id'],
             'region_id' => ['required', 'integer', 'exists:regions,id'],
             'district_id' => ['required', 'integer', 'exists:districts,id'],
+            'county_id' => ['nullable', 'integer', 'exists:counties,id'],
             'sub_county_id' => ['nullable', 'integer', 'exists:sub_counties,id'],
+            'parish_id' => ['nullable', 'integer', 'exists:parishes,id'],
             'town' => ['nullable', 'string', 'max:120'],
             'address' => ['nullable', 'string', 'max:1000'],
             'po_box' => ['nullable', 'string', 'max:120'],
@@ -454,6 +462,23 @@ class AdminWorkspaceController extends Controller
             'featured_until' => ['nullable', 'date'],
             'rejection_reason' => ['nullable', 'string', 'max:2000'],
         ]);
+
+        if (filled($data['county_id'] ?? null) && ! DB::table('counties')
+            ->where('id', $data['county_id'])->where('district_id', $data['district_id'])->exists()) {
+            throw ValidationException::withMessages(['county_id' => ['Choose a county within the selected district.']]);
+        }
+        if (filled($data['sub_county_id'] ?? null)) {
+            $subCountyQuery = DB::table('sub_counties')->where('id', $data['sub_county_id'])
+                ->where('district_id', $data['district_id']);
+            if (filled($data['county_id'] ?? null)) $subCountyQuery->where('county_id', $data['county_id']);
+            if (! $subCountyQuery->exists()) {
+                throw ValidationException::withMessages(['sub_county_id' => ['Choose a subcounty within the selected county.']]);
+            }
+        }
+        if (filled($data['parish_id'] ?? null) && ! DB::table('parishes')
+            ->where('id', $data['parish_id'])->where('sub_county_id', $data['sub_county_id'] ?? null)->exists()) {
+            throw ValidationException::withMessages(['parish_id' => ['Choose a parish within the selected subcounty.']]);
+        }
 
         $permissions = ['admin.schools.edit_any'];
         $statusChanged = $data['status'] !== $school->status;
@@ -583,8 +608,11 @@ class AdminWorkspaceController extends Controller
             'tagline' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:10000'],
             'type_id' => ['required', 'integer', 'exists:school_types,id'],
+            'region_id' => ['required', 'integer', 'exists:regions,id'],
             'district_id' => ['required', 'integer', 'exists:districts,id'],
-            'sub_county_id' => ['nullable', 'integer', 'exists:sub_counties,id'],
+            'county_id' => ['required', 'integer', 'exists:counties,id'],
+            'sub_county_id' => ['required', 'integer', 'exists:sub_counties,id'],
+            'parish_id' => ['nullable', 'integer', 'exists:parishes,id'],
             'town' => ['nullable', 'string', 'max:120'],
             'address' => ['nullable', 'string', 'max:1000'],
             'po_box' => ['nullable', 'string', 'max:120'],
@@ -645,6 +673,21 @@ class AdminWorkspaceController extends Controller
             throw ValidationException::withMessages([
                 'district_id' => ['Choose a district within the selected region.'],
             ]);
+        }
+
+        $countyMatchesDistrict = DB::table('counties')->where('id', $data['county_id'])
+            ->where('district_id', $data['district_id'])->exists();
+        if (! $countyMatchesDistrict) {
+            throw ValidationException::withMessages(['county_id' => ['Choose a county within the selected district.']]);
+        }
+        $subCountyMatchesCounty = DB::table('sub_counties')->where('id', $data['sub_county_id'])
+            ->where('district_id', $data['district_id'])->where('county_id', $data['county_id'])->exists();
+        if (! $subCountyMatchesCounty) {
+            throw ValidationException::withMessages(['sub_county_id' => ['Choose a subcounty within the selected county.']]);
+        }
+        if (filled($data['parish_id'] ?? null) && ! DB::table('parishes')
+            ->where('id', $data['parish_id'])->where('sub_county_id', $data['sub_county_id'])->exists()) {
+            throw ValidationException::withMessages(['parish_id' => ['Choose a parish within the selected subcounty.']]);
         }
 
         if (filled($data['sub_county_id'] ?? null)) {
@@ -713,7 +756,9 @@ class AdminWorkspaceController extends Controller
                 'description' => $data['description'] ?? null,
                 'type_id' => (int) $data['type_id'],
                 'district_id' => (int) $data['district_id'],
-                'sub_county_id' => $data['sub_county_id'] ?? null,
+                'county_id' => (int) $data['county_id'],
+                'sub_county_id' => (int) $data['sub_county_id'],
+                'parish_id' => $data['parish_id'] ?? null,
                 'town' => $data['town'] ?? null,
                 'address' => $data['address'] ?? null,
                 'po_box' => $data['po_box'] ?? null,
@@ -783,7 +828,9 @@ class AdminWorkspaceController extends Controller
             'type:id,name',
             'district:id,name,region_id',
             'district.region:id,name',
-            'subCounty:id,name,district_id',
+            'county:id,name,district_id',
+            'subCounty:id,name,district_id,county_id',
+            'parish:id,name,sub_county_id',
             'owner:id,name,email,phone,school_role,status,owner_invitation_pending',
             'curricula:id,name,slug,abbreviation,is_active',
             'facilities:id,name,category',
