@@ -89,7 +89,7 @@ class AdminSchoolImportController extends Controller
                 } else {
                     $failedInvitations++;
                 }
-            } catch (\\Throwable $exception) {
+            } catch (\Throwable $exception) {
                 report($exception);
                 $failedInvitations++;
             }
