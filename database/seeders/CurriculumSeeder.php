@@ -50,10 +50,21 @@ class CurriculumSeeder extends Seeder
         ];
 
         foreach ($curricula as $curriculum) {
-            Curriculum::updateOrCreate(
-                ['slug' => Str::slug($curriculum['name'])],
-                array_merge($curriculum, ['is_active' => true])
-            );
+            $model = Curriculum::query()
+                ->whereRaw('LOWER(BTRIM(name)) = ?', [mb_strtolower(trim($curriculum['name']))])
+                ->first();
+
+            if (! $model) {
+                $model = Curriculum::query()->where('slug', Str::slug($curriculum['name']))->first();
+            }
+
+            if (! $model) {
+                $model = new Curriculum();
+                $model->slug = Str::slug($curriculum['name']);
+            }
+
+            $model->fill(array_merge($curriculum, ['is_active' => true]));
+            $model->save();
         }
     }
 }
