@@ -574,3 +574,45 @@
     padding-bottom: 40px;
   }
 }
+
+ 
+/* Functional featured-schools carousel and high-contrast homepage headings. */
+.findursch-home-reference .hero h1 { color: #fff !important; }
+.findursch-home-reference .hero h1 em { color: var(--accent) !important; }
+.findursch-home-reference .slider { min-width: 0; }
+.findursch-home-reference .slider .cards {
+    display: flex;
+    gap: var(--gap);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.findursch-home-reference .slider .cards::-webkit-scrollbar { display: none; }
+.findursch-home-reference .slider .cards > .school {
+    flex: 0 0 calc((100% - 48px) / 3);
+    min-width: 0;
+    scroll-snap-align: start;
+}
+.findursch-home-reference .slider .arrow { border: 1px solid var(--line); padding: 0; line-height: 1; }
+.findursch-home-reference .school-carousel-dots {
+    display: flex; justify-content: center; align-items: center; gap: 7px; margin-top: 16px;
+}
+.findursch-home-reference .school-carousel-dots button {
+    width: 8px; height: 8px; padding: 0; border: 0; border-radius: 999px;
+    background: #cfd6d2; cursor: pointer; transition: width .18s ease, background .18s ease;
+}
+.findursch-home-reference .school-carousel-dots button.on { width: 26px; background: var(--brand); }
+.findursch-home-reference .cta { margin: 0 !important; width: 100%; color: #fff !important; }
+.findursch-home-reference .cta h2,
+.findursch-home-reference .cta h2 * { color: #fff !important; }
+.findursch-home-reference .cta p { color: #eaf3ef !important; }
+.findursch-home-reference .cta .btn-white { color: var(--brand) !important; }
+@media (max-width: 1000px) {
+    .findursch-home-reference .slider .cards > .school { flex-basis: calc((100% - 24px) / 2); }
+}
+@media (max-width: 640px) {
+    .findursch-home-reference .slider .cards > .school { flex-basis: 100%; }
+}
