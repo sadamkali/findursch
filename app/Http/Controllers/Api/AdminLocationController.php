@@ -408,7 +408,8 @@ class AdminLocationController extends Controller
                 ->whereIn('region_id', $regionIds)
                 ->get(['id', 'region_id', 'name', 'slug']);
             $districtIdsByKey = [];
-            $usedDistrictSlugs = [];
+            // Slugs are unique across the full districts table, not only this import's regions.
+            $usedDistrictSlugs = array_fill_keys(DB::table('districts')->pluck('slug')->all(), true);
 
             foreach ($districts as $district) {
                 $key = (int) $district->region_id.'|'.$this->normalized($district->name);
@@ -471,7 +472,8 @@ class AdminLocationController extends Controller
                 ->whereIn('district_id', $districtIds)
                 ->get(['id', 'district_id', 'name', 'slug']);
             $townExistsByKey = [];
-            $usedTownSlugs = [];
+            // Slugs are unique across the full towns table, not only this import's districts.
+            $usedTownSlugs = array_fill_keys(DB::table('sub_counties')->pluck('slug')->all(), true);
 
             foreach ($towns as $town) {
                 $key = (int) $town->district_id.'|'.$this->normalized($town->name);
