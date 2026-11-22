@@ -218,8 +218,15 @@ class AdminFormController extends Controller
     {
         if (! is_array($items) || count($items) > 200) abort(422, 'Each registration reference list can contain up to 200 entries.');
 
+        $modelClass = match ($key) {
+            'school_types' => SchoolType::class,
+            'curricula' => Curriculum::class,
+            'facilities' => Facility::class,
+        };
+
         $normalized = [];
         $seenNames = [];
+        $seenIds = [];
         foreach ($items as $index => $item) {
             if (! is_array($item)) abort(422, 'A registration reference entry is not valid.');
             $id = trim((string) ($item['id'] ?? ''));
@@ -228,9 +235,28 @@ class AdminFormController extends Controller
             if ($id === '' || mb_strlen($id) > 100 || $name === '' || mb_strlen($name) > 120 || $slug === '') {
                 abort(422, 'Each registration entry needs a valid name.');
             }
+
             $fingerprint = mb_strtolower($name);
             if (isset($seenNames[$fingerprint])) abort(422, 'Names in a registration list must be unique.');
             $seenNames[$fingerprint] = true;
+
+            // Resolve newly added/draft rows against the database before they
+            // can be published. Existing records are reused instead of copied.
+            $existing = $modelClass::query()
+                ->whereRaw('LOWER(BTRIM(name)) = ?', [$fingerprint])
+                ->first();
+
+            if ($existing && ctype_digit($id) && (int) $existing->id !== (int) $id) {
+                abort(422, 'Names in a registration list must be unique.');
+            }
+
+            if ($existing && ! ctype_digit($id)) {
+                $id = (string) $existing->id;
+                $slug = $existing->slug;
+            }
+
+            if (isset($seenIds[$id])) abort(422, 'Each registration entry must refer to a different record.');
+            $seenIds[$id] = true;
 
             $entry = [
                 'id' => $id,
