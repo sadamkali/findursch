@@ -215,6 +215,7 @@ class OwnerWorkspaceController extends Controller
                 'features' => $plan?->features ?? ['Basic listing', 'Contact info display', '1 photo upload'],
             ],
             'gallery_count' => $galleryCount,
+            'public_visible' => $record->status === 'active' && $record->verification_status === 'verified',
             'public_url' => rtrim((string) config('app.url'), '/').'/schools/'.$record->slug,
         ]]);
     }
