@@ -9,7 +9,7 @@
 .news-register-tab{position:fixed;right:0;top:34%;z-index:40;writing-mode:vertical-rl;background:var(--na);color:#2a1d00!important;font-size:12px;font-weight:700;letter-spacing:.06em;padding:18px 9px;border-radius:10px 0 0 10px;box-shadow:-3px 3px 12px #0003}
 .news-ad{display:grid;place-content:center;gap:4px;max-width:728px;min-height:90px;margin:22px auto 0;padding:12px 20px;border-radius:10px;background:linear-gradient(115deg,var(--nx),var(--nb));color:#fff!important;text-align:center;font:700 18px/1.2 var(--ns)}
 .news-ad small{color:#e2eee9;font:500 11px/1.5 var(--nn)}
-.news-heading{margin:24px auto 0;background:#052a22;color:#fff;text-align:center;padding:44px 24px 40px}
+.news-heading{margin:24px auto 0;background:var(--nb);color:#fff;text-align:center;padding:44px 24px 40px}
 .news-heading h1{font:700 clamp(30px,4vw,40px)/1.2 var(--ns);margin:0}
 .news-heading h1 em{color:var(--na);font-style:italic}
 .news-heading>p{max-width:650px;margin:12px auto 0;color:#e2eee9;font-size:14px}
