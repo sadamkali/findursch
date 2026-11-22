@@ -153,9 +153,6 @@
                 @if($schools->isNotEmpty())
                     <div class="grid {{ $viewMode === 'list' ? 'list' : '' }}" wire:loading.class="is-loading" wire:target="district,region,type,curriculum,sort,search,maxFee,applyFeeFilter">
                         @foreach($schools as $school)
-                            @php
-                                $schoolBadgeUrl = $school->getFirstMediaUrl('badge') ?: $school->getFirstMediaUrl('logo');
-                            @endphp
                             <article class="sc" wire:key="school-result-{{ $school->id }}">
                                 <a class="ph {{ $school->getFirstMediaUrl('cover') ? '' : 'nop' }}" href="{{ route('schools.show', $school) }}">
                                     @if($school->getFirstMediaUrl('cover'))
@@ -163,13 +160,6 @@
                                     @else
                                         <span class="placeholder-mark">{{ strtoupper(mb_substr($school->name, 0, 2)) }}</span>
                                     @endif
-                                    <span class="sc-badge" aria-label="{{ $school->name }} school badge">
-                                        @if($schoolBadgeUrl)
-                                            <img src="{{ $schoolBadgeUrl }}" alt="{{ $school->name }} badge" loading="lazy">
-                                        @else
-                                            <span>Badge</span>
-                                        @endif
-                                    </span>
                                     @if($school->is_featured)<span class="pop">Featured</span>@endif
                                 </a>
                                 <div class="in">
