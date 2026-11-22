@@ -341,7 +341,7 @@ class DashboardAuthController extends Controller
 
         $email = Str::lower(trim($data['email']));
         $approvalRequired = filter_var(Setting::get('schools_require_approval', '1'), FILTER_VALIDATE_BOOLEAN);
-        $user = DB::transaction(function () use ($request, $data, $schoolData, $email, $youtubeId, $approvalRequired, $customFieldValues, $existingTown, $allowCustomTown, $townName, $districtId) {
+        $user = DB::transaction(function () use ($request, $data, $schoolData, $email, $youtubeId, $approvalRequired, $customFieldValues, $existingTown, $allowCustomTown, $townName, $districtId, $countyId, $parishId) {
             $user = User::query()->create([
                 'name' => trim($data['first_name'].' '.$data['last_name']),
                 'email' => $email,

@@ -410,11 +410,10 @@
                     </section>
                 @endif
 
-                @if($regionName || $districtName || $subCountyName || filled($school->address) || $mapUrl)
+                @if($districtName || $countyName || $subCountyName || $parishName || filled($school->address) || $mapUrl)
                     <section class="sref-box">
                         <h5>Location</h5>
                         <dl class="sref-location-list">
-                            @if($regionName)<div><dt>Region</dt><dd>{{ $regionName }}</dd></div>@endif
                             @if($districtName)<div><dt>District</dt><dd>{{ $districtName }}</dd></div>@endif
                             @if($countyName)<div><dt>County</dt><dd>{{ $countyName }}</dd></div>@endif
                             @if($subCountyName)<div><dt>Subcounty</dt><dd>{{ $subCountyName }}</dd></div>@endif
