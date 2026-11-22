@@ -1,14 +1,13 @@
 <?php
 
-use Illuminate\\Database\\Migrations\\Migration;
-use Illuminate\\Support\\Facades\\DB;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     /**
      * Keep registration reference names unique regardless of letter casing
-     * or leading/trailing spaces. The same name can still exist in another
-     * reference table because each list is managed independently.
+     * or leading/trailing spaces. Each registration list remains independent.
      */
     public function up(): void
     {
