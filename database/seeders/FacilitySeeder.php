@@ -26,11 +26,22 @@ class FacilitySeeder extends Seeder
             ['name' => 'Sick Bay', 'icon' => 'first-aid', 'category' => 'welfare'],
         ];
 
-        foreach ($facilities as $f) {
-            Facility::firstOrCreate(
-                ['slug' => Str::slug($f['name'])],
-                array_merge($f, ['is_active' => true])
-            );
+        foreach ($facilities as $facility) {
+            $model = Facility::query()
+                ->whereRaw('LOWER(BTRIM(name)) = ?', [mb_strtolower(trim($facility['name']))])
+                ->first();
+
+            if (! $model) {
+                $model = Facility::query()->where('slug', Str::slug($facility['name']))->first();
+            }
+
+            if (! $model) {
+                $model = new Facility();
+                $model->slug = Str::slug($facility['name']);
+            }
+
+            $model->fill(array_merge($facility, ['is_active' => true]));
+            $model->save();
         }
     }
 }
