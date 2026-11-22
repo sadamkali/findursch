@@ -33,7 +33,7 @@
 .findursch-home-reference .hero>div{position:relative;z-index:1}
 .findursch-home-reference .hero h1,.findursch-home-reference .hero p{text-shadow:0 2px 12px rgba(0,0,0,.38)}
 .findursch-home-reference .hero h1{font:700 56px/1.12 var(--serif);max-width:760px;margin:0 auto}
-.findursch-home-reference .hero h1 em{font-style:normal;color:var(--accent)}
+.findursch-home-reference .hero h1 em{font-style:normal;color:#fff}
 .findursch-home-reference .hero p{max-width:620px;margin:20px auto 32px;font-size:17px;color:#f6faf8}
 .findursch-home-reference .search{display:flex;align-items:center;background:#fff;border-radius:999px;padding:7px 7px 7px 22px;max-width:720px;margin:0 auto;box-shadow:0 14px 40px rgba(0,0,0,.3);color:var(--ink)}
 .findursch-home-reference .search input{flex:1;min-width:0;border:0;outline:0;font:15px var(--sans);padding:10px 8px;background:none;color:var(--ink)}

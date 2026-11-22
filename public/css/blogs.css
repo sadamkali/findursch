@@ -42,7 +42,7 @@
 }
 .blogs-eyebrow { margin-bottom: 7px; color: var(--blogs-accent); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .blogs-phead h1 { color: #fff; font: 700 clamp(30px, 4vw, 40px)/1.2 var(--blogs-serif); }
-.blogs-phead h1 em { color: var(--blogs-accent); font-style: italic; }
+.blogs-phead h1 em { color: #fff; font-style: italic; }
 .blogs-phead p { max-width: 640px; margin: 12px auto 0; color: rgba(255,255,255,.87); }
 .blogs-pills {
     display: flex; gap: 8px; overflow-x: auto; padding: 20px 0 14px;

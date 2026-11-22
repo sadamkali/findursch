@@ -70,13 +70,13 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- These page styles are safely scoped to their page wrappers; load them directly so Livewire route rendering cannot skip them. --}}
     <link rel="stylesheet" href="{{ asset('css/events-reference.css') }}?v=2">
-    <link rel="stylesheet" href="{{ asset('css/events-listing-reference.css') }}?v=1">
-    <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=4">
+    <link rel="stylesheet" href="{{ asset('css/events-listing-reference.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=5">
     <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=3">
-    @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=5">@endif
-    @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}?v=2">@endif
+    @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=6">@endif
+    @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}?v=3">@endif
     @if (request()->routeIs('scholarships.*'))<link rel="stylesheet" href="{{ asset('css/scholarships-reference.css') }}?v=5">@endif
-    @if (request()->routeIs('news.*'))<link rel="stylesheet" href="{{ asset('css/news.css') }}?v=4">@endif
+    @if (request()->routeIs('news.*'))<link rel="stylesheet" href="{{ asset('css/news.css') }}?v=5">@endif
     <link rel="stylesheet" href="{{ asset('css/site-ad-banners.css') }}?v=4">
     @livewireStyles
     <style>

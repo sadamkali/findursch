@@ -16,7 +16,7 @@
 .event-directory-reference .ed-crumbs b{color:#fff}
 .event-directory-reference .ed-eyebrow{color:var(--ed-gold);font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;margin:0 0 10px}
 .event-directory-reference .ed-hero h1{font:700 clamp(32px,4.5vw,48px)/1.12 var(--ed-serif);color:#fff;margin:0}
-.event-directory-reference .ed-hero h1 em{color:var(--ed-gold);font-style:italic}
+.event-directory-reference .ed-hero h1 em{color:#fff;font-style:italic}
 .event-directory-reference .ed-intro{max-width:680px;color:#e0ece7;font-size:14px;line-height:1.8;margin:16px 0 20px}
 .event-directory-reference .ed-hero-note{display:flex;align-items:center;gap:10px;color:#d2e1db;font-size:11px;font-weight:600;flex-wrap:wrap}
 .event-directory-reference .ed-hero-note span{width:7px;height:7px;border-radius:50%;background:var(--ed-gold)}

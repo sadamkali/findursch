@@ -18,14 +18,14 @@
 .school-directory-reference .btn-gold{background:var(--accent);color:#2a1d00}
 .school-directory-reference .btn-gold:hover{background:var(--accent-dk)}
 .school-directory-reference .btn-block{width:100%}
-.school-directory-reference .phead{background:var(--tint)}
+.school-directory-reference .phead{background:var(--brand);color:#fff}
 .school-directory-reference .phead>.wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,728px);gap:32px;align-items:center;padding-top:32px;padding-bottom:32px}
-.school-directory-reference .crumbs{font-size:12px;color:var(--mute);margin-bottom:10px}
-.school-directory-reference .crumbs a{color:var(--mute)}
+.school-directory-reference .crumbs{font-size:12px;color:rgba(255,255,255,.82);margin-bottom:10px}
+.school-directory-reference .crumbs a{color:rgba(255,255,255,.82)}
 .school-directory-reference .crumbs span{margin:0 6px}
-.school-directory-reference .phead h1{font:700 36px/1.15 var(--serif);margin:0 0 8px;color:var(--ink)}
-.school-directory-reference .phead p{font-size:13.5px;color:var(--mute);max-width:560px}
-.school-directory-reference .phead p b{color:var(--brand)}
+.school-directory-reference .phead h1{font:700 36px/1.15 var(--serif);margin:0 0 8px;color:#fff}
+.school-directory-reference .phead p{font-size:13.5px;color:rgba(255,255,255,.88);max-width:560px}
+.school-directory-reference .phead p b{color:#fff}
 .school-directory-reference .ad{border-radius:var(--r);display:grid;place-content:center;gap:7px;text-align:center;color:#fff;font:700 22px/1.2 var(--serif);padding:20px;background:linear-gradient(135deg,#a32a2a,#e05a3a)}
 .school-directory-reference .ad small{display:block;font:500 11px/1.5 var(--sans);color:#fff1ec;margin-top:2px}
 .school-directory-reference .ad.top{min-height:90px}
