@@ -426,8 +426,36 @@ class AdminTemplateController extends Controller
             $directory = 'schools/'.$school->getKey().'/posts/'.$data['post_type'];
         }
 
-        $storageDisk = (string) config('media-library.disk_name', 'filebase');
-        abort_unless(in_array($storageDisk, ['filebase', 'r2'], true), 503, 'Media storage is not configured.');
+        $storageDisk = (string) config('media-library.disk_name', 'r2');
+
+        // Older environments may still have MEDIA_DISK=public from the Laravel
+        // starter configuration. This uploader writes to object storage only,
+        // so select the first fully configured supported provider instead.
+        if (! in_array($storageDisk, ['r2', 'filebase'], true)) {
+            foreach (['r2', 'filebase'] as $candidate) {
+                $candidateDisk = config('filesystems.disks.'.$candidate, []);
+                $isConfigured = filled($candidateDisk['key'] ?? null)
+                    && filled($candidateDisk['secret'] ?? null)
+                    && filled($candidateDisk['bucket'] ?? null);
+
+                if ($candidate === 'r2') {
+                    $isConfigured = $isConfigured
+                        && filled($candidateDisk['endpoint'] ?? null)
+                        && filled($candidateDisk['url'] ?? null);
+                }
+
+                if ($isConfigured) {
+                    $storageDisk = $candidate;
+                    break;
+                }
+            }
+        }
+
+        abort_unless(
+            in_array($storageDisk, ['filebase', 'r2'], true),
+            503,
+            'Media storage is not configured. Set MEDIA_DISK to r2 or filebase and add its storage credentials.'
+        );
 
         $disk = config('filesystems.disks.'.$storageDisk, []);
         $storageIsMissing = blank($disk['key'] ?? null)
