@@ -285,10 +285,28 @@ class AdminSchoolImportController extends Controller
                     : 'School Type "'.$typeName.'" does not match an existing school type.';
             }
 
-            $boarding = Str::lower(trim((string) ($values['boarding_type'] ?? 'day'))) ?: 'day';
-            $boarding = str_replace([' ', '-'], '_', $boarding);
-            $gender = Str::lower(trim((string) ($values['gender_policy'] ?? 'mixed'))) ?: 'mixed';
-            $gender = str_replace([' ', '-'], '_', $gender);
+            $normaliseChoice = function (?string $value): string {
+                $value = mb_strtolower(trim((string) $value));
+                $value = str_replace('&', ' and ', $value);
+                $value = preg_replace('/[^a-z0-9]+/i', ' ', $value) ?? '';
+                return trim(preg_replace('/\\s+/', ' ', $value) ?? '');
+            };
+
+            $boardingInput = $normaliseChoice($values['boarding_type'] ?? 'day');
+            $boarding = match ($boardingInput) {
+                '', 'day', 'day only', 'day school' => 'day',
+                'boarding', 'boarding only', 'boarding school', 'full boarding' => 'boarding',
+                'mixed', 'both', 'day and boarding', 'day boarding', 'day plus boarding', 'mixed day and boarding' => 'mixed',
+                default => str_replace(' ', '_', $boardingInput),
+            };
+
+            $genderInput = $normaliseChoice($values['gender_policy'] ?? 'mixed');
+            $gender = match ($genderInput) {
+                '', 'mixed', 'both', 'mixed boys and girls', 'boys and girls' => 'mixed',
+                'boys', 'boys only', 'male' => 'boys',
+                'girls', 'girls only', 'female' => 'girls',
+                default => str_replace(' ', '_', $genderInput),
+            };
 
             $optional = function (string $key) use ($values): ?string {
                 $value = trim((string) ($values[$key] ?? ''));
@@ -360,6 +378,7 @@ class AdminSchoolImportController extends Controller
 
             foreach ($curriculumNames as $curriculumName) {
                 $curriculum = Curriculum::query()
+                    ->where('is_active', true)
                     ->where(fn ($query) => $query
                         ->whereRaw('LOWER(name) = ?', [mb_strtolower($curriculumName)])
                         ->orWhereRaw('LOWER(abbreviation) = ?', [mb_strtolower($curriculumName)]))
