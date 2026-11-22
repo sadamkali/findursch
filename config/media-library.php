@@ -33,7 +33,9 @@ return [
      * The disk on which to store added files and derived images by default. Choose
      * one or more of the disks you've configured in config/filesystems.php.
      */
-    'disk_name' => env('MEDIA_DISK', 'public'),
+    // Public site uploads must use the configured object-storage provider.
+    // The upload controller supports Cloudflare R2 and Filebase, not the local public disk.
+    'disk_name' => env('MEDIA_DISK', 'r2'),
 
     /*
      * The disk on which to store conversions (thumbnails, etc.) and responsive images
