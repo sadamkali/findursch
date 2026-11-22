@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 class AdminFormController extends Controller
 {
-    private const TYPES = ['text', 'textarea', 'number', 'url', 'email', 'phone', 'date', 'select', 'checkboxes', 'checkbox'];
+    private const TYPES = ['text', 'textarea', 'number', 'url', 'email', 'phone', 'date', 'select', 'radio', 'checkboxes', 'checkbox'];
 
     private const REFERENCE_GROUPS = ['school_types', 'curricula', 'facilities'];
 
@@ -359,8 +359,18 @@ class AdminFormController extends Controller
             if (! in_array($type, self::TYPES, true)) abort(422, 'Choose a supported field type.');
             if ($registrationStep !== null && ! in_array((int) $registrationStep, [2, 3, 4], true)) abort(422, 'Custom registration fields can be placed in School info, Location, or Facilities and fees.');
             if ($registrationStep === null && ! $profileEnabled) abort(422, 'Choose where each custom field should appear.');
-            if (in_array($type, ['select', 'checkboxes'], true) && ($optionList === '' || ! isset($normalizedLists[$optionList]))) {
-                abort(422, 'Choose an existing option list for each dropdown or checkbox group.');
+            if (in_array($type, ['select', 'radio', 'checkboxes'], true)) {
+                if ($optionList === '' || ! isset($normalizedLists[$optionList])) {
+                    abort(422, 'Choose an existing option list for each dropdown, radio group or checkbox group.');
+                }
+                if (! collect($normalizedLists[$optionList]['options'] ?? [])->contains(fn ($option) => (bool) ($option['enabled'] ?? false))) {
+                    abort(422, 'Keep at least one active choice in each dropdown or choice group.');
+                }
+            }
+            $minValue = isset($field['min_value']) && is_numeric($field['min_value']) ? (float) $field['min_value'] : null;
+            $maxValue = isset($field['max_value']) && is_numeric($field['max_value']) ? (float) $field['max_value'] : null;
+            if ($type === 'number' && $minValue !== null && $maxValue !== null && $minValue > $maxValue) {
+                abort(422, 'A number field minimum cannot be greater than its maximum.');
             }
             $seenIds[$id] = true;
             $seenKeys[$key] = true;
@@ -370,12 +380,17 @@ class AdminFormController extends Controller
                 'label' => $label,
                 'type' => $type,
                 'help' => mb_substr(trim((string) ($field['help'] ?? '')), 0, 240),
+                'placeholder' => mb_substr(trim((string) ($field['placeholder'] ?? '')), 0, 180),
                 'required' => (bool) ($field['required'] ?? false),
                 'enabled' => (bool) ($field['enabled'] ?? true),
                 'registration_step' => $registrationStep === null ? null : (int) $registrationStep,
                 'profile_enabled' => $profileEnabled,
                 'option_list' => $optionList !== '' ? $optionList : null,
+                'min_length' => max(0, min(5000, (int) ($field['min_length'] ?? 0))),
                 'max_length' => max(0, min(5000, (int) ($field['max_length'] ?? 0))),
+                'min_value' => $minValue,
+                'max_value' => $maxValue,
+                'rows' => max(2, min(12, (int) ($field['rows'] ?? 4))),
                 'sort_order' => (int) ($field['sort_order'] ?? $index * 10),
             ];
         }
