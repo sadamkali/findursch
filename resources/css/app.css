@@ -1658,3 +1658,25 @@ a, button { -webkit-tap-highlight-color: transparent; }
     .sref-program-card { padding: 13px; }
     .sref-school-top--no-logo { grid-template-columns: minmax(0, 1fr); }
 }
+
+
+/* School profile gallery: compose only photos that the school has actually uploaded. */
+.sref-school-top--no-logo { grid-template-columns: minmax(0, 1fr); }
+.sref-mosaic--1 { grid-template-columns: minmax(0, 1fr); height: 370px; }
+.sref-mosaic--1 .sref-mosaic__main { grid-column: 1 / -1; }
+.sref-mosaic--2 .sref-mosaic__side { grid-template-rows: minmax(0, 1fr); }
+.sref-mosaic--3 .sref-mosaic__side { grid-template-rows: repeat(2, minmax(0, 1fr)); }
+.sref-mosaic--4 .sref-mosaic__side { grid-template-rows: repeat(3, minmax(0, 1fr)); }
+.sref-gallery-primary--1 { grid-template-columns: minmax(0, 1fr); grid-auto-rows: 300px; }
+.sref-gallery-primary--1 button.is-large { grid-column: 1 / -1; grid-row: auto; }
+.sref-gallery-primary--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 210px; }
+.sref-gallery-primary--2 button, .sref-gallery-primary--2 button.is-large { grid-column: span 1; grid-row: auto; height: 100%; }
+@media (max-width: 1000px) {
+  .sref-mosaic--1 { grid-template-columns: minmax(0, 1fr); height: 280px; }
+  .sref-gallery-primary--1 { grid-auto-rows: 250px; }
+}
+@media (max-width: 640px) {
+  .sref-mosaic--1 { height: 230px; }
+  .sref-gallery-primary--1 { grid-auto-rows: 210px; }
+  .sref-gallery-primary--2 { grid-auto-rows: 145px; }
+}
