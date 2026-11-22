@@ -75,8 +75,8 @@
     <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=3">
     @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=5">@endif
     @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}?v=2">@endif
-    @if (request()->routeIs('scholarships.*'))<link rel="stylesheet" href="{{ asset('css/scholarships-reference.css') }}">@endif
-    @if (request()->routeIs('news.*'))<link rel="stylesheet" href="{{ asset('css/news.css') }}">@endif
+    @if (request()->routeIs('scholarships.*'))<link rel="stylesheet" href="{{ asset('css/scholarships-reference.css') }}?v=2">@endif
+    @if (request()->routeIs('news.*'))<link rel="stylesheet" href="{{ asset('css/news.css') }}?v=2">@endif
     <link rel="stylesheet" href="{{ asset('css/site-ad-banners.css') }}?v=4">
     @livewireStyles
     <style>
