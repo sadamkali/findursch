@@ -43,7 +43,7 @@
         ['label' => 'Gender', 'value' => match($school->gender_policy) { 'boys' => 'Boys only', 'girls' => 'Girls only', default => 'Mixed (boys & girls)' }, 'color' => '#2f9e5a'],
         ['label' => 'Religion', 'value' => 'Not provided', 'color' => '#6b5bd2'],
         ['label' => 'Residence', 'value' => match($school->boarding_type) { 'boarding' => 'Boarding', 'mixed' => 'Day & boarding', default => 'Day school' }, 'color' => '#f0b030'],
-        ['label' => 'Curriculum', 'value' => $school->curricula->pluck('abbreviation')->filter()->implode(', ') ?: 'Not provided', 'color' => '#f0b030'],
+        ['label' => 'Curriculum', 'value' => $school->curricula->pluck('name')->filter()->implode(', ') ?: 'Not provided', 'color' => '#f0b030'],
     ];
 @endphp
 
