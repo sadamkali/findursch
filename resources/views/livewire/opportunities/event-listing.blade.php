@@ -1,11 +1,19 @@
 <div class="event-directory-reference">
     <a class="ed-register" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
 
-    <x-site-page-head :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Events']]" eyebrow="FindURSCH community calendar">
-        <x-slot:title>School Events <em>&amp; Open Days</em></x-slot:title>
-        <x-slot:description>Discover school open days, education fairs, conferences and activities shared by school communities across Uganda.</x-slot:description>
-        <div class="ed-hero-note"><span></span> School open days <i>•</i> Education fairs <i>•</i> Community activities</div>
-    </x-site-page-head>
+    <header class="ed-hero">
+        <div class="ed-shell">
+            <nav class="ed-crumbs" aria-label="Breadcrumb">
+                <a href="{{ route('home') }}">Home</a><span>›</span><b>Events</b>
+            </nav>
+            <p class="ed-eyebrow">FindURSCH community calendar</p>
+            <h1>School Events <em>&amp; Open Days</em></h1>
+            <p class="ed-intro">Discover school open days, education fairs, conferences and activities shared by school communities across Uganda.</p>
+            <div class="ed-hero-note"><span></span> School open days <i>•</i> Education fairs <i>•</i> Community activities</div>
+        </div>
+    </header>
+
+    <x-site-ad-banner placement="top" />
 
     <main class="ed-shell ed-main">
         <section class="ed-toolbar" aria-label="Search and filter events">
