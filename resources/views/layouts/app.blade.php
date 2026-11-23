@@ -105,7 +105,7 @@
 </head>
 <body class="h-full bg-white text-gray-900 antialiased">
     @php
-        $dashboardUrl = rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/');
+        $dashboardUrl = rtrim(config('services.dashboard.url', 'https://account.riotinvestments.space'), '/');
         $signInUrl = $dashboardUrl.'/login?returnTo=%2Faccount';
         $schoolRegistrationUrl = $dashboardUrl.'/register?type=school_owner&returnTo=%2Faccount';
 
@@ -140,6 +140,8 @@
             })
             ->values();
 
+        $dashboardIdentity = session('dashboard_identity');
+        $dashboardIdentityRole = is_array($dashboardIdentity) ? ($dashboardIdentity['role'] ?? null) : null;
         $accountLinkLabel = null;
         $accountLinkUrl = null;
 
@@ -154,6 +156,12 @@
                 $accountLinkLabel = 'My account';
                 $accountLinkUrl = route('user.home');
             }
+        } elseif ($dashboardIdentityRole === 'admin') {
+            $accountLinkLabel = 'Admin dashboard';
+            $accountLinkUrl = $dashboardUrl.'/admin';
+        } elseif ($dashboardIdentityRole === 'school_owner') {
+            $accountLinkLabel = 'School dashboard';
+            $accountLinkUrl = $dashboardUrl.'/owner';
         }
     @endphp
 
@@ -164,10 +172,10 @@
             <span class="site-topbar__message">{{ $siteTagline }}</span>
             <div class="site-topbar__actions">
                 @if($siteAccountActionsEnabled)
-                    @guest
+                    @if(!auth()->check() && !is_array($dashboardIdentity))
                         <a class="site-topbar__signin" href="{{ $signInUrl }}">Sign in</a>
                         <a class="site-topbar__signup" href="{{ $schoolRegistrationUrl }}">Sign up</a>
-                    @endguest
+                    @endif
                 @endif
                 <a class="site-topbar__contact" href="{{ route('contact') }}">Contact us <span aria-hidden="true">→</span></a>
             </div>
@@ -195,14 +203,16 @@
 
             <div class="site-header__actions">
                 @if($siteAccountActionsEnabled)
-                @auth
+                @if(auth()->check() || is_array($dashboardIdentity))
                     <a class="site-account-link" href="{{ $accountLinkUrl }}">{{ $accountLinkLabel }}</a>
-                    <form method="POST" action="{{ route('logout') }}" class="site-logout-form">@csrf
-                        <button type="submit" class="site-account-link">Log out</button>
-                    </form>
+                    @if(auth()->check())
+                        <form method="POST" action="{{ route('logout') }}" class="site-logout-form">@csrf
+                            <button type="submit" class="site-account-link">Log out</button>
+                        </form>
+                    @endif
                 @else
                     <a href="{{ $schoolRegistrationUrl }}" class="site-header__cta">{{ $siteHeaderCtaLabel }}</a>
-                @endauth
+                @endif
                 @endif
                 @if($siteNavigationEnabled)
                 <button type="button"
@@ -249,15 +259,17 @@
 
             @if($siteAccountActionsEnabled)
             <div class="site-mobile-drawer__footer">
-                @guest
+                @if(!auth()->check() && !is_array($dashboardIdentity))
                     <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ $signInUrl }}" @click="mobileMenuOpen = false">Sign in</a>
                     <a class="site-mobile-drawer__button site-mobile-drawer__button--gold" href="{{ $schoolRegistrationUrl }}" @click="mobileMenuOpen = false">List your school</a>
                 @else
                     <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ $accountLinkUrl }}" @click="mobileMenuOpen = false">{{ $accountLinkLabel }}</a>
-                    <form method="POST" action="{{ route('logout') }}">@csrf
-                        <button type="submit" class="site-mobile-drawer__button site-mobile-drawer__button--gold">Log out</button>
-                    </form>
-                @endguest
+                    @if(auth()->check())
+                        <form method="POST" action="{{ route('logout') }}">@csrf
+                            <button type="submit" class="site-mobile-drawer__button site-mobile-drawer__button--gold">Log out</button>
+                        </form>
+                    @endif
+                @endif
             </div>
             @endif
         </aside>
