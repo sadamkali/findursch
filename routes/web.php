@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\PersonalAccessToken;
 
-$dashboardUrl = static fn (): string => rtrim((string) config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/');
+$dashboardUrl = static fn (): string => rtrim((string) config('services.dashboard.url', 'https://account.riotinvestments.space'), '/');
 
 // =============== PUBLIC WEBSITE ===============
 Route::get('/', HomePage::class)->name('home');
@@ -132,10 +132,32 @@ Route::get('/auth/dashboard-callback', function (Request $request) {
     );
 
     $user = $accessToken->tokenable;
-    abort_unless($user instanceof User && $user->status === 'active' && $user->hasRole('parent'), 403);
+    abort_unless($user instanceof User && $user->status === 'active', 403);
+
+    $isParent = $user->hasRole('parent');
+    $isSchoolOwner = $user->hasRole('school_owner');
+    $isAdmin = $user->hasRole('admin') || $user->getAllPermissions()->contains(
+        fn ($permission) => str_starts_with($permission->name, 'admin.')
+    );
+    abort_unless($isParent || $isSchoolOwner || $isAdmin, 403);
 
     $accessToken->delete();
-    Auth::login($user);
+
+    if ($isParent) {
+        Auth::login($user);
+        $request->session()->forget('dashboard_identity');
+    } else {
+        // Owners and administrators need a public-site navigation identity,
+        // not a parent login or access to parent-only account pages.
+        Auth::logout();
+        $request->session()->put('dashboard_identity', [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $isAdmin ? 'admin' : 'school_owner',
+        ]);
+    }
+
     $request->session()->regenerate();
 
     $redirect = (string) $request->query('redirect', '/account');
