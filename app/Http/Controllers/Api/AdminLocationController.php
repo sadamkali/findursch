@@ -365,6 +365,13 @@ class AdminLocationController extends Controller
                     'name' => ['A location with this name already exists under the selected parent.'],
                 ]);
             }
+        } elseif (! $parentColumn && $nameChanged) {
+            $duplicate = $this->findByName($table, $name);
+            if ($duplicate && (int) $duplicate->id !== $id) {
+                throw ValidationException::withMessages([
+                    'name' => ['A location with this name already exists.'],
+                ]);
+            }
         }
 
         $changes = [];
