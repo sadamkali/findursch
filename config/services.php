@@ -36,7 +36,7 @@ return [
     ],
 
     'dashboard' => [
-        'url' => env('DASHBOARD_URL', 'https://findursch-dashboard.vercel.app'),
+        'url' => env('DASHBOARD_URL', 'https://findursch-dashboard-seven.vercel.app'),
     ],
 
 ];
