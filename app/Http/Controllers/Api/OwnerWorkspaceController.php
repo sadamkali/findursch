@@ -572,7 +572,7 @@ class OwnerWorkspaceController extends Controller
                 $mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
             }
 
-            $originalName = Str::limit(basename($file->getClientOriginalName()), 250, '');
+            $originalName = Str::limit(basename(str_replace('\\', '/', $file->getClientOriginalName())), 250, '');
             $storedPath = $record->id.'/'.Str::uuid().'.enc';
 
             try {

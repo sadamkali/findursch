@@ -307,11 +307,11 @@ class SchoolDocumentWatermark
     private function watermarkHeaderMarkup(string $relationshipId): string
     {
         return '<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:pict>'.
-            '<v:shapetype id="_x0000_t75" coordsize="21600,21600" o:spt="75" o:preferrelative="t" '.
+            '<v:shapetype id="FindURSCHPictureType" coordsize="21600,21600" o:spt="75" o:preferrelative="t" '.
             'path="m@4@5l@4@11@9@11@9@5xe"><v:stroke joinstyle="miter"/>'.
             '<v:path o:extrusionok="f" gradientshapeok="t" o:connecttype="rect"/>'.
             '<o:lock v:ext="edit" aspectratio="t"/></v:shapetype>'.
-            '<v:shape id="FindURSCHWatermark" type="#_x0000_t75" '.
+            '<v:shape id="FindURSCHWatermark" type="#FindURSCHPictureType" '.
             'style="position:absolute;margin-left:0;margin-top:0;width:250pt;height:100pt;rotation:315;z-index:-251654144;'.
             'mso-position-horizontal:center;mso-position-horizontal-relative:margin;'.
             'mso-position-vertical:center;mso-position-vertical-relative:margin" stroked="f">'.

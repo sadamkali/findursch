@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -21,6 +22,9 @@ return new class extends Migration
             $table->timestamps();
             $table->index(['school_id', 'created_at']);
         });
+
+        DB::statement('ALTER TABLE public.school_documents ENABLE ROW LEVEL SECURITY');
+        DB::statement('CREATE POLICY school_documents_deny_client_access ON public.school_documents FOR ALL TO anon, authenticated USING (false) WITH CHECK (false)');
     }
 
     public function down(): void
