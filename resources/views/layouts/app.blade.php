@@ -106,8 +106,9 @@
 <body class="h-full bg-white text-gray-900 antialiased">
     @php
         $dashboardUrl = rtrim(config('services.dashboard.url', 'https://admin.riotinvestments.space'), '/');
-        $signInUrl = $dashboardUrl.'/login?returnTo=%2Faccount';
-        $schoolRegistrationUrl = $dashboardUrl.'/register?type=school_owner&returnTo=%2Faccount';
+        $accountDashboardUrl = rtrim(config('services.dashboard.account_url', 'https://account.riotinvestments.space'), '/');
+        $signInUrl = $accountDashboardUrl.'/login?returnTo=%2Faccount';
+        $schoolRegistrationUrl = $accountDashboardUrl.'/register?type=school_owner&returnTo=%2Faccount';
 
         // One settings-backed navigation list drives desktop and mobile menus.
         $savedNavigation = json_decode((string) ($siteSettings['site_navigation'] ?? '[]'), true);
@@ -148,20 +149,20 @@
         if (auth()->check()) {
             if (auth()->user()->hasRole('admin')) {
                 $accountLinkLabel = 'Admin dashboard';
-                $accountLinkUrl = $dashboardUrl.'/admin';
+                $accountLinkUrl = route('auth.dashboard-login', ['returnTo' => '/admin']);
             } elseif (auth()->user()->hasRole('school_owner')) {
                 $accountLinkLabel = 'School dashboard';
-                $accountLinkUrl = $dashboardUrl.'/owner';
+                $accountLinkUrl = route('auth.dashboard-login', ['returnTo' => '/owner']);
             } else {
                 $accountLinkLabel = 'My account';
                 $accountLinkUrl = route('user.home');
             }
         } elseif ($dashboardIdentityRole === 'admin') {
             $accountLinkLabel = 'Admin dashboard';
-            $accountLinkUrl = $dashboardUrl.'/admin';
+            $accountLinkUrl = route('auth.dashboard-login', ['returnTo' => '/admin']);
         } elseif ($dashboardIdentityRole === 'school_owner') {
             $accountLinkLabel = 'School dashboard';
-            $accountLinkUrl = $dashboardUrl.'/owner';
+            $accountLinkUrl = route('auth.dashboard-login', ['returnTo' => '/owner']);
         }
     @endphp
 
@@ -335,7 +336,7 @@
                     <h2>Support</h2>
                     <ul>
                         <li><a href="{{ $dashboardUrl }}/register?type=school_owner">List your school</a></li>
-                        <li><a href="{{ $dashboardUrl }}/login?returnTo=%2Faccount">School owner login</a></li>
+                        <li><a href="{{ is_array($dashboardIdentity) ? route('auth.dashboard-login', ['returnTo' => '/owner']) : $signInUrl }}">School owner login</a></li>
                         <li><a href="{{ route('contact') }}">Get in touch</a></li>
                         @if($siteSupportEmail)<li><a href="mailto:{{ $siteSupportEmail }}">{{ $siteSupportEmail }}</a></li>@endif
                         @if($siteSupportPhone)<li><a href="tel:{{ preg_replace('/[^0-9+]/', '', $siteSupportPhone) }}">{{ $siteSupportPhone }}</a></li>@endif
