@@ -259,6 +259,6 @@ Route::get('/admin/{path?}', function (?string $path = null) use ($dashboardUrl)
     return redirect()->away($dashboardUrl().$target);
 })->where('path', '.*');
 
-Route::get('/owner/{path?}', function (?string $path = null) use ($dashboardUrl) {
-    return redirect()->away($dashboardUrl().'/owner');
+Route::get('/owner/{path?}', function (?string $path = null) use ($accountDashboardUrl) {
+    return redirect()->away($accountDashboardUrl().'/owner');
 })->where('path', '.*');
