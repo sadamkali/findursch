@@ -668,8 +668,15 @@ class DashboardAuthController extends Controller
     {
         $user = $request->user();
 
-        if (! $user || ! $user->hasRole('parent')) {
-            return response()->json(['message' => 'Only parent accounts can return to the public school website.'], 403);
+        $canReturnToWebsite = $user && (
+            $user->hasRole('parent') ||
+            $user->hasRole('school_owner') ||
+            $user->hasRole('admin') ||
+            $user->getAllPermissions()->contains(fn ($permission) => str_starts_with($permission->name, 'admin.'))
+        );
+
+        if (! $canReturnToWebsite || $user->status !== 'active') {
+            return response()->json(['message' => 'Your account does not have access to return to the public website.'], 403);
         }
 
         $token = $user->createToken(
