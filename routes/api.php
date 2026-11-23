@@ -14,6 +14,7 @@ Route::get('/registration/options', [DashboardAuthController::class, 'registrati
 Route::get('/branding/dashboard', [AdminTemplateController::class, 'publicDashboardBranding'])->middleware('throttle:120,1');
 
 Route::prefix('auth')->group(function () {
+    Route::post('/exchange-dashboard-session', [DashboardAuthController::class, 'exchangeDashboardSession'])->middleware('throttle:10,1');
     Route::post('/login', [DashboardAuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('/register', [DashboardAuthController::class, 'register'])->middleware('throttle:5,1');
     Route::post('/register-school', [DashboardAuthController::class, 'registerSchool'])->middleware('throttle:5,1');
@@ -27,6 +28,7 @@ Route::prefix('auth')->group(function () {
         Route::patch('/password', [DashboardAuthController::class, 'updatePassword'])->middleware('throttle:5,1');
         Route::post('/logout', [DashboardAuthController::class, 'logout']);
         Route::post('/handoff', [DashboardAuthController::class, 'handoff']);
+        Route::post('/create-dashboard-session-handoff', [DashboardAuthController::class, 'createDashboardSessionHandoff'])->middleware('throttle:10,1');
     });
 });
 
