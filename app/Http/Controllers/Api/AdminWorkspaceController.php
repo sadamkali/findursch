@@ -463,6 +463,16 @@ class AdminWorkspaceController extends Controller
             'rejection_reason' => ['nullable', 'string', 'max:2000'],
         ]);
 
+        $districtMatchesRegion = \\App\\Models\\District::query()
+            ->whereKey($data['district_id'])
+            ->where('region_id', $data['region_id'])
+            ->exists();
+        if (! $districtMatchesRegion) {
+            throw ValidationException::withMessages([
+                'district_id' => ['Choose a district within the selected region.'],
+            ]);
+        }
+
         if (filled($data['county_id'] ?? null) && ! DB::table('counties')
             ->where('id', $data['county_id'])->where('district_id', $data['district_id'])->exists()) {
             throw ValidationException::withMessages(['county_id' => ['Choose a county within the selected district.']]);
