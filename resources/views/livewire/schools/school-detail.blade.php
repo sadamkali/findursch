@@ -151,6 +151,9 @@
 
                     <nav class="sref-tabs" aria-label="Profile sections" x-data="{active:'about'}">
                         <a href="#about" x-on:click="active='about'" :class="active === 'about' ? 'is-active' : ''">About</a>
+                        @if($school->documents->isNotEmpty())
+                            <a href="#requirements" x-on:click="active='requirements'" :class="active === 'requirements' ? 'is-active' : ''">Documents</a>
+                        @endif
                         @if($admissionsVisible && ($school->admissions_open || filled($school->admission_classes) || filled($school->admission_requirements) || filled($school->how_to_apply)))
                             <a href="#admissions" x-on:click="active='admissions'" :class="active === 'admissions' ? 'is-active' : ''">Admissions</a>
                         @endif
@@ -211,6 +214,28 @@
                         @if($school->admissions_open)
                             <button type="button" class="sref-btn sref-btn--brand sref-btn--sm" x-on:click="$refs.enquiryDialog.showModal()">Apply for admission</button>
                         @endif
+                    </section>
+                @endif
+
+                @if($school->documents->isNotEmpty())
+                    <section class="sref-card sref-pad" id="requirements">
+                        <h2>School <span>requirements & documents</span></h2>
+                        <p class="sref-description">Download the official forms and requirements shared by {{ $school->name }}. Every file downloaded from FindURSCH includes the FindURSCH logo and website watermark.</p>
+                        <div class="sref-post-list">
+                            @foreach($school->documents as $document)
+                                <div class="sref-post-row">
+                                    <span class="sref-post-date">{{ strtoupper(pathinfo($document->original_filename, PATHINFO_EXTENSION)) }}</span>
+                                    <span class="sref-post-copy">
+                                        <strong>{{ $document->title }}</strong>
+                                        <small>{{ $document->original_filename }} · {{ number_format($document->file_size / 1024, 0) }} KB · Added {{ $document->created_at?->format('d M Y') }}</small>
+                                        @if(filled($document->description))
+                                            <span>{{ $document->description }}</span>
+                                        @endif
+                                    </span>
+                                    <a class="sref-btn sref-btn--brand sref-btn--sm" href="{{ route('schools.requirements.download', ['school' => $school->slug, 'document' => $document->id]) }}">Download</a>
+                                </div>
+                            @endforeach
+                        </div>
                     </section>
                 @endif
 

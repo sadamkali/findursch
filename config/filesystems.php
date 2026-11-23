@@ -83,6 +83,22 @@ return [
             'report' => true,
         ],
 
+        // Document payloads are encrypted before upload and stored in a
+        // dedicated private prefix, separate from public school images.
+        'school_documents' => [
+            'driver' => 's3',
+            'key' => env('R2_ACCESS_KEY_ID'),
+            'secret' => env('R2_SECRET_ACCESS_KEY'),
+            'region' => env('R2_REGION', 'auto'),
+            'bucket' => env('R2_BUCKET'),
+            'endpoint' => env('R2_ENDPOINT'),
+            'use_path_style_endpoint' => false,
+            'root' => 'school-documents',
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => true,
+        ],
+
         'filebase' => [
             'driver' => 's3',
             'key' => env('FILEBASE_KEY'),

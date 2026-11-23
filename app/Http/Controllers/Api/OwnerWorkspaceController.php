@@ -14,12 +14,15 @@ use App\Models\SchoolMessageCampaign;
 use App\Models\SchoolPost;
 use App\Models\SchoolProgram;
 use App\Models\SchoolVideo;
+use App\Models\SchoolDocument;
 use App\Models\Setting;
 use App\Services\SchoolMediaStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -505,6 +508,130 @@ class OwnerWorkspaceController extends Controller
                     ?: $record->getFirstMedia('logo')?->getUrl(),
             ],
         ]);
+    }
+
+    public function requirements(Request $request, int $school, ?int $document = null): JsonResponse
+    {
+        $record = $this->school($request, $school);
+
+        if ($request->isMethod('post')) {
+            $validated = $request->validate([
+                'title' => ['required', 'string', 'min:2', 'max:180'],
+                'description' => ['nullable', 'string', 'max:1200'],
+                'file' => ['required', 'file', 'max:20480'],
+            ]);
+
+            if ($record->documents()->count() >= 50) {
+                return response()->json(['message' => 'A school can have up to 50 downloadable documents.'], 422);
+            }
+
+            $file = $request->file('file');
+            $extension = strtolower($file->getClientOriginalExtension());
+
+            if (! in_array($extension, ['pdf', 'docx'], true)) {
+                return response()->json(['message' => 'Upload a PDF or a modern Word document (.docx).'], 422);
+            }
+
+            if ($extension === 'pdf') {
+                $handle = fopen($file->getRealPath(), 'rb');
+                $signature = $handle ? fread($handle, 5) : '';
+                if ($handle) fclose($handle);
+                if ($signature !== '%PDF-') {
+                    return response()->json(['message' => 'The selected PDF file is not valid.'], 422);
+                }
+                $mimeType = 'application/pdf';
+            } else {
+                if (! class_exists(\ZipArchive::class)) {
+                    return response()->json(['message' => 'Word document uploads are unavailable on this server.'], 503);
+                }
+
+                $archive = new \ZipArchive();
+                if ($archive->open($file->getRealPath()) !== true) {
+                    return response()->json(['message' => 'The selected Word document is not a valid .docx file.'], 422);
+                }
+
+                $validDocx = $archive->locateName('[Content_Types].xml') !== false
+                    && $archive->locateName('word/document.xml') !== false
+                    && $archive->numFiles <= 500;
+                $expandedSize = 0;
+
+                for ($index = 0; $validDocx && $index < $archive->numFiles; $index++) {
+                    $stat = $archive->statIndex($index);
+                    $expandedSize += (int) ($stat['size'] ?? 0);
+                    if ($expandedSize > 100 * 1024 * 1024) {
+                        $validDocx = false;
+                    }
+                }
+
+                $archive->close();
+
+                if (! $validDocx) {
+                    return response()->json(['message' => 'The selected Word document is invalid or too large after extraction.'], 422);
+                }
+
+                $mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            }
+
+            $originalName = Str::limit(basename($file->getClientOriginalName()), 250, '');
+            $storedPath = $record->id.'/'.Str::uuid().'.enc';
+
+            try {
+                $encryptedContent = \Illuminate\Support\Facades\Crypt::encryptString(file_get_contents($file->getRealPath()));
+                Storage::disk('school_documents')->put($storedPath, $encryptedContent, ['visibility' => 'private']);
+
+                $created = $record->documents()->create([
+                    'uploaded_by' => $request->user()->id,
+                    'title' => trim($validated['title']),
+                    'description' => $validated['description'] ?? null,
+                    'original_filename' => $originalName,
+                    'stored_path' => $storedPath,
+                    'mime_type' => $mimeType,
+                    'file_size' => $file->getSize(),
+                ]);
+            } catch (\Throwable $exception) {
+                Storage::disk('school_documents')->delete($storedPath);
+                report($exception);
+                return response()->json(['message' => 'The document could not be saved to secure storage. Please try again.'], 502);
+            }
+
+            return response()->json([
+                'data' => ['record' => $this->requirementPayload($record, $created)],
+                'message' => 'School document uploaded successfully.',
+            ], 201);
+        }
+
+        if ($request->isMethod('delete')) {
+            abort_unless($document, 404);
+            $item = $record->documents()->whereKey($document)->firstOrFail();
+            Storage::disk('school_documents')->delete($item->stored_path);
+            $item->delete();
+            return response()->json(['message' => 'School document removed.']);
+        }
+
+        return response()->json([
+            'data' => [
+                'records' => $record->documents()->latest()->get()
+                    ->map(fn (SchoolDocument $item) => $this->requirementPayload($record, $item))
+                    ->values(),
+            ],
+        ]);
+    }
+
+    private function requirementPayload(School $school, SchoolDocument $document): array
+    {
+        return [
+            'id' => $document->id,
+            'title' => $document->title,
+            'description' => $document->description,
+            'original_filename' => $document->original_filename,
+            'mime_type' => $document->mime_type,
+            'file_size' => (int) $document->file_size,
+            'created_at' => $document->created_at,
+            'download_url' => route('schools.requirements.download', [
+                'school' => $school->slug,
+                'document' => $document->id,
+            ]),
+        ];
     }
 
     public function videos(Request $request, int $school, ?int $video = null): JsonResponse

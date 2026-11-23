@@ -19,7 +19,7 @@ COPY composer.json composer.lock ./
 # Resolve and install the S3 adapter and its AWS SDK dependencies against
 # the committed dependency set. This produces an updated lock file in the
 # build image, because the repository lock predates Filebase support.
-RUN composer update league/flysystem-aws-s3-v3 aws/aws-sdk-php \
+RUN composer update league/flysystem-aws-s3-v3 aws/aws-sdk-php setasign/fpdf setasign/fpdi \
     --with-dependencies \
     --no-dev \
     --no-interaction \
@@ -27,7 +27,8 @@ RUN composer update league/flysystem-aws-s3-v3 aws/aws-sdk-php \
     --prefer-dist \
     --optimize-autoloader \
     --no-scripts \
-    && composer show league/flysystem-aws-s3-v3 --no-interaction
+    && composer show league/flysystem-aws-s3-v3 --no-interaction \
+    && composer show setasign/fpdi --no-interaction
 
 FROM node:22-alpine AS frontend
 WORKDIR /app

@@ -22,6 +22,7 @@ use App\Livewire\User\SavedSchools;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SchoolRequirementDownloadController;
 use App\Http\Controllers\Api\AdManagerController;
 use App\Models\School;
 use App\Models\District;
@@ -38,6 +39,8 @@ $accountDashboardUrl = static fn (): string => rtrim((string) config('services.d
 Route::get('/', HomePage::class)->name('home');
 Route::get('/schools', SchoolListing::class)->name('schools.index');
 Route::get('/schools/{school:slug}', SchoolDetail::class)->name('schools.show');
+Route::get('/schools/{school:slug}/requirements/{document}/download', SchoolRequirementDownloadController::class)
+    ->whereNumber('document')->middleware('throttle:20,1')->name('schools.requirements.download');
 Route::get('/district/{district:slug}', DistrictSchools::class)->name('district.show');
 Route::get('/search', SearchResults::class)->name('search');
 Route::get('/api/search/suggest', function (Request $request) {

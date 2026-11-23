@@ -121,6 +121,9 @@ Route::middleware(['auth:sanctum', 'role:admin|school_owner'])
         Route::get('/schools/{school}/media/{collection}', [OwnerWorkspaceController::class, 'media']);
         Route::post('/schools/{school}/media/{collection}', [OwnerWorkspaceController::class, 'media']);
         Route::delete('/schools/{school}/media/{collection}/{mediaId}', [OwnerWorkspaceController::class, 'media']);
+        Route::get('/schools/{school}/requirements', [OwnerWorkspaceController::class, 'requirements'])->whereNumber('school');
+        Route::post('/schools/{school}/requirements', [OwnerWorkspaceController::class, 'requirements'])->whereNumber('school')->middleware('throttle:10,1');
+        Route::delete('/schools/{school}/requirements/{document}', [OwnerWorkspaceController::class, 'requirements'])->whereNumber('school')->whereNumber('document');
 
         Route::get('/schools/{school}/videos', [OwnerWorkspaceController::class, 'videos']);
         Route::post('/schools/{school}/videos', [OwnerWorkspaceController::class, 'videos']);

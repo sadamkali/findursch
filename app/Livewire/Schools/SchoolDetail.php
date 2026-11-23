@@ -51,6 +51,7 @@ class SchoolDetail extends Component
             'contacts',
             'approvedReviews' => fn ($query) => $query->latest()->with('user'),
             'media',
+            'documents',
             'activeSubscription.plan',
         ]);
 

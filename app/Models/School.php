@@ -115,6 +115,11 @@ class School extends Model implements HasMedia
         return $this->hasMany(SchoolFee::class);
     }
 
+    public function documents(): HasMany
+    {
+        return $this->hasMany(SchoolDocument::class)->latest();
+    }
+
     public function facilities(): BelongsToMany
     {
         return $this->belongsToMany(Facility::class, 'school_facilities', 'school_id', 'facility_id')->withPivot('notes');
