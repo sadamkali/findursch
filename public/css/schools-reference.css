@@ -256,9 +256,9 @@
 .school-directory-reference .sband {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 60;
     padding: 12px 0 14px;
-    background: #0C5A49;
+    background: rgba(8, 63, 51, .97);
     border-bottom: 1px solid rgba(255,255,255,.14);
     box-shadow: 0 8px 24px rgba(5, 42, 34, .17);
     -webkit-backdrop-filter: blur(14px);
@@ -596,24 +596,15 @@
 }
 
 
-/* On the school directory, let the shared header scroll away so the
-   sticky search band can take over at the top. Other routes keep the shared
-   sticky header unchanged. */
-body.page-schools-index .site-header {
-    position: static;
-    top: auto;
-    z-index: auto;
-}
-
 /* Search capsule based on the supplied FindURSCH school-directory reference.
    On narrow screens the search stays prominent and detailed filters move to
    the existing Filters panel below the results toolbar. */
 .school-directory-reference .sband {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 60;
     padding: 12px 0 14px;
-    background: #0C5A49;
+    background: rgba(8, 63, 51, .97);
     border-bottom: 1px solid rgba(255,255,255,.14);
     box-shadow: 0 8px 24px rgba(5,42,34,.17);
     -webkit-backdrop-filter: blur(14px);
