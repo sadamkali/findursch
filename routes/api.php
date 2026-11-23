@@ -53,7 +53,6 @@ Route::middleware(['auth:sanctum'])
         // Keep the static import route before the dynamic {level} route below.
         Route::get('/location-manager', [AdminLocationController::class, 'index']);
         Route::post('/location-manager/import', [AdminLocationController::class, 'import']);
-        Route::post('/location-manager/import-school-locations', [AdminLocationController::class, 'importSchoolLocations']);
         Route::post('/location-manager/{level}', [AdminLocationController::class, 'store'])
             ->whereIn('level', ['regions', 'districts', 'counties', 'sub_counties', 'parishes', 'towns']);
         Route::patch('/location-manager/{level}/{id}', [AdminLocationController::class, 'update'])
