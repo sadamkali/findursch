@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\PersonalAccessToken;
 
 $dashboardUrl = static fn (): string => rtrim((string) config('services.dashboard.url', 'https://admin.riotinvestments.space'), '/');
+$accountDashboardUrl = static fn (): string => rtrim((string) config('services.dashboard.account_url', 'https://account.riotinvestments.space'), '/');
 
 // =============== PUBLIC WEBSITE ===============
 Route::get('/', HomePage::class)->name('home');
@@ -95,7 +96,7 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap')
 Route::get('/ad-banner/{banner}/click', [AdManagerController::class, 'click'])->whereNumber('banner')->name('site-ad-banner.click');
 
 // =============== CENTRALIZED AUTHENTICATION ===============
-Route::get('/login', function (Request $request) use ($dashboardUrl) {
+Route::get('/login', function (Request $request) use ($accountDashboardUrl) {
     $intended = (string) $request->session()->pull('url.intended', '/account');
     $path = parse_url($intended, PHP_URL_PATH) ?: '/account';
 
@@ -104,17 +105,17 @@ Route::get('/login', function (Request $request) use ($dashboardUrl) {
         $path = '/account';
     }
 
-    return redirect()->away($dashboardUrl().'/login?returnTo='.rawurlencode($path));
+    return redirect()->away($accountDashboardUrl().'/login?returnTo='.rawurlencode($path));
 })->name('login');
 
-Route::get('/register', function () use ($dashboardUrl) {
-    return redirect()->away($dashboardUrl().'/register?type=school_owner&returnTo=%2Faccount');
+Route::get('/register', function () use ($accountDashboardUrl) {
+    return redirect()->away($accountDashboardUrl().'/register?type=school_owner&returnTo=%2Faccount');
 })->name('register');
 
-Route::get('/forgot-password', fn () => redirect()->away($dashboardUrl().'/login'))->name('password.request');
-Route::get('/reset-password/{token}', function (string $token, Request $request) use ($dashboardUrl) {
+Route::get('/forgot-password', fn () => redirect()->away($accountDashboardUrl().'/login'))->name('password.request');
+Route::get('/reset-password/{token}', function (string $token, Request $request) use ($accountDashboardUrl) {
     $email = rawurlencode((string) $request->query('email', ''));
-    return redirect()->away($dashboardUrl().'/reset-password/'.$token.'?email='.$email);
+    return redirect()->away($accountDashboardUrl().'/reset-password/'.$token.'?email='.$email);
 })->name('password.reset');
 
 // A short-lived, single-use Sanctum token transfers the parent session back to this origin.
@@ -170,6 +171,54 @@ Route::get('/auth/dashboard-callback', function (Request $request) {
         ->header('Referrer-Policy', 'no-referrer')
         ->header('Cache-Control', 'no-store, private');
 })->name('auth.dashboard-callback');
+
+// Re-establish a host-only dashboard session from the public site's verified
+// server-side login identity. The exchanged code is single-use and short-lived.
+Route::get('/auth/dashboard-login', function (Request $request) use ($dashboardUrl, $accountDashboardUrl) {
+    $identity = $request->session()->get('dashboard_identity');
+    abort_unless(is_array($identity) && in_array($identity['role'] ?? null, ['admin', 'school_owner'], true), 401);
+
+    $user = User::query()->find($identity['id'] ?? null);
+    abort_unless($user instanceof User && $user->status === 'active', 401);
+
+    $isAdmin = $user->hasRole('admin') || $user->getAllPermissions()->contains(
+        fn ($permission) => str_starts_with($permission->name, 'admin.')
+    );
+    $isSchoolOwner = $user->hasRole('school_owner');
+    abort_unless($isAdmin || $isSchoolOwner, 403);
+
+    $returnTo = (string) $request->query('returnTo', $isAdmin ? '/admin' : '/owner');
+    if (! str_starts_with($returnTo, '/') || str_starts_with($returnTo, '//') ||
+        str_contains($returnTo, "\r") || str_contains($returnTo, "\n")) {
+        $returnTo = $isAdmin ? '/admin' : '/owner';
+    }
+
+    $code = $user->createToken(
+        'findursch-dashboard-session-handoff',
+        ['dashboard-session-handoff'],
+        now()->addMinutes(2)
+    )->plainTextToken;
+
+    $workspaceUrl = $isAdmin ? $dashboardUrl() : $accountDashboardUrl();
+    $callback = $workspaceUrl.'/auth/public-callback?code='.rawurlencode($code).'&redirect='.rawurlencode($returnTo);
+
+    return redirect()->away($callback)
+        ->header('Referrer-Policy', 'no-referrer')
+        ->header('Cache-Control', 'no-store, private');
+})->name('auth.dashboard-login');
+
+// Dashboard logout also clears the public-site navigation identity so the
+// next visit cannot silently create another workspace session.
+Route::get('/auth/dashboard-logout', function (Request $request) use ($dashboardUrl, $accountDashboardUrl) {
+    $request->session()->forget('dashboard_identity');
+    $workspace = $request->query('workspace') === 'admin' ? 'admin' : 'owner';
+    $returnTo = $workspace === 'admin'
+        ? $dashboardUrl().'/admin/login?notice=signed-out'
+        : $accountDashboardUrl().'/login?notice=signed-out';
+
+    return redirect()->away($returnTo)
+        ->header('Cache-Control', 'no-store, private');
+})->name('auth.dashboard-logout');
 
 Route::post('/logout', function () {
     auth()->logout();
