@@ -7,6 +7,7 @@ use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use App\Http\Middleware\EnsureSiteIsNotInMaintenance;
+use App\Http\Middleware\SyncDashboardIdentity;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Trust forwarded headers so Laravel generates HTTPS route and asset URLs.
         $middleware->trustProxies(at: '*');
 
-        $middleware->web(append: [EnsureSiteIsNotInMaintenance::class]);
+        $middleware->web(append: [EnsureSiteIsNotInMaintenance::class, SyncDashboardIdentity::class]);
 
         $middleware->alias([
             'role' => RoleMiddleware::class,
