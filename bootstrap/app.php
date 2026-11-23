@@ -21,6 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Trust forwarded headers so Laravel generates HTTPS route and asset URLs.
         $middleware->trustProxies(at: '*');
 
+        // The dashboard issues this HttpOnly Sanctum token cookie directly.
+        // Keep it readable by the web middleware so the public header can
+        // validate dashboard sessions without creating a Laravel login.
+        $middleware->encryptCookies(except: ['findursch_api_token']);
+
         $middleware->web(append: [EnsureSiteIsNotInMaintenance::class, SyncDashboardIdentity::class]);
 
         $middleware->alias([
