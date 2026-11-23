@@ -105,7 +105,7 @@
     </style>
     <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=3">
 </head>
-<body class="h-full bg-white text-gray-900 antialiased{{ request()->routeIs('schools.index') ? ' page-schools-index' : '' }}">
+<body class="h-full bg-white text-gray-900 antialiased">
     @php
         $dashboardUrl = rtrim(config('services.dashboard.url', 'https://admin.riotinvestments.space'), '/');
         $accountDashboardUrl = rtrim(config('services.dashboard.account_url', 'https://account.riotinvestments.space'), '/');
