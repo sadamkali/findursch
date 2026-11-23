@@ -335,8 +335,8 @@
                 <div>
                     <h2>Support</h2>
                     <ul>
-                        <li><a href="{{ $dashboardUrl }}/register?type=school_owner">List your school</a></li>
-                        <li><a href="{{ is_array($dashboardIdentity) ? route('auth.dashboard-login', ['returnTo' => '/owner']) : $signInUrl }}">School owner login</a></li>
+                        <li><a href="{{ $schoolRegistrationUrl }}">List your school</a></li>
+                        <li><a href="{{ is_array($dashboardIdentity) ? $accountLinkUrl : $signInUrl }}">School owner login</a></li>
                         <li><a href="{{ route('contact') }}">Get in touch</a></li>
                         @if($siteSupportEmail)<li><a href="mailto:{{ $siteSupportEmail }}">{{ $siteSupportEmail }}</a></li>@endif
                         @if($siteSupportPhone)<li><a href="tel:{{ preg_replace('/[^0-9+]/', '', $siteSupportPhone) }}">{{ $siteSupportPhone }}</a></li>@endif
