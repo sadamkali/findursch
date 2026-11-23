@@ -381,7 +381,7 @@ class AdminLocationController extends Controller
         $this->authorizeManage($request);
 
         $data = $request->validate([
-            'items' => ['required', 'array', 'min:1', 'max:2000'],
+            'items' => ['required', 'array', 'min:1', 'max:15000'],
             'items.*.region' => ['nullable', 'string', 'max:120'],
             'items.*.district' => ['required', 'string', 'min:2', 'max:120'],
             'items.*.county' => ['required', 'string', 'min:2', 'max:120'],
@@ -396,6 +396,15 @@ class AdminLocationController extends Controller
          */
         $resolved = [];
         $skippedRows = [];
+        $districtsByName = [];
+
+        // Load the District lookup once. Large location imports contain many
+        // repeated Parish rows, so querying the District table per row is wasteful.
+        foreach (DB::table('districts as d')
+            ->join('regions as r', 'r.id', '=', 'd.region_id')
+            ->get(['d.id', 'd.name', 'r.name as region_name']) as $existingDistrict) {
+            $districtsByName[$this->normalized($existingDistrict->name)][] = $existingDistrict;
+        }
 
         foreach ($data['items'] as $index => $item) {
             $region = $this->cleanName((string) ($item['region'] ?? ''));
@@ -404,30 +413,26 @@ class AdminLocationController extends Controller
             $subCountyName = $this->cleanName($item['subcounty']);
             $parishName = $this->cleanName((string) ($item['parish'] ?? ''));
 
-            $districtQuery = DB::table('districts as d')
-                ->join('regions as r', 'r.id', '=', 'd.region_id')
-                ->whereRaw('LOWER(TRIM(d.name)) = ?', [$this->normalized($districtName)]);
+            $districtMatches = $districtsByName[$this->normalized($districtName)] ?? [];
 
             if ($region !== '') {
-                $districtQuery->whereRaw('LOWER(TRIM(r.name)) = ?', [$this->normalized($region)]);
+                $normalizedRegion = $this->normalized($region);
+                $districtMatches = array_values(array_filter(
+                    $districtMatches,
+                    fn ($candidate) => $this->normalized($candidate->region_name) === $normalizedRegion
+                ));
             }
 
-            $districts = $districtQuery->get([
-                'd.id',
-                'd.name',
-                'r.name as region_name',
-            ]);
-
-            if ($districts->count() !== 1) {
+            if (count($districtMatches) !== 1) {
                 $scope = $region !== '' ? ' in region "'.$region.'"' : '';
-                $reason = $districts->isEmpty()
+                $reason = count($districtMatches) === 0
                     ? 'does not match an existing District'
                     : 'matches more than one District';
                 $skippedRows[] = 'Row '.($index + 2).': District "'.$districtName.'"'.$scope.' '.$reason.'.';
                 continue;
             }
 
-            $district = $districts->first();
+            $district = $districtMatches[0];
             $resolved[] = [
                 'district_id' => (int) $district->id,
                 'county' => $countyName,
