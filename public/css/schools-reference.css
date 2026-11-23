@@ -594,3 +594,250 @@
         transition: none;
     }
 }
+
+
+/* Search capsule based on the supplied FindURSCH school-directory reference.
+   On narrow screens the search stays prominent and detailed filters move to
+   the existing Filters panel below the results toolbar. */
+.school-directory-reference .sband {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    padding: 12px 0 14px;
+    background: rgba(8, 63, 51, .97);
+    border-bottom: 1px solid rgba(255,255,255,.14);
+    box-shadow: 0 8px 24px rgba(5,42,34,.17);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+}
+
+.school-directory-reference .sband > .wrap {
+    width: min(100%, 1328px);
+}
+
+.school-directory-reference .sform {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 7px 8px 7px 20px;
+    border: 1px solid rgba(255,255,255,.72);
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+}
+
+.school-directory-reference .sform__query {
+    display: flex;
+    flex: 1 1 250px;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 46px;
+    padding: 0 12px 0 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.school-directory-reference .sform__query > svg {
+    width: 19px;
+    height: 19px;
+    flex: 0 0 auto;
+    fill: none;
+    stroke: #687a72;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.school-directory-reference .sform__query input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ink);
+    font: 14px var(--sans);
+    box-shadow: none;
+}
+
+.school-directory-reference .sform__query input::placeholder {
+    color: #829088;
+    opacity: 1;
+}
+
+.school-directory-reference .sform__select {
+    display: block;
+    flex: 0 1 158px;
+    min-width: 0;
+    border-left: 1px solid var(--line);
+}
+
+.school-directory-reference .sform__select select {
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    height: 42px;
+    padding: 0 26px 0 13px;
+    border: 0;
+    border-radius: 0;
+    background-color: #fff;
+    color: #34443c;
+    font: 12px var(--sans);
+    cursor: pointer;
+}
+
+.school-directory-reference .sform__query:focus-within {
+    outline: 2px solid rgba(12,90,73,.18);
+    outline-offset: 2px;
+    border-radius: 5px;
+}
+
+.school-directory-reference .sform__select select:focus-visible,
+.school-directory-reference .sform__clear:focus-visible,
+.school-directory-reference .sform .go:focus-visible {
+    outline: 3px solid rgba(12,90,73,.24);
+    outline-offset: 2px;
+}
+
+.school-directory-reference .sform .go {
+    flex: 0 0 auto;
+    min-height: 44px;
+    height: 44px;
+    margin: 0 0 0 7px;
+    padding: 0 26px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--brand-xdk);
+    color: #fff;
+    font: 700 13px var(--sans);
+    white-space: nowrap;
+}
+
+.school-directory-reference .sform .go:hover {
+    background: var(--brand-dk);
+}
+
+.school-directory-reference .sform .go:disabled {
+    opacity: .68;
+    cursor: wait;
+}
+
+.school-directory-reference .sform__clear {
+    flex: 0 0 auto;
+    min-height: 36px;
+    margin: 0 0 0 7px;
+    padding: 0 10px;
+    border: 1px solid #dbe8e1;
+    border-radius: 999px;
+    background: #f1f6f3;
+    color: var(--brand);
+    font: 700 11px var(--sans);
+    cursor: pointer;
+}
+
+.school-directory-reference .sform__clear:hover {
+    border-color: var(--brand);
+    background: #e6f0eb;
+}
+
+@media (max-width: 1000px) {
+    .school-directory-reference .sband {
+        padding: 9px 0 10px;
+    }
+
+    .school-directory-reference .sform {
+        max-width: none;
+        padding: 6px 7px 6px 16px;
+        border-radius: 15px;
+    }
+
+    .school-directory-reference .sform__query {
+        flex: 1 1 auto;
+        min-height: 44px;
+    }
+
+    .school-directory-reference .sform__select,
+    .school-directory-reference .sform__clear {
+        display: none;
+    }
+
+    .school-directory-reference .sform .go {
+        min-height: 40px;
+        height: 40px;
+        margin-left: 5px;
+        padding: 0 20px;
+        border-radius: 10px;
+    }
+}
+
+@media (max-width: 640px) {
+    .school-directory-reference .sband {
+        padding: 7px 0 8px;
+    }
+
+    .school-directory-reference .sband > .wrap {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .school-directory-reference .sform {
+        gap: 4px;
+        padding: 5px 6px 5px 12px;
+        border-radius: 12px;
+    }
+
+    .school-directory-reference .sform__query {
+        gap: 8px;
+        min-height: 42px;
+        padding-right: 3px;
+    }
+
+    .school-directory-reference .sform__query > svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .school-directory-reference .sform__query input {
+        height: 38px;
+        font-size: 16px;
+    }
+
+    .school-directory-reference .sform .go {
+        min-height: 37px;
+        height: 37px;
+        margin-left: 2px;
+        padding: 0 13px;
+        border-radius: 8px;
+        font-size: 12px;
+    }
+
+    .school-directory-reference .cols {
+        padding-top: 16px;
+    }
+}
+
+@media (max-width: 360px) {
+    .school-directory-reference .sform {
+        padding-left: 9px;
+    }
+
+    .school-directory-reference .sform .go {
+        padding: 0 10px;
+        font-size: 11px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .school-directory-reference .sform__query,
+    .school-directory-reference .sform .go {
+        transition: none;
+    }
+}
