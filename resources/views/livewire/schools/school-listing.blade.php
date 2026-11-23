@@ -25,7 +25,7 @@
                     <span class="sr-only">Search schools</span>
                     <input type="search"
                         wire:model.live.debounce.350ms="search"
-                        placeholder="Search school name or district…"
+                        placeholder="Search school name"
                         aria-label="Search schools">
                 </label>
 
@@ -64,9 +64,6 @@
                     <span wire:loading wire:target="applyFilters">Searching…</span>
                 </button>
 
-                @if($search !== '' || $district !== '' || $region !== '' || $type !== '' || $curriculum !== '' || $boarding !== '' || $verified_only || $feeFilterEnabled)
-                    <button type="button" class="sform__clear" wire:click="resetFilters">Clear</button>
-                @endif
             </form>
         </div>
     </section>
