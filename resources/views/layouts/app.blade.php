@@ -71,7 +71,7 @@
     {{-- These page styles are safely scoped to their page wrappers; load them directly so Livewire route rendering cannot skip them. --}}
     <link rel="stylesheet" href="{{ asset('css/events-reference.css') }}?v=2">
     <link rel="stylesheet" href="{{ asset('css/events-listing-reference.css') }}?v=2">
-    <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=8">
+    <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=9">
     @if (request()->routeIs('district.show'))<link rel="stylesheet" href="{{ asset('css/district-reference.css') }}?v=1">@endif
     @if (request()->routeIs('jobs.*'))<link rel="stylesheet" href="{{ asset('css/jobs-reference.css') }}?v=1">@endif
     <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=3">
@@ -104,6 +104,7 @@
         body { font-family: '{{ $siteBodyFont }}', system-ui, sans-serif; }
     </style>
     <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=3">
+    <link rel="stylesheet" href="{{ asset('css/site-page-head.css') }}?v=1">
 </head>
 <body class="h-full bg-white text-gray-900 antialiased{{ request()->routeIs('schools.index') ? ' page-schools-index' : '' }}">
     @php
