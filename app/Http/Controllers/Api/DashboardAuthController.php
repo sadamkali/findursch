@@ -546,7 +546,7 @@ class DashboardAuthController extends Controller
             return response()->json(['message' => 'This account is not active. Contact FindurSch administration.'], 403);
         }
 
-        $isAdmin = $user->hasRole('admin') || $user->getAllPermissions()->isNotEmpty();
+        $isAdmin = $user->hasRole('admin') || $user->getAllPermissions()->contains(fn ($permission) => str_starts_with($permission->name, 'admin.'));
         if (! $user->hasAnyRole(['school_owner', 'parent']) && ! $isAdmin) {
             return response()->json(['message' => 'This account does not have access to the FindurSch workspace.'], 403);
         }
@@ -624,7 +624,7 @@ class DashboardAuthController extends Controller
 
     private function issueDashboardSession(User $user, bool $remember = true, array $additional = []): JsonResponse
     {
-        $isAdmin = $user->hasRole('admin') || $user->getAllPermissions()->isNotEmpty();
+        $isAdmin = $user->hasRole('admin') || $user->getAllPermissions()->contains(fn ($permission) => str_starts_with($permission->name, 'admin.'));
         $timeout = max(30, (int) Setting::get('admin_session_timeout_minutes', 120));
         $expiresAt = $isAdmin ? now()->addMinutes($timeout) : now()->addDays($remember ? 30 : 1);
         $token = $user->createToken('findursch-dashboard', ['*'], $expiresAt)->plainTextToken;
@@ -700,7 +700,7 @@ class DashboardAuthController extends Controller
     public function updateProfile(Request $request): JsonResponse
     {
         $user = $request->user();
-        abort_unless($user && ($user->hasRole('admin') || $user->getAllPermissions()->isNotEmpty()), 403, 'Administrator access is required to update these account details.');
+        abort_unless($user && ($user->hasRole('admin') || $user->getAllPermissions()->contains(fn ($permission) => str_starts_with($permission->name, 'admin.'))), 403, 'Administrator access is required to update these account details.');
 
         $request->merge(['email' => Str::lower(trim((string) $request->input('email', '')))]);
         $data = $request->validate([
@@ -735,7 +735,7 @@ class DashboardAuthController extends Controller
     public function updatePassword(Request $request): JsonResponse
     {
         $user = $request->user();
-        abort_unless($user && ($user->hasRole('admin') || $user->getAllPermissions()->isNotEmpty()), 403, 'Administrator access is required to change this password.');
+        abort_unless($user && ($user->hasRole('admin') || $user->getAllPermissions()->contains(fn ($permission) => str_starts_with($permission->name, 'admin.'))), 403, 'Administrator access is required to change this password.');
 
         $minimum = max(10, (int) Setting::get('admin_min_password_length', 10));
         $data = $request->validate([
@@ -773,7 +773,7 @@ class DashboardAuthController extends Controller
 
         $user = User::query()->findOrFail($challenge->user_id);
         abort_unless(strtolower($user->email) === strtolower($data['email']), 422, 'The verification code does not match this account.');
-        abort_unless($user->status === 'active' && ($user->hasRole('admin') || $user->getAllPermissions()->isNotEmpty()), 403, 'Administrator access is no longer active for this account.');
+        abort_unless($user->status === 'active' && ($user->hasRole('admin') || $user->getAllPermissions()->contains(fn ($permission) => str_starts_with($permission->name, 'admin.'))), 403, 'Administrator access is no longer active for this account.');
         abort_unless(Hash::check($data['code'], $challenge->code_hash), 422, 'The verification code is incorrect.');
 
         DB::table('admin_login_challenges')->where('id', $challenge->id)->update(['used_at' => now(), 'updated_at' => now()]);
