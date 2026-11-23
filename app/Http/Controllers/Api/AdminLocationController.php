@@ -596,9 +596,12 @@ class AdminLocationController extends Controller
     public function importSchoolLocations(Request $request): JsonResponse
     {
         $this->authorizeManage($request);
+        // Imports are sent in small batches by the dashboard so large CSV files do not
+        // exceed serverless request-body limits. A row may describe locations only,
+        // or may additionally identify a school whose location should be updated.
         $data = $request->validate([
-            'items' => ['required', 'array', 'min:1', 'max:2000'],
-            'items.*.school_name' => ['required', 'string', 'min:2', 'max:255'],
+            'items' => ['required', 'array', 'min:1', 'max:1000'],
+            'items.*.school_name' => ['sometimes', 'nullable', 'string', 'min:2', 'max:255'],
             'items.*.district' => ['required', 'string', 'min:2', 'max:120'],
             'items.*.county' => ['required', 'string', 'min:2', 'max:120'],
             'items.*.subcounty' => ['required', 'string', 'min:2', 'max:120'],
@@ -616,15 +619,20 @@ class AdminLocationController extends Controller
                 continue;
             }
             $district = $districts->first();
-            $school = DB::table('schools')->where('district_id', $district->id)
-                ->whereRaw('LOWER(TRIM(name)) = ?', [$this->normalized($item['school_name'])])
-                ->first(['id']);
-            if (! $school) {
-                $errors[] = 'Row '.($index + 2).': school "'.$item['school_name'].'" was not found in '.$district->name.'.';
-                continue;
+            $schoolId = null;
+            $schoolName = trim((string) ($item['school_name'] ?? ''));
+            if ($schoolName !== '') {
+                $school = DB::table('schools')->where('district_id', $district->id)
+                    ->whereRaw('LOWER(TRIM(name)) = ?', [$this->normalized($schoolName)])
+                    ->first(['id']);
+                if (! $school) {
+                    $errors[] = 'Row '.($index + 2).': school "'.$schoolName.'" was not found in '.$district->name.'.';
+                    continue;
+                }
+                $schoolId = (int) $school->id;
             }
             $resolved[] = [
-                'school_id' => (int) $school->id, 'district_id' => (int) $district->id,
+                'school_id' => $schoolId, 'district_id' => (int) $district->id,
                 'county' => $this->cleanName($item['county']),
                 'subcounty' => $this->cleanName($item['subcounty']),
                 'parish' => $this->cleanName((string) ($item['parish'] ?? '')),
@@ -632,7 +640,7 @@ class AdminLocationController extends Controller
         }
         if ($errors !== []) throw ValidationException::withMessages(['file' => $errors]);
 
-        $counts = ['schools_updated' => 0, 'counties_created' => 0, 'sub_counties_created' => 0, 'parishes_created' => 0];
+        $counts = ['location_rows_processed' => 0, 'schools_updated' => 0, 'counties_created' => 0, 'sub_counties_created' => 0, 'parishes_created' => 0];
         DB::transaction(function () use ($resolved, &$counts) {
             foreach ($resolved as $item) {
                 $county = DB::table('counties')->where('district_id', $item['district_id'])
@@ -676,11 +684,14 @@ class AdminLocationController extends Controller
                     } else $parishId = (int) $parish->id;
                 }
 
-                DB::table('schools')->where('id', $item['school_id'])->update([
-                    'county_id' => $county->id, 'sub_county_id' => $sub->id,
-                    'parish_id' => $parishId, 'town' => $sub->name, 'updated_at' => now(),
-                ]);
-                $counts['schools_updated']++;
+                if ($item['school_id'] !== null) {
+                    DB::table('schools')->where('id', $item['school_id'])->update([
+                        'county_id' => $county->id, 'sub_county_id' => $sub->id,
+                        'parish_id' => $parishId, 'town' => $sub->name, 'updated_at' => now(),
+                    ]);
+                    $counts['schools_updated']++;
+                }
+                $counts['location_rows_processed']++;
             }
         });
         return response()->json(['message' => $counts['schools_updated'].' school location record(s) updated.', 'data' => $counts]);
