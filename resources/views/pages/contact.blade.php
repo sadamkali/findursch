@@ -1,10 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-site-page-head :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Contact us']]" eyebrow="FindURSCH" :show-ad="false">
-    <x-slot:title>Contact us</x-slot:title>
-    <x-slot:description>Send a message to the FindurSch team about listings, account access or general questions.</x-slot:description>
-</x-site-page-head>
+<section class="py-12" style="background-color:var(--brand);"><div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8"><p class="text-sm font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.76)">FindurSch</p><h1 class="mt-2 text-4xl font-semibold" style="font-family: 'DM Serif Display', serif; color:#fff;">Contact us</h1><p class="mt-3 text-sm leading-6" style="color:rgba(255,255,255,.88)">Send a message to the FindurSch team about listings, account access or general questions.</p></div></section>
 <section class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
     @if(session('success'))<div class="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">{{ session('success') }}</div>@endif
     <form method="POST" action="{{ route('contact.store') }}" class="space-y-5 rounded-xl border border-gray-200 bg-white p-6">@csrf
