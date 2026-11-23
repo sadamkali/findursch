@@ -297,40 +297,160 @@ class AdminLocationController extends Controller
         $table = $this->tableFor($level);
         $record = DB::table($table)->where('id', $id)->first();
         abort_unless($record, 404, 'Location not found.');
-        $data = $request->validate([
+
+        $parentColumn = match ($level) {
+            'districts' => 'region_id',
+            'counties' => 'district_id',
+            'sub_counties', 'towns' => 'county_id',
+            'parishes' => 'sub_county_id',
+            default => null,
+        };
+        $parentTable = match ($level) {
+            'districts' => 'regions',
+            'counties' => 'districts',
+            'sub_counties', 'towns' => 'counties',
+            'parishes' => 'sub_counties',
+            default => null,
+        };
+
+        $rules = [
             'name' => ['sometimes', 'required', 'string', 'min:2', 'max:120'],
             'is_active' => ['sometimes', 'boolean'],
-        ]);
+        ];
+        if ($parentColumn && $parentTable) {
+            $rules[$parentColumn] = ['sometimes', 'required', 'integer', 'exists:'.$parentTable.',id'];
+        }
+
+        $data = $request->validate($rules);
         abort_unless($data !== [], 422, 'There are no changes to save.');
 
-        $changes = [];
-        if (array_key_exists('name', $data)) {
-            $name = $this->cleanName($data['name']);
-            $parentColumn = match ($level) {
-                'districts' => 'region_id', 'counties' => 'district_id',
-                'sub_counties' => 'county_id', 'towns' => 'district_id',
-                'parishes' => 'sub_county_id', default => null,
-            };
-            $parentId = $parentColumn ? (int) $record->{$parentColumn} : null;
-            if ($this->findByName($table, $name, $parentColumn, $parentId) &&
-                $this->normalized($record->name) !== $this->normalized($name)) {
-                throw ValidationException::withMessages(['name' => ['That name already exists in this location.']]);
+        $targetParentId = $parentColumn
+            ? (int) ($data[$parentColumn] ?? $record->{$parentColumn})
+            : null;
+        $currentParentId = $parentColumn ? (int) $record->{$parentColumn} : null;
+        $parentChanged = $parentColumn && $targetParentId !== $currentParentId;
+        $targetParent = null;
+
+        if ($parentChanged) {
+            $targetParent = DB::table($parentTable)
+                ->where('id', $targetParentId)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $targetParent) {
+                throw ValidationException::withMessages([
+                    $parentColumn => ['Choose an active parent location.'],
+                ]);
             }
+
+            if (in_array($level, ['sub_counties', 'towns'], true) && empty($targetParent->district_id)) {
+                throw ValidationException::withMessages([
+                    $parentColumn => ['Choose a county linked to an active district.'],
+                ]);
+            }
+
+            if ($level === 'parishes' && (empty($targetParent->county_id) || empty($targetParent->district_id))) {
+                throw ValidationException::withMessages([
+                    $parentColumn => ['Choose a subcounty that is assigned to a county and district.'],
+                ]);
+            }
+        }
+
+        $name = array_key_exists('name', $data) ? $this->cleanName($data['name']) : $record->name;
+        $nameChanged = $this->normalized($record->name) !== $this->normalized($name);
+        if ($parentColumn && ($parentChanged || $nameChanged)) {
+            $duplicate = $this->findByName($table, $name, $parentColumn, $targetParentId);
+            if ($duplicate && (int) $duplicate->id !== $id) {
+                throw ValidationException::withMessages([
+                    'name' => ['A location with this name already exists under the selected parent.'],
+                ]);
+            }
+        }
+
+        $changes = [];
+        if ($nameChanged) {
             $changes['name'] = $name;
             $changes['slug'] = $this->slugFor($table, $name, $id);
         }
-        if (array_key_exists('is_active', $data)) $changes['is_active'] = (bool) $data['is_active'];
-        $changes['updated_at'] = now();
-        DB::transaction(function () use ($table, $id, $changes, $level) {
-            DB::table($table)->where('id', $id)->update($changes);
-            if (in_array($level, ['towns', 'sub_counties'], true) && array_key_exists('name', $changes)) {
-                DB::table('schools')->where('sub_county_id', $id)
-                    ->update(['town' => $changes['name'], 'updated_at' => now()]);
+        if (array_key_exists('is_active', $data)) {
+            $changes['is_active'] = (bool) $data['is_active'];
+        }
+        if ($parentChanged && $parentColumn) {
+            $changes[$parentColumn] = $targetParentId;
+        }
+
+        if ($changes === []) {
+            abort(422, 'There are no changes to save.');
+        }
+
+        $schoolsReassigned = 0;
+        DB::transaction(function () use (
+            $table, $id, $changes, $level, $parentChanged, $targetParent,
+            $targetParentId, $name, &$schoolsReassigned
+        ) {
+            DB::table($table)->where('id', $id)->update([...$changes, 'updated_at' => now()]);
+
+            // Keep the denormalized school location columns aligned when a
+            // parent is moved. A Parish move also moves schools assigned to it.
+            if ($parentChanged && $level === 'counties') {
+                $subCountyIds = DB::table('sub_counties')
+                    ->where('county_id', $id)
+                    ->pluck('id')
+                    ->all();
+
+                DB::table('sub_counties')
+                    ->where('county_id', $id)
+                    ->update(['district_id' => $targetParentId, 'updated_at' => now()]);
+
+                $schoolsQuery = DB::table('schools')->where(function ($query) use ($id, $subCountyIds) {
+                    $query->where('county_id', $id);
+                    if ($subCountyIds !== []) {
+                        $query->orWhereIn('sub_county_id', $subCountyIds);
+                    }
+                });
+                $schoolsReassigned = $schoolsQuery->update([
+                    'district_id' => $targetParentId,
+                    'county_id' => $id,
+                    'updated_at' => now(),
+                ]);
             }
+
+            if ($parentChanged && in_array($level, ['sub_counties', 'towns'], true)) {
+                DB::table('sub_counties')->where('id', $id)->update([
+                    'county_id' => $targetParentId,
+                    'district_id' => (int) $targetParent->district_id,
+                    'updated_at' => now(),
+                ]);
+
+                $schoolsReassigned = DB::table('schools')->where('sub_county_id', $id)->update([
+                    'county_id' => $targetParentId,
+                    'district_id' => (int) $targetParent->district_id,
+                    'town' => $name,
+                    'updated_at' => now(),
+                ]);
+            }
+
+            if ($parentChanged && $level === 'parishes') {
+                $subCountyName = DB::table('sub_counties')->where('id', $targetParentId)->value('name');
+                $schoolsReassigned = DB::table('schools')->where('parish_id', $id)->update([
+                    'sub_county_id' => $targetParentId,
+                    'county_id' => (int) $targetParent->county_id,
+                    'district_id' => (int) $targetParent->district_id,
+                    'town' => $subCountyName,
+                    'updated_at' => now(),
+                ]);
+            }
+
+            // Region is an internal grouping on District; the school still
+            // references the same District, so no school row needs changing.
         });
+
         return response()->json([
-            'message' => 'Location updated.',
+            'message' => $parentChanged
+                ? 'Location reassigned to the selected parent.'
+                : 'Location updated.',
             'data' => DB::table($table)->where('id', $id)->first(),
+            'schools_reassigned' => $schoolsReassigned,
         ]);
     }
 
