@@ -36,7 +36,7 @@ return [
     ],
 
     'dashboard' => [
-        'url' => env('DASHBOARD_URL', 'https://admin.riotinvestments.space'),
+        'url' => env('DASHBOARD_URL', 'https://account.riotinvestments.space'),
     ],
 
 ];
