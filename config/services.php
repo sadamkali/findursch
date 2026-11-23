@@ -36,7 +36,7 @@ return [
     ],
 
     'dashboard' => [
-        'url' => env('DASHBOARD_URL', 'https://findursch-dashboard-seven.vercel.app'),
+        'url' => env('DASHBOARD_URL', 'https://admin.riotinvestments.space'),
     ],
 
 ];
