@@ -71,7 +71,7 @@
     {{-- These page styles are safely scoped to their page wrappers; load them directly so Livewire route rendering cannot skip them. --}}
     <link rel="stylesheet" href="{{ asset('css/events-reference.css') }}?v=2">
     <link rel="stylesheet" href="{{ asset('css/events-listing-reference.css') }}?v=2">
-    <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=6">
+    <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=7">
     <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=3">
     @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=6">@endif
     @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}?v=3">@endif
