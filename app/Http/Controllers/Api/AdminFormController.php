@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Permission;
 
 class AdminFormController extends Controller
 {
@@ -168,17 +169,44 @@ class AdminFormController extends Controller
     {
         $user = $request->user();
         $owner = (bool) $user?->hasRole('admin');
+        $hasGranularFormPermissions = (bool) $user?->getAllPermissions()->contains(
+            fn (Permission $permission) => str_starts_with($permission->name, 'admin.forms.')
+        );
         $administrator = $owner || (bool) $user?->hasRole('administrator') || (bool) $user?->can('admin.system.edit_site_settings');
         $editor = (bool) $user?->hasRole('editor');
         $support = (bool) $user?->hasRole('support');
 
+        if ($owner) {
+            return [
+                'can_view' => true,
+                'can_edit_fields' => true,
+                'can_manage_options' => true,
+                'can_delete_fields' => true,
+                'can_publish' => true,
+                'role_label' => 'Super Admin',
+            ];
+        }
+
+        if ($hasGranularFormPermissions) {
+            return [
+                'can_view' => (bool) $user?->can('admin.forms.view'),
+                'can_edit_fields' => (bool) $user?->can('admin.forms.edit_fields'),
+                'can_manage_options' => (bool) $user?->can('admin.forms.manage_options'),
+                'can_delete_fields' => (bool) $user?->can('admin.forms.delete_fields'),
+                'can_publish' => (bool) $user?->can('admin.forms.publish'),
+                'role_label' => $user?->hasRole('administrator') ? 'Admin' : ($editor ? 'Editor' : ($support ? 'Support' : 'Administrator')),
+            ];
+        }
+
+        // Preserve the previous built-in role defaults until the role settings
+        // page has seeded granular permissions for the current database.
         return [
-            'can_view' => $owner || $administrator || $editor || $support || (bool) $user?->can('admin.forms.view'),
+            'can_view' => $administrator || $editor || $support || (bool) $user?->can('admin.forms.view'),
             'can_edit_fields' => $administrator,
             'can_manage_options' => $administrator || $editor,
-            'can_delete_fields' => $owner,
+            'can_delete_fields' => false,
             'can_publish' => $administrator || $editor,
-            'role_label' => $owner ? 'Owner' : ($user?->hasRole('administrator') ? 'Administrator' : ($editor ? 'Editor' : ($support ? 'Support' : 'Administrator'))),
+            'role_label' => $administrator ? 'Admin' : ($editor ? 'Editor' : ($support ? 'Support' : 'Administrator')),
         ];
     }
 

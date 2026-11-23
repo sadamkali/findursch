@@ -690,10 +690,70 @@ class DashboardAuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'phone' => $user->phone,
                 'roles' => $user->getRoleNames(),
                 'permissions' => $user->getAllPermissions()->pluck('name')->values(),
             ],
         ]);
+    }
+
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        abort_unless($user && ($user->hasRole('admin') || $user->getAllPermissions()->isNotEmpty()), 403, 'Administrator access is required to update these account details.');
+
+        $request->merge(['email' => Str::lower(trim((string) $request->input('email', '')))]);
+        $data = $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:255'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'current_password' => ['required', 'string'],
+        ]);
+
+        abort_unless(Hash::check($data['current_password'], $user->password), 422, 'Your current password is incorrect.');
+        $emailChanged = Str::lower((string) $user->email) !== $data['email'];
+        $user->forceFill([
+            'name' => trim($data['name']),
+            'email' => $data['email'],
+            'phone' => isset($data['phone']) ? trim((string) $data['phone']) : null,
+            ...($emailChanged ? ['email_verified_at' => null] : []),
+        ])->save();
+
+        return response()->json([
+            'message' => 'Your account details have been updated.',
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'roles' => $user->getRoleNames(),
+                'permissions' => $user->getAllPermissions()->pluck('name')->values(),
+            ],
+        ]);
+    }
+
+    public function updatePassword(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        abort_unless($user && ($user->hasRole('admin') || $user->getAllPermissions()->isNotEmpty()), 403, 'Administrator access is required to change this password.');
+
+        $minimum = max(10, (int) Setting::get('admin_min_password_length', 10));
+        $data = $request->validate([
+            'current_password' => ['required', 'string'],
+            'new_password' => ['required', 'string', 'min:'.$minimum, 'confirmed'],
+        ]);
+
+        abort_unless(Hash::check($data['current_password'], $user->password), 422, 'Your current password is incorrect.');
+        $user->forceFill(['password' => $data['new_password']])->save();
+
+        $currentToken = $user->currentAccessToken();
+        if ($currentToken && method_exists($currentToken, 'getKey')) {
+            $user->tokens()->where('id', '!=', $currentToken->getKey())->delete();
+        } else {
+            $user->tokens()->delete();
+        }
+
+        return response()->json(['message' => 'Your password has been updated. Other active sessions have been signed out.']);
     }
 
     public function verifyAdminCode(Request $request): JsonResponse

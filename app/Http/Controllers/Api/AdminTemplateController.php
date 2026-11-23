@@ -46,6 +46,11 @@ class AdminTemplateController extends Controller
             ['Users and roles', 'View admin users', 'admin.users.view', [1, 1, 0, 0]],
             ['Users and roles', 'Create or remove admins', 'admin.users.manage', [1, 0, 0, 0]],
             ['Users and roles', 'Edit roles and privileges', 'admin.roles.edit', [1, 0, 0, 0]],
+            ['Forms', 'View registration form settings', 'admin.forms.view', [1, 1, 1, 1]],
+            ['Forms', 'Edit custom registration fields', 'admin.forms.edit_fields', [1, 1, 0, 0]],
+            ['Forms', 'Manage registration options and lists', 'admin.forms.manage_options', [1, 1, 1, 0]],
+            ['Forms', 'Publish registration form changes', 'admin.forms.publish', [1, 1, 1, 0]],
+            ['Forms', 'Delete published custom fields', 'admin.forms.delete_fields', [1, 0, 0, 0]],
             ['System', 'Edit site settings', 'admin.system.edit_site_settings', [1, 0, 0, 0]],
             ['System', 'View audit log', 'admin.system.view_audit_log', [1, 1, 0, 0]],
             ['System', 'Export data', 'admin.system.export_data', [1, 0, 0, 0]],
@@ -78,6 +83,24 @@ class AdminTemplateController extends Controller
                 ->pluck(2)
                 ->all();
             $role->syncPermissions([...$keys, 'admin.workspace.access']);
+        }
+
+        // Seed granular form permissions once for existing built-in roles.
+        // Later role edits are preserved and are enforced by AdminFormController.
+        if (! Setting::query()->where('key', 'admin_form_permissions_seeded')->exists()) {
+            foreach (['administrator' => 1, 'editor' => 2, 'support' => 3] as $roleName => $column) {
+                $keys = collect($rows)
+                    ->filter(fn ($row) => $row[0] === 'Forms' && (int) $row[3][$column] === 1)
+                    ->pluck(2)
+                    ->all();
+                Role::findOrCreate($roleName, 'web')->givePermissionTo($keys);
+            }
+            Setting::query()->updateOrCreate(['key' => 'admin_form_permissions_seeded'], [
+                'value' => '1',
+                'type' => 'boolean',
+                'group' => 'security',
+                'label' => 'Built-in form permissions seeded',
+            ]);
         }
     }
 
@@ -520,8 +543,8 @@ class AdminTemplateController extends Controller
                 'id' => $role->id,
                 'name' => $role->name,
                 'label' => match ($role->name) {
-                    'admin' => 'Owner',
-                    'administrator' => 'Administrator',
+                    'admin' => 'Super Admin',
+                    'administrator' => 'Admin',
                     'editor' => 'Editor',
                     'support' => 'Support',
                     default => Str::headline($role->name),
@@ -552,8 +575,8 @@ class AdminTemplateController extends Controller
                     'role_id' => $role?->id,
                     'role' => $role?->name,
                     'role_label' => match ($role?->name) {
-                        'admin' => 'Owner',
-                        'administrator' => 'Administrator',
+                        'admin' => 'Super Admin',
+                        'administrator' => 'Admin',
                         'editor' => 'Editor',
                         'support' => 'Support',
                         default => $role ? Str::headline($role->name) : '—',

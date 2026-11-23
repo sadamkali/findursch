@@ -23,6 +23,8 @@ Route::prefix('auth')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [DashboardAuthController::class, 'me']);
+        Route::patch('/profile', [DashboardAuthController::class, 'updateProfile'])->middleware('throttle:10,1');
+        Route::patch('/password', [DashboardAuthController::class, 'updatePassword'])->middleware('throttle:5,1');
         Route::post('/logout', [DashboardAuthController::class, 'logout']);
         Route::post('/handoff', [DashboardAuthController::class, 'handoff']);
     });

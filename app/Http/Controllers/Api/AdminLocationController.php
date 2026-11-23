@@ -19,7 +19,7 @@ class AdminLocationController extends Controller
     {
         $user = $request->user();
         abort_unless(
-            $user && ($user->hasRole('admin') || $user->can('admin.locations.manage') || $user->can('admin.schools.view')),
+            $user && ($user->hasRole('admin') || $user->can('admin.locations.manage')),
             403,
             'Your administrator role cannot view location management.'
         );
