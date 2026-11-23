@@ -1,25 +1,16 @@
 <div class="district-directory-reference">
     <a class="district-rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
-    <x-site-ad-banner placement="top" />
-
-    <section class="district-head">
-        <div class="district-wrap">
-            <nav class="district-crumbs" aria-label="Breadcrumb">
-                <a href="{{ route('home') }}">Home</a>
-                <span aria-hidden="true">/</span>
-                <a href="{{ route('schools.index') }}">Schools</a>
-                <span aria-hidden="true">/</span>
-                <span>{{ $district->region?->name }} Region</span>
-                <span aria-hidden="true">/</span>
-                <b>{{ $district->name }} District</b>
-            </nav>
-
-            <p class="district-kicker">{{ $district->region?->name }} REGION · SCHOOL DIRECTORY</p>
-            <h1>Schools in <em>{{ $district->name }}</em> District</h1>
-            <p class="district-intro">
-                Discover active, verified schools in {{ $district->name }} District. Compare school levels, published fees and admission information, then visit each profile to contact the school.
-            </p>
-
+    <x-site-page-head
+        :breadcrumbs="[
+            ['label' => 'Home', 'url' => route('home')],
+            ['label' => 'Schools', 'url' => route('schools.index')],
+            ['label' => ($district->region?->name ?? 'Uganda').' Region'],
+            ['label' => $district->name.' District'],
+        ]"
+        :eyebrow="($district->region?->name ?? 'Uganda').' region · School directory'">
+        <x-slot:title>Schools in <em>{{ $district->name }}</em> District</x-slot:title>
+        <x-slot:description>Discover active, verified schools in {{ $district->name }} District. Compare school levels, published fees and admission information, then visit each profile to contact the school.</x-slot:description>
+        <x-slot:footer>
             <div class="district-stats">
                 <div><b>{{ number_format($totalSchools) }}</b><span>Verified schools</span></div>
                 <div><b>{{ number_format($admissionsOpenCount) }}</b><span>Admissions open</span></div>
@@ -46,8 +37,8 @@
                     @endif
                 </div>
             </div>
-        </div>
-    </section>
+        </x-slot:footer>
+    </x-site-page-head>
 
     <main class="district-wrap district-main">
         <div class="district-layout">
