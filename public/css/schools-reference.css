@@ -257,9 +257,9 @@
 .school-directory-reference .sband {
     position: sticky;
     top: 0;
-    z-index: 60;
+    z-index: 20;
     padding: 12px 0 14px;
-    background: rgba(8, 63, 51, .97);
+    background: #0C5A49;
     border-bottom: 1px solid rgba(255,255,255,.14);
     box-shadow: 0 8px 24px rgba(5,42,34,.17);
     -webkit-backdrop-filter: blur(14px);
