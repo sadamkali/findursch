@@ -1,0 +1,181 @@
+/* FindURSCH district school directory — styles scoped to the district route. */
+.district-directory-reference{
+  --dd-brand:#0c5a49;--dd-dark:#083f33;--dd-deep:#052a22;--dd-gold:#f0b030;
+  --dd-tint:#f1f6f3;--dd-line:#e4e8e6;--dd-ink:#1b2420;--dd-muted:#5d6b65;
+  --dd-serif:'Playfair Display',Georgia,serif;--dd-sans:'Inter',system-ui,sans-serif;
+  color:var(--dd-ink);background:#fff;font:14px/1.55 var(--dd-sans);padding-bottom:48px;
+}
+.district-directory-reference,.district-directory-reference *,.district-directory-reference *::before,.district-directory-reference *::after{box-sizing:border-box}
+.district-directory-reference a{color:inherit;text-decoration:none}
+.district-directory-reference button,.district-directory-reference input,.district-directory-reference select{font:inherit}
+.district-directory-reference button{cursor:pointer}
+.district-directory-reference .district-wrap{width:100%;max-width:1280px;margin:0 auto;padding:0 24px}
+.district-directory-reference .district-rtab{position:fixed;right:0;top:34%;z-index:50;writing-mode:vertical-rl;background:var(--dd-gold);color:#2a1d00;padding:17px 9px;border-radius:10px 0 0 10px;font:800 10px var(--dd-sans);letter-spacing:.07em;box-shadow:-3px 3px 12px #0003}
+.district-directory-reference .district-head{background:linear-gradient(135deg,#f1f6f3 0%,#e7f0eb 100%);border-bottom:1px solid var(--dd-line);padding:22px 0 25px}
+.district-directory-reference .district-crumbs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--dd-muted);font-size:11px;margin-bottom:15px}
+.district-directory-reference .district-crumbs a:hover{color:var(--dd-brand);text-decoration:underline}
+.district-directory-reference .district-crumbs b{color:var(--dd-ink);font-weight:700}
+.district-directory-reference .district-kicker{margin:0 0 7px;color:var(--dd-brand);font:800 9px var(--dd-sans);letter-spacing:.15em;text-transform:uppercase}
+.district-directory-reference .district-head h1{max-width:850px;margin:0;color:var(--dd-dark);font:700 clamp(30px,4vw,40px)/1.16 var(--dd-serif)}
+.district-directory-reference .district-head h1 em{color:var(--dd-brand);font-style:normal}
+.district-directory-reference .district-intro{max-width:800px;margin:10px 0 0;color:#53635b;font-size:13px;line-height:1.8}
+.district-directory-reference .district-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:21px}
+.district-directory-reference .district-stats>div{min-width:0;padding:13px 15px;border:1px solid #dce8e1;border-radius:9px;background:#fff}
+.district-directory-reference .district-stats b{display:block;overflow-wrap:anywhere;color:var(--dd-brand);font:700 clamp(19px,2.3vw,25px)/1.2 var(--dd-serif)}
+.district-directory-reference .district-stats span{display:block;margin-top:4px;color:var(--dd-muted);font-size:10px;line-height:1.45}
+.district-directory-reference .district-areas{margin-top:20px}
+.district-directory-reference .district-area-label{display:block;margin-bottom:8px;color:var(--dd-brand);font:800 9px var(--dd-sans);letter-spacing:.12em}
+.district-directory-reference .district-area-list{display:flex;gap:7px;overflow-x:auto;padding:1px 1px 7px;scrollbar-width:thin;overscroll-behavior-x:contain}
+.district-directory-reference .district-area-list button{display:inline-flex;align-items:center;gap:7px;flex:none;min-height:33px;padding:0 11px;border:1px solid #d5e1da;border-radius:7px;background:#fff;color:#34473e;font-size:10.5px;font-weight:600;white-space:nowrap}
+.district-directory-reference .district-area-list button:hover,.district-directory-reference .district-area-list button.is-active{border-color:var(--dd-brand);background:var(--dd-brand);color:#fff}
+.district-directory-reference .district-area-list em{font-size:9px;font-style:normal;opacity:.8}
+.district-directory-reference .district-no-areas{align-self:center;color:var(--dd-muted);font-size:10.5px}
+.district-directory-reference .district-main{padding-top:25px}
+.district-directory-reference .district-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:25px;align-items:start}
+.district-directory-reference .district-results,.district-directory-reference .district-sidebar{min-width:0}
+.district-directory-reference .district-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.district-directory-reference .district-search{display:flex;align-items:center;gap:8px;flex:1 1 230px;min-width:0;height:43px;padding:0 12px;border:1px solid #d4ddd8;border-radius:8px;background:#fff}
+.district-directory-reference .district-search>span{color:var(--dd-muted);font-size:22px;line-height:1}
+.district-directory-reference .district-search input{width:100%;min-width:0;height:100%;border:0;outline:0;background:transparent;color:var(--dd-ink);font-size:12px}
+.district-directory-reference .district-search input::placeholder{color:#8a9790}
+.district-directory-reference .district-select{flex:0 1 145px;min-width:120px}
+.district-directory-reference .district-select select,.district-directory-reference .district-sort select{width:100%;height:43px;padding:0 10px;border:1px solid #d4ddd8;border-radius:8px;background:#fff;color:var(--dd-ink);font-size:11px}
+.district-directory-reference .district-btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 15px;border:1px solid transparent;border-radius:8px;font-size:11px;font-weight:800;white-space:nowrap}
+.district-directory-reference .district-btn-brand{background:var(--dd-brand);color:#fff}
+.district-directory-reference .district-btn-brand:hover{background:var(--dd-dark)}
+.district-directory-reference .district-btn-gold{background:var(--dd-gold);color:#2a1d00}
+.district-directory-reference .district-btn-gold:hover{background:#d99a1a}
+.district-directory-reference .district-filter-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0 17px}
+.district-directory-reference .district-check{display:flex;align-items:center;gap:7px;color:var(--dd-muted);font-size:10.5px;font-weight:600;cursor:pointer}
+.district-directory-reference .district-check input{width:15px;height:15px;accent-color:var(--dd-brand)}
+.district-directory-reference .district-clear{border:0;background:none;color:var(--dd-brand);font-size:10.5px;font-weight:800;text-decoration:underline}
+.district-directory-reference .district-toolbar{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:15px}
+.district-directory-reference .district-toolbar small{display:block;color:var(--dd-muted);font-size:8.5px;font-weight:800;letter-spacing:.14em}
+.district-directory-reference .district-toolbar strong{display:block;margin-top:3px;color:var(--dd-brand);font:700 19px var(--dd-serif)}
+.district-directory-reference .district-sort{display:flex;align-items:center;gap:7px;color:var(--dd-muted);font-size:10px}
+.district-directory-reference .district-sort select{width:auto;min-width:140px;height:35px}
+.district-directory-reference .district-school-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.district-directory-reference .district-school-card{display:flex;min-width:0;flex-direction:column;overflow:hidden;border:1px solid var(--dd-line);border-radius:10px;background:#fff;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+.district-directory-reference .district-school-card:hover{border-color:#9bbcaf;box-shadow:0 7px 18px #052a2210;transform:translateY(-2px)}
+.district-directory-reference .district-school-cover{display:block;height:135px;overflow:hidden;background:var(--dd-tint)}
+.district-directory-reference .district-school-cover img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .25s ease}
+.district-directory-reference .district-school-card:hover .district-school-cover img{transform:scale(1.025)}
+.district-directory-reference .district-school-body{flex:1;padding:14px 14px 12px}
+.district-directory-reference .district-school-tags{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.district-directory-reference .district-tag{display:inline-flex;align-items:center;padding:3px 7px;border-radius:4px;font-size:8.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.district-directory-reference .district-tag-type{background:#eaf2ed;color:var(--dd-brand)}
+.district-directory-reference .district-tag-verified{border:1px solid #c5e4cc;background:#edf8ef;color:#17703a}
+.district-directory-reference .district-tag-featured{background:#fff4d9;color:#795500}
+.district-directory-reference .district-school-card h2{margin:0 0 5px;color:var(--dd-ink);font:700 16px/1.3 var(--dd-serif);overflow-wrap:anywhere}
+.district-directory-reference .district-school-card h2 a:hover{color:var(--dd-brand)}
+.district-directory-reference .district-school-tagline{margin:0 0 9px;color:var(--dd-muted);font-size:10px;line-height:1.55}
+.district-directory-reference .district-school-location{display:flex;align-items:flex-start;gap:6px;margin:8px 0;color:#53635b;font-size:10px;line-height:1.5}
+.district-directory-reference .district-school-location>span{color:var(--dd-brand);font-size:15px;line-height:1}
+.district-directory-reference .district-school-facts{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.district-directory-reference .district-school-facts>span{padding:3px 6px;border:1px solid var(--dd-line);border-radius:4px;background:#fafcfb;color:#526158;font-size:8.5px}
+.district-directory-reference .district-school-facts>.district-admissions-open{border-color:#c5e4cc;background:#edf8ef;color:#17703a;font-weight:700}
+.district-directory-reference .district-curricula{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+.district-directory-reference .district-curricula span{padding:2px 6px;border-radius:4px;background:#edf4f0;color:var(--dd-brand);font-size:8.5px;font-weight:700}
+.district-directory-reference .district-school-meta{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid #edf1ee}
+.district-directory-reference .district-rating{display:flex;align-items:center;gap:3px;min-width:0;color:#b5790b}
+.district-directory-reference .district-rating b{color:var(--dd-ink);font-size:10px}
+.district-directory-reference .district-rating small{color:var(--dd-muted);font-size:8px}
+.district-directory-reference .district-fee{display:flex;flex-direction:column;align-items:flex-end;text-align:right;min-width:0}
+.district-directory-reference .district-fee b{color:var(--dd-brand);font-size:10px;overflow-wrap:anywhere}
+.district-directory-reference .district-fee small{color:var(--dd-muted);font-size:8px}
+.district-directory-reference .district-school-footer{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--dd-line);background:#fcfdfc}
+.district-directory-reference .district-profile-link{color:var(--dd-brand);font-size:10px;font-weight:800}
+.district-directory-reference .district-profile-link:hover{text-decoration:underline}
+.district-directory-reference .district-school-footer button{border:0;background:none;color:var(--dd-muted);font-size:9px;font-weight:600}
+.district-directory-reference .district-school-footer button:hover{color:var(--dd-brand);text-decoration:underline}
+.district-directory-reference .district-list-ad{grid-column:1/-1;min-width:0}
+.district-directory-reference .district-pagination{display:flex;justify-content:center;margin-top:23px}
+.district-directory-reference .district-pagination nav{display:flex;align-items:center;gap:5px}
+.district-directory-reference .district-pagination a,.district-directory-reference .district-pagination span{display:grid;min-width:33px;height:33px;place-items:center;padding:0 8px;border:1px solid var(--dd-line);border-radius:6px;color:var(--dd-ink);font-size:10px}
+.district-directory-reference .district-pagination span[aria-current=page]{border-color:var(--dd-brand);background:var(--dd-brand);color:#fff}
+.district-directory-reference .district-pagination a:hover{border-color:var(--dd-brand);color:var(--dd-brand)}
+.district-directory-reference .district-empty{padding:42px 22px;border:1px solid var(--dd-line);border-radius:10px;background:var(--dd-tint);text-align:center}
+.district-directory-reference .district-empty>span{display:grid;place-items:center;width:44px;height:44px;margin:0 auto 10px;border-radius:50%;background:#fff;color:var(--dd-brand);font-size:23px}
+.district-directory-reference .district-empty>small{color:var(--dd-brand);font-size:8.5px;font-weight:800;letter-spacing:.15em}
+.district-directory-reference .district-empty h2{margin:5px 0;color:var(--dd-ink);font:700 22px var(--dd-serif)}
+.district-directory-reference .district-empty p{max-width:440px;margin:0 auto 15px;color:var(--dd-muted);font-size:10.5px;line-height:1.7}
+.district-directory-reference .district-sidebar{display:flex;flex-direction:column;gap:17px}
+.district-directory-reference .district-side-card{overflow:hidden;border:1px solid var(--dd-line);border-radius:9px;background:#fff}
+.district-directory-reference .district-side-card h3{margin:0;padding:11px 14px;background:var(--dd-brand);color:#fff;font:800 9px var(--dd-sans);letter-spacing:.1em;text-transform:uppercase}
+.district-directory-reference .district-side-card ul{margin:0;padding:4px 0;list-style:none}
+.district-directory-reference .district-side-card li{margin:0}
+.district-directory-reference .district-side-card li>a,.district-directory-reference .district-side-card li>button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:9px 14px;border:0;border-bottom:1px solid var(--dd-line);background:#fff;color:var(--dd-ink);text-align:left;font-size:10.5px}
+.district-directory-reference .district-side-card li>a:hover,.district-directory-reference .district-side-card li>button:hover,.district-directory-reference .district-side-card li>button.is-active{background:var(--dd-tint);color:var(--dd-brand)}
+.district-directory-reference .district-side-card li em{min-width:24px;padding:2px 6px;border-radius:4px;background:#eef1ef;color:var(--dd-muted);text-align:center;font-size:8.5px;font-style:normal}
+.district-directory-reference .district-side-card li>button.is-active em{background:var(--dd-brand);color:#fff}
+.district-directory-reference .district-side-empty{padding:13px;color:var(--dd-muted);font-size:10px;line-height:1.6}
+.district-directory-reference .district-side-clear{width:100%;padding:9px 14px;border:0;border-top:1px solid var(--dd-line);background:#fff;color:var(--dd-brand);text-align:left;font-size:9.5px;font-weight:800}
+.district-directory-reference .district-promo{position:relative;overflow:hidden;padding:19px;border-radius:10px;background:var(--dd-brand);color:#fff}
+.district-directory-reference .district-promo::after{position:absolute;right:-45px;top:-50px;width:140px;height:140px;border-radius:50%;background:#ffffff12;content:""}
+.district-directory-reference .district-promo>*{position:relative;z-index:1}
+.district-directory-reference .district-promo small{color:var(--dd-gold);font-size:8px;font-weight:800;letter-spacing:.13em}
+.district-directory-reference .district-promo h3{margin:7px 0;color:#fff;font:700 21px/1.25 var(--dd-serif)}
+.district-directory-reference .district-promo p{margin:0 0 14px;color:#e5eee9;font-size:10px;line-height:1.65}
+.district-directory-reference .district-side-help{padding:17px;border:1px solid var(--dd-line);border-radius:9px;background:var(--dd-tint)}
+.district-directory-reference .district-side-help h3{margin:0 0 6px;color:var(--dd-brand);font:700 17px var(--dd-serif)}
+.district-directory-reference .district-side-help p{margin:0 0 10px;color:var(--dd-muted);font-size:10px;line-height:1.6}
+.district-directory-reference .district-side-help a{display:block;margin-top:7px;color:var(--dd-brand);font-size:10px;font-weight:800}
+.district-directory-reference .district-side-help a:hover{text-decoration:underline}
+.district-directory-reference .district-faq{margin-top:38px}
+.district-directory-reference .district-section-heading{margin-bottom:13px}
+.district-directory-reference .district-section-heading small{color:var(--dd-brand);font-size:8px;font-weight:800;letter-spacing:.14em}
+.district-directory-reference .district-section-heading h2{margin:4px 0 0;color:var(--dd-ink);font:700 23px/1.25 var(--dd-serif)}
+.district-directory-reference .district-faq-item{margin-bottom:8px;border:1px solid var(--dd-line);border-radius:8px;background:#fff}
+.district-directory-reference .district-faq-item summary{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 15px;color:var(--dd-ink);font-size:11px;font-weight:700;cursor:pointer;list-style:none}
+.district-directory-reference .district-faq-item summary::-webkit-details-marker{display:none}
+.district-directory-reference .district-faq-item summary::after{content:"+";color:var(--dd-brand);font-size:18px;font-weight:400}
+.district-directory-reference .district-faq-item[open] summary::after{content:"−"}
+.district-directory-reference .district-faq-item p{padding:0 15px 14px;color:var(--dd-muted);font-size:10.5px;line-height:1.75}
+@media(max-width:1100px){
+ .district-directory-reference .district-school-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:900px){
+ .district-directory-reference .district-layout{grid-template-columns:minmax(0,1fr) 260px;gap:17px}
+ .district-directory-reference .district-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .district-directory-reference .district-filters{gap:7px}
+ .district-directory-reference .district-select{flex:1 1 125px}
+}
+@media(max-width:740px){
+ .district-directory-reference .district-layout{grid-template-columns:1fr}
+ .district-directory-reference .district-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+ .district-directory-reference .district-school-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+ .district-directory-reference{padding-bottom:30px}
+ .district-directory-reference .district-wrap{padding:0 16px}
+ .district-directory-reference .district-head{padding:17px 0 20px}
+ .district-directory-reference .district-crumbs{font-size:9.5px;margin-bottom:12px}
+ .district-directory-reference .district-head h1{font-size:29px}
+ .district-directory-reference .district-intro{font-size:11px;line-height:1.7}
+ .district-directory-reference .district-stats{gap:8px;margin-top:16px}
+ .district-directory-reference .district-stats>div{padding:10px}
+ .district-directory-reference .district-stats b{font-size:19px}
+ .district-directory-reference .district-stats span{font-size:9px}
+ .district-directory-reference .district-areas{margin-top:16px}
+ .district-directory-reference .district-main{padding-top:18px}
+ .district-directory-reference .district-filters{display:grid;grid-template-columns:1fr 1fr}
+ .district-directory-reference .district-search{grid-column:1/-1;height:42px}
+ .district-directory-reference .district-select{min-width:0}
+ .district-directory-reference .district-select select{height:39px;font-size:10px}
+ .district-directory-reference .district-filters>.district-btn{height:39px}
+ .district-directory-reference .district-filter-bottom{margin:9px 0 14px}
+ .district-directory-reference .district-toolbar{align-items:flex-start;flex-direction:column;gap:8px}
+ .district-directory-reference .district-toolbar strong{font-size:17px}
+ .district-directory-reference .district-sort{width:100%;justify-content:space-between}
+ .district-directory-reference .district-sort select{min-width:150px}
+ .district-directory-reference .district-school-grid{grid-template-columns:1fr;gap:12px}
+ .district-directory-reference .district-school-cover{height:165px}
+ .district-directory-reference .district-school-body{padding:13px}
+ .district-directory-reference .district-school-footer{padding:10px 13px}
+ .district-directory-reference .district-sidebar{grid-template-columns:1fr}
+ .district-directory-reference .district-faq{margin-top:29px}
+ .district-directory-reference .district-section-heading h2{font-size:21px}
+ .district-directory-reference .district-rtab{top:38%;padding:13px 7px;font-size:9px}
+ .district-directory-reference .district-empty{padding:32px 17px}
+}
+@media(prefers-reduced-motion:reduce){.district-directory-reference *{transition:none!important;scroll-behavior:auto!important}}
