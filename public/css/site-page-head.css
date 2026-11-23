@@ -1,0 +1,81 @@
+/* Shared page-heading treatment for public directory and discovery pages. */
+.site-page-head {
+    color: #fff;
+    background: var(--brand, #0C5A49);
+}
+.site-page-head__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 728px);
+    align-items: center;
+    gap: 32px;
+    padding-top: 32px;
+    padding-bottom: 32px;
+}
+.site-page-head__copy { min-width: 0; }
+.site-page-head__breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+    margin: 0 0 11px;
+    color: rgba(255,255,255,.82);
+    font-size: 12px;
+    line-height: 1.5;
+}
+.site-page-head__breadcrumbs a {
+    color: rgba(255,255,255,.82);
+    text-decoration: none;
+}
+.site-page-head__breadcrumbs a:hover { color: #fff; text-decoration: underline; }
+.site-page-head__separator { color: rgba(255,255,255,.62); }
+.site-page-head__eyebrow {
+    margin: 0 0 7px;
+    color: var(--gold, #f0b030);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .11em;
+    line-height: 1.5;
+    text-transform: uppercase;
+}
+.site-page-head__copy h1 {
+    margin: 0 0 9px;
+    color: #fff;
+    font: 700 clamp(29px, 3vw, 38px)/1.14 var(--display-font, 'Playfair Display', Georgia, serif);
+    letter-spacing: -.02em;
+}
+.site-page-head__copy h1 em { color: var(--gold, #f0b030); font-style: normal; }
+.site-page-head__description,
+.site-page-head__description p {
+    max-width: 660px;
+    margin: 0;
+    color: rgba(255,255,255,.89);
+    font-size: 13.5px;
+    line-height: 1.65;
+}
+.site-page-head__description strong,
+.site-page-head__description b { color: #fff; }
+.site-page-head__ad { width: 100%; min-width: 0; }
+.site-page-head__ad .site-ad-slot { width: 100%; }
+.site-page-head__copy > :last-child { margin-bottom: 0; }
+
+@media (max-width: 1000px) {
+    .site-page-head__inner {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
+        padding-top: 27px;
+        padding-bottom: 27px;
+    }
+    .site-page-head__ad { max-width: 728px; }
+}
+@media (max-width: 640px) {
+    .site-page-head__inner {
+        gap: 14px;
+        padding-top: 22px;
+        padding-bottom: 23px;
+    }
+    .site-page-head__breadcrumbs { margin-bottom: 8px; font-size: 11px; }
+    .site-page-head__eyebrow { font-size: 9px; }
+    .site-page-head__copy h1 { font-size: clamp(27px, 8vw, 32px); }
+    .site-page-head__description,
+    .site-page-head__description p { font-size: 12.5px; }
+}
