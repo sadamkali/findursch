@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\PersonalAccessToken;
 
-$dashboardUrl = static fn (): string => rtrim((string) config('services.dashboard.url', 'https://account.riotinvestments.space'), '/');
+$dashboardUrl = static fn (): string => rtrim((string) config('services.dashboard.url', 'https://admin.riotinvestments.space'), '/');
 
 // =============== PUBLIC WEBSITE ===============
 Route::get('/', HomePage::class)->name('home');
