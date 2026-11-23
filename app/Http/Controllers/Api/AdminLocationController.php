@@ -8,7 +8,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 
 class AdminLocationController extends Controller
 {
@@ -380,310 +379,290 @@ class AdminLocationController extends Controller
     public function import(Request $request): JsonResponse
     {
         $this->authorizeManage($request);
+
         $data = $request->validate([
             'items' => ['required', 'array', 'min:1', 'max:2000'],
-            'items.*.region' => ['required', 'string', 'min:2', 'max:120'],
-            'items.*.district' => ['required', 'string', 'min:2', 'max:120'],
-            'items.*.town' => ['nullable', 'string', 'max:120'],
-        ]);
-
-        $counts = [
-            'regions_created' => 0, 'districts_created' => 0, 'towns_created' => 0,
-            'regions_existing' => 0, 'districts_existing' => 0, 'towns_existing' => 0,
-        ];
-
-        DB::transaction(function () use ($data, &$counts) {
-            $items = collect($data['items'])->map(fn (array $item) => [
-                'region' => $this->cleanName($item['region']),
-                'district' => $this->cleanName($item['district']),
-                'town' => $this->cleanName((string) ($item['town'] ?? '')),
-            ])->all();
-
-            $makeSlug = static function (string $name, array &$usedSlugs): string {
-                $base = Str::slug($name);
-                $base = $base !== '' ? $base : 'location';
-                $candidate = $base;
-                $suffix = 2;
-
-                while (isset($usedSlugs[$candidate])) {
-                    $candidate = $base.'-'.$suffix++;
-                }
-
-                $usedSlugs[$candidate] = true;
-
-                return $candidate;
-            };
-
-            $insertInChunks = static function (string $table, array $rows): void {
-                foreach (array_chunk($rows, 500) as $chunk) {
-                    DB::table($table)->insert($chunk);
-                }
-            };
-
-            /*
-             * Resolve and insert regions in batches. The map is updated as soon
-             * as a new name is queued so repeated rows count as existing without
-             * creating duplicate records.
-             */
-            $regions = DB::table('regions')->get(['id', 'name', 'slug']);
-            $regionIdsByName = [];
-            $usedRegionSlugs = [];
-
-            foreach ($regions as $region) {
-                $key = $this->normalized($region->name);
-                if (! array_key_exists($key, $regionIdsByName)) {
-                    $regionIdsByName[$key] = (int) $region->id;
-                }
-                $usedRegionSlugs[$region->slug] = true;
-            }
-
-            $newRegions = [];
-            foreach ($items as $item) {
-                $key = $this->normalized($item['region']);
-                if (array_key_exists($key, $regionIdsByName)) {
-                    $counts['regions_existing']++;
-                    continue;
-                }
-
-                $regionIdsByName[$key] = null;
-                $newRegions[] = [
-                    'name' => $item['region'],
-                    'slug' => $makeSlug($item['region'], $usedRegionSlugs),
-                    'is_active' => true,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-                $counts['regions_created']++;
-            }
-
-            if ($newRegions !== []) {
-                $insertInChunks('regions', $newRegions);
-                $regions = DB::table('regions')->get(['id', 'name', 'slug']);
-                $regionIdsByName = [];
-                foreach ($regions as $region) {
-                    $key = $this->normalized($region->name);
-                    if (! array_key_exists($key, $regionIdsByName)) {
-                        $regionIdsByName[$key] = (int) $region->id;
-                    }
-                }
-            }
-
-            $regionIds = array_values(array_unique(array_map(
-                fn (array $item) => $regionIdsByName[$this->normalized($item['region'])],
-                $items
-            )));
-
-            /*
-             * Resolve districts using their parent region, then insert only the
-             * missing combinations. Slugs remain unique across the whole table.
-             */
-            $districts = DB::table('districts')
-                ->whereIn('region_id', $regionIds)
-                ->get(['id', 'region_id', 'name', 'slug']);
-            $districtIdsByKey = [];
-            // Slugs are unique across the full districts table, not only this import's regions.
-            $usedDistrictSlugs = array_fill_keys(DB::table('districts')->pluck('slug')->all(), true);
-
-            foreach ($districts as $district) {
-                $key = (int) $district->region_id.'|'.$this->normalized($district->name);
-                if (! array_key_exists($key, $districtIdsByKey)) {
-                    $districtIdsByKey[$key] = (int) $district->id;
-                }
-                $usedDistrictSlugs[$district->slug] = true;
-            }
-
-            $newDistricts = [];
-            foreach ($items as $item) {
-                $regionId = $regionIdsByName[$this->normalized($item['region'])];
-                $key = $regionId.'|'.$this->normalized($item['district']);
-
-                if (array_key_exists($key, $districtIdsByKey)) {
-                    $counts['districts_existing']++;
-                    continue;
-                }
-
-                $districtIdsByKey[$key] = null;
-                $newDistricts[] = [
-                    'region_id' => $regionId,
-                    'name' => $item['district'],
-                    'slug' => $makeSlug($item['district'], $usedDistrictSlugs),
-                    'school_count' => 0,
-                    'is_featured' => false,
-                    'is_active' => true,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-                $counts['districts_created']++;
-            }
-
-            if ($newDistricts !== []) {
-                $insertInChunks('districts', $newDistricts);
-                $districts = DB::table('districts')
-                    ->whereIn('region_id', $regionIds)
-                    ->get(['id', 'region_id', 'name', 'slug']);
-                $districtIdsByKey = [];
-                foreach ($districts as $district) {
-                    $key = (int) $district->region_id.'|'.$this->normalized($district->name);
-                    if (! array_key_exists($key, $districtIdsByKey)) {
-                        $districtIdsByKey[$key] = (int) $district->id;
-                    }
-                }
-            }
-
-            $districtIds = array_values(array_unique(array_map(
-                fn (array $item) => $districtIdsByKey[
-                    $regionIdsByName[$this->normalized($item['region'])].'|'.$this->normalized($item['district'])
-                ],
-                $items
-            )));
-
-            /*
-             * Towns and areas are optional. Resolve them by district and insert
-             * missing names in batches, keeping existing school assignments intact.
-             */
-            $towns = DB::table('sub_counties')
-                ->whereIn('district_id', $districtIds)
-                ->get(['id', 'district_id', 'name', 'slug']);
-            $townExistsByKey = [];
-            // Slugs are unique across the full towns table, not only this import's districts.
-            $usedTownSlugs = array_fill_keys(DB::table('sub_counties')->pluck('slug')->all(), true);
-
-            foreach ($towns as $town) {
-                $key = (int) $town->district_id.'|'.$this->normalized($town->name);
-                $townExistsByKey[$key] = true;
-                $usedTownSlugs[$town->slug] = true;
-            }
-
-            $newTowns = [];
-            foreach ($items as $item) {
-                if ($item['town'] === '') {
-                    continue;
-                }
-
-                $districtKey = $regionIdsByName[$this->normalized($item['region'])]
-                    .'|'.$this->normalized($item['district']);
-                $districtId = $districtIdsByKey[$districtKey];
-                $key = $districtId.'|'.$this->normalized($item['town']);
-
-                if (isset($townExistsByKey[$key])) {
-                    $counts['towns_existing']++;
-                    continue;
-                }
-
-                $townExistsByKey[$key] = true;
-                $newTowns[] = [
-                    'district_id' => $districtId,
-                    'name' => $item['town'],
-                    'slug' => $makeSlug($item['town'], $usedTownSlugs),
-                    'is_active' => true,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-                $counts['towns_created']++;
-            }
-
-            if ($newTowns !== []) {
-                $insertInChunks('sub_counties', $newTowns);
-            }
-        });
-
-        return response()->json([
-            'message' => 'Location import completed.',
-            'data' => $counts,
-        ]);
-    }
-
-    public function importSchoolLocations(Request $request): JsonResponse
-    {
-        $this->authorizeManage($request);
-        $data = $request->validate([
-            'items' => ['required', 'array', 'min:1', 'max:2000'],
-            'items.*.school_name' => ['required', 'string', 'min:2', 'max:255'],
+            'items.*.region' => ['nullable', 'string', 'max:120'],
             'items.*.district' => ['required', 'string', 'min:2', 'max:120'],
             'items.*.county' => ['required', 'string', 'min:2', 'max:120'],
             'items.*.subcounty' => ['required', 'string', 'min:2', 'max:120'],
             'items.*.parish' => ['nullable', 'string', 'max:120'],
         ]);
 
+        /*
+         * Region and District are lookup parents only. This import never creates
+         * or changes either level, and it never writes to the schools table.
+         * Rows that cannot be matched to one existing District are skipped.
+         */
         $resolved = [];
-        $errors = [];
+        $skippedRows = [];
+
         foreach ($data['items'] as $index => $item) {
-            $districts = DB::table('districts')
-                ->whereRaw('LOWER(TRIM(name)) = ?', [$this->normalized($item['district'])])
-                ->get(['id', 'name']);
+            $region = $this->cleanName((string) ($item['region'] ?? ''));
+            $districtName = $this->cleanName($item['district']);
+            $countyName = $this->cleanName($item['county']);
+            $subCountyName = $this->cleanName($item['subcounty']);
+            $parishName = $this->cleanName((string) ($item['parish'] ?? ''));
+
+            $districtQuery = DB::table('districts as d')
+                ->join('regions as r', 'r.id', '=', 'd.region_id')
+                ->whereRaw('LOWER(TRIM(d.name)) = ?', [$this->normalized($districtName)]);
+
+            if ($region !== '') {
+                $districtQuery->whereRaw('LOWER(TRIM(r.name)) = ?', [$this->normalized($region)]);
+            }
+
+            $districts = $districtQuery->get([
+                'd.id',
+                'd.name',
+                'r.name as region_name',
+            ]);
+
             if ($districts->count() !== 1) {
-                $errors[] = 'Row '.($index + 2).': district "'.$item['district'].'" '.($districts->isEmpty() ? 'does not exist.' : 'is ambiguous across regions.');
+                $scope = $region !== '' ? ' in region "'.$region.'"' : '';
+                $reason = $districts->isEmpty()
+                    ? 'does not match an existing District'
+                    : 'matches more than one District';
+                $skippedRows[] = 'Row '.($index + 2).': District "'.$districtName.'"'.$scope.' '.$reason.'.';
                 continue;
             }
+
             $district = $districts->first();
-            $school = DB::table('schools')->where('district_id', $district->id)
-                ->whereRaw('LOWER(TRIM(name)) = ?', [$this->normalized($item['school_name'])])
-                ->first(['id']);
-            if (! $school) {
-                $errors[] = 'Row '.($index + 2).': school "'.$item['school_name'].'" was not found in '.$district->name.'.';
-                continue;
-            }
             $resolved[] = [
-                'school_id' => (int) $school->id, 'district_id' => (int) $district->id,
-                'county' => $this->cleanName($item['county']),
-                'subcounty' => $this->cleanName($item['subcounty']),
-                'parish' => $this->cleanName((string) ($item['parish'] ?? '')),
+                'district_id' => (int) $district->id,
+                'county' => $countyName,
+                'subcounty' => $subCountyName,
+                'parish' => $parishName,
             ];
         }
-        if ($errors !== []) throw ValidationException::withMessages(['file' => $errors]);
 
-        $counts = ['schools_updated' => 0, 'counties_created' => 0, 'sub_counties_created' => 0, 'parishes_created' => 0];
-        DB::transaction(function () use ($resolved, &$counts) {
-            foreach ($resolved as $item) {
-                $county = DB::table('counties')->where('district_id', $item['district_id'])
-                    ->whereRaw('LOWER(TRIM(name)) = ?', [$this->normalized($item['county'])])->first();
-                if (! $county) {
-                    $id = DB::table('counties')->insertGetId([
-                        'district_id' => $item['district_id'], 'name' => $item['county'],
-                        'slug' => $this->slugFor('counties', $item['county']),
-                        'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
-                    ]);
-                    $county = DB::table('counties')->where('id', $id)->first();
-                    $counts['counties_created']++;
+        $counts = [
+            'rows_received' => count($data['items']),
+            'rows_processed' => count($resolved),
+            'rows_skipped' => count($skippedRows),
+            'counties_created' => 0,
+            'counties_matched' => 0,
+            'sub_counties_created' => 0,
+            'sub_counties_matched' => 0,
+            'parishes_created' => 0,
+            'parishes_matched' => 0,
+            'skipped_rows' => array_slice($skippedRows, 0, 30),
+        ];
+
+        if ($resolved !== []) {
+            DB::transaction(function () use ($resolved, &$counts) {
+                $districtIds = array_values(array_unique(array_column($resolved, 'district_id')));
+
+                $makeSlug = static function (string $name, array &$usedSlugs): string {
+                    $base = Str::slug($name);
+                    $base = $base !== '' ? $base : 'location';
+                    $candidate = $base;
+                    $suffix = 2;
+
+                    while (isset($usedSlugs[$candidate])) {
+                        $candidate = $base.'-'.$suffix++;
+                    }
+
+                    $usedSlugs[$candidate] = true;
+
+                    return $candidate;
+                };
+
+                $insertInChunks = static function (string $table, array $rows): void {
+                    foreach (array_chunk($rows, 500) as $chunk) {
+                        DB::table($table)->insert($chunk);
+                    }
+                };
+
+                // Match County records within each District and insert only missing combinations.
+                $countyIdsByKey = [];
+                foreach (DB::table('counties')->whereIn('district_id', $districtIds)->get(['id', 'district_id', 'name']) as $county) {
+                    $key = (int) $county->district_id.'|'.$this->normalized($county->name);
+                    if (! array_key_exists($key, $countyIdsByKey)) {
+                        $countyIdsByKey[$key] = (int) $county->id;
+                    }
                 }
 
-                $sub = DB::table('sub_counties')->where('district_id', $item['district_id'])
-                    ->whereRaw('LOWER(TRIM(name)) = ?', [$this->normalized($item['subcounty'])])
-                    ->where(fn ($q) => $q->whereNull('county_id')->orWhere('county_id', $county->id))->first();
-                if (! $sub) {
-                    $id = DB::table('sub_counties')->insertGetId([
-                        'district_id' => $item['district_id'], 'county_id' => $county->id,
-                        'name' => $item['subcounty'], 'slug' => $this->slugFor('sub_counties', $item['subcounty']),
-                        'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
-                    ]);
-                    $sub = DB::table('sub_counties')->where('id', $id)->first();
-                    $counts['sub_counties_created']++;
-                } elseif (! $sub->county_id) {
-                    DB::table('sub_counties')->where('id', $sub->id)->update(['county_id' => $county->id, 'updated_at' => now()]);
+                $usedCountySlugs = array_fill_keys(DB::table('counties')->pluck('slug')->all(), true);
+                $newCountyRows = [];
+                foreach ($resolved as $item) {
+                    $key = $item['district_id'].'|'.$this->normalized($item['county']);
+                    if (array_key_exists($key, $countyIdsByKey) || array_key_exists($key, $newCountyRows)) {
+                        continue;
+                    }
+
+                    $newCountyRows[$key] = [
+                        'district_id' => $item['district_id'],
+                        'name' => $item['county'],
+                        'slug' => $makeSlug($item['county'], $usedCountySlugs),
+                        'is_active' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
                 }
 
-                $parishId = null;
-                if ($item['parish'] !== '') {
-                    $parish = DB::table('parishes')->where('sub_county_id', $sub->id)
-                        ->whereRaw('LOWER(TRIM(name)) = ?', [$this->normalized($item['parish'])])->first();
-                    if (! $parish) {
-                        $parishId = DB::table('parishes')->insertGetId([
-                            'sub_county_id' => $sub->id, 'name' => $item['parish'],
-                            'slug' => $this->slugFor('parishes', $item['parish']),
-                            'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
+                if ($newCountyRows !== []) {
+                    $insertInChunks('counties', array_values($newCountyRows));
+                    foreach (DB::table('counties')->whereIn('district_id', $districtIds)->get(['id', 'district_id', 'name']) as $county) {
+                        $key = (int) $county->district_id.'|'.$this->normalized($county->name);
+                        if (! array_key_exists($key, $countyIdsByKey)) {
+                            $countyIdsByKey[$key] = (int) $county->id;
+                        }
+                    }
+                }
+
+                $requestedCountyKeys = [];
+                foreach ($resolved as $item) {
+                    $requestedCountyKeys[$item['district_id'].'|'.$this->normalized($item['county'])] = true;
+                }
+                $counts['counties_created'] = count($newCountyRows);
+                $counts['counties_matched'] = max(0, count($requestedCountyKeys) - count($newCountyRows));
+
+                // Match Subcounties by District + County, reusing a legacy unassigned
+                // Subcounty only when its name maps to one County in this import.
+                $subCountyIdsByKey = [];
+                $unassignedSubCountyIdsByName = [];
+                foreach (DB::table('sub_counties')->whereIn('district_id', $districtIds)->get(['id', 'district_id', 'county_id', 'name']) as $subCounty) {
+                    $districtNameKey = (int) $subCounty->district_id.'|'.$this->normalized($subCounty->name);
+                    if ($subCounty->county_id === null) {
+                        $unassignedSubCountyIdsByName[$districtNameKey][] = (int) $subCounty->id;
+                        continue;
+                    }
+
+                    $key = (int) $subCounty->district_id.'|'.(int) $subCounty->county_id.'|'.$this->normalized($subCounty->name);
+                    if (! array_key_exists($key, $subCountyIdsByKey)) {
+                        $subCountyIdsByKey[$key] = (int) $subCounty->id;
+                    }
+                }
+
+                $targetCountiesBySubCountyName = [];
+                foreach ($resolved as $item) {
+                    $countyKey = $item['district_id'].'|'.$this->normalized($item['county']);
+                    $countyId = $countyIdsByKey[$countyKey];
+                    $nameKey = $item['district_id'].'|'.$this->normalized($item['subcounty']);
+                    $targetCountiesBySubCountyName[$nameKey][$countyId] = true;
+                }
+
+                $usedSubCountySlugs = array_fill_keys(DB::table('sub_counties')->pluck('slug')->all(), true);
+                $newSubCountyRows = [];
+                foreach ($resolved as $item) {
+                    $countyKey = $item['district_id'].'|'.$this->normalized($item['county']);
+                    $countyId = $countyIdsByKey[$countyKey];
+                    $name = $this->normalized($item['subcounty']);
+                    $key = $item['district_id'].'|'.$countyId.'|'.$name;
+
+                    if (array_key_exists($key, $subCountyIdsByKey) || array_key_exists($key, $newSubCountyRows)) {
+                        continue;
+                    }
+
+                    $legacyKey = $item['district_id'].'|'.$name;
+                    $legacyCandidates = $unassignedSubCountyIdsByName[$legacyKey] ?? [];
+                    $targetCounties = array_keys($targetCountiesBySubCountyName[$legacyKey] ?? []);
+
+                    if (count($legacyCandidates) === 1 && count($targetCounties) === 1) {
+                        $legacyId = $legacyCandidates[0];
+                        DB::table('sub_counties')->where('id', $legacyId)->whereNull('county_id')->update([
+                            'county_id' => $countyId,
+                            'updated_at' => now(),
                         ]);
-                        $counts['parishes_created']++;
-                    } else $parishId = (int) $parish->id;
+                        $subCountyIdsByKey[$key] = $legacyId;
+                        unset($unassignedSubCountyIdsByName[$legacyKey]);
+                        continue;
+                    }
+
+                    $newSubCountyRows[$key] = [
+                        'district_id' => $item['district_id'],
+                        'county_id' => $countyId,
+                        'name' => $this->cleanName($item['subcounty']),
+                        'slug' => $makeSlug($item['subcounty'], $usedSubCountySlugs),
+                        'is_active' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
                 }
 
-                DB::table('schools')->where('id', $item['school_id'])->update([
-                    'county_id' => $county->id, 'sub_county_id' => $sub->id,
-                    'parish_id' => $parishId, 'town' => $sub->name, 'updated_at' => now(),
-                ]);
-                $counts['schools_updated']++;
-            }
-        });
-        return response()->json(['message' => $counts['schools_updated'].' school location record(s) updated.', 'data' => $counts]);
+                if ($newSubCountyRows !== []) {
+                    $insertInChunks('sub_counties', array_values($newSubCountyRows));
+                }
+
+                // Reload newly inserted Subcounty IDs for the Parish matching step.
+                $subCountyIdsByKey = [];
+                foreach (DB::table('sub_counties')->whereIn('district_id', $districtIds)->get(['id', 'district_id', 'county_id', 'name']) as $subCounty) {
+                    if ($subCounty->county_id === null) {
+                        continue;
+                    }
+                    $key = (int) $subCounty->district_id.'|'.(int) $subCounty->county_id.'|'.$this->normalized($subCounty->name);
+                    if (! array_key_exists($key, $subCountyIdsByKey)) {
+                        $subCountyIdsByKey[$key] = (int) $subCounty->id;
+                    }
+                }
+
+                $requestedSubCountyKeys = [];
+                foreach ($resolved as $item) {
+                    $countyKey = $item['district_id'].'|'.$this->normalized($item['county']);
+                    $key = $item['district_id'].'|'.$countyIdsByKey[$countyKey].'|'.$this->normalized($item['subcounty']);
+                    $requestedSubCountyKeys[$key] = true;
+                }
+                $counts['sub_counties_created'] = count($newSubCountyRows);
+                $counts['sub_counties_matched'] = max(0, count($requestedSubCountyKeys) - count($newSubCountyRows));
+
+                // Match Parish records within the resolved Subcounty.
+                $subCountyIds = array_values(array_unique(array_map(
+                    fn (array $item) => $subCountyIdsByKey[
+                        $item['district_id'].'|'.$countyIdsByKey[$item['district_id'].'|'.$this->normalized($item['county'])].'|'.$this->normalized($item['subcounty'])
+                    ],
+                    $resolved
+                )));
+
+                $parishIdsByKey = [];
+                foreach (DB::table('parishes')->whereIn('sub_county_id', $subCountyIds)->get(['id', 'sub_county_id', 'name']) as $parish) {
+                    $key = (int) $parish->sub_county_id.'|'.$this->normalized($parish->name);
+                    if (! array_key_exists($key, $parishIdsByKey)) {
+                        $parishIdsByKey[$key] = (int) $parish->id;
+                    }
+                }
+
+                $usedParishSlugs = array_fill_keys(DB::table('parishes')->pluck('slug')->all(), true);
+                $newParishRows = [];
+                $requestedParishKeys = [];
+                foreach ($resolved as $item) {
+                    if ($item['parish'] === '') {
+                        continue;
+                    }
+
+                    $countyKey = $item['district_id'].'|'.$this->normalized($item['county']);
+                    $subCountyKey = $item['district_id'].'|'.$countyIdsByKey[$countyKey].'|'.$this->normalized($item['subcounty']);
+                    $subCountyId = $subCountyIdsByKey[$subCountyKey];
+                    $key = $subCountyId.'|'.$this->normalized($item['parish']);
+                    $requestedParishKeys[$key] = true;
+
+                    if (array_key_exists($key, $parishIdsByKey) || array_key_exists($key, $newParishRows)) {
+                        continue;
+                    }
+
+                    $newParishRows[$key] = [
+                        'sub_county_id' => $subCountyId,
+                        'name' => $item['parish'],
+                        'slug' => $makeSlug($item['parish'], $usedParishSlugs),
+                        'is_active' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+
+                if ($newParishRows !== []) {
+                    $insertInChunks('parishes', array_values($newParishRows));
+                }
+
+                $counts['parishes_created'] = count($newParishRows);
+                $counts['parishes_matched'] = max(0, count($requestedParishKeys) - count($newParishRows));
+            });
+        }
+
+        return response()->json([
+            'message' => 'Location import completed.',
+            'data' => $counts,
+        ]);
     }
 
     public function reviewSuggestion(Request $request, int $suggestionId): JsonResponse
