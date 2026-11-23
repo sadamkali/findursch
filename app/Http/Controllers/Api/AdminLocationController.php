@@ -7,7 +7,10 @@ use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Str;
+use Throwable;
 
 class AdminLocationController extends Controller
 {
@@ -381,7 +384,9 @@ class AdminLocationController extends Controller
         $this->authorizeManage($request);
 
         $data = $request->validate([
-            'items' => ['required', 'array', 'min:1', 'max:15000'],
+            'items' => ['required', 'array', 'min:1', 'max:500'],
+            'batch_number' => ['nullable', 'integer', 'min:1'],
+            'batch_total' => ['nullable', 'integer', 'min:1'],
             'items.*.region' => ['nullable', 'string', 'max:120'],
             'items.*.district' => ['required', 'string', 'min:2', 'max:120'],
             'items.*.county' => ['required', 'string', 'min:2', 'max:120'],
@@ -455,7 +460,8 @@ class AdminLocationController extends Controller
         ];
 
         if ($resolved !== []) {
-            DB::transaction(function () use ($resolved, &$counts) {
+            try {
+                DB::transaction(function () use ($resolved, &$counts) {
                 $districtIds = array_values(array_unique(array_column($resolved, 'district_id')));
 
                 $makeSlug = static function (string $name, array &$usedSlugs): string {
@@ -661,12 +667,50 @@ class AdminLocationController extends Controller
 
                 $counts['parishes_created'] = count($newParishRows);
                 $counts['parishes_matched'] = max(0, count($requestedParishKeys) - count($newParishRows));
-            });
+                });
+            } catch (QueryException $exception) {
+                report($exception);
+                $sqlState = $exception->errorInfo[0] ?? null;
+                $batchNumber = $data['batch_number'] ?? null;
+                Log::error('Location import batch failed at the database layer.', [
+                    'batch_number' => $batchNumber,
+                    'batch_total' => $data['batch_total'] ?? null,
+                    'item_count' => count($data['items']),
+                    'sql_state' => $sqlState,
+                    'exception' => $exception->getMessage(),
+                ]);
+
+                $message = $sqlState === '23505'
+                    ? 'This batch encountered a duplicate location constraint. No changes from this batch were saved. Retry the batch so existing locations can be matched.'
+                    : 'The database could not save this batch. No changes from this batch were saved. Retry the failed batch; contact the administrator if it fails again.';
+
+                return response()->json([
+                    'message' => $message,
+                    'batch_number' => $batchNumber,
+                ], $sqlState === '23505' ? 409 : 500);
+            } catch (Throwable $exception) {
+                report($exception);
+                $batchNumber = $data['batch_number'] ?? null;
+                Log::error('Location import batch failed unexpectedly.', [
+                    'batch_number' => $batchNumber,
+                    'batch_total' => $data['batch_total'] ?? null,
+                    'item_count' => count($data['items']),
+                    'exception' => $exception->getMessage(),
+                ]);
+
+                return response()->json([
+                    'message' => 'The server could not save this batch. No changes from this batch were saved. Retry the failed batch; contact the administrator if it fails again.',
+                    'batch_number' => $batchNumber,
+                ], 500);
+            }
         }
 
         return response()->json([
-            'message' => 'Location import completed.',
-            'data' => $counts,
+            'message' => 'Location batch completed.',
+            'data' => array_merge($counts, [
+                'batch_number' => $data['batch_number'] ?? null,
+                'batch_total' => $data['batch_total'] ?? null,
+            ]),
         ]);
     }
 
