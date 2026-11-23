@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 use Spatie\Permission\Models\Role;
 
 class DashboardAuthController extends Controller
@@ -686,6 +687,89 @@ class DashboardAuthController extends Controller
         )->plainTextToken;
 
         return response()->json(['code' => $token]);
+    }
+
+    /**
+     * Create a short-lived one-time code that moves an authenticated dashboard
+     * user to the correct workspace host without sharing cookies across hosts.
+     */
+    public function createDashboardSessionHandoff(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $isAdmin = $user && (
+            $user->hasRole('admin') ||
+            $user->getAllPermissions()->contains(fn ($permission) => str_starts_with($permission->name, 'admin.'))
+        );
+        $isSchoolOwner = $user && $user->hasRole('school_owner');
+
+        if (! $user || $user->status !== 'active' || (! $isAdmin && ! $isSchoolOwner)) {
+            return response()->json(['message' => 'Only active school-owner or administrator accounts can open this workspace.'], 403);
+        }
+
+        $code = $user->createToken(
+            'findursch-dashboard-session-handoff',
+            ['dashboard-session-handoff'],
+            now()->addMinutes(2)
+        )->plainTextToken;
+
+        // Revoke the token that authenticated this broker request. The new
+        // workspace token is issued only after the one-time code is exchanged.
+        $request->user()?->currentAccessToken()?->delete();
+
+        return response()->json([
+            'code' => $code,
+            'workspace' => $isAdmin ? 'admin' : 'owner',
+        ]);
+    }
+
+    /**
+     * Exchange a one-time dashboard handoff code for a normal protected
+     * session token. Codes are single-use and expire after two minutes.
+     */
+    public function exchangeDashboardSession(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'code' => ['required', 'string', 'max:255'],
+        ]);
+
+        $handoff = PersonalAccessToken::findToken($data['code']);
+        abort_unless(
+            $handoff &&
+            $handoff->can('dashboard-session-handoff') &&
+            $handoff->expires_at &&
+            $handoff->expires_at->isFuture(),
+            403
+        );
+
+        $user = $handoff->tokenable;
+        abort_unless($user instanceof User && $user->status === 'active', 403);
+
+        $isAdmin = $user->hasRole('admin') || $user->getAllPermissions()->contains(
+            fn ($permission) => str_starts_with($permission->name, 'admin.')
+        );
+        $isSchoolOwner = $user->hasRole('school_owner');
+        abort_unless($isAdmin || $isSchoolOwner, 403);
+
+        $handoff->delete();
+
+        $timeout = max(30, (int) Setting::get('admin_session_timeout_minutes', 120));
+        $expiresAt = $isAdmin ? now()->addMinutes($timeout) : now()->addDays(30);
+        $token = $user->createToken('findursch-dashboard', ['*'], $expiresAt)->plainTextToken;
+
+        $roles = $user->getRoleNames();
+        $permissions = $user->getAllPermissions()->pluck('name')->values();
+
+        return response()->json([
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'roles' => $roles,
+                'permissions' => $permissions,
+            ],
+            'redirectTo' => $isAdmin ? '/admin' : '/owner',
+        ])->header('Cache-Control', 'no-store, private');
     }
 
     public function me(Request $request): JsonResponse
