@@ -8,7 +8,6 @@
 <div class="bg-gray-50 py-12">
     <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div class="prose prose-gray max-w-none">
-            <p>FindURSCH is Uganda's leading school discovery platform, helping parents find, compare, and connect with the best educational institutions for their children.</p>
             <p>Launched in 2024, FindURSCH was built on the belief that every parent deserves transparent, reliable information when making one of life's most important decisions: where to send their child to school.</p>
             <h2>Our Mission</h2>
             <p>To empower Ugandan parents with accurate, up-to-date information about schools across the country — from nurseries and primary schools to secondary schools, international institutions, and universities.</p>
