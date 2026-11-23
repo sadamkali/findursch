@@ -199,7 +199,7 @@
                     <div class="r">
                         <button type="button" class="fbtn"
                             @click="filtersOpen = !filtersOpen; if (filtersOpen) $nextTick(() => $refs.schoolFilters.scrollIntoView({ behavior: 'smooth', block: 'start' }))"
-                            :aria-expanded="filtersOpen.toString()" aria-controls="school-filters">Filters</button>
+                            :aria-expanded="filtersOpen.toString()" aria-controls="school-filters">More filters</button>
                         <label class="sort-label"><span>Sort:</span>
                             <select wire:model.live="sort" aria-label="Sort schools">
                                 <option value="newest">Newest first</option>
