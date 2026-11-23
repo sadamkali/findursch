@@ -101,14 +101,24 @@ Route::get('/login', function (Request $request) use ($accountDashboardUrl) {
     $path = parse_url($intended, PHP_URL_PATH) ?: '/account';
 
     if (! str_starts_with($path, '/') || str_starts_with($path, '//') ||
-        preg_match('#^/(login|register|auth/dashboard-callback)(/|$)#', $path)) {
+        preg_match('#^/(login|register|auth/dashboard-callback|auth/dashboard-login)(/|$)#', $path)) {
         $path = '/account';
+    }
+
+    $dashboardIdentity = $request->session()->get('dashboard_identity');
+    if (is_array($dashboardIdentity) && in_array($dashboardIdentity['role'] ?? null, ['admin', 'school_owner'], true)) {
+        return redirect()->route('auth.dashboard-login', ['returnTo' => $path]);
     }
 
     return redirect()->away($accountDashboardUrl().'/login?returnTo='.rawurlencode($path));
 })->name('login');
 
-Route::get('/register', function () use ($accountDashboardUrl) {
+Route::get('/register', function (Request $request) use ($accountDashboardUrl) {
+    $dashboardIdentity = $request->session()->get('dashboard_identity');
+    if (is_array($dashboardIdentity) && in_array($dashboardIdentity['role'] ?? null, ['admin', 'school_owner'], true)) {
+        return redirect()->route('auth.dashboard-login');
+    }
+
     return redirect()->away($accountDashboardUrl().'/register?type=school_owner&returnTo=%2Faccount');
 })->name('register');
 
