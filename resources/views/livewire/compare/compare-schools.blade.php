@@ -1,10 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<x-site-page-head :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Compare schools']]">
-    <x-slot:title>Compare Schools</x-slot:title>
-    <x-slot:description>Side-by-side comparison of up to 3 schools</x-slot:description>
-</x-site-page-head>
+<div class="py-8" style="background-color:var(--brand);">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h1 class="text-4xl font-normal mb-4" style="font-family: 'DM Serif Display', serif; color:#fff;">Compare Schools</h1>
+        <p style="color:rgba(255,255,255,.88)">Side-by-side comparison of up to 3 schools</p>
+    </div>
+</div>
 
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
     @if($schools->count() === 0)
