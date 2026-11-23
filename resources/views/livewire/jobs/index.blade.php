@@ -1,10 +1,17 @@
 <div class="findursch-jobs">
     <a class="rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
-    <x-site-page-head :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Jobs']]" eyebrow="FindURSCH career board">
-        <x-slot:title>All <em>Education Jobs</em> in Uganda</x-slot:title>
-        <x-slot:description>Browse teaching, school administration, university, NGO and education support vacancies in one place. Search current opportunities and check application deadlines directly with the employer.</x-slot:description>
+    <x-site-ad-banner placement="top" />
+
+    <div class="wrap crumbs">
+        <a href="{{ route('home') }}">Home</a><span aria-hidden="true">/</span><b>Jobs</b>
+    </div>
+
+    <section class="phead">
+        <p class="jobs-eyebrow">FINDURSCH CAREER BOARD</p>
+        <h1>All <em>Education Jobs</em> in Uganda</h1>
+        <p>Browse teaching, school administration, university, NGO and education support vacancies in one place. Search current opportunities and check application deadlines directly with the employer.</p>
         <div class="jobs-hero-count"><span class="jobs-dot"></span>{{ number_format($totalOpenJobs) }} {{ \Illuminate\Support\Str::plural('open opportunity', $totalOpenJobs) }}</div>
-    </x-site-page-head>
+    </section>
 
     <main class="wrap jobs-main">
         <div class="pills" role="tablist" aria-label="Job categories">
