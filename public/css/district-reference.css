@@ -179,8 +179,3 @@
  .district-directory-reference .district-empty{padding:32px 17px}
 }
 @media(prefers-reduced-motion:reduce){.district-directory-reference *{transition:none!important;scroll-behavior:auto!important}}
-
-/* District summary content now sits in the shared green page-heading section. */
-.district-directory-reference .site-page-head__footer .district-stats { margin-top: 0; }
-.district-directory-reference .site-page-head__footer .district-area-label { color: rgba(255,255,255,.82); }
-.district-directory-reference .site-page-head__footer .district-no-areas { color: rgba(255,255,255,.78); }
