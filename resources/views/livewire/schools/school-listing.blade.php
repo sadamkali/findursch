@@ -17,29 +17,58 @@
     <section class="sband">
         <div class="wrap">
             <form class="sform" wire:submit="applyFilters">
-                <input type="search" wire:model.live.debounce.350ms="search" placeholder="Search school name" aria-label="Search school name">
-                <select wire:model.live="district" aria-label="District">
-                    <option value="">All districts</option>
-                    @foreach($allDistricts as $districtOption)
-                        <option value="{{ $districtOption->id }}">{{ $districtOption->name }}</option>
-                    @endforeach
-                </select>
-                <select wire:model.live="region" aria-label="Region">
-                    <option value="">All regions</option>
-                    @foreach($regions as $regionOption)
-                        <option value="{{ $regionOption->id }}">{{ $regionOption->name }}</option>
-                    @endforeach
-                </select>
-                <select wire:model.live="curriculum" aria-label="Curriculum">
-                    <option value="">All curricula</option>
-                    @foreach($curricula as $curriculumOption)
-                        <option value="{{ $curriculumOption->id }}">{{ $curriculumOption->name }}</option>
-                    @endforeach
-                </select>
-                <button class="go" type="submit" wire:loading.attr="disabled" wire:target="applyFilters">
-                    <span wire:loading.remove wire:target="applyFilters">Search</span>
-                    <span wire:loading wire:target="applyFilters">Searching…</span>
-                </button>
+                <div class="sform__main">
+                    <div class="sform__intro">
+                        <span>FINDURSCH SCHOOL FINDER</span>
+                        <strong>Find your school</strong>
+                        <small>Search by school name, district or keyword.</small>
+                    </div>
+                    <label class="sform__query">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <circle cx="10.8" cy="10.8" r="6.8"></circle>
+                            <path d="m16 16 4.5 4.5"></path>
+                        </svg>
+                        <span class="sr-only">Search schools</span>
+                        <input type="search" wire:model.live.debounce.350ms="search" placeholder="Try a school name, district or keyword…" aria-label="Search schools">
+                        <button class="go" type="submit" wire:loading.attr="disabled" wire:target="applyFilters">
+                            <span wire:loading.remove wire:target="applyFilters">Search schools</span>
+                            <span wire:loading wire:target="applyFilters">Searching…</span>
+                        </button>
+                    </label>
+                </div>
+                <div class="sform__filters">
+                    <span class="sform__filter-heading">Refine your search</span>
+                    <label class="sform__select">
+                        <span class="sr-only">District</span>
+                        <select wire:model.live="district" aria-label="Filter by district">
+                            <option value="">All districts</option>
+                            @foreach($allDistricts as $districtOption)
+                                <option value="{{ $districtOption->id }}">{{ $districtOption->name }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="sform__select">
+                        <span class="sr-only">Region</span>
+                        <select wire:model.live="region" aria-label="Filter by region">
+                            <option value="">All regions</option>
+                            @foreach($regions as $regionOption)
+                                <option value="{{ $regionOption->id }}">{{ $regionOption->name }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="sform__select">
+                        <span class="sr-only">Curriculum</span>
+                        <select wire:model.live="curriculum" aria-label="Filter by curriculum">
+                            <option value="">All curricula</option>
+                            @foreach($curricula as $curriculumOption)
+                                <option value="{{ $curriculumOption->id }}">{{ $curriculumOption->name }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    @if($search !== '' || $district !== '' || $region !== '' || $type !== '' || $curriculum !== '' || $boarding !== '' || $verified_only || $feeFilterEnabled)
+                        <button type="button" class="sform__clear" wire:click="resetFilters">Clear all filters</button>
+                    @endif
+                </div>
             </form>
         </div>
     </section>
