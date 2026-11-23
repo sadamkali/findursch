@@ -73,6 +73,7 @@
     <link rel="stylesheet" href="{{ asset('css/events-listing-reference.css') }}?v=2">
     <link rel="stylesheet" href="{{ asset('css/schools-reference.css') }}?v=7">
     <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=3">
+    @if (request()->routeIs('jobs.*'))<link rel="stylesheet" href="{{ asset('css/jobs-reference.css') }}?v=1">@endif
     @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=6">@endif
     @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}?v=3">@endif
     @if (request()->routeIs('scholarships.*'))<link rel="stylesheet" href="{{ asset('css/scholarships-reference.css') }}?v=5">@endif
@@ -123,6 +124,9 @@
         ];
         $navigationItems = is_array($savedNavigation) ? $savedNavigation : $navigationFallback;
         if ($navigationItems === []) $navigationItems = $navigationFallback;
+        if (! collect($navigationItems)->contains(fn ($item) => is_array($item) && ($item['href'] ?? null) === '/jobs')) {
+            $navigationItems[] = ['label' => 'Jobs', 'href' => '/jobs', 'enabled' => true];
+        }
         $currentPath = '/'.trim(request()->path(), '/');
         $primaryNavigation = collect($navigationItems)
             ->filter(fn ($item) => is_array($item)

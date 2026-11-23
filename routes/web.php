@@ -87,6 +87,8 @@ Route::get('/news/{article:slug}', ArticleShow::class)->name('news.show');
 Route::get('/school-news/{post}', SchoolPostShow::class)->name('school-news.show');
 Route::get('/events', EventListing::class)->name('events.index');
 Route::get('/events/{post}', EventShow::class)->name('events.show');
+Route::get('/jobs', JobIndex::class)->name('jobs.index');
+Route::get('/jobs/{job:slug}', JobShow::class)->name('jobs.show');
 Route::get('/scholarships', ScholarshipListing::class)->name('scholarships.index');
 Route::get('/scholarships/{post}', ScholarshipShow::class)->name('scholarships.show');
 

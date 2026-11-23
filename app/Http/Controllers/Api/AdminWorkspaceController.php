@@ -61,7 +61,7 @@ class AdminWorkspaceController extends Controller
             'owners', 'parents' => 'admin.users.view',
             'enquiries', 'contacts' => 'admin.enquiries.view',
             'reviews' => 'admin.reviews.moderate',
-            'articles', 'article-categories' => 'admin.content.publish',
+            'articles', 'article-categories', 'jobs' => 'admin.content.publish',
             'events' => 'admin.content.events',
             'scholarships' => 'admin.content.scholarships',
             'school-news' => 'admin.content.approve',
@@ -213,6 +213,21 @@ class AdminWorkspaceController extends Controller
                 $query = Review::query()->with(['school:id,name', 'user:id,name,email'])->orderByDesc('created_at');
                 if ($status) $query->where('status', $status);
                 $items = $query->limit(100)->get();
+                break;
+
+            case 'jobs':
+                $jobQuery = JobListing::query()->orderByDesc('created_at');
+                if ($status) {
+                    $jobQuery->where('status', $status);
+                }
+                if ($search !== '') {
+                    $jobQuery->where(function ($builder) use ($search) {
+                        $builder->where('title', 'ilike', '%'.$search.'%')
+                            ->orWhere('employer', 'ilike', '%'.$search.'%')
+                            ->orWhere('location', 'ilike', '%'.$search.'%');
+                    });
+                }
+                $items = $jobQuery->limit(100)->get();
                 break;
 
             case 'articles':
@@ -1043,7 +1058,7 @@ class AdminWorkspaceController extends Controller
                 'owners', 'parents' => 'admin.users.manage',
                 'enquiries' => 'admin.enquiries.reply',
                 'reviews' => 'admin.reviews.moderate',
-                'articles' => 'admin.content.publish',
+                'articles', 'jobs' => 'admin.content.publish',
                 'events' => 'admin.content.events',
                 'scholarships' => 'admin.content.scholarships',
                 'school-news' => 'admin.content.approve',
@@ -1192,6 +1207,39 @@ class AdminWorkspaceController extends Controller
                 ])->save();
                 $review->school?->updateRatingCache();
                 return response()->json(['data' => $review->fresh(['school', 'user'])]);
+
+            case 'jobs':
+                $job = JobListing::query()->findOrFail($id);
+                $data = $request->validate([
+                    'title' => ['sometimes', 'required', 'string', 'min:2', 'max:255'],
+                    'employer' => ['sometimes', 'required', 'string', 'min:2', 'max:255'],
+                    'category' => ['sometimes', 'required', 'in:teaching,administration,higher,ngo,support,other'],
+                    'location' => ['sometimes', 'required', 'string', 'min:2', 'max:180'],
+                    'employment_type' => ['sometimes', 'required', 'in:full_time,part_time,temporary,contract,internship,volunteer'],
+                    'excerpt' => ['sometimes', 'nullable', 'string', 'max:600'],
+                    'description' => ['sometimes', 'required', 'string', 'max:50000'],
+                    'salary' => ['sometimes', 'nullable', 'string', 'max:180'],
+                    'deadline' => ['sometimes', 'nullable', 'date'],
+                    'application_url' => ['sometimes', 'nullable', 'url', 'max:2048'],
+                    'application_email' => ['sometimes', 'nullable', 'email', 'max:255'],
+                    'application_instructions' => ['sometimes', 'nullable', 'string', 'max:10000'],
+                    'status' => ['sometimes', 'required', 'in:draft,published,closed,archived'],
+                    'is_featured' => ['sometimes', 'boolean'],
+                ]);
+                abort_unless($data !== [], 422);
+
+                if (isset($data['title']) && $data['title'] !== $job->title) {
+                    $data['slug'] = $this->uniqueJobSlug($data['title'], $job->id);
+                }
+                if (($data['status'] ?? null) === 'published' && ! $job->published_at) {
+                    $data['published_at'] = now();
+                } elseif (($data['status'] ?? null) === 'draft') {
+                    $data['published_at'] = null;
+                }
+
+                $job->forceFill($data)->save();
+
+                return response()->json(['data' => $job->fresh()]);
 
             case 'articles':
                 $article = Article::query()->findOrFail($id);
@@ -1354,6 +1402,68 @@ class AdminWorkspaceController extends Controller
 
         return response()->json(['data' => $article->load(['category', 'author'])], 201);
     }
+
+    public function storeJob(Request $request): JsonResponse
+    {
+        $this->authorizeWorkspacePermission($request, 'admin.content.publish');
+
+        $data = $request->validate([
+            'title' => ['required', 'string', 'min:2', 'max:255'],
+            'employer' => ['required', 'string', 'min:2', 'max:255'],
+            'category' => ['required', 'in:teaching,administration,higher,ngo,support,other'],
+            'location' => ['required', 'string', 'min:2', 'max:180'],
+            'employment_type' => ['required', 'in:full_time,part_time,temporary,contract,internship,volunteer'],
+            'excerpt' => ['nullable', 'string', 'max:600'],
+            'description' => ['required', 'string', 'max:50000'],
+            'salary' => ['nullable', 'string', 'max:180'],
+            'deadline' => ['nullable', 'date'],
+            'application_url' => ['nullable', 'url', 'max:2048'],
+            'application_email' => ['nullable', 'email', 'max:255'],
+            'application_instructions' => ['nullable', 'string', 'max:10000'],
+            'status' => ['required', 'in:draft,published'],
+            'is_featured' => ['sometimes', 'boolean'],
+        ]);
+
+        if (blank($data['application_url'] ?? null)
+            && blank($data['application_email'] ?? null)
+            && blank($data['application_instructions'] ?? null)) {
+            throw ValidationException::withMessages([
+                'application_url' => ['Add an application website, email address or application instructions before saving this job.'],
+            ]);
+        }
+
+        $job = JobListing::query()->create([
+            ...$data,
+            'slug' => $this->uniqueJobSlug($data['title']),
+            'created_by' => $request->user()->id,
+            'published_at' => $data['status'] === 'published' ? now() : null,
+            'is_featured' => (bool) ($data['is_featured'] ?? false),
+        ]);
+
+        return response()->json([
+            'data' => $job,
+            'message' => $data['status'] === 'published'
+                ? 'Job published successfully.'
+                : 'Job saved as a draft.',
+        ], 201);
+    }
+
+    private function uniqueJobSlug(string $title, ?int $ignoreId = null): string
+    {
+        $base = Str::slug($title) ?: 'education-job';
+        $slug = $base;
+        $suffix = 2;
+
+        while (JobListing::query()
+            ->where('slug', $slug)
+            ->when($ignoreId, fn ($query) => $query->where('id', '!=', $ignoreId))
+            ->exists()) {
+            $slug = $base.'-'.$suffix++;
+        }
+
+        return $slug;
+    }
+
     private function authorizeWorkspacePermission(Request $request, string $permission): void
     {
         $user = $request->user();

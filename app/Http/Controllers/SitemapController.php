@@ -14,6 +14,7 @@ class SitemapController extends Controller
         $urls[] = ['url' => route('home'), 'priority' => '1.0'];
         $urls[] = ['url' => route('schools.index'), 'priority' => '0.9'];
         $urls[] = ['url' => route('articles.index'), 'priority' => '0.8'];
+        $urls[] = ['url' => route('jobs.index'), 'priority' => '0.8'];
 
         foreach (School::publiclyVisible()->get() as $s) {
             $urls[] = ['url' => route('schools.show', $s), 'priority' => '0.7'];
@@ -21,6 +22,10 @@ class SitemapController extends Controller
         foreach (District::all() as $d) {
             $urls[] = ['url' => route('district.show', $d), 'priority' => '0.6'];
         }
+        foreach (JobListing::query()->publiclyVisible()->get() as $job) {
+            $urls[] = ['url' => route('jobs.show', $job->slug), 'priority' => '0.6'];
+        }
+
         foreach (Article::where('status', 'published')
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
