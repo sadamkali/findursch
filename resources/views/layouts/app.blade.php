@@ -105,7 +105,7 @@
 </head>
 <body class="h-full bg-white text-gray-900 antialiased">
     @php
-        $dashboardUrl = rtrim(config('services.dashboard.url', 'https://account.riotinvestments.space'), '/');
+        $dashboardUrl = rtrim(config('services.dashboard.url', 'https://admin.riotinvestments.space'), '/');
         $signInUrl = $dashboardUrl.'/login?returnTo=%2Faccount';
         $schoolRegistrationUrl = $dashboardUrl.'/register?type=school_owner&returnTo=%2Faccount';
 
