@@ -1,10 +1,12 @@
 <div class="findursch-scholarships">
     <a class="rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
 
-    <x-site-page-head :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Scholarships']]">
-        <x-slot:title>Scholarships &amp; <em>Bursaries</em> in Uganda</x-slot:title>
-        <x-slot:description>Explore school bursaries and published funding opportunities for Ugandan learners. <b>{{ number_format($openCount) }}</b> open now.</x-slot:description>
-    </x-site-page-head>
+    <x-site-ad-banner placement="top" />
+
+    <section class="phead">
+        <h1>Scholarships &amp; <em>Bursaries</em> in Uganda</h1>
+        <p>Explore school bursaries and published funding opportunities for Ugandan learners. <b>{{ number_format($openCount) }}</b> open now.</p>
+    </section>
 
     <main class="wrap">
         <div class="pills" role="tablist" aria-label="Scholarship categories">
