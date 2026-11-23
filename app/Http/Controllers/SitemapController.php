@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\District;
+use App\Models\JobListing;
 use App\Models\School;
 
 class SitemapController extends Controller

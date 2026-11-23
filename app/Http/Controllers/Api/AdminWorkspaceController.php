@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\Inquiry;
+use App\Models\JobListing;
 use App\Models\Review;
 use App\Models\School;
 use App\Models\SchoolPost;

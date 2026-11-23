@@ -7,6 +7,8 @@ use App\Livewire\Opportunities\EventShow;
 use App\Livewire\Opportunities\ScholarshipListing;
 use App\Livewire\Opportunities\ScholarshipShow;
 use App\Livewire\Opportunities\SchoolPostShow;
+use App\Livewire\Jobs\Index as JobIndex;
+use App\Livewire\Jobs\Show as JobShow;
 use App\Livewire\Articles\ArticleShow;
 use App\Livewire\Compare\CompareSchools;
 use App\Livewire\Districts\DistrictSchools;

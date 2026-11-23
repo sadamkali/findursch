@@ -85,14 +85,13 @@ Route::middleware(['auth:sanctum'])
         Route::delete('/template-access/users/{user}', [AdminTemplateController::class, 'deleteAdmin']);
         Route::post('/template-access/sign-out-others', [AdminTemplateController::class, 'signOutOthers']);
         Route::get('/{resource}', [AdminWorkspaceController::class, 'index'])
-            ->whereIn('resource', ['schools', 'verification', 'owners', 'parents', 'enquiries', 'reviews', 'articles', 'article-categories', 'events', 'scholarships', 'school-news', 'jobs', 'advertisements', 'settings', 'plans', 'subscriptions', 'payments', 'activity', 'contacts', 'locations']);
+            ->whereIn('resource', ['schools', 'verification', 'owners', 'parents', 'enquiries', 'reviews', 'articles', 'article-categories', 'events', 'scholarships', 'school-news', 'advertisements', 'settings', 'plans', 'subscriptions', 'payments', 'activity', 'contacts', 'locations']);
         Route::post('/articles', [AdminWorkspaceController::class, 'storeArticle']);
-        Route::post('/jobs', [AdminWorkspaceController::class, 'storeJob']);
         Route::post('/owners/{id}/password', [AdminWorkspaceController::class, 'setOwnerPassword'])->whereNumber('id');
         Route::post('/owners/{id}/invitation', [AdminWorkspaceController::class, 'resendOwnerInvitation'])->whereNumber('id');
         Route::post('/advertisements', [AdminWorkspaceController::class, 'storeAdvertisement']);
         Route::patch('/{resource}/{id}', [AdminWorkspaceController::class, 'update'])
-            ->whereIn('resource', ['schools', 'verification', 'owners', 'parents', 'enquiries', 'reviews', 'articles', 'events', 'scholarships', 'school-news', 'jobs', 'advertisements', 'settings', 'plans', 'contacts']);
+            ->whereIn('resource', ['schools', 'verification', 'owners', 'parents', 'enquiries', 'reviews', 'articles', 'events', 'scholarships', 'school-news', 'advertisements', 'settings', 'plans', 'contacts']);
     });
 
 // Owners can manage only their own schools. Administrators can use the same
