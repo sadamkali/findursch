@@ -102,7 +102,11 @@ class DistrictSchools extends Component
         $query = $this->baseSchools();
 
         if ($this->town !== '') {
-            $query->where('town', $this->town);
+            $query->where(function (Builder $area) {
+                $area->where('town', $this->town)
+                    ->orWhereHas('subCounty', fn (Builder $subCounty) => $subCounty->where('name', $this->town))
+                    ->orWhereHas('county', fn (Builder $county) => $county->where('name', $this->town));
+            });
         }
 
         if ($this->schoolType !== '' && ctype_digit($this->schoolType)) {
@@ -165,13 +169,16 @@ class DistrictSchools extends Component
             ->filter(fn (SchoolType $type) => (int) $type->public_listing_count > 0)
             ->values();
 
-        $areas = School::query()
-            ->publiclyVisible()
-            ->where('district_id', $this->district->id)
-            ->whereNotNull('town')
-            ->whereRaw("BTRIM(town) <> ''")
-            ->selectRaw('BTRIM(town) AS name, COUNT(*) AS total')
-            ->groupByRaw('BTRIM(town)')
+        $areaExpression = "COALESCE(NULLIF(BTRIM(schools.town), ''), NULLIF(BTRIM(sub_counties.name), ''), NULLIF(BTRIM(counties.name), ''))";
+        $areas = DB::table('schools')
+            ->leftJoin('sub_counties', 'sub_counties.id', '=', 'schools.sub_county_id')
+            ->leftJoin('counties', 'counties.id', '=', 'schools.county_id')
+            ->where('schools.district_id', $this->district->id)
+            ->where('schools.status', 'active')
+            ->where('schools.verification_status', 'verified')
+            ->whereRaw($areaExpression.' IS NOT NULL')
+            ->selectRaw($areaExpression.' AS name, COUNT(*) AS total')
+            ->groupByRaw($areaExpression)
             ->orderBy('name')
             ->get();
 
