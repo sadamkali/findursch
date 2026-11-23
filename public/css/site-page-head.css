@@ -79,3 +79,10 @@
     .site-page-head__description,
     .site-page-head__description p { font-size: 12.5px; }
 }
+
+.site-page-head__footer {
+    padding-bottom: 30px;
+}
+@media (max-width: 640px) {
+    .site-page-head__footer { padding-bottom: 23px; }
+}
