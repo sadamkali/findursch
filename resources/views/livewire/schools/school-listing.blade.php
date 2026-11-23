@@ -1,113 +1,73 @@
 <div class="school-directory-reference">
     <a class="rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
 
-    <x-site-page-head :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Schools']]">
-        <x-slot:title>Find a school in Uganda</x-slot:title>
-        <x-slot:description>Discover <b>{{ number_format($allSchoolCount) }}</b> verified nursery, primary, secondary, vocational and international schools across all districts of Uganda. Compare by location, curriculum and fees.</x-slot:description>
-    </x-site-page-head>
+    <section class="phead">
+        <div class="wrap">
+            <div>
+                <nav class="crumbs" aria-label="Breadcrumb">
+                    <a href="{{ route('home') }}">Home</a><span aria-hidden="true">›</span>Schools
+                </nav>
+                <h1>Find a school in Uganda</h1>
+                <p>Discover <b>{{ number_format($allSchoolCount) }}</b> verified nursery, primary, secondary, vocational and international schools across all districts of Uganda. Compare by location, curriculum and fees.</p>
+            </div>
+            <x-site-ad-banner placement="top" />
+        </div>
+    </section>
 
     <section class="sband">
         <div class="wrap">
-            <form class="sform" wire:submit="applyFilters" x-data="{ filtersOpen: false }">
-                <div class="sform__main">
-                    <label class="sform__query">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <circle cx="10.8" cy="10.8" r="6.8"></circle>
-                            <path d="m16 16 4.5 4.5"></path>
-                        </svg>
-                        <span class="sr-only">Search schools</span>
-                        <input type="search"
-                            wire:model="search"
-                            placeholder="Search school name or district…"
-                            aria-label="Search schools">
-                    </label>
+            <form class="sform" wire:submit="applyFilters">
+                <label class="sform__query">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <circle cx="10.8" cy="10.8" r="6.8"></circle>
+                        <path d="m16 16 4.5 4.5"></path>
+                    </svg>
+                    <span class="sr-only">Search schools</span>
+                    <input type="search"
+                        wire:model.live.debounce.350ms="search"
+                        placeholder="Search school name or district…"
+                        aria-label="Search schools">
+                </label>
 
-                    <button type="button" class="sform__toggle"
-                        @click="filtersOpen = !filtersOpen"
-                        :aria-expanded="filtersOpen.toString()"
-                        aria-controls="schools-advanced-filters">
-                        <span>Filters</span><span aria-hidden="true">⌄</span>
-                    </button>
+                <label class="sform__select">
+                    <span class="sr-only">District</span>
+                    <select wire:model.live="district" aria-label="Filter by district">
+                        <option value="">All districts</option>
+                        @foreach($allDistricts as $districtOption)
+                            <option value="{{ $districtOption->id }}">{{ $districtOption->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
 
-                    <button class="go" type="submit" wire:loading.attr="disabled" wire:target="applyFilters">
-                        <span wire:loading.remove wire:target="applyFilters">Search</span>
-                        <span wire:loading wire:target="applyFilters">Searching…</span>
-                    </button>
-                </div>
+                <label class="sform__select">
+                    <span class="sr-only">Region</span>
+                    <select wire:model.live="region" aria-label="Filter by region">
+                        <option value="">All regions</option>
+                        @foreach($regions as $regionOption)
+                            <option value="{{ $regionOption->id }}">{{ $regionOption->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
 
-                <div id="schools-advanced-filters" class="sform__filters" :class="{ 'is-open': filtersOpen }">
-                    <label class="sform__select">
-                        <span>District</span>
-                        <select wire:model="district" aria-label="Filter by district">
-                            <option value="">All districts</option>
-                            @foreach($allDistricts as $districtOption)
-                                <option value="{{ $districtOption->id }}">{{ $districtOption->name }}</option>
-                            @endforeach
-                        </select>
-                    </label>
+                <label class="sform__select">
+                    <span class="sr-only">Curriculum</span>
+                    <select wire:model.live="curriculum" aria-label="Filter by curriculum">
+                        <option value="">All curricula</option>
+                        @foreach($curricula as $curriculumOption)
+                            <option value="{{ $curriculumOption->id }}">{{ $curriculumOption->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
 
-                    <label class="sform__select">
-                        <span>Region</span>
-                        <select wire:model="region" aria-label="Filter by region">
-                            <option value="">All regions</option>
-                            @foreach($regions as $regionOption)
-                                <option value="{{ $regionOption->id }}">{{ $regionOption->name }}</option>
-                            @endforeach
-                        </select>
-                    </label>
+                <button class="go" type="submit" wire:loading.attr="disabled" wire:target="applyFilters">
+                    <span wire:loading.remove wire:target="applyFilters">Search</span>
+                    <span wire:loading wire:target="applyFilters">Searching…</span>
+                </button>
 
-                    <label class="sform__select">
-                        <span>School type</span>
-                        <select wire:model="type" aria-label="Filter by school type">
-                            <option value="">All school types</option>
-                            @foreach($schoolTypes as $schoolType)
-                                <option value="{{ $schoolType->id }}">{{ $schoolType->name }}</option>
-                            @endforeach
-                        </select>
-                    </label>
-
-                    <label class="sform__select">
-                        <span>Curriculum</span>
-                        <select wire:model="curriculum" aria-label="Filter by curriculum">
-                            <option value="">All curricula</option>
-                            @foreach($curricula as $curriculumOption)
-                                <option value="{{ $curriculumOption->id }}">{{ $curriculumOption->name }}</option>
-                            @endforeach
-                        </select>
-                    </label>
-
-                    <label class="sform__select">
-                        <span>Boarding</span>
-                        <select wire:model="boarding" aria-label="Filter by boarding type">
-                            <option value="">Day and boarding</option>
-                            <option value="day">Day school</option>
-                            <option value="boarding">Boarding school</option>
-                            <option value="mixed">Day &amp; boarding</option>
-                        </select>
-                    </label>
-
-                    <label class="sform__check">
-                        <input type="checkbox" wire:model="verified_only">
-                        <span>Verified schools only</span>
-                    </label>
-
-                    <div class="sform__fee">
-                        <label class="sform__check">
-                            <input type="checkbox" wire:model="feeFilterEnabled">
-                            <span>Limit maximum term fee</span>
-                        </label>
-                        <input type="range" min="0" max="2000000" step="50000"
-                            wire:model="maxFee"
-                            x-on:input="$refs.feeValue.textContent = Number($event.target.value).toLocaleString('en-US')"
-                            aria-label="Maximum fee per term">
-                        <small>Up to UGX <b x-ref="feeValue">{{ number_format((int) $maxFee) }}</b></small>
-                    </div>
-
-                    @if($search !== '' || $district !== '' || $region !== '' || $type !== '' || $curriculum !== '' || $boarding !== '' || $verified_only || $feeFilterEnabled)
-                        <button type="button" class="sform__clear" wire:click="resetFilters">Clear all filters</button>
-                    @endif
-                </div>
-            </form>     </form>
+                @if($search !== '' || $district !== '' || $region !== '' || $type !== '' || $curriculum !== '' || $boarding !== '' || $verified_only || $feeFilterEnabled)
+                    <button type="button" class="sform__clear" wire:click="resetFilters">Clear</button>
+                @endif
+            </form>
         </div>
     </section>
 
@@ -199,7 +159,7 @@
                     <div class="r">
                         <button type="button" class="fbtn"
                             @click="filtersOpen = !filtersOpen; if (filtersOpen) $nextTick(() => $refs.schoolFilters.scrollIntoView({ behavior: 'smooth', block: 'start' }))"
-                            :aria-expanded="filtersOpen.toString()" aria-controls="school-filters">More filters</button>
+                            :aria-expanded="filtersOpen.toString()" aria-controls="school-filters">Filters</button>
                         <label class="sort-label"><span>Sort:</span>
                             <select wire:model.live="sort" aria-label="Sort schools">
                                 <option value="newest">Newest first</option>
