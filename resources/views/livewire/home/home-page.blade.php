@@ -42,7 +42,11 @@
                     <a class="more" href="{{ route('schools.index') }}">View all</a>
                 </div>
 
-                <div class="slider" x-data="schoolCarousel">
+                <div class="slider" x-data="schoolCarousel"
+                    x-on:mouseenter="pause()"
+                    x-on:mouseleave="resume()"
+                    x-on:focusin="pause()"
+                    x-on:focusout="$nextTick(() => { if (!$el.contains(document.activeElement)) resume() })">
                     <button type="button" class="arrow l" x-show="pages > 1" @click="previous()" aria-label="Previous featured schools">‹</button>
                     <button type="button" class="arrow r" x-show="pages > 1" @click="next()" aria-label="Next featured schools">›</button>
                     <div class="cards" x-ref="track" @scroll.debounce.80ms="sync()">
@@ -50,8 +54,22 @@
                             <a class="card school" href="{{ route('schools.show', $school) }}">
                                 @php
                                     $schoolPhoto = $school->getFirstMediaUrl('cover');
-                                    $schoolBadgeUrl = $school->getFirstMediaUrl('badge') ?: $school->getFirstMediaUrl('logo');
                                     $photoTone = $loop->iteration === 2 ? 'b' : ($loop->iteration === 3 ? 'c' : '');
+                                    $feeFrom = is_numeric($school->fees_from) && (float) $school->fees_from > 0 ? (float) $school->fees_from : null;
+                                    $feeTo = is_numeric($school->fees_to) && (float) $school->fees_to > 0 ? (float) $school->fees_to : null;
+                                    if ($feeFrom !== null && $feeTo !== null) {
+                                        $feeMin = min($feeFrom, $feeTo);
+                                        $feeMax = max($feeFrom, $feeTo);
+                                        $feeEstimate = $feeMin === $feeMax
+                                            ? number_format($feeMin)
+                                            : number_format($feeMin).'–'.number_format($feeMax);
+                                    } elseif ($feeFrom !== null) {
+                                        $feeEstimate = 'from '.number_format($feeFrom);
+                                    } elseif ($feeTo !== null) {
+                                        $feeEstimate = 'up to '.number_format($feeTo);
+                                    } else {
+                                        $feeEstimate = null;
+                                    }
                                 @endphp
                                 <div class="ph {{ $photoTone }}">
                                     @if($schoolPhoto)
@@ -59,18 +77,14 @@
                                     @else
                                         <span class="ph-initials">{{ strtoupper(mb_substr($school->name, 0, 2)) }}</span>
                                     @endif
-                                    <span class="school-badge-mark" aria-label="{{ $school->name }} school badge">
-                                        @if($schoolBadgeUrl)
-                                            <img src="{{ $schoolBadgeUrl }}" alt="{{ $school->name }} badge" loading="lazy">
-                                        @else
-                                            <span>Badge</span>
-                                        @endif
-                                    </span>
                                 </div>
                                 <div class="b">
                                     <span class="kick">{{ $school->type?->name ?? 'School' }}</span>
                                     <h3>{{ $school->name }}</h3>
                                     <small>{{ $school->district?->name ?? 'Uganda' }} district</small>
+                                    @if($feeEstimate)
+                                        <span class="tag fee-estimate">Approx. UGX {{ $feeEstimate }} / term</span>
+                                    @endif
                                     @foreach($school->curricula->take(1) as $curriculum)
                                         <span class="tag">{{ $curriculum->abbreviation }}</span>
                                     @endforeach

@@ -177,6 +177,23 @@
                 @if($schools->isNotEmpty())
                     <div class="grid {{ $viewMode === 'list' ? 'list' : '' }}" wire:loading.class="is-loading" wire:target="district,region,type,curriculum,sort,search,maxFee,applyFeeFilter">
                         @foreach($schools as $school)
+                            @php
+                                $feeFrom = is_numeric($school->fees_from) && (float) $school->fees_from > 0 ? (float) $school->fees_from : null;
+                                $feeTo = is_numeric($school->fees_to) && (float) $school->fees_to > 0 ? (float) $school->fees_to : null;
+                                if ($feeFrom !== null && $feeTo !== null) {
+                                    $feeMin = min($feeFrom, $feeTo);
+                                    $feeMax = max($feeFrom, $feeTo);
+                                    $feeEstimate = $feeMin === $feeMax
+                                        ? number_format($feeMin)
+                                        : number_format($feeMin).'–'.number_format($feeMax);
+                                } elseif ($feeFrom !== null) {
+                                    $feeEstimate = 'from '.number_format($feeFrom);
+                                } elseif ($feeTo !== null) {
+                                    $feeEstimate = 'up to '.number_format($feeTo);
+                                } else {
+                                    $feeEstimate = null;
+                                }
+                            @endphp
                             <article class="sc" wire:key="school-result-{{ $school->id }}">
                                 <a class="ph {{ $school->getFirstMediaUrl('cover') ? '' : 'nop' }}" href="{{ route('schools.show', $school) }}">
                                     @if($school->getFirstMediaUrl('cover'))
@@ -207,7 +224,9 @@
                                             <span>{{ match($school->boarding_type) { 'boarding' => 'Boarding', 'mixed' => 'Day & boarding', default => 'Day school' } }}</span>
                                             @if($school->created_at?->greaterThan(now()->subDays(14)))<em>New</em>@endif
                                         </div>
-                                        @if($school->lowest_term_tuition !== null)
+                                        @if($feeEstimate)
+                                            <b>Approx. UGX {{ $feeEstimate }} / term</b>
+                                        @elseif($school->lowest_term_tuition !== null)
                                             <b>UGX {{ number_format((float) $school->lowest_term_tuition) }} / term</b>
                                         @endif
                                         <a class="vp" href="{{ route('schools.show', $school) }}">View profile</a>

@@ -147,6 +147,11 @@
 .findursch-home-reference .row>.ph>span{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.85);font:700 23px var(--serif)}
 .findursch-home-reference .row h4{font:600 13.5px/1.3 var(--serif)}
 .findursch-home-reference .row small{color:var(--brand);font-style:italic;font-size:11.5px}
+.findursch-home-reference .news .rows{background:var(--brand-dk);border-color:var(--brand-dk);color:#fff}
+.findursch-home-reference .news .rows .row h4,
+.findursch-home-reference .news .rows .box-empty{color:#fff}
+.findursch-home-reference .news .rows .row small{color:rgba(255,255,255,.78)}
+.findursch-home-reference .news .rows .mini span{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.9)}
 .findursch-home-reference .mini{display:flex;gap:6px;justify-content:center;padding-top:2px}
 .findursch-home-reference .mini span{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;color:var(--mute)}
 .findursch-home-reference .prem{position:relative}
@@ -618,35 +623,3 @@
 }
 
 
-/* Small school identity mark layered over homepage school cover photos. */
-.findursch-home-reference .school .ph .school-badge-mark {
-    position: absolute;
-    z-index: 2;
-    left: 10px;
-    bottom: 10px;
-    display: flex;
-    width: 48px;
-    height: 48px;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    border: 2px solid #fff;
-    border-radius: 10px;
-    background: #fff;
-    padding: 4px;
-    box-shadow: 0 3px 12px rgba(0,0,0,.2);
-}
-.findursch-home-reference .school .ph .school-badge-mark img {
-    position: static;
-    inset: auto;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-.findursch-home-reference .school .ph .school-badge-mark span {
-    color: var(--brand);
-    font: 800 8px/1.2 var(--sans);
-    letter-spacing: .06em;
-    text-align: center;
-    text-transform: uppercase;
-}
