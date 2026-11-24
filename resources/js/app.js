@@ -91,45 +91,15 @@ Alpine.data('homepageHero', (configuredSlides) => ({
 Alpine.data('schoolCarousel', () => ({
     activePage: 0,
     pages: 1,
-    timer: null,
-    paused: false,
-    resizeHandler: null,
     init() {
-        this.resizeHandler = () => this.measure();
-        window.addEventListener('resize', this.resizeHandler);
-        this.$nextTick(() => {
-            this.measure();
-            this.start();
-        });
-    },
-    destroy() {
-        if (this.timer) window.clearInterval(this.timer);
-        if (this.resizeHandler) window.removeEventListener('resize', this.resizeHandler);
-    },
-    start() {
-        if (this.timer || this.paused || this.pages <= 1 ||
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        this.timer = window.setInterval(() => this.next(), 6500);
-    },
-    pause() {
-        this.paused = true;
-        if (this.timer) window.clearInterval(this.timer);
-        this.timer = null;
-    },
-    resume() {
-        this.paused = false;
-        this.start();
+        this.$nextTick(() => this.measure());
+        window.addEventListener('resize', () => this.measure());
     },
     measure() {
         const track = this.$refs.track;
         if (!track || !track.clientWidth) return;
         this.pages = Math.max(1, Math.ceil(track.scrollWidth / track.clientWidth));
         this.activePage = Math.min(this.pages - 1, Math.round(track.scrollLeft / track.clientWidth));
-        if (this.pages > 1) this.start();
-        else if (this.timer) {
-            window.clearInterval(this.timer);
-            this.timer = null;
-        }
     },
     sync() { this.measure(); },
     go(page) {
@@ -138,8 +108,8 @@ Alpine.data('schoolCarousel', () => ({
         this.activePage = Math.max(0, Math.min(this.pages - 1, page));
         track.scrollTo({ left: this.activePage * track.clientWidth, behavior: 'smooth' });
     },
-    next() { this.go((this.activePage + 1) % this.pages); },
-    previous() { this.go((this.activePage - 1 + this.pages) % this.pages); },
+    next() { this.go(this.activePage + 1); },
+    previous() { this.go(this.activePage - 1); },
 }));
 
 Alpine.data('schoolTabs', () => ({

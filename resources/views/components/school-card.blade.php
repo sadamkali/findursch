@@ -1,21 +1,5 @@
 @props(['school'])
 
-@php
-    $feeFrom = is_numeric($school->fees_from) && (float) $school->fees_from > 0 ? (float) $school->fees_from : null;
-    $feeTo = is_numeric($school->fees_to) && (float) $school->fees_to > 0 ? (float) $school->fees_to : null;
-    if ($feeFrom !== null && $feeTo !== null) {
-        $feeMin = min($feeFrom, $feeTo);
-        $feeMax = max($feeFrom, $feeTo);
-        $feeEstimate = $feeMin === $feeMax ? number_format($feeMin) : number_format($feeMin).'–'.number_format($feeMax);
-    } elseif ($feeFrom !== null) {
-        $feeEstimate = 'from '.number_format($feeFrom);
-    } elseif ($feeTo !== null) {
-        $feeEstimate = 'up to '.number_format($feeTo);
-    } else {
-        $feeEstimate = null;
-    }
-@endphp
-
 <article data-reveal class="school-card group overflow-hidden rounded-card border border-gray-100 bg-white">
     <a href="{{ route('schools.show', $school) }}" class="block">
         <div class="school-card__media relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-primary-50 to-accent-50">
@@ -29,6 +13,13 @@
                 </div>
             @endif
 
+            <span class="absolute bottom-3 left-3 flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl border-2 border-white bg-white p-1 shadow-md" aria-label="{{ $school->name }} school badge">
+                @if($school->getFirstMediaUrl('badge') || $school->getFirstMediaUrl('logo'))
+                    <img src="{{ $school->getFirstMediaUrl('badge') ?: $school->getFirstMediaUrl('logo') }}" alt="{{ $school->name }} badge" class="h-full w-full object-contain" loading="lazy">
+                @else
+                    <span class="px-0.5 text-center text-[9px] font-bold uppercase tracking-wide text-primary">Badge</span>
+                @endif
+            </span>
             @if($school->is_featured)
                 <span class="absolute right-3 top-3 rounded-badge border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700">Featured</span>
             @endif
@@ -43,9 +34,6 @@
             <h3 class="mb-1 line-clamp-1 text-lg font-semibold transition group-hover:text-primary">{{ $school->name }}</h3>
             @if($school->tagline)
                 <p class="mb-3 line-clamp-2 text-sm text-gray-600">{{ $school->tagline }}</p>
-            @endif
-            @if($feeEstimate)
-                <p class="mb-3 text-sm font-semibold text-primary-700">Approx. fees: UGX {{ $feeEstimate }} / term</p>
             @endif
             <div class="mb-3 flex items-center text-sm text-gray-500">
                 <svg class="mr-1 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
