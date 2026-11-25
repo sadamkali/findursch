@@ -30,7 +30,7 @@ class HomePage extends Component
             ->limit(9)
             ->get();
 
-        $spotlightQuery = (clone $publicSchools)->with(['district', 'type', 'media']);
+        $spotlightQuery = (clone $publicSchools)->with(['district', 'type', 'curricula', 'media']);
         if ($featuredSchools->isNotEmpty()) {
             $spotlightQuery->whereNotIn('id', $featuredSchools->take(3)->pluck('id'));
         }
@@ -104,10 +104,25 @@ class HomePage extends Component
             ->whereIn('key', ['site_name', 'site_description', 'contact_address', 'support_phone', 'support_email', 'site_footer_copyright_text'])
             ->pluck('value', 'key');
 
+        $savedSchoolIds = [];
+        $homepageSchoolIds = $featuredSchools->pluck('id')
+            ->concat(collect([$spotlightSchool?->id]))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if (auth()->check() && $homepageSchoolIds->isNotEmpty()) {
+            $savedSchoolIds = auth()->user()->savedSchools()
+                ->whereIn('schools.id', $homepageSchoolIds)
+                ->pluck('schools.id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+        }
+
         return view('livewire.home.home-page', compact(
             'featuredSchools', 'spotlightSchool', 'schoolTypes', 'newsArticles',
             'insightArticles', 'partnerSchoolNews', 'upcomingEvents', 'scholarshipCount',
-            'latestJobs', 'videos', 'reviews', 'footerSettings'
+            'latestJobs', 'videos', 'reviews', 'footerSettings', 'savedSchoolIds'
         ))->layout('layouts.app', [
             'title' => 'FindURSCH — Find the right school in Uganda',
             'description' => 'Find the right school for your child. Explore verified school profiles, compare options, read education news, find events, watch school videos and discover scholarships and jobs across Uganda.',
