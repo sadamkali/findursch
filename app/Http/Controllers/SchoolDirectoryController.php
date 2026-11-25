@@ -1,0 +1,191 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Curriculum;
+use App\Models\District;
+use App\Models\Region;
+use App\Models\School;
+use App\Models\SchoolType;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+
+class SchoolDirectoryController extends Controller
+{
+    public function __invoke(Request $request)
+    {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+            'type' => ['nullable', 'integer', 'exists:school_types,id'],
+            'district' => ['nullable', 'array'],
+            'district.*' => ['integer', 'exists:districts,id'],
+            'region' => ['nullable', 'integer', 'exists:regions,id'],
+            'fee_min' => ['nullable', 'numeric', 'min:0', 'max:100000000'],
+            'fee_max' => ['nullable', 'numeric', 'min:0', 'max:100000000'],
+            'curriculum' => ['nullable', 'array'],
+            'curriculum.*' => ['integer', 'exists:curricula,id'],
+            'boarding' => ['nullable', 'array'],
+            'boarding.*' => ['string', 'max:40'],
+            'admissions_open' => ['nullable', 'boolean'],
+            'sort' => ['nullable', 'in:newest,featured,name,rating,fee_low,fee_high'],
+            'view' => ['nullable', 'in:list,grid'],
+        ]);
+
+        $search = trim((string) ($filters['q'] ?? ''));
+        $typeId = $filters['type'] ?? null;
+        $districtIds = array_values(array_unique(array_map('intval', $filters['district'] ?? [])));
+        $curriculumIds = array_values(array_unique(array_map('intval', $filters['curriculum'] ?? [])));
+        $boardingTypes = array_values(array_unique($filters['boarding'] ?? []));
+        $regionId = $filters['region'] ?? null;
+        $feeMin = isset($filters['fee_min']) ? (float) $filters['fee_min'] : null;
+        $feeMax = isset($filters['fee_max']) ? (float) $filters['fee_max'] : null;
+        $admissionsOpen = (bool) ($filters['admissions_open'] ?? false);
+        $sort = $filters['sort'] ?? 'newest';
+        $viewMode = $filters['view'] ?? 'list';
+
+        $termTuition = static fn ($fees) => $fees
+            ->where('category', 'tuition')
+            ->where('is_active', true)
+            ->where('currency', 'UGX')
+            ->where('period', 'per_term');
+
+        $query = School::query()
+            ->publiclyVisible()
+            ->with([
+                'district.region',
+                'county',
+                'subCounty',
+                'parish',
+                'type',
+                'curricula',
+                'media',
+            ])
+            ->withMin(['fees as lowest_term_tuition' => $termTuition], 'amount');
+
+        if ($search !== '') {
+            $term = '%'.mb_strtolower($search).'%';
+            $query->where(function (Builder $searchQuery) use ($term) {
+                $searchQuery
+                    ->whereRaw('LOWER(schools.name) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(COALESCE(schools.tagline, \'\')) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(COALESCE(schools.description, \'\')) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(COALESCE(schools.town, \'\')) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(COALESCE(schools.address, \'\')) LIKE ?', [$term])
+                    ->orWhereHas('district', fn ($districtQuery) => $districtQuery->whereRaw('LOWER(name) LIKE ?', [$term]))
+                    ->orWhereHas('parish', fn ($parishQuery) => $parishQuery->whereRaw('LOWER(name) LIKE ?', [$term]))
+                    ->orWhereHas('subCounty', fn ($subCountyQuery) => $subCountyQuery->whereRaw('LOWER(name) LIKE ?', [$term]));
+            });
+        }
+
+        if ($typeId) {
+            $query->where('type_id', (int) $typeId);
+        }
+        if ($districtIds !== []) {
+            $query->whereIn('district_id', $districtIds);
+        }
+        if ($regionId) {
+            $query->whereHas('district', fn ($districtQuery) => $districtQuery->where('region_id', (int) $regionId));
+        }
+        if ($curriculumIds !== []) {
+            $query->whereHas('curricula', fn ($curriculumQuery) => $curriculumQuery->whereIn('curricula.id', $curriculumIds));
+        }
+        if ($boardingTypes !== []) {
+            $query->whereIn('boarding_type', $boardingTypes);
+        }
+        if ($admissionsOpen) {
+            $query->where('admissions_open', true);
+        }
+        if ($feeMin !== null || $feeMax !== null) {
+            $query->whereHas('fees', function ($fees) use ($termTuition, $feeMin, $feeMax) {
+                $termTuition($fees);
+                if ($feeMin !== null) {
+                    $fees->where('amount', '>=', $feeMin);
+                }
+                if ($feeMax !== null) {
+                    $fees->where('amount', '<=', $feeMax);
+                }
+            });
+        }
+
+        match ($sort) {
+            'featured' => $query->orderByDesc('is_featured')->latest('created_at'),
+            'name' => $query->orderBy('name'),
+            'rating' => $query->orderByDesc('rating_average')->latest('created_at'),
+            'fee_low' => $query->orderByRaw('CASE WHEN lowest_term_tuition IS NULL THEN 1 ELSE 0 END')->orderBy('lowest_term_tuition'),
+            'fee_high' => $query->orderByRaw('CASE WHEN lowest_term_tuition IS NULL THEN 1 ELSE 0 END')->orderByDesc('lowest_term_tuition'),
+            default => $query->latest('created_at'),
+        };
+
+        $schools = $query->paginate(12)->appends($request->except('page'));
+
+        $schoolTypes = SchoolType::query()
+            ->where('is_active', true)
+            ->withCount(['schools as public_listing_count' => fn ($schoolsQuery) => $schoolsQuery->publiclyVisible()])
+            ->orderBy('order')
+            ->orderBy('name')
+            ->get();
+
+        $districts = District::query()
+            ->where('is_active', true)
+            ->with('region')
+            ->withCount(['schools as public_listing_count' => fn ($schoolsQuery) => $schoolsQuery->publiclyVisible()])
+            ->orderByDesc('public_listing_count')
+            ->orderBy('name')
+            ->get();
+
+        $regions = Region::query()
+            ->where('is_active', true)
+            ->withCount(['districts as public_listing_count' => fn ($districtQuery) => $districtQuery->whereHas('schools', fn ($schoolsQuery) => $schoolsQuery->publiclyVisible())])
+            ->orderBy('name')
+            ->get();
+
+        $curricula = Curriculum::query()
+            ->where('is_active', true)
+            ->withCount(['schools as public_listing_count' => fn ($schoolsQuery) => $schoolsQuery->publiclyVisible()])
+            ->orderBy('name')
+            ->get();
+
+        $boardingOptions = School::query()
+            ->publiclyVisible()
+            ->whereNotNull('boarding_type')
+            ->where('boarding_type', '<>', '')
+            ->distinct()
+            ->orderBy('boarding_type')
+            ->pluck('boarding_type');
+
+        $savedSchoolIds = [];
+        $savedSchoolCount = 0;
+        if ($request->user()) {
+            $savedSchoolCount = $request->user()->savedSchools()->count();
+            $pageSchoolIds = $schools->getCollection()->pluck('id');
+            $savedSchoolIds = $request->user()->savedSchools()
+                ->whereIn('schools.id', $pageSchoolIds)
+                ->pluck('schools.id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+        }
+
+        return response()->view('livewire.schools.school-listing', [
+            'schools' => $schools,
+            'schoolTypes' => $schoolTypes,
+            'districts' => $districts,
+            'regions' => $regions,
+            'curricula' => $curricula,
+            'boardingOptions' => $boardingOptions,
+            'allSchoolCount' => School::query()->publiclyVisible()->count(),
+            'savedSchoolIds' => $savedSchoolIds,
+            'savedSchoolCount' => $savedSchoolCount,
+            'selectedDistrictIds' => $districtIds,
+            'selectedCurriculumIds' => $curriculumIds,
+            'selectedBoardingTypes' => $boardingTypes,
+            'search' => $search,
+            'typeId' => $typeId,
+            'regionId' => $regionId,
+            'feeMin' => $feeMin,
+            'feeMax' => $feeMax,
+            'admissionsOpen' => $admissionsOpen,
+            'sort' => $sort,
+            'viewMode' => $viewMode,
+        ])->header('Cache-Control', 'private, no-store');
+    }
+}
