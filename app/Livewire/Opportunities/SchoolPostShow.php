@@ -19,7 +19,14 @@ class SchoolPostShow extends Component
             ->whereIn('status', ['approved', 'published'])
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
-            ->with(['school.district.region'])
+            ->with([
+                'school.type',
+                'school.district.region',
+                'school.county',
+                'school.subCounty',
+                'school.parish',
+                'school.media',
+            ])
             ->firstOrFail();
     }
 
@@ -32,14 +39,39 @@ class SchoolPostShow extends Component
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
             ->where('id', '!=', $this->post->id)
+            ->with(['school.media', 'school.district'])
             ->latest('published_at')
-            ->limit(3)
+            ->limit(4)
             ->get();
 
-        return view('livewire.opportunities.school-post-show', compact('related'))
-            ->layout('layouts.app', [
-                'title' => $this->post->title.' — '.$this->post->school?->name.' — FindURSCH',
-                'description' => \Illuminate\Support\Str::limit(strip_tags($this->post->description), 155),
-            ]);
+        $relatedHeading = 'More from this school';
+
+        if ($related->isEmpty()) {
+            $related = SchoolPost::query()
+                ->where('type', 'news')
+                ->where('school_id', '!=', $this->post->school_id)
+                ->whereIn('status', ['approved', 'published'])
+                ->whereNotNull('published_at')
+                ->where('published_at', '<=', now())
+                ->whereHas('school', fn ($query) => $query->publiclyVisible())
+                ->with(['school.media', 'school.district'])
+                ->latest('published_at')
+                ->limit(3)
+                ->get();
+
+            $relatedHeading = 'Latest school news';
+        }
+
+        $wordCount = str_word_count(strip_tags((string) $this->post->description));
+        $readingMinutes = max(1, (int) ceil($wordCount / 220));
+
+        return view('livewire.opportunities.school-post-show', compact(
+            'related',
+            'relatedHeading',
+            'readingMinutes',
+        ))->layout('layouts.app', [
+            'title' => $this->post->title.' — '.$this->post->school?->name.' — FindURSCH',
+            'description' => \Illuminate\Support\Str::limit(strip_tags($this->post->description), 155),
+        ]);
     }
 }
