@@ -44,9 +44,18 @@
     $facebook = $school->contacts->firstWhere('type', 'facebook')?->value;
     $twitter = $school->contacts->firstWhere('type', 'twitter')?->value;
     $instagram = $school->contacts->firstWhere('type', 'instagram')?->value;
-    $activeFees = $school->fees->where('is_active', true);
-    $tuitionFees = $activeFees->where('category', 'tuition')->sortBy('amount');
-    $lowestTuition = $tuitionFees->first();
+    $feeRangeFrom = is_numeric($school->fees_from) && (float) $school->fees_from > 0
+        ? (float) $school->fees_from
+        : null;
+    $feeRangeTo = is_numeric($school->fees_to) && (float) $school->fees_to > 0
+        ? (float) $school->fees_to
+        : null;
+    $hasFeeRange = $feeRangeFrom !== null && $feeRangeTo !== null && $feeRangeFrom !== $feeRangeTo;
+    $feeCircular = $school->documents
+        ->where('document_type', 'fees_circular')
+        ->sortByDesc('created_at')
+        ->first();
+    $publicDocuments = $school->documents->where('document_type', '!=', 'fees_circular');
 
     $quickFacts = [
         ['label' => 'Type', 'value' => $school->type?->name ?: 'Not provided', 'color' => '#d33'],
@@ -148,8 +157,11 @@
 
                     <nav class="sref-tabs" aria-label="Profile sections" x-data="{active:'about'}">
                         <a href="#about" x-on:click="active='about'" :class="active === 'about' ? 'is-active' : ''">About</a>
-                        @if($school->documents->isNotEmpty())
+                        @if($publicDocuments->isNotEmpty())
                             <a href="#requirements" x-on:click="active='requirements'" :class="active === 'requirements' ? 'is-active' : ''">Documents</a>
+                        @endif
+                        @if($feeCircular)
+                            <a href="#fees-circular" x-on:click="active='fees-circular'" :class="active === 'fees-circular' ? 'is-active' : ''">Fees circular</a>
                         @endif
                         @if($admissionsVisible && ($school->admissions_open || filled($school->admission_classes) || filled($school->admission_requirements) || filled($school->how_to_apply)))
                             <a href="#admissions" x-on:click="active='admissions'" :class="active === 'admissions' ? 'is-active' : ''">Admissions</a>
@@ -188,7 +200,6 @@
                         <div class="sref-about-meta">
                             <span>{{ $school->admissions_open ? 'Admissions are open' : 'Admissions are currently closed' }}</span>
                             @if($school->admission_deadline)<span>Deadline: {{ $school->admission_deadline->format('d M Y') }}</span>@endif
-                            @if(filled($school->application_fee))<span>Application / interview fee: {{ $school->application_fee }}</span>@endif
                         </div>
                         @if(filled($school->admission_classes))
                             <p class="sref-description"><strong>Classes admitting:</strong> {{ $school->admission_classes }}</p>
@@ -214,12 +225,12 @@
                     </section>
                 @endif
 
-                @if($school->documents->isNotEmpty())
+                @if($publicDocuments->isNotEmpty())
                     <section class="sref-card sref-pad" id="requirements">
                         <h2>School <span>requirements & documents</span></h2>
                         <p class="sref-description">Download the official forms and requirements shared by {{ $school->name }}. Every file downloaded from FindURSCH includes the FindURSCH logo and website watermark.</p>
                         <div class="sref-post-list">
-                            @foreach($school->documents as $document)
+                            @foreach($publicDocuments as $document)
                                 <div class="sref-post-row">
                                     <span class="sref-post-date">{{ strtoupper(pathinfo($document->original_filename, PATHINFO_EXTENSION)) }}</span>
                                     <span class="sref-post-copy">
@@ -232,6 +243,24 @@
                                     <a class="sref-btn sref-btn--brand sref-btn--sm" href="{{ route('schools.requirements.download', ['school' => $school->slug, 'document' => $document->id]) }}">Download</a>
                                 </div>
                             @endforeach
+                        </div>
+                    </section>
+                @endif
+
+                @if($feeCircular)
+                    <section class="sref-card sref-pad" id="fees-circular">
+                        <h2>Official <span>fees circular</span></h2>
+                        <p class="sref-description">Download the school's official fee structure for the applicable classes and academic period. Exact fee details are provided in this document; FindURSCH displays estimates only on the website.</p>
+                        <div class="sref-post-row">
+                            <span class="sref-post-date">PDF / DOC</span>
+                            <span class="sref-post-copy">
+                                <strong>{{ $feeCircular->title }}</strong>
+                                <small>{{ $feeCircular->original_filename }} · {{ number_format($feeCircular->file_size / 1024, 0) }} KB · Updated {{ $feeCircular->created_at?->format('d M Y') }}</small>
+                                @if(filled($feeCircular->description))
+                                    <span>{{ $feeCircular->description }}</span>
+                                @endif
+                            </span>
+                            <a class="sref-btn sref-btn--brand sref-btn--sm" href="{{ route('schools.requirements.download', ['school' => $school->slug, 'document' => $feeCircular->id]) }}">Download fees circular</a>
                         </div>
                     </section>
                 @endif
@@ -406,15 +435,27 @@
                 </section>
 
                 <section class="sref-box">
-                    <h5>School fees</h5>
-                    <?php if ($lowestTuition): ?>
-                        <div class="sref-fee">
-                            <b>{{ $lowestTuition->currency }} {{ number_format((float) $lowestTuition->amount) }}</b>
-                            <small>Lowest listed tuition · {{ str_replace('_', ' ', $lowestTuition->period) }}</small>
-                        </div>
-                    <?php else: ?>
-                        <div class="sref-fee"><b>Contact school</b><small>for current fee structure</small></div>
-                    <?php endif; ?>
+                    <h5>Estimated school fees</h5>
+                    <div class="sref-fee">
+                        @if($hasFeeRange)
+                            <b>UGX {{ number_format(min($feeRangeFrom, $feeRangeTo)) }} – UGX {{ number_format(max($feeRangeFrom, $feeRangeTo)) }}</b>
+                            <small>Approximate fee range per term</small>
+                        @elseif($feeRangeFrom !== null && $feeRangeTo === null)
+                            <b>From UGX {{ number_format($feeRangeFrom) }}</b>
+                            <small>Estimated starting range per term</small>
+                        @elseif($feeRangeTo !== null && $feeRangeFrom === null)
+                            <b>Up to UGX {{ number_format($feeRangeTo) }}</b>
+                            <small>Estimated range per term</small>
+                        @else
+                            <b>Fee range not provided</b>
+                            <small>Contact the school for an estimate</small>
+                        @endif
+                    </div>
+                    @if($feeCircular)
+                        <a class="sref-btn sref-btn--brand sref-btn--sm" href="{{ route('schools.requirements.download', ['school' => $school->slug, 'document' => $feeCircular->id]) }}">Download fees circular</a>
+                    @else
+                        <small>Official fee details may be requested directly from the school.</small>
+                    @endif
                 </section>
 
                 <x-site-ad-banner placement="side" />
