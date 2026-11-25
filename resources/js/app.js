@@ -11,35 +11,10 @@ Alpine.plugin(focus);
 Alpine.plugin(anchor);
 
 window.Alpine = Alpine;
+// Clear selections left by the retired school-comparison feature.
+try { window.localStorage.removeItem('compare_schools'); } catch (error) { /* Storage may be unavailable in restricted browsers. */ }
 // Global Alpine components
-Alpine.data('compareBar', () => ({
-    schools: JSON.parse(localStorage.getItem('compare_schools') || '[]'),
-    init() {
-        const sync = () => {
-            this.schools = JSON.parse(localStorage.getItem('compare_schools') || '[]');
-        };
 
-        window.addEventListener('storage', sync);
-        window.addEventListener('findursch:compare-add', event => this.add(event.detail));
-    },
-    add(slug) {
-        if (this.schools.length < 3 && !this.schools.includes(slug)) {
-            this.schools.push(slug);
-            localStorage.setItem('compare_schools', JSON.stringify(this.schools));
-        }
-    },
-    remove(slug) {
-        this.schools = this.schools.filter(s => s !== slug);
-        localStorage.setItem('compare_schools', JSON.stringify(this.schools));
-    },
-    clear() {
-        this.schools = [];
-        localStorage.removeItem('compare_schools');
-    },
-    has(slug) {
-        return this.schools.includes(slug);
-    }
-}));
 
 Alpine.data('homepageHero', (configuredSlides) => ({
     slides: Array.isArray(configuredSlides) ? configuredSlides : [],
@@ -49,7 +24,7 @@ Alpine.data('homepageHero', (configuredSlides) => ({
         return this.slides[this.active] || this.slides[0] || {
             image_url: '',
             title: 'Find the right school for your child',
-            description: 'Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.',
+            description: 'Browse nursery, primary, secondary, vocational and university listings across Uganda, and explore school profiles.',
             button_label: '',
             button_url: '',
         };
@@ -64,7 +39,7 @@ Alpine.data('homepageHero', (configuredSlides) => ({
             this.slides = [{
                 image_url: '',
                 title: 'Find the right school for your child',
-                description: 'Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.',
+                description: 'Browse nursery, primary, secondary, vocational and university listings across Uganda, and explore school profiles.',
                 button_label: '',
                 button_url: '',
             }];
@@ -605,32 +580,7 @@ function initializeFindURSCHHomepage() {
         }));
     });
 
-    home.querySelectorAll('[data-compare-school]').forEach(button => {
-        button.addEventListener('click', event => {
-            event.preventDefault();
-            event.stopPropagation();
-            const slug = button.dataset.compareSchool;
-            let selected = [];
-            try {
-                selected = JSON.parse(localStorage.getItem('compare_schools') || '[]');
-            } catch (error) {
-                selected = [];
-            }
-            if (selected.includes(slug)) {
-                button.textContent = 'Already selected';
-                button.disabled = true;
-                return;
-            }
-            if (selected.length >= 3) {
-                button.textContent = 'Compare limit reached';
-                button.disabled = true;
-                return;
-            }
-            window.dispatchEvent(new CustomEvent('findursch:compare-add', { detail: slug }));
-            button.textContent = 'Added to compare';
-            button.disabled = true;
-        });
-    });
+;
 }
 
 if (document.readyState === 'loading') {
