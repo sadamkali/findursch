@@ -175,9 +175,10 @@ class SchoolListing extends Component
         }
 
         if ($this->feeFilterEnabled) {
-            $query->whereNotNull('fees_from')
-                ->where('fees_from', '>', 0)
-                ->where('fees_from', '<=', max(0, (int) $this->maxFee));
+            $query->where(function ($rangeQuery) {
+                $rangeQuery->whereNotNull('schools.fees_from')
+                    ->orWhereNotNull('schools.fees_to');
+            })->whereRaw('COALESCE(schools.fees_from, schools.fees_to) <= ?', [max(0, (int) $this->maxFee)]);
         }
 
         match ($this->sort) {
@@ -230,14 +231,14 @@ class SchoolListing extends Component
             'searchFeatureAd' => $searchFeatureAd,
         ])->layout('layouts.app', [
             'title' => 'Find a school in Uganda — FindURSCH',
-            'description' => 'Find verified nursery, primary, secondary, vocational and international schools across Uganda. Compare districts, curricula and published tuition fees.',
+            'description' => 'Find verified nursery, primary, secondary, vocational and international schools across Uganda. Compare districts, curricula and estimated fee ranges.',
         ]);
     }
 
     private function sortByTermFee(Builder $query, string $direction): Builder
     {
         return $query
-            ->orderByRaw('CASE WHEN schools.fees_from IS NULL OR schools.fees_from <= 0 THEN 1 ELSE 0 END ASC')
-            ->orderBy('schools.fees_from', $direction);
+            ->orderByRaw('CASE WHEN COALESCE(schools.fees_from, schools.fees_to) IS NULL OR COALESCE(schools.fees_from, schools.fees_to) <= 0 THEN 1 ELSE 0 END ASC')
+            ->orderByRaw('COALESCE(schools.fees_from, schools.fees_to) '.$direction);
     }
 }
