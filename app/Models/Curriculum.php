@@ -18,7 +18,7 @@ class Curriculum extends Model
 
     public function schools(): BelongsToMany
     {
-        return $this->belongsToMany(School::class);
+        return $this->belongsToMany(School::class, 'school_curriculum', 'curriculum_id', 'school_id');
     }
 
     public function programs(): HasMany
