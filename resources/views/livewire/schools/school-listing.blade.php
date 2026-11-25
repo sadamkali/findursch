@@ -431,7 +431,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
         <section class="card fs" id="fs-fee"><button class="fh" type="button">Fee per term, UGX<span>—</span></button><div class="fb">
           <div class="mm2"><input id="lo" name="fee_min" type="number" min="0" step="10000" value="{{ $feeMin !== null ? (int)$feeMin : '' }}" placeholder="min" aria-label="Minimum fee"><span>–</span><input id="hi" name="fee_max" type="number" min="0" step="10000" value="{{ $feeMax !== null ? (int)$feeMax : '' }}" placeholder="max" aria-label="Maximum fee"></div>
           <div class="rs"><button id="fclr" type="button">CLEAR</button><button type="submit">APPLY</button></div>
-          <small>Only active tuition fees published in UGX per term are included.</small>
+          <small>Filter using each school's estimated fee range per term.</small>
         </div></section>
 
         <section class="card fs" id="fs-cu"><button class="fh" type="button">Curriculum<span>—</span></button><div class="fb" id="cu">
@@ -488,7 +488,15 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
             </a>
             <div class="bd">
               <div class="tp"><div class="fe">
-                @if($school->lowest_term_tuition !== null)<b>UGX {{ number_format((float)$school->lowest_term_tuition) }}</b> per term @elseif($school->fees_from !== null && (float)$school->fees_from > 0)<b>From UGX {{ number_format((float)$school->fees_from) }}</b>@if($school->fees_to !== null && (float)$school->fees_to > (float)$school->fees_from)<span> – UGX {{ number_format((float)$school->fees_to) }}</span>@endif @else<b>Fees not published</b>@endif
+                @if($school->fees_from !== null && (float)$school->fees_from > 0 && $school->fees_to !== null && (float)$school->fees_to > 0 && (float)$school->fees_from !== (float)$school->fees_to)
+                  <b>Estimated UGX {{ number_format(min((float)$school->fees_from, (float)$school->fees_to)) }} – UGX {{ number_format(max((float)$school->fees_from, (float)$school->fees_to)) }}</b> per term
+                @elseif($school->fees_from !== null && (float)$school->fees_from > 0 && $school->fees_to === null)
+                  <b>Estimated from UGX {{ number_format((float)$school->fees_from) }}</b> per term
+                @elseif($school->fees_to !== null && (float)$school->fees_to > 0 && $school->fees_from === null)
+                  <b>Estimated up to UGX {{ number_format((float)$school->fees_to) }}</b> per term
+                @else
+                  <b>Fee estimate not provided</b>
+                @endif
               </div><h3 class="nm"><a href="{{ route('schools.show', $school) }}">{{ $school->name }}</a></h3></div>
               <p class="ds">{{ $school->tagline ?: \Illuminate\Support\Str::limit(strip_tags((string)$school->description), 160, '…') ?: ($school->type?->name.' in '.$locationText) }}</p>
               <div class="cp"><span>{{ $school->type?->name ?? 'School' }}</span>@foreach($school->curricula as $schoolCurriculum)<span>{{ $schoolCurriculum->abbreviation ?: $schoolCurriculum->name }}</span>@endforeach @if($school->boarding_type)<span>{{ ucwords(str_replace(['_', '-'], ' ', $school->boarding_type)) }}</span>@endif @if($school->admissions_open)<span class="nw">Admissions open</span>@endif</div>
