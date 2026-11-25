@@ -3,7 +3,7 @@
 
     <x-site-page-hero
         eyebrow="FindURSCH newsroom"
-        title="School News &amp; Updates in Uganda"
+        title="School News & Updates in Uganda"
         description="Stay informed with the latest education news, school announcements, policy updates and stories from school communities across Uganda."
         :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'News']]"
     />
