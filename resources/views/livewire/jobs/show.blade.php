@@ -1,16 +1,16 @@
 <div class="findursch-jobs jobs-detail">
     <a class="rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
-    <x-site-ad-banner placement="top" />
-
+    <x-site-page-hero
+        eyebrow="FindURSCH career board · {{ $job->category_label }}"
+        :title="$job->title"
+        :description="$job->excerpt ?: $job->employer"
+        :meta="$job->location.' · '.$job->employment_type_label.($job->deadline ? ' · Apply by '.$job->deadline->format('j M Y') : ' · Open until filled')"
+        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Jobs', 'url' => route('jobs.index')], ['label' => $job->title]]"
+    />
     <main class="wrap jobs-detail-main">
-        <nav class="crumbs" aria-label="Breadcrumb">
-            <a href="{{ route('home') }}">Home</a><span aria-hidden="true">/</span><a href="{{ route('jobs.index') }}">Jobs</a><span aria-hidden="true">/</span><b>{{ $job->title }}</b>
-        </nav>
-
         <div class="jobs-detail-layout">
             <article class="jobs-detail-content">
                 <div class="jobs-detail-tags"><span class="cat">{{ $job->category_label }}</span><span class="jobs-detail-type">{{ $job->employment_type_label }}</span>@if($job->is_featured)<span class="job-featured">Featured opportunity</span>@endif</div>
-                <h1>{{ $job->title }}</h1>
                 <p class="jobs-detail-employer">{{ $job->employer }}</p>
                 @if($job->excerpt)<p class="jobs-detail-excerpt">{{ $job->excerpt }}</p>@endif
 
