@@ -4,7 +4,7 @@
         class="district-page-hero"
         :eyebrow="($district->region?->name ? $district->region->name.' Region · School directory' : 'School directory in Uganda')"
         :title="'Schools in '.$district->name.' District'"
-        :description="'Discover active, verified schools in '.$district->name.' District. Explore school levels, published fees and admission information, then visit each profile to contact the school.'"
+        :description="'Discover active, verified schools in '.$district->name.' District. Explore school levels, estimated fee ranges and admission information, then visit each profile to contact the school.'"
         :meta="number_format($totalSchools).' verified schools in '.$district->name"
         :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Schools', 'url' => route('schools.index')], ['label' => $district->name.' District']]"
     >
@@ -13,8 +13,8 @@
                 <div><b>{{ number_format($admissionsOpenCount) }}</b><span>Admissions open</span></div>
                 <div><b>{{ number_format($boardingCount) }}</b><span>Boarding options</span></div>
                 <div>
-                    <b>{{ $averageTermFee !== null ? 'UGX '.number_format((float) $averageTermFee) : '—' }}</b>
-                    <span>Average published starting tuition / term</span>
+                    <b>{{ number_format($feeEstimateSchoolsCount) }}</b>
+                    <span>Schools with fee estimates</span>
                 </div>
             </div>
 
