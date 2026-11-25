@@ -36,6 +36,8 @@ a{color:inherit;text-decoration:none}ul{list-style:none}
 header{background:var(--brand);color:#fff;position:relative;z-index:40;box-shadow:0 2px 10px rgba(0,0,0,.18)}
 header .wrap{display:flex;align-items:center;gap:28px;height:64px}
 .logo{font:700 26px var(--serif);letter-spacing:-.3px}.logo b{color:var(--accent)}
+.logo-image{display:inline-flex;align-items:center;flex:none;line-height:0}
+.logo-image img{display:block;width:168px;height:auto;max-height:42px;object-fit:contain;object-position:left center}
 nav{display:flex;gap:4px;margin:0 auto}
 nav a{padding:8px 14px;border-radius:8px;font-size:14px;font-weight:500}
 nav a:hover,nav a.on{background:rgba(255,255,255,.16)}
@@ -118,8 +120,10 @@ body.nolock{overflow:hidden}
   .ov.open{opacity:1;visibility:visible}
   .drawer{display:flex;flex-direction:column;position:fixed;top:0;right:0;bottom:0;width:min(82vw,380px);background:var(--brand-xdk);color:#fff;z-index:80;transform:translateX(100%);visibility:hidden;transition:transform .25s,visibility .25s;box-shadow:-12px 0 32px rgba(0,0,0,.4)}
   .drawer.open{transform:none;visibility:visible}
-  .dh{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #2a5a4d;flex:none}
+  .dh{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid #2a5a4d;flex:none}
   .dh .logo{font-size:24px;color:#fff}
+  .dh-actions{display:flex;align-items:center;gap:8px}
+  .dh .account-btn{width:40px;height:40px;flex:none}
   .dx{width:40px;height:40px;border:0;background:none;color:#fff;font-size:22px;cursor:pointer;border-radius:8px}.dx:hover{background:#12453a}
   .dl{flex:1;overflow-y:auto;overscroll-behavior:contain}
   .dl a{display:block;padding:16px 20px;border-bottom:1px solid #1d4a3f;font-size:17px;font-weight:500;color:#fff}
@@ -228,7 +232,11 @@ input{accent-color:var(--brand)}button{font-family:inherit}
 .pg{border-top:0;margin-top:24px}.pg a[aria-disabled=true]{opacity:.4;pointer-events:none}
 @media(max-width:1100px){.res.grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:1000px){
-  .rtab,header nav,header .btn,.hic,aside .ad,aside .promo2{display:none}
+  .rtab,header nav,header .btn,aside .ad,aside .promo2{display:none}
+  .hic{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .hic .hb[aria-label="Saved schools"]{display:none}
+  .hic .hb[aria-label="Account"]{display:grid;width:40px;height:40px}
+  .burger{margin-left:0}
   .cols{padding-top:0;grid-template-columns:minmax(0,1fr)}.crumb{padding:12px 0 10px}
   .pt{font-size:22px;margin:12px 0 10px}
   .mrow{display:flex;gap:10px;overflow-x:auto;margin-bottom:12px;scrollbar-width:none}.mrow::-webkit-scrollbar{display:none}
@@ -282,14 +290,15 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .wrap{padding-left:16px;padding-right:16px}
   header .wrap{min-height:64px}
   header .logo{font-size:23px}
+  header .logo-image img{width:140px;max-height:34px}
   .sband{padding:14px 0}
   .sform{min-height:54px;padding:5px 6px 5px 16px}
   .sform input,.sform input[type="search"]{font-size:16px;line-height:1.35}
   .sform .go{height:44px;padding:0 18px;font-size:14px}
   .crumb{font-size:12.5px;line-height:1.45;flex-wrap:wrap}
   .pt{font-size:23px;line-height:1.2;margin:14px 0 12px}
-  .qchips{gap:8px}
-  .qc{font-size:13px;min-height:42px;height:auto;padding:9px 13px;line-height:1.3}
+  .qchips{gap:8px;flex-wrap:wrap;overflow:visible}
+  .qc{font-size:12.5px;min-height:40px;height:auto;padding:8px 10px;line-height:1.3}
   .result-meta{font-size:13px;line-height:1.45;gap:8px}
   .sort-form select{font-size:14px;min-height:42px}
   .res.grid{grid-template-columns:minmax(0,1fr);gap:12px}
@@ -339,11 +348,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <a href="{{ route('events.index') }}">Events</a>
   <a href="{{ route('articles.index') }}">Articles</a>
   <a href="{{ route('contact') }}">Contact</a>
-  @guest<a href="{{ route('login') }}">Log in</a><a href="{{ route('register') }}">Sign up</a>@else<a href="{{ route('user.home') }}">My account</a>@endguest
 </div></div>
 
 <header><div class="wrap">
-  <a class="logo" href="{{ route('home') }}">Find<b>UR</b>SCH</a>
+  <a class="logo logo-image" href="{{ route('home') }}"><img src="https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png" alt="FindURSCH" width="168" height="37" fetchpriority="high"></a>
   <nav aria-label="Main navigation">
     <a href="{{ route('home') }}">Home</a>
     <a class="on" href="{{ route('schools.index') }}">Schools</a>
@@ -357,7 +365,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <a class="hb" href="{{ auth()->check() ? route('user.saved-schools') : route('login') }}" aria-label="Saved schools"><svg class="i"><use href="#i-bm"/></svg>@if(auth()->check() && $savedSchoolCount > 0)<em>{{ $savedSchoolCount }}</em>@endif</a>
     <a class="hb" href="{{ auth()->check() ? route('user.home') : route('login') }}" aria-label="Account"><svg class="i"><use href="#i-user"/></svg></a>
   </div>
-  <a class="btn btn-ghost" href="{{ route('register') }}">List your school</a>
   <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false">☰</button>
 </div></header>
 
@@ -523,7 +530,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     const shade=document.createElement('div'); shade.className='ov'; document.body.appendChild(shade);
     const links=nav?Array.from(nav.querySelectorAll('a')).map(a=>'<a href="'+a.href+'">'+a.textContent+'</a>').join(''):'';
     const other=Array.from(extras).map(a=>'<a href="'+a.href+'">'+a.textContent+'</a>').join('');
-    drawer.innerHTML='<div class="dh"><a class="logo" href="{{ route('home') }}">Find<b>UR</b>SCH</a><button class="dx" type="button" aria-label="Close menu">✕</button></div><div class="dl">'+links+'<hr>'+other+'<a href="{{ route('register') }}">List your school</a></div><div class="df"><a href="{{ route('login') }}">Sign in</a><a class="b2" href="{{ route('register') }}">Register</a></div>';
+    drawer.innerHTML='<div class="dh"><a class="logo logo-image" href="{{ route('home') }}"><img src="https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png" alt="FindURSCH" width="156" height="34"></a><div class="dh-actions"><a class="hb account-btn" href="{{ route('login') }}" aria-label="Account"><svg class="i"><use href="#i-user"/></svg></a><button class="dx" type="button" aria-label="Close menu">✕</button></div></div><div class="dl">'+links+'<hr>'+other+'</div>';
     document.body.appendChild(drawer);
     const setOpen=open=>{drawer.classList.toggle('open',open);shade.classList.toggle('open',open);document.body.classList.toggle('nolock',open);burger.setAttribute('aria-expanded',String(open));(open?drawer.querySelector('.dx'):burger).focus()};
     burger.addEventListener('click',()=>setOpen(true)); shade.addEventListener('click',()=>setOpen(false)); drawer.querySelector('.dx').addEventListener('click',()=>setOpen(false)); drawer.addEventListener('click',e=>{if(e.target.closest('a'))setOpen(false)}); document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false)});
