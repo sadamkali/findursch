@@ -7,6 +7,7 @@ use App\Models\District;
 use App\Models\Region;
 use App\Models\School;
 use App\Models\SchoolType;
+use App\Models\Setting;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -165,6 +166,13 @@ class SchoolDirectoryController extends Controller
                 ->all();
         }
 
+        $brandSettings = Setting::query()
+            ->whereIn('key', ['site_logo', 'site_horizontal_logo', 'site_mobile_logo'])
+            ->pluck('value', 'key');
+        $defaultHeaderLogo = 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png';
+        $headerLogoUrl = $brandSettings['site_horizontal_logo'] ?: ($brandSettings['site_logo'] ?: $defaultHeaderLogo);
+        $mobileLogoUrl = $brandSettings['site_mobile_logo'] ?: $headerLogoUrl;
+
         return response()->view('livewire.schools.school-listing', [
             'schools' => $schools,
             'schoolTypes' => $schoolTypes,
@@ -175,6 +183,8 @@ class SchoolDirectoryController extends Controller
             'allSchoolCount' => School::query()->publiclyVisible()->count(),
             'savedSchoolIds' => $savedSchoolIds,
             'savedSchoolCount' => $savedSchoolCount,
+            'headerLogoUrl' => $headerLogoUrl,
+            'mobileLogoUrl' => $mobileLogoUrl,
             'selectedDistrictIds' => $districtIds,
             'selectedCurriculumIds' => $curriculumIds,
             'selectedBoardingTypes' => $boardingTypes,
