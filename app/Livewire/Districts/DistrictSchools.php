@@ -134,8 +134,8 @@ class DistrictSchools extends Component
     {
         return match ($this->sort) {
             'fee_low' => $query
-                ->orderByRaw('CASE WHEN COALESCE(schools.fees_from, schools.fees_to) IS NULL OR COALESCE(schools.fees_from, schools.fees_to) <= 0 THEN 1 ELSE 0 END ASC')
-                ->orderByRaw('COALESCE(schools.fees_from, schools.fees_to) ASC')
+                ->orderByRaw('CASE WHEN schools.fees_from IS NULL OR schools.fees_to IS NULL OR schools.fees_from <= 0 OR schools.fees_to <= schools.fees_from THEN 1 ELSE 0 END ASC')
+                ->orderBy('schools.fees_from')
                 ->orderBy('name'),
             'name' => $query->orderBy('name'),
             default => $query
@@ -177,10 +177,10 @@ class DistrictSchools extends Component
         $feeEstimateSchoolsCount = School::query()
             ->publiclyVisible()
             ->where('district_id', $this->district->id)
-            ->where(function (Builder $query) {
-                $query->whereNotNull('fees_from')
-                    ->orWhereNotNull('fees_to');
-            })
+            ->whereNotNull('fees_from')
+            ->whereNotNull('fees_to')
+            ->where('fees_from', '>', 0)
+            ->whereColumn('fees_to', '>', 'fees_from')
             ->count();
 
         $totalSchools = (clone $base)->count();
