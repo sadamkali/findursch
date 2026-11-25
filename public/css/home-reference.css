@@ -436,3 +436,571 @@
   .findursch-home-page .school-actions{align-items:flex-start;flex-direction:column}
   .findursch-home-page .lead-story .cap{padding:18px 18px 50px}
 }
+
+/* --------------------------------------------------------------------------
+   Mobile-first refinement for the FindURSCH homepage.
+   Scoped to .findursch-home-page so directory, detail and account routes
+   retain their own responsive rules.
+   -------------------------------------------------------------------------- */
+@media (max-width: 760px) {
+  .findursch-home-page {
+    --gap: 18px;
+    overflow-wrap: anywhere;
+  }
+
+  .findursch-home-page .wrap {
+    padding-inline: 18px;
+  }
+
+  .findursch-home-page .cols > *,
+  .findursch-home-page .news > *,
+  .findursch-home-page .ins > *,
+  .findursch-home-page .stack,
+  .findursch-home-page aside,
+  .findursch-home-page .fgrid > * {
+    min-width: 0;
+  }
+
+  .findursch-home-page .hero {
+    min-height: 410px;
+    padding: 52px 18px 62px;
+    background-position: center;
+  }
+
+  .findursch-home-page .hero h1 {
+    max-width: 650px;
+    font-size: clamp(32px, 5.8vw, 42px);
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+
+  .findursch-home-page .hero p {
+    max-width: 560px;
+    margin: 16px auto 24px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .findursch-home-page .search {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+    max-width: 620px;
+    gap: 0;
+    padding: 7px;
+    border-radius: 16px;
+  }
+
+  .findursch-home-page .search input {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 12px 12px;
+    font-size: 16px !important;
+  }
+
+  .findursch-home-page .search select {
+    flex: 1 1 100%;
+    width: 100%;
+    min-height: 46px;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .findursch-home-page .search .btn,
+  .findursch-home-page .search button {
+    flex: 1 1 100%;
+    width: 100%;
+    min-height: 46px;
+    margin-top: 6px;
+    justify-content: center;
+  }
+
+  .findursch-home-page .hero .dots {
+    bottom: 14px;
+  }
+
+  .findursch-home-page .tab {
+    top: auto;
+    right: 12px;
+    bottom: 14px;
+    writing-mode: horizontal-tb;
+    padding: 10px 13px;
+    border-radius: 999px;
+    font-size: 10px;
+    letter-spacing: .045em;
+  }
+
+  .findursch-home-page .sec {
+    padding-top: 42px;
+  }
+
+  .findursch-home-page .head {
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+
+  .findursch-home-page .head h2 {
+    font-size: 23px;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  .findursch-home-page .head .more {
+    flex: 0 0 auto;
+    padding-top: 4px;
+    font-size: 12px;
+  }
+
+  .findursch-home-page .cards {
+    gap: 16px;
+  }
+
+  .findursch-home-page .school {
+    flex-basis: 88%;
+  }
+
+  .findursch-home-page .school .ph {
+    height: 170px;
+  }
+
+  .findursch-home-page .school div.b {
+    padding: 14px;
+  }
+
+  .findursch-home-page .spot {
+    margin-top: 24px;
+  }
+
+  .findursch-home-page .spot .t {
+    padding: 22px;
+  }
+
+  .findursch-home-page .spot h3 {
+    font-size: 23px;
+  }
+
+  .findursch-home-page .strip {
+    width: 100%;
+    padding: 18px;
+    gap: 12px;
+  }
+
+  .findursch-home-page .news {
+    gap: 16px;
+  }
+
+  .findursch-home-page .lead {
+    min-height: 310px;
+  }
+
+  .findursch-home-page .lead-story .cap {
+    padding: 18px 18px 50px;
+  }
+
+  .findursch-home-page .lead h3 {
+    font-size: 21px;
+    line-height: 1.25;
+  }
+
+  .findursch-home-page .rows {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .findursch-home-page .row {
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .findursch-home-page .row .ph {
+    height: 66px;
+  }
+
+  .findursch-home-page .row h4 {
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+
+  .findursch-home-page .prem .ph {
+    height: 160px;
+  }
+
+  .findursch-home-page .prem .flag {
+    top: 130px;
+  }
+
+  .findursch-home-page .band {
+    padding: 22px;
+    gap: 16px;
+  }
+
+  .findursch-home-page .band h3 {
+    font-size: 22px;
+  }
+
+  .findursch-home-page .band .acts {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .findursch-home-page .vids {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .findursch-home-page .promo {
+    padding: 22px;
+  }
+
+  .findursch-home-page .promo h3 {
+    font-size: 25px;
+  }
+
+  .findursch-home-page .tinted {
+    margin-top: 44px;
+    padding: 40px 0 46px;
+  }
+
+  .findursch-home-page .ins {
+    gap: 16px;
+  }
+
+  .findursch-home-page .big .ph {
+    height: 190px;
+  }
+
+  .findursch-home-page .spl {
+    min-height: 300px;
+  }
+
+  .findursch-home-page .banner {
+    width: calc(100% - 36px);
+    gap: 14px;
+    margin: 34px auto;
+  }
+
+  .findursch-home-page .banner .ad {
+    height: 180px;
+  }
+
+  .findursch-home-page .cta {
+    padding: 52px 18px;
+  }
+
+  .findursch-home-page .cta h2 {
+    font-size: 31px;
+    line-height: 1.15;
+  }
+
+  .findursch-home-page .cta .acts {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .findursch-home-page .fgrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 22px;
+    padding-bottom: 34px;
+  }
+
+  .findursch-home-page .fgrid > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .findursch-home-page .fbar {
+    align-items: stretch;
+    gap: 14px;
+    padding: 20px 0;
+  }
+
+  .findursch-home-page .fbar .box2 {
+    width: 100%;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 560px) {
+  .findursch-home-page {
+    --gap: 14px;
+  }
+
+  .findursch-home-page .wrap {
+    padding-inline: 16px;
+  }
+
+  .findursch-home-page .hero {
+    min-height: 390px;
+    padding: 44px 16px 58px;
+  }
+
+  .findursch-home-page .hero h1 {
+    font-size: clamp(28px, 8vw, 36px);
+    line-height: 1.12;
+  }
+
+  .findursch-home-page .hero p {
+    margin: 14px auto 20px;
+    font-size: 14px;
+  }
+
+  .findursch-home-page .search {
+    border-radius: 14px;
+    padding: 6px;
+  }
+
+  .findursch-home-page .search input {
+    min-height: 46px;
+    padding-inline: 10px;
+  }
+
+  .findursch-home-page .search select {
+    min-height: 44px;
+  }
+
+  .findursch-home-page .search .btn,
+  .findursch-home-page .search button {
+    min-height: 44px;
+  }
+
+  .findursch-home-page .tab {
+    right: 10px;
+    bottom: 10px;
+    padding: 9px 12px;
+    font-size: 9.5px;
+  }
+
+  .findursch-home-page .sec {
+    padding-top: 34px;
+  }
+
+  .findursch-home-page .head h2 {
+    font-size: 21px;
+  }
+
+  .findursch-home-page .cards {
+    gap: 12px;
+  }
+
+  .findursch-home-page .school {
+    flex-basis: 100%;
+  }
+
+  .findursch-home-page .school .ph {
+    height: 158px;
+  }
+
+  .findursch-home-page .school-actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    font-size: 11.5px;
+  }
+
+  .findursch-home-page .school-actions button {
+    padding: 7px 8px;
+    font-size: 10.5px;
+  }
+
+  .findursch-home-page .spot .ph {
+    height: 152px;
+  }
+
+  .findursch-home-page .spot .t {
+    padding: 18px;
+  }
+
+  .findursch-home-page .spot h3 {
+    font-size: 21px;
+  }
+
+  .findursch-home-page .strip {
+    padding: 16px;
+  }
+
+  .findursch-home-page .strip h4 {
+    font-size: 16px;
+  }
+
+  .findursch-home-page .strip .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .findursch-home-page .lead {
+    min-height: 286px;
+  }
+
+  .findursch-home-page .lead-story .cap {
+    padding: 16px 16px 48px;
+  }
+
+  .findursch-home-page .lead h3 {
+    font-size: 19px;
+  }
+
+  .findursch-home-page .lead .cap p {
+    font-size: 12px;
+  }
+
+  .findursch-home-page .lead .arrow {
+    width: 30px;
+    height: 30px;
+  }
+
+  .findursch-home-page .lead .arrow.l {
+    left: 8px;
+  }
+
+  .findursch-home-page .lead .arrow.r {
+    right: 8px;
+  }
+
+  .findursch-home-page .prem .b {
+    padding: 14px;
+  }
+
+  .findursch-home-page .prem h3 {
+    font-size: 18px;
+  }
+
+  .findursch-home-page .prem small {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .findursch-home-page .band {
+    padding: 18px;
+  }
+
+  .findursch-home-page .band h3 {
+    font-size: 20px;
+  }
+
+  .findursch-home-page .band .acts {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .findursch-home-page .band .acts .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .findursch-home-page .vid .ph {
+    height: 190px;
+  }
+
+  .findursch-home-page .promo {
+    padding: 18px;
+  }
+
+  .findursch-home-page .promo h3 {
+    font-size: 23px;
+  }
+
+  .findursch-home-page .quote {
+    padding: 14px;
+  }
+
+  .findursch-home-page .tinted {
+    margin-top: 34px;
+    padding: 34px 0 38px;
+  }
+
+  .findursch-home-page .big .ph {
+    height: 165px;
+  }
+
+  .findursch-home-page .big .b {
+    padding: 15px;
+  }
+
+  .findursch-home-page .spl {
+    min-height: 270px;
+  }
+
+  .findursch-home-page .spl div {
+    padding: 18px;
+  }
+
+  .findursch-home-page .banner {
+    width: calc(100% - 32px);
+    margin: 28px auto;
+  }
+
+  .findursch-home-page .cta {
+    padding: 42px 16px;
+  }
+
+  .findursch-home-page .cta h2 {
+    font-size: 27px;
+  }
+
+  .findursch-home-page .cta .acts {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .findursch-home-page .cta .acts .btn {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+  }
+
+  .findursch-home-page .fgrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+
+  .findursch-home-page .fgrid > :first-child {
+    grid-column: auto;
+  }
+
+  .findursch-home-page .ref-footer {
+    padding-top: 38px;
+  }
+
+  .findursch-home-page .fbar .box2 {
+    align-items: flex-start;
+  }
+
+  .findursch-home-page .fbar .box2 .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .findursch-home-page .wrap {
+    padding-inline: 14px;
+  }
+
+  .findursch-home-page .hero {
+    padding-inline: 14px;
+  }
+
+  .findursch-home-page .hero h1 {
+    font-size: 28px;
+  }
+
+  .findursch-home-page .head {
+    gap: 8px;
+  }
+
+  .findursch-home-page .head h2 {
+    font-size: 20px;
+  }
+
+  .findursch-home-page .school-actions {
+    gap: 6px;
+    font-size: 11px;
+  }
+}
