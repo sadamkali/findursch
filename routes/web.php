@@ -21,6 +21,7 @@ use App\Livewire\User\MyReviews;
 use App\Livewire\User\ProfileEdit;
 use App\Livewire\User\SavedSchools;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\SchoolDirectoryController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SchoolRequirementDownloadController;
@@ -38,7 +39,7 @@ $accountDashboardUrl = static fn (): string => rtrim((string) config('services.d
 
 // =============== PUBLIC WEBSITE ===============
 Route::get('/', HomePage::class)->name('home');
-Route::view('/schools', 'livewire.schools.school-listing')->name('schools.index');
+Route::get('/schools', SchoolDirectoryController::class)->name('schools.index');
 Route::get('/schools/{school:slug}', SchoolDetail::class)->name('schools.show');
 Route::get('/schools/{school:slug}/requirements/{document}/download', SchoolRequirementDownloadController::class)
     ->whereNumber('document')->middleware('throttle:20,1')->name('schools.requirements.download');
