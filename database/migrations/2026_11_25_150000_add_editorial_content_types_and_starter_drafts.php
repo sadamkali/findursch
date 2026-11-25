@@ -76,12 +76,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        DB::table('articles')->whereIn('slug', [
-            'finding-the-right-school-for-your-child', 'looking-for-daycare-or-kindergarten',
-            'preparing-your-child-for-primary-school', 'exploring-primary-schools-in-uganda',
-            'boarding-or-day-school', 'choosing-the-right-university-course',
-            'why-extracurricular-activities-matter',
-        ])->delete();
+        // Keep editorial drafts and any later edits intact if this schema change is rolled back.
+        // Without the content_type column, existing records fall back to the legacy article/blog feed.
 
         if (Schema::hasColumn('articles', 'content_type')) {
             Schema::table('articles', function (Blueprint $table) {
