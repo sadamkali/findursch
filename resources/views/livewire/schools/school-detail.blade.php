@@ -65,6 +65,13 @@
             : route('register');
     ?>
     <a class="sref-register-tab" href="{{ $registerSchoolUrl }}">REGISTER YOUR SCHOOL</a>
+    <x-site-page-hero
+        eyebrow="{{ $school->type?->name ?: 'School profile' }}"
+        :title="$school->name"
+        :description="\Illuminate\Support\Str::limit($school->tagline ?: $school->description, 220)"
+        :meta="$displayLocation"
+        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Schools', 'url' => route('schools.index')], ['label' => $school->name]]"
+    />
     @if($profileImages->isNotEmpty())
         <section class="sref-mosaic sref-mosaic--{{ min($profileImages->count(), 4) }}" aria-label="School photo gallery">
             <button type="button" class="sref-mosaic__main" x-on:click="show(images, 0)" aria-label="View school photos">
@@ -86,15 +93,6 @@
         </section>
     @endif
 
-    <div class="sref-crumbs">
-        <div class="site-wrap">
-            <a href="{{ route('home') }}">Home</a>
-            <a href="{{ route('schools.index') }}">Schools</a>
-            <?php if ($school->type): ?><a href="{{ route('schools.index', ['type' => $school->type->id]) }}">{{ $school->type->name }}</a><?php endif; ?>
-            <span>{{ $school->name }}</span>
-        </div>
-    </div>
-
     <main class="site-wrap sref-page">
         <div class="sref-cols">
             {{-- LEFT COLUMN: exact order and card arrangement from the supplied HTML --}}
@@ -107,7 +105,6 @@
                             </div>
                         @endif
                         <div class="sref-school-copy">
-                            <h1>{{ $school->name }}</h1>
                             <div class="sref-tags">
                                 <?php if ($school->type): ?><span class="sref-tag sref-tag--gold">{{ $school->type->name }}</span><?php endif; ?>
                                 <span class="sref-tag sref-tag--green">✓ Verified</span>
