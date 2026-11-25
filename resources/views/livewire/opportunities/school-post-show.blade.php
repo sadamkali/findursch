@@ -16,36 +16,14 @@
 
 <div class="resource-page school-news-detail-page">
     <a class="blogs-rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
-    <x-site-ad-banner placement="top" />
-
+    <x-site-page-hero
+        eyebrow="School news · Published {{ $post->published_at?->format('d F Y') }}"
+        :title="$post->title"
+        :description="\Illuminate\Support\Str::limit(strip_tags($post->description), 250)"
+        :meta="$locationLabel.' · '.$readingMinutes.' min read'"
+        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Education news', 'url' => route('news.index')], ['label' => $post->title]]"
+    />
     <div class="blogs-wrap resource-detail-wrap school-news-wrap">
-        <nav class="resource-crumbs" aria-label="Breadcrumb">
-            <a href="{{ route('home') }}">Home</a>
-            <span>›</span>
-            <a href="{{ route('news.index') }}">Education news</a>
-            <span>›</span>
-            @if($school)
-                <a href="{{ route('schools.show', $school) }}">{{ $school->name }}</a>
-                <span>›</span>
-            @endif
-            <b>{{ $post->title }}</b>
-        </nav>
-
-        <header class="school-news-heading">
-            <div class="school-news-heading-tags">
-                <span>School news</span>
-                <span>Published {{ $post->published_at?->format('d F Y') }}</span>
-            </div>
-            <h1>{{ $post->title }}</h1>
-            <p>{{ \Illuminate\Support\Str::limit(strip_tags($post->description), 260) }}</p>
-            <div class="school-news-heading-meta">
-                @if($school)
-                    <a href="{{ route('schools.show', $school) }}">{{ $school->name }}</a>
-                @endif
-                <span>{{ $locationLabel }}</span>
-                <span>{{ $readingMinutes }} min read</span>
-            </div>
-        </header>
 
         <div class="resource-detail-grid school-news-detail-grid">
             <article class="resource-detail-content school-news-article">
