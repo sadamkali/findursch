@@ -41,7 +41,7 @@ class SchoolDirectoryController extends Controller
         $feeMax = isset($filters['fee_max']) ? (float) $filters['fee_max'] : null;
         $admissionsOpen = (bool) ($filters['admissions_open'] ?? false);
         $sort = $filters['sort'] ?? 'newest';
-        $viewMode = $filters['view'] ?? 'list';
+        $viewMode = $filters['view'] ?? 'grid';
 
         $termTuition = static fn ($fees) => $fees
             ->where('category', 'tuition')
