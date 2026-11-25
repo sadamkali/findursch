@@ -1,6 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
+    "static-assets": {
+      "root": "public",
+      "framework": null,
+      "outputDirectory": "."
+    },
     "backend-laravel": {
       "root": ".",
       "entrypoint": "Dockerfile",
@@ -8,6 +13,30 @@
     }
   },
   "rewrites": [
+    {
+      "source": "/build/assets/(.*)",
+      "destination": {
+        "service": "static-assets"
+      }
+    },
+    {
+      "source": "/css/(.*)",
+      "destination": {
+        "service": "static-assets"
+      }
+    },
+    {
+      "source": "/vendor/livewire/(.*)",
+      "destination": {
+        "service": "static-assets"
+      }
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": {
+        "service": "static-assets"
+      }
+    },
     {
       "source": "/(.*)",
       "destination": {
