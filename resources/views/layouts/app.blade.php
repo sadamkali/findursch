@@ -102,7 +102,7 @@
         }
         body { font-family: '{{ $siteBodyFont }}', system-ui, sans-serif; }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=4">
+    <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=5">
     <link rel="stylesheet" href="{{ asset('css/site-page-hero.css') }}?v=1">
     @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=14">@endif
 </head>
