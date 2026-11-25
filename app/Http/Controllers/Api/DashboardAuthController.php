@@ -239,6 +239,44 @@ class DashboardAuthController extends Controller
         return $this->issueDashboardSession($user);
     }
 
+    /**
+     * Register a parent or guardian without creating a school listing.
+     * This endpoint assigns the parent role server-side; callers cannot choose a role.
+     */
+    public function registerParent(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:30', 'regex:/^\+?[0-9 ]{9,15}$/', 'unique:users,phone'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $email = Str::lower(trim($data['email']));
+        $phone = isset($data['phone']) ? trim($data['phone']) : null;
+
+        $user = DB::transaction(function () use ($data, $email, $phone) {
+            $user = User::query()->create([
+                'name' => trim($data['name']),
+                'email' => $email,
+                'phone' => $phone ?: null,
+                'password' => $data['password'],
+            ]);
+
+            $user->forceFill([
+                'user_type' => 'parent',
+                'status' => 'active',
+            ])->save();
+
+            Role::findOrCreate('parent', 'web');
+            $user->assignRole('parent');
+
+            return $user;
+        });
+
+        return $this->issueDashboardSession($user);
+    }
+
     public function registerSchool(Request $request): JsonResponse
     {
         $data = $request->validate([
