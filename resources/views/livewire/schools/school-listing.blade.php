@@ -376,7 +376,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <nav aria-label="Main navigation">
     <a href="{{ route('home') }}">Home</a>
     <a class="on" href="{{ route('schools.index') }}">Schools</a>
-    <a href="{{ route('compare') }}">Compare</a>
     <a href="{{ route('scholarships.index') }}">Scholarships</a>
     <a href="{{ route('news.index') }}">News</a>
     <a href="{{ route('jobs.index') }}">Jobs</a>
