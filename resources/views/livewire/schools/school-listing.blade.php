@@ -328,7 +328,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .grid .ft,.ft{font-size:12.5px}
 }
 </style>
-<link rel="stylesheet" href="{{ asset('css/site-footer.css') }}?v=1">
+<link rel="stylesheet" href="{{ asset('css/site-footer.css') }}?v=2">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
