@@ -50,7 +50,7 @@
     $feeRangeTo = is_numeric($school->fees_to) && (float) $school->fees_to > 0
         ? (float) $school->fees_to
         : null;
-    $hasFeeRange = $feeRangeFrom !== null && $feeRangeTo !== null && $feeRangeFrom !== $feeRangeTo;
+    $hasFeeRange = $feeRangeFrom !== null && $feeRangeTo !== null && $feeRangeFrom < $feeRangeTo;
     $feeCircular = $school->documents
         ->where('document_type', 'fees_circular')
         ->sortByDesc('created_at')
@@ -440,12 +440,6 @@
                         @if($hasFeeRange)
                             <b>UGX {{ number_format(min($feeRangeFrom, $feeRangeTo)) }} – UGX {{ number_format(max($feeRangeFrom, $feeRangeTo)) }}</b>
                             <small>Approximate fee range per term</small>
-                        @elseif($feeRangeFrom !== null && $feeRangeTo === null)
-                            <b>From UGX {{ number_format($feeRangeFrom) }}</b>
-                            <small>Estimated starting range per term</small>
-                        @elseif($feeRangeTo !== null && $feeRangeFrom === null)
-                            <b>Up to UGX {{ number_format($feeRangeTo) }}</b>
-                            <small>Estimated range per term</small>
                         @else
                             <b>Fee range not provided</b>
                             <small>Contact the school for an estimate</small>
