@@ -1,10 +1,45 @@
-<section class="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-    <div class="mb-8"><a href="{{ route('user.home') }}" class="text-sm font-medium text-primary hover:underline">← Account overview</a><h1 class="mt-5 text-3xl font-semibold text-gray-900" style="font-family: 'DM Serif Display', serif;">Profile settings</h1><p class="mt-2 text-sm text-gray-600">Keep your contact details up to date.</p></div>
-    @if(session('message'))<div class="mb-5 rounded-lg bg-green-50 p-3 text-sm text-green-800">{{ session('message') }}</div>@endif
-    <form wire:submit="save" class="space-y-5 rounded-xl border border-gray-200 bg-white p-6">
-        <div><label for="name" class="mb-1 block text-sm font-medium text-gray-700">Full name</label><input id="name" wire:model="name" required class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm">@error('name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror</div>
-        <div><label for="email" class="mb-1 block text-sm font-medium text-gray-700">Email address</label><input id="email" type="email" wire:model="email" required class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm">@error('email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror</div>
-        <div><label for="phone" class="mb-1 block text-sm font-medium text-gray-700">Phone number</label><input id="phone" wire:model="phone" maxlength="30" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm">@error('phone')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror</div>
-        <button type="submit" wire:loading.attr="disabled" class="btn-primary">Save changes</button>
+<section class="parent-account-page parent-account-profile-page">
+    <div class="parent-account-page__intro">
+        <a href="{{ route('user.home') }}" class="parent-account-back-link">← Account overview</a>
+        <p class="parent-account-eyebrow">YOUR DETAILS</p>
+        <p class="parent-account-page__description">Keep your name and contact information up to date.</p>
+    </div>
+
+    @if(session('message'))
+        <div class="parent-account-message" role="status">{{ session('message') }}</div>
+    @endif
+
+    <form wire:submit="save" class="parent-account-form">
+        <div class="parent-account-form__heading">
+            <h2>Personal details</h2>
+            <p>These details help schools respond to your enquiries.</p>
+        </div>
+
+        <div class="parent-account-form__grid">
+            <div class="parent-account-field">
+                <label for="name">Full name</label>
+                <input id="name" wire:model="name" autocomplete="name" required>
+                @error('name')<p class="parent-account-field__error">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="parent-account-field">
+                <label for="email">Email address</label>
+                <input id="email" type="email" wire:model="email" autocomplete="email" required>
+                @error('email')<p class="parent-account-field__error">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="parent-account-field">
+                <label for="phone">Phone number</label>
+                <input id="phone" wire:model="phone" maxlength="30" autocomplete="tel">
+                @error('phone')<p class="parent-account-field__error">{{ $message }}</p>@enderror
+            </div>
+        </div>
+
+        <div class="parent-account-form__footer">
+            <button type="submit" wire:loading.attr="disabled" class="parent-account-button parent-account-button--brand">
+                <span wire:loading.remove wire:target="save">Save changes</span>
+                <span wire:loading wire:target="save">Saving…</span>
+            </button>
+        </div>
     </form>
 </section>
