@@ -1,12 +1,12 @@
 <div class="news-page">
     <a class="news-register-tab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
 
-    <x-site-ad-banner placement="top" />
-
-    <section class="news-heading">
-        <h1>School <em>News &amp; Updates</em> in Uganda</h1>
-        <p>Stay informed with the latest education news, school announcements, policy updates and stories from school communities across Uganda.</p>
-    </section>
+    <x-site-page-hero
+        eyebrow="FindURSCH newsroom"
+        title="School News &amp; Updates in Uganda"
+        description="Stay informed with the latest education news, school announcements, policy updates and stories from school communities across Uganda."
+        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'News']]"
+    />
 
     <main class="news-wrap">
         <div class="news-category-row">
