@@ -20,7 +20,7 @@
     $footerPrimaryColor = is_string($footerSettings['primary_color'] ?? null) && preg_match('/^#[0-9a-fA-F]{6}$/', $footerSettings['primary_color']) ? $footerSettings['primary_color'] : '#0c5a49';
     $footerAccentColor = is_string($footerSettings['accent_color'] ?? null) && preg_match('/^#[0-9a-fA-F]{6}$/', $footerSettings['accent_color']) ? $footerSettings['accent_color'] : '#f0b030';
     $footerName = ($footerSettings['site_name'] ?? null) ?: 'FindURSCH';
-    $footerDescription = ($footerSettings['site_description'] ?? null) ?: 'Discover, compare and learn about schools across Uganda.';
+    $footerDescription = ($footerSettings['site_description'] ?? null) ?: 'Discover and learn about schools across Uganda.';
     $footerLogo = ($footerSettings['site_footer_logo'] ?? null)
         ?: (($footerSettings['site_horizontal_logo'] ?? null) ?: 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png');
     $footerAddress = $footerSettings['contact_address'] ?? '';
@@ -84,7 +84,6 @@
                     <h2>Explore schools</h2>
                     <ul>
                         <li><a href="{{ route('schools.index') }}">Find a school</a></li>
-                        <li><a href="{{ route('compare') }}">Compare schools</a></li>
                         <li><a href="{{ route('schools.index', ['sort' => 'newest']) }}">Recently added</a></li>
                         <li><a href="{{ route('schools.index', ['verified_only' => 1]) }}">Verified schools</a></li>
                     </ul>
