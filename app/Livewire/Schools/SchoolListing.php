@@ -6,7 +6,6 @@ use App\Models\Curriculum;
 use App\Models\District;
 use App\Models\Region;
 use App\Models\School;
-use App\Models\SchoolFee;
 use App\Models\SchoolType;
 use App\Models\SchoolAdvertisement;
 use Illuminate\Database\Eloquent\Builder;
@@ -127,12 +126,6 @@ class SchoolListing extends Component
 
     public function render()
     {
-        $termTuition = fn ($fees) => $fees
-            ->where('category', 'tuition')
-            ->where('is_active', true)
-            ->where('currency', 'UGX')
-            ->where('period', 'per_term');
-
         $query = School::query()
             ->publiclyVisible()
             ->with([
@@ -143,8 +136,7 @@ class SchoolListing extends Component
                 'type',
                 'curricula',
                 'media',
-            ])
-            ->withMin(['fees as lowest_term_tuition' => $termTuition], 'amount');
+            ]);
 
         if ($this->district !== '') {
             $query->inDistrict((int) $this->district);
@@ -183,16 +175,17 @@ class SchoolListing extends Component
         }
 
         if ($this->feeFilterEnabled) {
-            $query->whereHas('fees', fn ($fees) => $termTuition($fees)
-                ->where('amount', '<=', max(0, (int) $this->maxFee)));
+            $query->whereNotNull('fees_from')
+                ->where('fees_from', '>', 0)
+                ->where('fees_from', '<=', max(0, (int) $this->maxFee));
         }
 
         match ($this->sort) {
             'rating' => $query->orderByDesc('rating_average')->latest('created_at'),
             'featured' => $query->orderByDesc('is_featured')->latest('created_at'),
             'name' => $query->orderBy('name'),
-            'fee_low' => $this->sortByTermFee($query, $termTuition, 'asc'),
-            'fee_high' => $this->sortByTermFee($query, $termTuition, 'desc'),
+            'fee_low' => $this->sortByTermFee($query, 'asc'),
+            'fee_high' => $this->sortByTermFee($query, 'desc'),
             default => $query->latest('created_at'),
         };
 
@@ -241,16 +234,10 @@ class SchoolListing extends Component
         ]);
     }
 
-    private function sortByTermFee(Builder $query, callable $termTuition, string $direction): Builder
+    private function sortByTermFee(Builder $query, string $direction): Builder
     {
-        $lowestFee = SchoolFee::query()
-            ->select('amount')
-            ->whereColumn('school_fees.school_id', 'schools.id');
-
-        $termTuition($lowestFee)->orderBy('amount');
-
         return $query
-            ->orderByRaw('CASE WHEN ('.$lowestFee->toSql().') IS NULL THEN 1 ELSE 0 END ASC', $lowestFee->getBindings())
-            ->orderBy($lowestFee, $direction);
+            ->orderByRaw('CASE WHEN schools.fees_from IS NULL OR schools.fees_from <= 0 THEN 1 ELSE 0 END ASC')
+            ->orderBy('schools.fees_from', $direction);
     }
 }
