@@ -164,7 +164,6 @@
             $coverUrl = $school->getFirstMediaUrl('cover');
             $logoUrl = $school->getFirstMediaUrl('logo');
             $locationText = collect([$school->town ?: $school->parish?->name, $school->district?->name])->filter()->unique()->implode(', ');
-            $primaryCurriculum = $school->curricula->first();
             $isFeatured = (bool) $school->is_featured && (!$school->featured_until || $school->featured_until->isFuture());
           @endphp
           <article class="lc{{ $isFeatured ? ' prm' : '' }}">
@@ -174,10 +173,10 @@
             </a>
             <div class="bd">
               <div class="tp"><div class="fe">
-                @if($school->lowest_term_tuition !== null)<b>UGX {{ number_format((float)$school->lowest_term_tuition) }}</b> per term @else<b>Fees not published</b>@endif
+                @if($school->lowest_term_tuition !== null)<b>UGX {{ number_format((float)$school->lowest_term_tuition) }}</b> per term @elseif($school->fees_from !== null && (float)$school->fees_from > 0)<b>From UGX {{ number_format((float)$school->fees_from) }}</b>@if($school->fees_to !== null && (float)$school->fees_to > (float)$school->fees_from)<span> – UGX {{ number_format((float)$school->fees_to) }}</span>@endif @else<b>Fees not published</b>@endif
               </div><h3 class="nm"><a href="{{ route('schools.show', $school) }}">{{ $school->name }}</a></h3></div>
               <p class="ds">{{ $school->tagline ?: \Illuminate\Support\Str::limit(strip_tags((string)$school->description), 160, '…') ?: ($school->type?->name.' in '.$locationText) }}</p>
-              <div class="cp"><span>{{ $school->type?->name ?? 'School' }}</span>@if($primaryCurriculum)<span>{{ $primaryCurriculum->abbreviation ?: $primaryCurriculum->name }}</span>@endif @if($school->boarding_type)<span>{{ ucwords(str_replace(['_', '-'], ' ', $school->boarding_type)) }}</span>@endif @if($school->admissions_open)<span class="nw">Admissions open</span>@endif</div>
+              <div class="cp"><span>{{ $school->type?->name ?? 'School' }}</span>@foreach($school->curricula as $schoolCurriculum)<span>{{ $schoolCurriculum->abbreviation ?: $schoolCurriculum->name }}</span>@endforeach @if($school->boarding_type)<span>{{ ucwords(str_replace(['_', '-'], ' ', $school->boarding_type)) }}</span>@endif @if($school->admissions_open)<span class="nw">Admissions open</span>@endif</div>
               <div class="ft"><span class="loc"><svg class="i"><use href="#i-pin"/></svg>{{ $locationText ?: 'Uganda' }}</span>
                 @if(auth()->check())
                   <form class="school-card-save" method="POST" action="{{ route('school.save.toggle', $school) }}">@csrf<button class="sv {{ in_array((int)$school->id, $savedSchoolIds, true) ? 'on' : '' }}" type="submit" aria-label="Save {{ $school->name }}" aria-pressed="{{ in_array((int)$school->id, $savedSchoolIds, true) ? 'true' : 'false' }}"><svg class="i"><use href="#i-bm"/></svg></button></form>
