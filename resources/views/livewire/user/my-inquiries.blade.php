@@ -1,4 +1,38 @@
-<section class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-    <div class="mb-8"><a href="{{ route('user.home') }}" class="text-sm font-medium text-primary hover:underline">← Account overview</a><h1 class="mt-5 text-3xl font-semibold text-gray-900" style="font-family: 'DM Serif Display', serif;">My school inquiries</h1></div>
-    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">@forelse($inquiries as $inquiry)<article class="border-b border-gray-100 p-5 last:border-b-0"><div class="flex flex-wrap items-center justify-between gap-2"><h2 class="font-semibold text-gray-900">{{ $inquiry->school?->name ?? 'School listing' }}</h2><span class="rounded-full bg-gray-100 px-3 py-1 text-xs capitalize text-gray-700">{{ $inquiry->status }}</span></div><p class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-700">{{ $inquiry->message }}</p><p class="mt-3 text-xs text-gray-500">Sent {{ $inquiry->created_at?->format('d M Y, H:i') }}</p>@if($inquiry->owner_response)<div class="mt-4 rounded-lg bg-blue-50 p-4"><p class="text-xs font-semibold uppercase text-blue-800">School response</p><p class="mt-2 whitespace-pre-line text-sm text-blue-950">{{ $inquiry->owner_response }}</p></div>@endif</article>@empty<div class="p-12 text-center text-sm text-gray-500">You have not sent any school inquiries.</div>@endforelse</div><div class="mt-6">{{ $inquiries->links() }}</div>
+<section class="parent-account-page parent-account-list-page">
+    <div class="parent-account-page__intro">
+        <a href="{{ route('user.home') }}" class="parent-account-back-link">← Account overview</a>
+        <p class="parent-account-eyebrow">YOUR SCHOOL CONVERSATIONS</p>
+        <p class="parent-account-page__description">Follow the questions you have sent and read replies from schools.</p>
+    </div>
+
+    <div class="parent-account-record-list">
+        @forelse($inquiries as $inquiry)
+            <article class="parent-account-record">
+                <div class="parent-account-record__heading">
+                    <div>
+                        <h2>{{ $inquiry->school?->name ?? 'School listing' }}</h2>
+                        <p>Sent {{ $inquiry->created_at?->format('d M Y, H:i') }}</p>
+                    </div>
+                    <span class="parent-account-status">{{ str($inquiry->status)->replace('_', ' ')->title() }}</span>
+                </div>
+                <p class="parent-account-record__message">{{ $inquiry->message }}</p>
+                @if($inquiry->owner_response)
+                    <div class="parent-account-response">
+                        <p class="parent-account-eyebrow">SCHOOL RESPONSE</p>
+                        <p>{{ $inquiry->owner_response }}</p>
+                    </div>
+                @endif
+            </article>
+        @empty
+            <div class="parent-account-empty parent-account-empty--page">
+                <strong>You have not sent any enquiries</strong>
+                <p>Contact a school to ask about available places, fees or arranging a visit.</p>
+                <a href="{{ route('schools.index') }}">Find schools</a>
+            </div>
+        @endforelse
+    </div>
+
+    @if($inquiries->hasPages())
+        <div class="parent-account-pagination">{{ $inquiries->links() }}</div>
+    @endif
 </section>
