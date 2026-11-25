@@ -160,7 +160,16 @@
         $savedSchoolCount = auth()->check() ? auth()->user()->savedSchools()->count() : 0;
 
         if (auth()->check()) {
-            if (auth()->user()->hasRole('admin')) {
+            if ($headerAccountUser->hasRole('school_owner')) {
+                $headerAccountSchool = $headerAccountUser->ownedSchools()
+                    ->with('media')
+                    ->latest('updated_at')
+                    ->first();
+                $headerAccountAvatarUrl = $headerAccountSchool?->getFirstMedia('badge')?->getUrl()
+                    ?: $headerAccountSchool?->getFirstMedia('logo')?->getUrl();
+            }
+
+            if ($headerAccountUser->hasRole('admin')) {
                 $accountLinkLabel = 'Admin dashboard';
                 $accountLinkUrl = route('auth.dashboard-login', ['returnTo' => '/admin']);
             } elseif (auth()->user()->hasRole('school_owner')) {
