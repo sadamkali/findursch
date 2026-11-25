@@ -3,7 +3,7 @@
 
     <x-site-page-hero
         eyebrow="FindURSCH community calendar"
-        title="School Events &amp; Open Days"
+        title="School Events & Open Days"
         description="Discover school open days, education fairs, conferences and activities shared by school communities across Uganda."
         meta="School open days · Education fairs · Community activities"
         :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Events']]"
