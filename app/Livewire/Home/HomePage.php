@@ -146,7 +146,7 @@ class HomePage extends Component
             $homepageSlides = [[
                 'image_url' => $legacyHeroImage,
                 'title' => 'Find the right school for your child',
-                'description' => 'Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.',
+                'description' => 'Browse nursery, primary, secondary, vocational and university listings across Uganda, and explore school profiles.',
                 'button_label' => '',
                 'button_url' => '',
             ]];
@@ -176,7 +176,7 @@ class HomePage extends Component
             'homepageSlides', 'firstHeroSlide'
         ))->layout('layouts.app', [
             'title' => 'FindURSCH — Find the right school in Uganda',
-            'description' => 'Find the right school for your child. Explore verified school profiles, compare options, read education news, find events, watch school videos and discover scholarships and jobs across Uganda.',
+            'description' => 'Find the right school for your child. Explore verified school profiles, read education news, find events, watch school videos and discover scholarships and jobs across Uganda.',
         ]);
     }
 }
