@@ -66,7 +66,7 @@
     ?>
     <a class="sref-register-tab" href="{{ $registerSchoolUrl }}">REGISTER YOUR SCHOOL</a>
     <x-site-page-hero
-        eyebrow="{{ $school->type?->name ?: 'School profile' }}"
+        :eyebrow="$school->type?->name ?: 'School profile'"
         :title="$school->name"
         :description="\Illuminate\Support\Str::limit($school->tagline ?: $school->description, 220)"
         :meta="$displayLocation"
