@@ -1,12 +1,16 @@
 <div class="resource-page">
     <a class="blogs-rtab" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
-    <x-site-ad-banner placement="top" />
+    <x-site-page-hero
+        eyebrow="Scholarship / bursary"
+        :title="$scholarship->title"
+        :description="($scholarship->award ?: 'Funding opportunity').' · '.($scholarship->school?->name ?: 'Uganda')"
+        :meta="$scholarship->deadline ? 'Deadline: '.$scholarship->deadline->format('d F Y') : 'Contact the publishing school to confirm availability'"
+        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Scholarships', 'url' => route('scholarships.index')], ['label' => $scholarship->title]]"
+    />
     <main class="blogs-wrap resource-detail-wrap">
-        <nav class="resource-crumbs"><a href="{{ route('home') }}">Home</a><span>›</span><a href="{{ route('scholarships.index') }}">Scholarships</a><span>›</span><b>{{ $scholarship->title }}</b></nav>
         <div class="resource-detail-grid">
             <article class="resource-detail-content">
                 <div class="resource-tags"><span>Scholarship / bursary</span><span>{{ $scholarship->deadline && $scholarship->deadline->isPast() ? 'Deadline passed' : 'Check availability' }}</span></div>
-                <h1>{{ $scholarship->title }}</h1>
                 <p class="resource-detail-lead">{{ $scholarship->award ?: 'Funding opportunity' }} · {{ $scholarship->school?->name }}</p>
                 @if($scholarship->school?->getFirstMediaUrl('cover'))<img class="resource-detail-cover" src="{{ $scholarship->school->getFirstMediaUrl('cover') }}" alt="{{ $scholarship->school->name }}">@endif
                 <section class="resource-prose"><h2>About this opportunity</h2><div>{!! nl2br(e($scholarship->description)) !!}</div></section>
