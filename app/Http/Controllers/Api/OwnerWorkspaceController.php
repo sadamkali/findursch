@@ -517,6 +517,7 @@ class OwnerWorkspaceController extends Controller
         if ($request->isMethod('post')) {
             $validated = $request->validate([
                 'title' => ['required', 'string', 'min:2', 'max:180'],
+                'document_type' => ['nullable', 'string', Rule::in(['requirement', 'fees_circular'])],
                 'description' => ['nullable', 'string', 'max:1200'],
                 'file' => ['required', 'file', 'max:20480'],
             ]);
@@ -582,6 +583,7 @@ class OwnerWorkspaceController extends Controller
                 $created = $record->documents()->create([
                     'uploaded_by' => $request->user()->id,
                     'title' => trim($validated['title']),
+                    'document_type' => $validated['document_type'] ?? 'requirement',
                     'description' => $validated['description'] ?? null,
                     'original_filename' => $originalName,
                     'stored_path' => $storedPath,
@@ -622,6 +624,7 @@ class OwnerWorkspaceController extends Controller
         return [
             'id' => $document->id,
             'title' => $document->title,
+            'document_type' => $document->document_type ?: 'requirement',
             'description' => $document->description,
             'original_filename' => $document->original_filename,
             'mime_type' => $document->mime_type,
