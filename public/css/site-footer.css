@@ -4,7 +4,7 @@
   width:100%;
   margin-top:64px;
   overflow:hidden;
-  background:linear-gradient(135deg,var(--fd-brand-deep,#052a22),color-mix(in srgb,var(--fd-brand,#0c5a49) 58%,#052a22));
+  background:linear-gradient(135deg,var(--fd-brand-deep,#052a22),var(--fd-brand,#0c5a49)) !important;
   color:rgba(255,255,255,.84);
   font-family:var(--fd-body,Inter,system-ui,sans-serif);
 }
