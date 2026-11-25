@@ -104,6 +104,60 @@ class HomePage extends Component
             ->whereIn('key', ['site_name', 'site_description', 'contact_address', 'support_phone', 'support_email', 'site_footer_copyright_text'])
             ->pluck('value', 'key');
 
+        $homepageCarouselSettings = Setting::query()
+            ->whereIn('key', ['homepage_slides', 'homepage_hero_image_url'])
+            ->pluck('value', 'key');
+
+        $storedHomepageSlides = json_decode((string) ($homepageCarouselSettings['homepage_slides'] ?? '[]'), true);
+        $storedHomepageSlides = is_array($storedHomepageSlides) ? $storedHomepageSlides : [];
+
+        $homepageSlides = collect($storedHomepageSlides)
+            ->filter(fn ($slide) => is_array($slide) && ($slide['enabled'] ?? true) !== false && ($slide['enabled'] ?? true) !== 0 && ($slide['enabled'] ?? true) !== '0')
+            ->map(function (array $slide): array {
+                $imageUrl = trim((string) ($slide['image_url'] ?? ''));
+                $imageScheme = $imageUrl !== '' ? strtolower((string) parse_url($imageUrl, PHP_URL_SCHEME)) : '';
+                if (! filter_var($imageUrl, FILTER_VALIDATE_URL) || ! in_array($imageScheme, ['https', 'http'], true)) {
+                    $imageUrl = '';
+                }
+
+                $buttonUrl = trim((string) ($slide['button_url'] ?? ''));
+                $isInternalPath = str_starts_with($buttonUrl, '/') && ! str_starts_with($buttonUrl, '//');
+                $buttonScheme = $buttonUrl !== '' ? strtolower((string) parse_url($buttonUrl, PHP_URL_SCHEME)) : '';
+                $isSecureExternalUrl = filter_var($buttonUrl, FILTER_VALIDATE_URL) && $buttonScheme === 'https';
+                if (! $isInternalPath && ! $isSecureExternalUrl) {
+                    $buttonUrl = '';
+                }
+
+                return [
+                    'image_url' => $imageUrl,
+                    'title' => trim((string) ($slide['title'] ?? '')) ?: 'Find the right school for your child',
+                    'description' => trim((string) ($slide['description'] ?? '')),
+                    'button_label' => trim((string) ($slide['button_label'] ?? '')),
+                    'button_url' => $buttonUrl,
+                ];
+            })
+            ->take(8)
+            ->values()
+            ->all();
+
+        if ($homepageSlides === []) {
+            $legacyHeroImage = trim((string) ($homepageCarouselSettings['homepage_hero_image_url'] ?? ''));
+            $legacyScheme = $legacyHeroImage !== '' ? strtolower((string) parse_url($legacyHeroImage, PHP_URL_SCHEME)) : '';
+            if (! filter_var($legacyHeroImage, FILTER_VALIDATE_URL) || ! in_array($legacyScheme, ['https', 'http'], true)) {
+                $legacyHeroImage = '';
+            }
+
+            $homepageSlides = [[
+                'image_url' => $legacyHeroImage,
+                'title' => 'Find the right school for your child',
+                'description' => 'Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.',
+                'button_label' => '',
+                'button_url' => '',
+            ]];
+        }
+
+        $firstHeroSlide = $homepageSlides[0];
+
         $savedSchoolIds = [];
         $homepageSchoolIds = $featuredSchools->pluck('id')
             ->concat(collect([$spotlightSchool?->id]))
@@ -122,7 +176,8 @@ class HomePage extends Component
         return view('livewire.home.home-page', compact(
             'featuredSchools', 'spotlightSchool', 'schoolTypes', 'newsArticles',
             'insightArticles', 'partnerSchoolNews', 'upcomingEvents', 'scholarshipCount',
-            'latestJobs', 'videos', 'reviews', 'footerSettings', 'savedSchoolIds'
+            'latestJobs', 'videos', 'reviews', 'footerSettings', 'savedSchoolIds',
+            'homepageSlides', 'firstHeroSlide'
         ))->layout('layouts.app', [
             'title' => 'FindURSCH — Find the right school in Uganda',
             'description' => 'Find the right school for your child. Explore verified school profiles, compare options, read education news, find events, watch school videos and discover scholarships and jobs across Uganda.',
