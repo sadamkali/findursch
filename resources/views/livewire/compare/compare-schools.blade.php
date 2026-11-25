@@ -47,7 +47,23 @@
                     <tr><td class="p-4 font-medium">Student Count</td>@foreach($schools as $s)<td class="p-4 text-center">{{ $s->student_count_approx ? number_format($s->student_count_approx) : 'N/A' }}</td>@endforeach</tr>
                     <tr><td class="p-4 font-medium">Rating</td>@foreach($schools as $s)<td class="p-4 text-center">@if($s->rating_average > 0)<span class="text-amber-500">★</span> {{ number_format($s->rating_average, 1) }} ({{ $s->reviews_count }})@else No reviews @endif</td>@endforeach</tr>
                     <tr><td class="p-4 font-medium">Verified</td>@foreach($schools as $s)<td class="p-4 text-center">@if($s->verification_status === 'verified')<span class="text-green-600 font-semibold">✓ Verified</span>@else <span class="text-gray-400">Unverified</span>@endif</td>@endforeach</tr>
-                    <tr class="bg-gray-50"><td class="p-4 font-medium">Lowest Annual Fee</td>@foreach($schools as $s)<td class="p-4 text-center">@if($fee = $s->getLowestAnnualFee())UGX {{ number_format($fee) }}@else N/A @endif</td>@endforeach</tr>
+                    <tr class="bg-gray-50"><td class="p-4 font-medium">Estimated Fee Range (per term)</td>@foreach($schools as $s)
+                        @php
+                            $feeFrom = is_numeric($s->fees_from) && (float) $s->fees_from > 0 ? (float) $s->fees_from : null;
+                            $feeTo = is_numeric($s->fees_to) && (float) $s->fees_to > 0 ? (float) $s->fees_to : null;
+                        @endphp
+                        <td class="p-4 text-center">
+                            @if($feeFrom !== null && $feeTo !== null && $feeFrom !== $feeTo)
+                                UGX {{ number_format(min($feeFrom, $feeTo)) }} – UGX {{ number_format(max($feeFrom, $feeTo)) }}
+                            @elseif($feeFrom !== null && $feeTo === null)
+                                From UGX {{ number_format($feeFrom) }}
+                            @elseif($feeTo !== null && $feeFrom === null)
+                                Up to UGX {{ number_format($feeTo) }}
+                            @else
+                                Fee estimate not provided
+                            @endif
+                        </td>
+                    @endforeach</tr>
                     <tr><td class="p-4 font-medium">Facilities</td>@foreach($schools as $s)<td class="p-4 text-center"><div class="flex flex-wrap justify-center gap-1">@foreach($s->facilities->take(6) as $f)<span class="bg-gray-100 text-gray-700 rounded-badge px-2 py-0.5 text-xs">{{ $f->name }}</span>@endforeach @if($s->facilities->count() > 6)<span class="bg-primary-50 text-primary-700 rounded-badge px-2 py-0.5 text-xs">+{{ $s->facilities->count() - 6 }} more</span>@endif</div></td>@endforeach</tr>
                     <tr><td class="p-4 font-medium">Description</td>@foreach($schools as $s)<td class="p-4"><p class="text-sm text-gray-600 line-clamp-3">{{ $s->description }}</p></td>@endforeach</tr>
                 </tbody>
