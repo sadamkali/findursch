@@ -50,7 +50,6 @@
                             <a class="card school" href="{{ route('schools.show', $school) }}">
                                 @php
                                     $schoolPhoto = $school->getFirstMediaUrl('cover');
-                                    $schoolBadgeUrl = $school->getFirstMediaUrl('badge') ?: $school->getFirstMediaUrl('logo');
                                     $photoTone = $loop->iteration === 2 ? 'b' : ($loop->iteration === 3 ? 'c' : '');
                                 @endphp
                                 <div class="ph {{ $photoTone }}">
@@ -59,18 +58,24 @@
                                     @else
                                         <span class="ph-initials">{{ strtoupper(mb_substr($school->name, 0, 2)) }}</span>
                                     @endif
-                                    <span class="school-badge-mark" aria-label="{{ $school->name }} school badge">
-                                        @if($schoolBadgeUrl)
-                                            <img src="{{ $schoolBadgeUrl }}" alt="{{ $school->name }} badge" loading="lazy">
-                                        @else
-                                            <span>Badge</span>
-                                        @endif
-                                    </span>
                                 </div>
                                 <div class="b">
                                     <span class="kick">{{ $school->type?->name ?? 'School' }}</span>
                                     <h3>{{ $school->name }}</h3>
                                     <small>{{ $school->district?->name ?? 'Uganda' }} district</small>
+                                    @if($school->fees_from !== null || $school->fees_to !== null)
+                                        <small class="fee-estimate">
+                                            Approx.
+                                            @if($school->fees_from !== null && $school->fees_to !== null)
+                                                UGX {{ number_format((float) $school->fees_from) }} – {{ number_format((float) $school->fees_to) }}
+                                            @elseif($school->fees_from !== null)
+                                                from UGX {{ number_format((float) $school->fees_from) }}
+                                            @else
+                                                up to UGX {{ number_format((float) $school->fees_to) }}
+                                            @endif
+                                            / term
+                                        </small>
+                                    @endif
                                     @foreach($school->curricula->take(1) as $curriculum)
                                         <span class="tag">{{ $curriculum->abbreviation }}</span>
                                     @endforeach
@@ -112,7 +117,7 @@
                             @endif
                         </a>
                         <div class="t">
-                            <h3>School spotlight</h3>
+                            <h3>{{ $spotlightSchool->name }}</h3>
                             <p>{{ \Illuminate\Support\Str::limit($spotlightSchool->tagline ?: $spotlightSchool->description ?: 'Discover this school and explore its programmes, facilities and learning environment.', 150) }}</p>
                             <div class="meta">
                                 @if($spotlightSchool->phone)<b>Tel</b> {{ $spotlightSchool->phone }} &nbsp;@endif
@@ -183,33 +188,59 @@
                 <a class="more" href="{{ route('news.index') }}">All news</a>
             </div>
             <div class="news">
-                @if($leadArticle)
-                    <a class="lead ph c" href="{{ route('news.show', $leadArticle) }}">
-                        @if($leadArticle->cover_image)
-                            <img src="{{ $leadArticle->cover_image }}" alt="{{ $leadArticle->title }}" loading="lazy">
+                @if($leadArticles->isNotEmpty())
+                    <div class="lead ph c" x-data="homepageLeadCarousel({{ $leadArticles->count() }})">
+                        @foreach($leadArticles as $article)
+                            <a class="lead-slide" href="{{ route('news.show', $article) }}" x-show="active === {{ $loop->index }}" @if(!$loop->first) x-cloak @endif>
+                                @if($article->cover_image)
+                                    <img src="{{ $article->cover_image }}" alt="{{ $article->title }}" loading="lazy">
+                                @endif
+                                <div class="cap">
+                                    <small>{{ $article->category?->name ?? 'Education news' }} · {{ $article->published_at?->diffForHumans() }}</small>
+                                    <h3>{{ $article->title }}</h3>
+                                </div>
+                            </a>
+                        @endforeach
+                        @if($leadArticles->count() > 1)
+                            <div class="dots lead-dots" role="tablist" aria-label="Education lead stories">
+                                @foreach($leadArticles as $slide)
+                                    <button type="button" :class="{on: active === {{ $loop->index }}}" @click="show({{ $loop->index }})" aria-label="Show lead story {{ $loop->iteration }}"></button>
+                                @endforeach
+                            </div>
+                            <button type="button" class="arrow l" @click="previous()" aria-label="Previous lead story">‹</button>
+                            <button type="button" class="arrow r" @click="next()" aria-label="Next lead story">›</button>
                         @endif
-                        <div class="cap">
-                            <small>{{ $leadArticle->category?->name ?? 'Education news' }} · {{ $leadArticle->published_at?->diffForHumans() }}</small>
-                            <h3>{{ $leadArticle->title }}</h3>
-                            <div class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
-                        </div>
-                    </a>
+                    </div>
                 @else
                     <div class="lead ph c"><div class="cap"><small>FindURSCH newsroom</small><h3>Education news and school announcements</h3><a class="btn btn-gold" href="{{ route('news.index') }}">Explore news</a></div></div>
                 @endif
 
-                <div class="card rows">
-                    @forelse($newsArticles->take(3) as $article)
-                        <a class="row" href="{{ route('news.show', $article) }}">
-                            <div class="ph {{ $loop->iteration === 1 ? 'b' : ($loop->iteration === 2 ? 'd' : '') }}">
-                                @if($article->cover_image)<img src="{{ $article->cover_image }}" alt="" loading="lazy">@else<span>F</span>@endif
+                @php
+                    $homepageNewsItems = $newsArticles->map(fn ($article) => [
+                        'id' => $article->id,
+                        'url' => route('news.show', $article),
+                        'title' => $article->title,
+                        'image' => $article->cover_image,
+                        'date' => $article->published_at?->format('d M Y'),
+                    ])->values()->all();
+                @endphp
+                <div class="card rows" x-data="homepageRows(@js($homepageNewsItems))">
+                    <template x-for="(article, position) in visibleItems" :key="article.id">
+                        <a class="row" :href="article.url">
+                            <div class="ph" :class="['b', 'd', ''][position % 3]">
+                                <template x-if="article.image"><img :src="article.image" alt="" loading="lazy"></template>
+                                <span x-show="!article.image">F</span>
                             </div>
-                            <div><h4>{{ $article->title }}</h4><small>{{ $article->published_at?->format('d M Y') }}</small></div>
+                            <div><h4 x-text="article.title"></h4><small x-text="article.date"></small></div>
                         </a>
-                    @empty
+                    </template>
+                    @if($newsArticles->isEmpty())
                         <p class="box-empty">Published education headlines will appear here.</p>
-                    @endforelse
-                    <div class="mini"><span>↑</span><span>↓</span></div>
+                    @endif
+                    <div class="mini" x-show="items.length > 3" x-cloak>
+                        <button type="button" @click="previous()" aria-label="Previous headlines">↑</button>
+                        <button type="button" @click="next()" aria-label="Next headlines">↓</button>
+                    </div>
                 </div>
 
                 @if($latestSchoolUpdates->first())
@@ -249,16 +280,20 @@
                 <div>
                     <div class="head"><h2>Featured <span>school videos</span></h2><a class="more" href="{{ route('schools.index') }}">All videos</a></div>
                     @if($featuredVideos->isNotEmpty())
-                        <div class="vids">
-                            @foreach($featuredVideos as $video)
-                                <a class="card vid" href="{{ $video->youtube_url }}" target="_blank" rel="noopener noreferrer">
-                                    <div class="ph {{ $loop->iteration === 1 ? 'c' : 'b' }}">
-                                        <img src="https://img.youtube.com/vi/{{ rawurlencode($video->youtube_video_id) }}/hqdefault.jpg" alt="" loading="lazy">
-                                        <i class="play"></i>
-                                    </div>
-                                    <div class="b"><small>{{ $video->school?->name ?? 'School' }}</small><h4>{{ $video->title }}</h4><span>Watch video ↗</span></div>
-                                </a>
-                            @endforeach
+                        <div class="slider video-slider" x-data="homepageHorizontalCarousel">
+                            <button type="button" class="arrow l" x-show="canScroll" @click="previous()" aria-label="Previous school videos">‹</button>
+                            <button type="button" class="arrow r" x-show="canScroll" @click="next()" aria-label="Next school videos">›</button>
+                            <div class="vids" x-ref="track" @scroll.debounce.100ms="measure()">
+                                @foreach($featuredVideos as $video)
+                                    <a class="card vid" href="{{ $video->youtube_url }}" target="_blank" rel="noopener noreferrer">
+                                        <div class="ph {{ $loop->iteration === 1 ? 'c' : 'b' }}">
+                                            <img src="https://img.youtube.com/vi/{{ rawurlencode($video->youtube_video_id) }}/hqdefault.jpg" alt="" loading="lazy">
+                                            <i class="play"></i>
+                                        </div>
+                                        <div class="b"><small>{{ $video->school?->name ?? 'School' }}</small><h4>{{ $video->title }}</h4><span>Watch video ↗</span></div>
+                                    </a>
+                                @endforeach
+                            </div>
                         </div>
                     @else
                         <div class="card video-empty"><p>Approved school videos will appear here when participating schools share them.</p><a href="{{ route('schools.index') }}" class="more">Explore schools →</a></div>
@@ -302,22 +337,35 @@
                     <a class="foot" href="{{ route('contact') }}">Enquire about job listings</a>
                 </div>
 
-
+                <a class="promo" href="{{ route('contact') }}">
+                    <small>Advertise</small>
+                    <h3>Put your brand in front of parents and students</h3>
+                    <p>Reach families across Uganda every month.</p>
+                    <span class="btn btn-gold">Advertise with us</span>
+                </a>
 
                 @if($homepageDisplaySettings['reviews'])
                 <div class="card box">
                     <h5>Stories from schools &amp; families</h5>
-                    @if($featuredReviews->first())
+                    @if($featuredReviews->isNotEmpty())
                         @php
-                            $homeReview = $featuredReviews->first();
+                            $homepageReviewItems = $featuredReviews->map(fn ($review) => [
+                                'rating' => (int) $review->rating,
+                                'body' => \Illuminate\Support\Str::limit($review->body, 190),
+                                'initial' => strtoupper(mb_substr($review->user?->name ?? 'P', 0, 1)),
+                                'name' => $review->user?->name ?? 'FindURSCH parent',
+                                'school' => $review->school?->name ?? '',
+                            ])->values()->all();
                         @endphp
-                        <div class="quote">
-                            <div class="st" aria-label="{{ $homeReview->rating }} out of 5 stars">
-                                @for($star = 1; $star <= 5; $star++){{ $star <= (int) $homeReview->rating ? '★' : '☆' }}@endfor
+                        <div class="quote" x-data="homepageQuotes(@js($homepageReviewItems))">
+                            <div class="st" :aria-label="quote.rating + ' out of 5 stars'" x-text="'★'.repeat(quote.rating) + '☆'.repeat(5 - quote.rating)"></div>
+                            <p>“<span x-text="quote.body"></span>”</p>
+                            <div class="who"><i x-text="quote.initial"></i><span><b x-text="quote.name"></b><span x-text="quote.school"></span></span></div>
+                            <div class="dots quote-dots" x-show="quotes.length > 1" x-cloak role="tablist" aria-label="School and family stories">
+                                <template x-for="(item, index) in quotes" :key="index">
+                                    <button type="button" :class="{on: active === index}" @click="show(index)" :aria-label="'Show review ' + (index + 1)"></button>
+                                </template>
                             </div>
-                            <p>“{{ \Illuminate\Support\Str::limit($homeReview->body, 190) }}”</p>
-                            <div class="who"><i>{{ strtoupper(mb_substr($homeReview->user?->name ?? 'P', 0, 1)) }}</i><span><b>{{ $homeReview->user?->name ?? 'FindURSCH parent' }}</b>{{ $homeReview->school?->name }}</span></div>
-                            <div class="dots" aria-hidden="true"><i></i><i class="on"></i><i></i></div>
                         </div>
                     @else
                         <div class="quote"><p>Approved stories and reviews from school communities will appear here.</p><a class="more" href="{{ route('schools.index') }}">Explore schools</a></div>
@@ -349,18 +397,32 @@
                     <div class="card big big-empty"><div class="ph d"><span class="ph-initials">FS</span></div><div class="b"><h3>Educational insights</h3><p>Helpful articles and guidance will appear here as they are published.</p></div></div>
                 @endif
 
-                <div class="card rows">
-                    @forelse($insightArticles->skip(1)->take(3) as $article)
-                        <a class="row" href="{{ route('articles.show', $article) }}">
-                            <div class="ph {{ $loop->iteration === 1 ? 'b' : ($loop->iteration === 2 ? '' : 'c') }}">
-                                @if($article->cover_image)<img src="{{ $article->cover_image }}" alt="" loading="lazy">@else<span>F</span>@endif
+                @php
+                    $homepageInsightItems = $insightArticles->skip(1)->map(fn ($article) => [
+                        'id' => $article->id,
+                        'url' => route('articles.show', $article),
+                        'title' => $article->title,
+                        'image' => $article->cover_image,
+                        'date' => $article->published_at?->format('M Y'),
+                    ])->values()->all();
+                @endphp
+                <div class="card rows" x-data="homepageRows(@js($homepageInsightItems))">
+                    <template x-for="(article, position) in visibleItems" :key="article.id">
+                        <a class="row" :href="article.url">
+                            <div class="ph" :class="['b', '', 'c'][position % 3]">
+                                <template x-if="article.image"><img :src="article.image" alt="" loading="lazy"></template>
+                                <span x-show="!article.image">F</span>
                             </div>
-                            <div><h4>{{ $article->title }}</h4><small>{{ $article->published_at?->format('M Y') }}</small></div>
+                            <div><h4 x-text="article.title"></h4><small x-text="article.date"></small></div>
                         </a>
-                    @empty
+                    </template>
+                    @if($homepageInsightItems === [])
                         <p class="box-empty">More educational articles will appear here.</p>
-                    @endforelse
-                    <div class="mini"><span>↑</span><span>↓</span></div>
+                    @endif
+                    <div class="mini" x-show="items.length > 3" x-cloak>
+                        <button type="button" @click="previous()" aria-label="Previous articles">↑</button>
+                        <button type="button" @click="next()" aria-label="Next articles">↓</button>
+                    </div>
                 </div>
 
                 @if($spotlightSchool)

@@ -91,25 +91,224 @@ Alpine.data('homepageHero', (configuredSlides) => ({
 Alpine.data('schoolCarousel', () => ({
     activePage: 0,
     pages: 1,
+    timer: null,
+    paused: false,
+    reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    resizeHandler: null,
+    pauseHandler: null,
+    resumeHandler: null,
     init() {
+        this.resizeHandler = () => this.measure();
+        this.pauseHandler = () => { this.paused = true; };
+        this.resumeHandler = () => { this.paused = false; };
+        window.addEventListener('resize', this.resizeHandler, { passive: true });
+        this.$el.addEventListener('mouseenter', this.pauseHandler);
+        this.$el.addEventListener('mouseleave', this.resumeHandler);
+        this.$el.addEventListener('focusin', this.pauseHandler);
+        this.$el.addEventListener('focusout', this.resumeHandler);
         this.$nextTick(() => this.measure());
-        window.addEventListener('resize', () => this.measure());
+    },
+    destroy() {
+        this.stop();
+        if (this.resizeHandler) window.removeEventListener('resize', this.resizeHandler);
+        if (this.pauseHandler) {
+            this.$el.removeEventListener('mouseenter', this.pauseHandler);
+            this.$el.removeEventListener('focusin', this.pauseHandler);
+        }
+        if (this.resumeHandler) {
+            this.$el.removeEventListener('mouseleave', this.resumeHandler);
+            this.$el.removeEventListener('focusout', this.resumeHandler);
+        }
+    },
+    start() {
+        if (this.reducedMotion || this.pages < 2 || this.timer) return;
+        this.timer = window.setInterval(() => { if (!this.paused) this.go((this.activePage + 1) % this.pages); }, 6500);
+    },
+    stop() {
+        if (this.timer) window.clearInterval(this.timer);
+        this.timer = null;
     },
     measure() {
         const track = this.$refs.track;
         if (!track || !track.clientWidth) return;
-        this.pages = Math.max(1, Math.ceil(track.scrollWidth / track.clientWidth));
+        this.pages = Math.max(1, Math.ceil((track.scrollWidth - 1) / track.clientWidth));
         this.activePage = Math.min(this.pages - 1, Math.round(track.scrollLeft / track.clientWidth));
+        if (this.pages > 1) this.start();
+        else this.stop();
     },
     sync() { this.measure(); },
     go(page) {
         const track = this.$refs.track;
         if (!track) return;
-        this.activePage = Math.max(0, Math.min(this.pages - 1, page));
-        track.scrollTo({ left: this.activePage * track.clientWidth, behavior: 'smooth' });
+        this.activePage = ((page % this.pages) + this.pages) % this.pages;
+        track.scrollTo({ left: this.activePage * track.clientWidth, behavior: this.reducedMotion ? 'auto' : 'smooth' });
     },
     next() { this.go(this.activePage + 1); },
     previous() { this.go(this.activePage - 1); },
+}));
+
+Alpine.data('homepageHorizontalCarousel', () => ({
+    canScroll: false,
+    timer: null,
+    paused: false,
+    reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    resizeHandler: null,
+    pauseHandler: null,
+    resumeHandler: null,
+    init() {
+        this.resizeHandler = () => this.measure();
+        this.pauseHandler = () => { this.paused = true; };
+        this.resumeHandler = () => { this.paused = false; };
+        window.addEventListener('resize', this.resizeHandler, { passive: true });
+        this.$el.addEventListener('mouseenter', this.pauseHandler);
+        this.$el.addEventListener('mouseleave', this.resumeHandler);
+        this.$el.addEventListener('focusin', this.pauseHandler);
+        this.$el.addEventListener('focusout', this.resumeHandler);
+        this.$nextTick(() => this.measure());
+    },
+    destroy() {
+        if (this.timer) window.clearInterval(this.timer);
+        if (this.resizeHandler) window.removeEventListener('resize', this.resizeHandler);
+        if (this.pauseHandler) {
+            this.$el.removeEventListener('mouseenter', this.pauseHandler);
+            this.$el.removeEventListener('focusin', this.pauseHandler);
+        }
+        if (this.resumeHandler) {
+            this.$el.removeEventListener('mouseleave', this.resumeHandler);
+            this.$el.removeEventListener('focusout', this.resumeHandler);
+        }
+    },
+    measure() {
+        const track = this.$refs.track;
+        if (!track) return;
+        this.canScroll = track.scrollWidth > track.clientWidth + 8;
+        if (this.canScroll && !this.reducedMotion && !this.timer) {
+            this.timer = window.setInterval(() => { if (!this.paused) this.next(); }, 7000);
+        } else if (!this.canScroll && this.timer) {
+            window.clearInterval(this.timer);
+            this.timer = null;
+        }
+    },
+    move(direction) {
+        const track = this.$refs.track;
+        const card = track?.firstElementChild;
+        if (!track || !card) return;
+        const styles = window.getComputedStyle(track);
+        const gap = parseFloat(styles.columnGap || styles.gap) || 24;
+        const step = card.getBoundingClientRect().width + gap;
+        const maximum = Math.max(0, track.scrollWidth - track.clientWidth);
+        const target = direction > 0
+            ? (track.scrollLeft + step >= maximum - 4 ? 0 : track.scrollLeft + step)
+            : (track.scrollLeft - step <= 4 ? maximum : track.scrollLeft - step);
+        track.scrollTo({ left: target, behavior: this.reducedMotion ? 'auto' : 'smooth' });
+    },
+    next() { this.move(1); },
+    previous() { this.move(-1); },
+}));
+
+Alpine.data('homepageLeadCarousel', (count) => ({
+    active: 0,
+    count: Number(count) || 0,
+    timer: null,
+    paused: false,
+    reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    init() {
+        this.pauseHandler = () => { this.paused = true; };
+        this.resumeHandler = () => { this.paused = false; };
+        this.$el.addEventListener('mouseenter', this.pauseHandler);
+        this.$el.addEventListener('mouseleave', this.resumeHandler);
+        this.$el.addEventListener('focusin', this.pauseHandler);
+        this.$el.addEventListener('focusout', this.resumeHandler);
+        if (this.count > 1 && !this.reducedMotion) {
+            this.timer = window.setInterval(() => { if (!this.paused) this.next(); }, 6500);
+        }
+    },
+    destroy() {
+        if (this.timer) window.clearInterval(this.timer);
+        if (this.pauseHandler) {
+            this.$el.removeEventListener('mouseenter', this.pauseHandler);
+            this.$el.removeEventListener('focusin', this.pauseHandler);
+        }
+        if (this.resumeHandler) {
+            this.$el.removeEventListener('mouseleave', this.resumeHandler);
+            this.$el.removeEventListener('focusout', this.resumeHandler);
+        }
+    },
+    show(index) { this.active = Math.max(0, Math.min(this.count - 1, Number(index) || 0)); },
+    next() { if (this.count > 1) this.active = (this.active + 1) % this.count; },
+    previous() { if (this.count > 1) this.active = (this.active - 1 + this.count) % this.count; },
+}));
+
+Alpine.data('homepageRows', (items) => ({
+    items: Array.isArray(items) ? items : [],
+    active: 0,
+    timer: null,
+    paused: false,
+    reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    get visibleItems() {
+        if (!this.items.length) return [];
+        const visible = Math.min(3, this.items.length);
+        return Array.from({ length: visible }, (_, offset) => this.items[(this.active + offset) % this.items.length]);
+    },
+    init() {
+        this.pauseHandler = () => { this.paused = true; };
+        this.resumeHandler = () => { this.paused = false; };
+        this.$el.addEventListener('mouseenter', this.pauseHandler);
+        this.$el.addEventListener('mouseleave', this.resumeHandler);
+        this.$el.addEventListener('focusin', this.pauseHandler);
+        this.$el.addEventListener('focusout', this.resumeHandler);
+        if (this.items.length > 3 && !this.reducedMotion) {
+            this.timer = window.setInterval(() => { if (!this.paused) this.next(); }, 7500);
+        }
+    },
+    destroy() {
+        if (this.timer) window.clearInterval(this.timer);
+        if (this.pauseHandler) {
+            this.$el.removeEventListener('mouseenter', this.pauseHandler);
+            this.$el.removeEventListener('focusin', this.pauseHandler);
+        }
+        if (this.resumeHandler) {
+            this.$el.removeEventListener('mouseleave', this.resumeHandler);
+            this.$el.removeEventListener('focusout', this.resumeHandler);
+        }
+    },
+    next() { if (this.items.length > 1) this.active = (this.active + 1) % this.items.length; },
+    previous() { if (this.items.length > 1) this.active = (this.active - 1 + this.items.length) % this.items.length; },
+}));
+
+Alpine.data('homepageQuotes', (items) => ({
+    quotes: Array.isArray(items) ? items : [],
+    active: 0,
+    timer: null,
+    paused: false,
+    reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    get quote() {
+        return this.quotes[this.active] || { rating: 5, body: '', initial: 'F', name: 'FindURSCH', school: '' };
+    },
+    init() {
+        this.pauseHandler = () => { this.paused = true; };
+        this.resumeHandler = () => { this.paused = false; };
+        this.$el.addEventListener('mouseenter', this.pauseHandler);
+        this.$el.addEventListener('mouseleave', this.resumeHandler);
+        this.$el.addEventListener('focusin', this.pauseHandler);
+        this.$el.addEventListener('focusout', this.resumeHandler);
+        if (this.quotes.length > 1 && !this.reducedMotion) {
+            this.timer = window.setInterval(() => { if (!this.paused) this.next(); }, 8000);
+        }
+    },
+    destroy() {
+        if (this.timer) window.clearInterval(this.timer);
+        if (this.pauseHandler) {
+            this.$el.removeEventListener('mouseenter', this.pauseHandler);
+            this.$el.removeEventListener('focusin', this.pauseHandler);
+        }
+        if (this.resumeHandler) {
+            this.$el.removeEventListener('mouseleave', this.resumeHandler);
+            this.$el.removeEventListener('focusout', this.resumeHandler);
+        }
+    },
+    show(index) { this.active = Math.max(0, Math.min(this.quotes.length - 1, Number(index) || 0)); },
+    next() { if (this.quotes.length > 1) this.active = (this.active + 1) % this.quotes.length; },
 }));
 
 Alpine.data('schoolTabs', () => ({

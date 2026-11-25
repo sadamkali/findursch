@@ -771,3 +771,271 @@
     gap: 5px 12px;
   }
 }
+
+
+/* Uploaded homepage reference: consistent white information cards and moving content rails. */
+.findursch-home-reference .hero {
+  background-color: #18382b;
+  background-image: linear-gradient(rgba(5,30,24,.62), rgba(5,30,24,.72)),
+    var(--hero-background-image, linear-gradient(120deg,#355a4e,#7b6a3c 55%,#2f4d5a));
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.findursch-home-reference .card,
+.findursch-home-reference .school,
+.findursch-home-reference .vid,
+.findursch-home-reference .box,
+.findursch-home-reference .rows,
+.findursch-home-reference .prem,
+.findursch-home-reference .big {
+  background-color: #fff;
+  color: var(--ink);
+}
+.findursch-home-reference .news .rows {
+  background: #fff;
+  border-color: var(--line);
+  color: var(--ink);
+}
+.findursch-home-reference .news .rows .row h4,
+.findursch-home-reference .news .rows .box-empty { color: var(--ink); }
+.findursch-home-reference .news .rows .row small { color: var(--brand); }
+.findursch-home-reference .news .rows .mini button {
+  border-color: var(--line);
+  background: #fff;
+  color: var(--mute);
+}
+.findursch-home-reference .news .rows .mini button:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+.findursch-home-reference .fee-estimate {
+  display: block;
+  margin: 2px 0 9px;
+  color: var(--brand) !important;
+  font-size: 11.5px !important;
+  font-weight: 700;
+  line-height: 1.45;
+}
+.findursch-home-reference .school .b,
+.findursch-home-reference .vid .b,
+.findursch-home-reference .prem .b,
+.findursch-home-reference .big .b { background: #fff; color: var(--ink); }
+.findursch-home-reference .school h3,
+.findursch-home-reference .vid h4,
+.findursch-home-reference .prem h3,
+.findursch-home-reference .big h3 { color: var(--ink); }
+.findursch-home-reference .lead { isolation: isolate; }
+.findursch-home-reference .lead::after { z-index: 0; }
+.findursch-home-reference .lead-slide {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+}
+.findursch-home-reference .lead-slide .cap {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+.findursch-home-reference .lead .arrow { z-index: 3; }
+.findursch-home-reference .lead-dots {
+  position: absolute !important;
+  inset: auto auto 20px 22px !important;
+  z-index: 4;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 6px;
+}
+.findursch-home-reference .lead-dots button,
+.findursch-home-reference .quote-dots button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 99px;
+  background: #c9d4ce;
+  cursor: pointer;
+  transition: width .18s ease, background .18s ease;
+}
+.findursch-home-reference .lead-dots button.on {
+  width: 26px;
+  background: #fff;
+}
+.findursch-home-reference .mini button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--mute);
+  cursor: pointer;
+  font: 500 12px var(--sans);
+}
+.findursch-home-reference .mini button:hover { border-color: var(--brand); color: var(--brand); }
+.findursch-home-reference .quote-dots {
+  position: static;
+  justify-content: flex-start;
+  gap: 6px;
+  margin-top: 14px;
+}
+.findursch-home-reference .quote-dots button { background: #c9d4ce; }
+.findursch-home-reference .quote-dots button.on { width: 26px; background: var(--brand); }
+.findursch-home-reference .video-slider { min-width: 0; }
+.findursch-home-reference .video-slider .vids {
+  display: flex;
+  gap: var(--gap);
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.findursch-home-reference .video-slider .vids::-webkit-scrollbar { display: none; }
+.findursch-home-reference .video-slider .vid {
+  flex: 0 0 calc((100% - 24px) / 2);
+  min-width: 0;
+  scroll-snap-align: start;
+}
+.findursch-home-reference .video-slider .vid .ph { height: 170px; }
+.findursch-home-reference .school,
+.findursch-home-reference .vid,
+.findursch-home-reference .prem,
+.findursch-home-reference .big,
+.findursch-home-reference .box { border-radius: var(--r); }
+.findursch-home-reference .school,
+.findursch-home-reference .vid,
+.findursch-home-reference .prem,
+.findursch-home-reference .big {
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+.findursch-home-reference .school:hover,
+.findursch-home-reference .vid:hover,
+.findursch-home-reference .prem:hover,
+.findursch-home-reference .big:hover {
+  transform: translateY(-3px);
+  border-color: #cbd8d2;
+  box-shadow: 0 10px 24px rgba(5,42,34,.09);
+}
+.findursch-home-reference .news .rows,
+.findursch-home-reference .ins .rows { min-width: 0; }
+.findursch-home-reference .row,
+.findursch-home-reference .row > div:last-child { min-width: 0; }
+.findursch-home-reference .row h4 { overflow-wrap: anywhere; }
+.findursch-home-reference .prem small { flex-wrap: wrap; }
+.findursch-home-reference .strip,
+.findursch-home-reference .promo,
+.findursch-home-reference .band,
+.findursch-home-reference .cta { color: #fff; }
+.findursch-home-reference .promo {
+  border-radius: var(--r);
+  background: var(--brand);
+}
+.findursch-home-reference .promo .btn { justify-content: center; }
+.findursch-home-reference .cta { margin-top: 0; }
+.findursch-home-reference .wrap { max-width: 1280px; }
+.findursch-home-reference .banner { width: min(calc(100% - 48px), 900px); }
+.findursch-home-reference .banner > .site-ad-slot { min-width: 0; }
+
+/* Match the reference footer; the header/navigation is not targeted. */
+body:has(.findursch-home-reference) .site-footer {
+  background: #052a22;
+  color: #fff;
+  padding-top: 56px;
+  font-size: 13.5px;
+}
+body:has(.findursch-home-reference) .site-footer .site-wrap {
+  max-width: 1280px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+body:has(.findursch-home-reference) .site-footer__grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 48px;
+  padding-bottom: 48px;
+}
+body:has(.findursch-home-reference) .site-footer h2 {
+  margin-bottom: 16px;
+  color: #fff;
+  font: 700 14px Inter, sans-serif;
+}
+body:has(.findursch-home-reference) .site-footer p,
+body:has(.findursch-home-reference) .site-footer li,
+body:has(.findursch-home-reference) .site-footer li a {
+  color: #e2eee9;
+  font-size: 13.5px;
+}
+body:has(.findursch-home-reference) .site-footer li { margin-bottom: 10px; }
+body:has(.findursch-home-reference) .site-footer li a:hover { color: #fff; text-decoration: underline; }
+body:has(.findursch-home-reference) .site-footer__bar {
+  border-top: 1px solid #2a5a4d;
+  padding: 24px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  color: #e2eee9;
+  font-size: 12.5px;
+}
+body:has(.findursch-home-reference) .site-footer__promo {
+  border: 1px solid #3d6b5f;
+  border-radius: 8px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+body:has(.findursch-home-reference) .site-footer__promo .btn {
+  min-height: 36px;
+  color: #fff;
+  white-space: nowrap;
+}
+@media (max-width: 1000px) {
+  .findursch-home-reference .video-slider .vid { flex-basis: 72%; }
+  body:has(.findursch-home-reference) .site-footer__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px;
+  }
+}
+@media (max-width: 640px) {
+  .findursch-home-reference .video-slider .vid { flex-basis: 86%; }
+  .findursch-home-reference .video-slider .vid .ph { height: 180px; }
+  .findursch-home-reference .banner {
+    width: calc(100% - 32px);
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    margin: 34px auto;
+  }
+  body:has(.findursch-home-reference) .site-footer .site-wrap {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  body:has(.findursch-home-reference) .site-footer__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    padding-bottom: 32px;
+  }
+  body:has(.findursch-home-reference) .site-footer__bar,
+  body:has(.findursch-home-reference) .site-footer__promo {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .findursch-home-reference .school,
+  .findursch-home-reference .vid,
+  .findursch-home-reference .prem,
+  .findursch-home-reference .big,
+  .findursch-home-reference .lead-slide { transition: none !important; }
+}

@@ -70,18 +70,21 @@ class HomePage extends Component
             ->whereHas('category', fn ($query) => $query->whereIn('slug', ['school-news', 'education-policy']))
             ->with(['category', 'author']);
 
-        $leadArticle = (clone $publishedNews)
+        $leadArticles = (clone $publishedNews)
             ->orderByDesc('is_featured')
             ->latest('published_at')
-            ->first();
+            ->limit(4)
+            ->get();
+
+        $leadArticle = $leadArticles->first();
 
         $newsArticlesQuery = (clone $publishedNews)->latest('published_at');
 
-        if ($leadArticle) {
-            $newsArticlesQuery->where('id', '!=', $leadArticle->id);
+        if ($leadArticles->isNotEmpty()) {
+            $newsArticlesQuery->whereNotIn('id', $leadArticles->pluck('id'));
         }
 
-        $newsArticles = $newsArticlesQuery->limit(3)->get();
+        $newsArticles = $newsArticlesQuery->limit(8)->get();
 
         $upcomingEvents = SchoolPost::query()
             ->where('type', 'event')
@@ -101,7 +104,7 @@ class HomePage extends Component
             ->whereHas('school', fn ($query) => $query->publiclyVisible())
             ->with('school:id,name,slug')
             ->latest()
-            ->limit(2)
+            ->limit(6)
             ->get();
 
         $featuredBursaries = SchoolPost::query()
@@ -136,14 +139,14 @@ class HomePage extends Component
             ->whereHas('school', fn ($query) => $query->publiclyVisible())
             ->with(['school:id,name,slug', 'user:id,name'])
             ->latest()
-            ->limit(2)
+            ->limit(4)
             ->get();
 
         $insightArticlesQuery = (clone $publishedArticles)
             ->with(['category', 'author'])
             ->latest('published_at');
 
-        $excludedArticleIds = collect([$leadArticle?->id])
+        $excludedArticleIds = $leadArticles->pluck('id')
             ->merge($newsArticles->pluck('id'))
             ->filter()
             ->values()
@@ -153,7 +156,7 @@ class HomePage extends Component
             $insightArticlesQuery->whereNotIn('id', $excludedArticleIds);
         }
 
-        $insightArticles = $insightArticlesQuery->limit(4)->get();
+        $insightArticles = $insightArticlesQuery->limit(7)->get();
 
         $homepageSettings = Setting::query()
             ->whereIn('key', [
@@ -233,6 +236,7 @@ class HomePage extends Component
             'spotlightSchool',
             'districts',
             'searchDistricts',
+            'leadArticles',
             'leadArticle',
             'newsArticles',
             'upcomingEvents',

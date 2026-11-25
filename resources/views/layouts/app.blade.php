@@ -75,7 +75,7 @@
     @if (request()->routeIs('district.show'))<link rel="stylesheet" href="{{ asset('css/district-reference.css') }}?v=1">@endif
     @if (request()->routeIs('jobs.*'))<link rel="stylesheet" href="{{ asset('css/jobs-reference.css') }}?v=1">@endif
     <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=3">
-    @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=8">@endif
+    @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=9">@endif
     @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}?v=3">@endif
     @if (request()->routeIs('scholarships.*'))<link rel="stylesheet" href="{{ asset('css/scholarships-reference.css') }}?v=5">@endif
     @if (request()->routeIs('news.*'))<link rel="stylesheet" href="{{ asset('css/news.css') }}?v=5">@endif
