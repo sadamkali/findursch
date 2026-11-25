@@ -107,6 +107,7 @@
     <link rel="stylesheet" href="{{ asset('css/site-page-hero.css') }}?v=1">
     @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=17">@endif
     <link rel="stylesheet" href="{{ asset('css/school-tile-cards.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/site-footer.css') }}?v=1">
 </head>
 <body class="h-full bg-white text-gray-900 antialiased">
     @php
@@ -292,76 +293,7 @@
         @yield('content')
     </main>
 
-    @if($siteFooterEnabled && !request()->routeIs('home'))
-    <footer class="site-footer">
-        <div class="site-wrap">
-            <div class="site-footer__grid">
-                <div class="site-footer__brand">
-                    <a href="{{ route('home') }}" class="site-logo site-logo--footer">
-                        @if($siteFooterLogoUrl)<img src="{{ $siteFooterLogoUrl }}" alt="{{ $siteName }}" onerror="this.onerror=null;this.src='{{ asset('brand/findursch-logo.png') }}';" style="max-height:48px;max-width:220px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
-                    </a>
-                    <p>{{ $siteDescription }}</p>
-                    @if($siteAddress)<p class="site-footer__location">{{ $siteAddress }}</p>@endif
-                    @if($siteFooterSocialEnabled)
-                    <div class="site-footer__social" aria-label="Social media links">
-                        @foreach(['Facebook' => 'facebook_url', 'X' => 'twitter_url', 'Instagram' => 'instagram_url', 'YouTube' => 'youtube_url'] as $socialLabel => $socialKey)
-                            @if(!empty($siteSettings[$socialKey]))<a href="{{ $siteSettings[$socialKey] }}" target="_blank" rel="noopener noreferrer">{{ $socialLabel }}</a>@endif
-                        @endforeach
-                    </div>
-                    @endif
-                </div>
-                @if($siteFooterExploreEnabled)
-                <div>
-                    <h2>Explore schools</h2>
-                    <ul>
-                        <li><a href="{{ route('schools.index') }}">Find a school</a></li>
-                        <li><a href="{{ route('compare') }}">Compare schools</a></li>
-                        <li><a href="{{ route('schools.index', ['sort' => 'newest']) }}">Recently added</a></li>
-                        <li><a href="{{ route('schools.index', ['verified_only' => 1]) }}">Verified schools</a></li>
-                    </ul>
-                </div>
-                @endif
-                @if($siteFooterResourcesEnabled)
-                <div>
-                    <h2>Resources</h2>
-                    <ul>
-                        <li><a href="{{ route('articles.index') }}">Blogs</a></li>
-                        <li><a href="{{ route('about') }}">About FindurSch</a></li>
-                        <li><a href="{{ route('contact') }}">Contact</a></li>
-                    </ul>
-                </div>
-                @endif
-                @if($siteFooterSupportEnabled)
-                <div>
-                    <h2>Support</h2>
-                    <ul>
-                        <li><a href="{{ $schoolRegistrationUrl }}">List your school</a></li>
-                        <li><a href="{{ is_array($dashboardIdentity) ? $accountLinkUrl : $signInUrl }}">School owner login</a></li>
-                        <li><a href="{{ route('contact') }}">Get in touch</a></li>
-                        @if($siteSupportEmail)<li><a href="mailto:{{ $siteSupportEmail }}">{{ $siteSupportEmail }}</a></li>@endif
-                        @if($siteSupportPhone)<li><a href="tel:{{ preg_replace('/[^0-9+]/', '', $siteSupportPhone) }}">{{ $siteSupportPhone }}</a></li>@endif
-                        @if($siteSupportWhatsapp)<li><a href="https://wa.me/{{ $siteSupportWhatsapp }}" target="_blank" rel="noopener">WhatsApp support</a></li>@endif
-                        <li><a href="{{ route('legal.terms') }}">Terms and conditions</a></li>
-                        <li><a href="{{ route('legal.privacy') }}">Privacy policy</a></li>
-                    </ul>
-                </div>
-                @endif
-            </div>
-            <div class="site-footer__bar">
-                <div>
-                    <span>{{ $siteFooterCopyright ?: ('© '.date('Y').' '.$siteName.'. All rights reserved.') }}</span>
-                    <span class="site-footer__legal"><a href="{{ route('legal.privacy') }}">Privacy</a><a href="{{ route('legal.terms') }}">Terms</a></span>
-                </div>
-                @if($siteFooterPromoEnabled)
-                <div class="site-footer__promo">
-                    <span>Want to reach parents and students every month?</span>
-                    <a class="btn btn-footer" href="{{ route('contact') }}">Advertise with us</a>
-                </div>
-                @endif
-            </div>
-        </div>
-    </footer>
-    @endif
+    <x-site-footer />
 
     @livewireScripts
 </body>
