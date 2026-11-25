@@ -328,6 +328,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .grid .ft,.ft{font-size:12.5px}
 }
 </style>
+<link rel="stylesheet" href="{{ asset('css/site-footer.css') }}?v=1">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -520,17 +521,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   </div>
 </main>
 
-<footer>
-  <div class="wrap">
-    <div class="fgrid">
-      <div><a class="logo" href="{{ route('home') }}">Find<b>UR</b>SCH</a><p>Uganda's school discovery, comparison and admissions platform, with verified school profiles, news, events, jobs and scholarships.</p><p>Kampala, Uganda<br><a href="{{ route('contact') }}">Contact FindURSCH</a></p></div>
-      <div><h6>Explore schools</h6><ul><li><a href="{{ route('schools.index') }}">All schools</a></li><li><a href="{{ route('schools.index', ['sort'=>'newest']) }}">Recently added</a></li><li><a href="{{ route('compare') }}">Compare schools</a></li><li><a href="{{ route('contact') }}">List your school</a></li></ul></div>
-      <div><h6>Resources</h6><ul><li><a href="{{ route('news.index') }}">Latest news</a></li><li><a href="{{ route('scholarships.index') }}">Scholarships</a></li><li><a href="{{ route('jobs.index') }}">School jobs</a></li><li><a href="{{ route('events.index') }}">Events calendar</a></li><li><a href="{{ route('articles.index') }}">Articles</a></li></ul></div>
-      <div><h6>Support</h6><ul><li><a href="{{ route('register') }}">List your school</a></li><li><a href="{{ route('about') }}">About</a></li><li><a href="{{ route('contact') }}">Contact</a></li><li><a href="{{ route('legal.terms') }}">Terms and conditions</a></li><li><a href="{{ route('legal.privacy') }}">Privacy policy</a></li></ul></div>
-    </div>
-    <div class="fbar"><span>© {{ date('Y') }} FindURSCH. All rights reserved.</span><div class="box2"><span>Want to reach parents and students every month?</span><a class="btn btn-ghost" href="{{ route('contact') }}">Advertise with us</a></div></div>
-  </div>
-</footer>
+<x-site-footer />
 
 <div class="sov" id="sov"></div>
 <script>
