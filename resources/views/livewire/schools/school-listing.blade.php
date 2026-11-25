@@ -1,5 +1,4 @@
-@verbatim
-<!DOCTYPE html>
+@verbatim<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -505,5 +504,4 @@ d.addEventListener("click",function(e){if(e.target.closest(".dl a"))set(false)})
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&d.classList.contains("open"))set(false)});
 })();</script>
 </body>
-</html>
-@endverbatim
+</html>@endverbatim
