@@ -1,18 +1,12 @@
 <div class="school-directory-reference">
     <a class="rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
 
-    <section class="phead">
-        <div class="wrap">
-            <div>
-                <nav class="crumbs" aria-label="Breadcrumb">
-                    <a href="{{ route('home') }}">Home</a><span aria-hidden="true">›</span>Schools
-                </nav>
-                <h1>Find a school in Uganda</h1>
-                <p>Discover <b>{{ number_format($allSchoolCount) }}</b> verified nursery, primary, secondary, vocational and international schools across all districts of Uganda. Compare by location, curriculum and fees.</p>
-            </div>
-            <x-site-ad-banner placement="top" />
-        </div>
-    </section>
+    <x-site-page-hero
+        eyebrow="School directory across Uganda"
+        title="Find a school in Uganda"
+        :description="'Discover '.number_format($allSchoolCount).' verified nursery, primary, secondary, vocational and international schools across all districts of Uganda. Compare by location, curriculum and fees.'"
+        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Schools']]"
+    />
 
     <section class="sband">
         <div class="wrap">
