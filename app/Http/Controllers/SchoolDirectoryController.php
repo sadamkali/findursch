@@ -90,15 +90,17 @@ class SchoolDirectoryController extends Controller
             $query->where('admissions_open', true);
         }
         if ($feeMin !== null || $feeMax !== null) {
-            $query->whereNotNull('fees_from')
-                ->where('fees_from', '>', 0);
+            $query->where(function (Builder $rangeQuery) {
+                $rangeQuery->whereNotNull('schools.fees_from')
+                    ->orWhereNotNull('schools.fees_to');
+            });
 
             if ($feeMin !== null) {
                 $query->whereRaw('COALESCE(schools.fees_to, schools.fees_from) >= ?', [$feeMin]);
             }
 
             if ($feeMax !== null) {
-                $query->where('fees_from', '<=', $feeMax);
+                $query->whereRaw('COALESCE(schools.fees_from, schools.fees_to) <= ?', [$feeMax]);
             }
         }
 
@@ -106,8 +108,8 @@ class SchoolDirectoryController extends Controller
             'featured' => $query->orderByDesc('is_featured')->latest('created_at'),
             'name' => $query->orderBy('name'),
             'rating' => $query->orderByDesc('rating_average')->latest('created_at'),
-            'fee_low' => $query->orderByRaw('CASE WHEN schools.fees_from IS NULL OR schools.fees_from <= 0 THEN 1 ELSE 0 END')->orderBy('schools.fees_from'),
-            'fee_high' => $query->orderByRaw('CASE WHEN schools.fees_from IS NULL OR schools.fees_from <= 0 THEN 1 ELSE 0 END')->orderByDesc('schools.fees_from'),
+            'fee_low' => $query->orderByRaw('CASE WHEN COALESCE(schools.fees_from, schools.fees_to) IS NULL OR COALESCE(schools.fees_from, schools.fees_to) <= 0 THEN 1 ELSE 0 END')->orderByRaw('COALESCE(schools.fees_from, schools.fees_to) ASC'),
+            'fee_high' => $query->orderByRaw('CASE WHEN COALESCE(schools.fees_from, schools.fees_to) IS NULL OR COALESCE(schools.fees_from, schools.fees_to) <= 0 THEN 1 ELSE 0 END')->orderByRaw('COALESCE(schools.fees_from, schools.fees_to) DESC'),
             default => $query->latest('created_at'),
         };
 
