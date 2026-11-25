@@ -273,21 +273,4 @@
   <div class="acts"><a class="btn btn-white" href="{{ route('register') }}">Register your school</a><a class="btn btn-ghost" href="{{ route('about') }}">View benefits</a></div>
 </section>
 
-<footer class="ref-footer">
-  <div class="wrap">
-    <div class="fgrid">
-      <div>
-        <a class="logo" href="{{ route('home') }}" style="color:#fff">{{ $footerSettings['site_name'] ?? 'FindURSCH' }}</a>
-        <p>{{ $footerSettings['site_description'] ?? 'Uganda’s school discovery, comparison and admissions platform.' }}</p>
-        @if($footerSettings['contact_address'] ?? null)<p>{{ $footerSettings['contact_address'] }}</p>@endif
-        @if($footerSettings['support_phone'] ?? null)<p><a href="tel:{{ preg_replace('/[^0-9+]/', '', $footerSettings['support_phone']) }}">{{ $footerSettings['support_phone'] }}</a></p>@endif
-        @if($footerSettings['support_email'] ?? null)<p><a href="mailto:{{ $footerSettings['support_email'] }}">{{ $footerSettings['support_email'] }}</a></p>@endif
-      </div>
-      <div><h6>Explore schools</h6><ul><li><a href="{{ route('schools.index') }}">Find a school</a></li><li><a href="{{ route('compare') }}">Compare schools</a></li><li><a href="{{ route('schools.index', ['sort' => 'newest']) }}">Recently added</a></li><li><a href="{{ route('schools.index', ['verified_only' => 1]) }}">Verified schools</a></li></ul></div>
-      <div><h6>Resources</h6><ul><li><a href="{{ route('news.index') }}">Latest news</a></li><li><a href="{{ route('articles.index') }}">Articles &amp; insights</a></li><li><a href="{{ route('scholarships.index') }}">Scholarships</a></li><li><a href="{{ route('jobs.index') }}">School jobs</a></li><li><a href="{{ route('events.index') }}">Events calendar</a></li></ul></div>
-      <div><h6>Support</h6><ul><li><a href="{{ route('register') }}">List your school</a></li><li><a href="{{ route('contact', ['subject' => 'Advertising enquiry']) }}">Advertise with us</a></li><li><a href="{{ route('about') }}">About</a></li><li><a href="{{ route('contact') }}">Contact</a></li><li><a href="{{ route('legal.terms') }}">Terms and conditions</a></li><li><a href="{{ route('legal.privacy') }}">Privacy policy</a></li></ul></div>
-    </div>
-    <div class="fbar"><span>{{ $footerSettings['site_footer_copyright_text'] ?: ('© '.date('Y').' '.($footerSettings['site_name'] ?? 'FindURSCH').'. All rights reserved.') }}</span><div class="box2"><span>Want to reach parents and students every month?</span><a class="btn btn-ghost" href="{{ route('contact', ['subject' => 'Advertising enquiry']) }}">Advertise with us</a></div></div>
-  </div>
-</footer>
-</div>
+<x-site-footer /></div>
