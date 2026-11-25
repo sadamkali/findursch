@@ -1,6 +1,31 @@
-<section class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-    <div class="mb-8"><a href="{{ route('user.home') }}" class="text-sm font-medium text-primary hover:underline">← Account overview</a><h1 class="mt-5 text-3xl font-semibold text-gray-900" style="font-family: 'DM Serif Display', serif;">Saved schools</h1><p class="mt-2 text-sm text-gray-600">Schools you have bookmarked for later.</p></div>
-    @if(session('message'))<div class="mb-5 rounded-lg bg-green-50 p-3 text-sm text-green-800">{{ session('message') }}</div>@endif
-    @if($schools->count())<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">@foreach($schools as $school)<div class="relative">@include('components.school-card', ['school' => $school])<button type="button" wire:click="unsave({{ $school->id }})" class="mt-2 text-sm font-medium text-red-600 hover:underline">Remove from saved schools</button></div>@endforeach</div><div class="mt-8">{{ $schools->links() }}</div>
-    @else<div class="rounded-xl bg-gray-50 px-6 py-16 text-center"><p class="text-gray-600">You have not saved any schools yet.</p><a href="{{ route('schools.index') }}" class="btn-primary mt-5 inline-flex">Explore schools</a></div>@endif
+<section class="parent-account-page parent-account-list-page">
+    <div class="parent-account-page__intro">
+        <a href="{{ route('user.home') }}" class="parent-account-back-link">← Account overview</a>
+        <p class="parent-account-eyebrow">YOUR SHORTLIST</p>
+        <p class="parent-account-page__description">Schools you have bookmarked to revisit as you compare your options.</p>
+    </div>
+
+    @if(session('message'))
+        <div class="parent-account-message" role="status">{{ session('message') }}</div>
+    @endif
+
+    @if($schools->count())
+        <div class="parent-account-school-grid">
+            @foreach($schools as $school)
+                <article class="parent-account-school-item">
+                    @include('components.school-card', ['school' => $school])
+                    <button type="button" wire:click="unsave({{ $school->id }})" class="parent-account-remove-link">
+                        Remove from saved schools
+                    </button>
+                </article>
+            @endforeach
+        </div>
+        <div class="parent-account-pagination">{{ $schools->links() }}</div>
+    @else
+        <div class="parent-account-empty parent-account-empty--page">
+            <strong>You have not saved any schools yet</strong>
+            <p>Browse the directory and save schools you would like to come back to.</p>
+            <a href="{{ route('schools.index') }}">Explore schools</a>
+        </div>
+    @endif
 </section>
