@@ -1,11 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<section class="py-12" style="background-color:var(--brand);">
-    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <p class="text-sm font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.76)">FindurSch policies</p><h1 class="mt-2 text-4xl font-semibold" style="font-family: 'DM Serif Display', serif; color:#fff;">Privacy policy</h1><p class="mt-3 text-sm" style="color:rgba(255,255,255,.88)">Last updated: 17 November 2026</p>
-    </div>
-</section>
+<x-site-page-hero
+    eyebrow="FindURSCH policies"
+    title="Privacy policy"
+    description="How FindURSCH uses and looks after information when you use the platform."
+    meta="Last updated: 17 November 2026"
+    :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Privacy policy']]"
+/>
 <section class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
     <div class="prose prose-gray max-w-none">
         <p>This page explains the information FindurSch uses to operate its school discovery and account services. It is a platform privacy notice, not a substitute for advice on applicable Ugandan data-protection requirements.</p>
