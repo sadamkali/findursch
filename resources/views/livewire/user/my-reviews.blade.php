@@ -1,4 +1,42 @@
-<section class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-    <div class="mb-8"><a href="{{ route('user.home') }}" class="text-sm font-medium text-primary hover:underline">← Account overview</a><h1 class="mt-5 text-3xl font-semibold text-gray-900" style="font-family: 'DM Serif Display', serif;">My reviews</h1></div>
-    <div class="space-y-4">@forelse($reviews as $review)<article class="rounded-xl border border-gray-200 bg-white p-5"><div class="flex flex-wrap items-center justify-between gap-2"><h2 class="font-semibold text-gray-900">{{ $review->school?->name ?? 'School listing' }}</h2><span class="rounded-full bg-gray-100 px-3 py-1 text-xs capitalize text-gray-700">{{ $review->status }}</span></div><div class="mt-3 flex items-center gap-2"><span class="text-amber-600">★ {{ $review->rating }}/5</span><span class="font-semibold text-gray-900">{{ $review->title }}</span></div><p class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-700">{{ $review->body }}</p><p class="mt-3 text-xs text-gray-500">Submitted {{ $review->created_at?->format('d M Y') }}</p>@if($review->owner_response)<div class="mt-4 rounded-lg bg-blue-50 p-4"><p class="text-xs font-semibold uppercase text-blue-800">School response</p><p class="mt-2 whitespace-pre-line text-sm text-blue-950">{{ $review->owner_response }}</p></div>@endif</article>@empty<div class="rounded-xl bg-gray-50 p-12 text-center text-sm text-gray-500">You have not submitted any reviews yet.</div>@endforelse</div><div class="mt-6">{{ $reviews->links() }}</div>
+<section class="parent-account-page parent-account-list-page">
+    <div class="parent-account-page__intro">
+        <a href="{{ route('user.home') }}" class="parent-account-back-link">← Account overview</a>
+        <p class="parent-account-eyebrow">YOUR FEEDBACK</p>
+        <p class="parent-account-page__description">Read the reviews you have submitted and check their publication status.</p>
+    </div>
+
+    <div class="parent-account-record-list">
+        @forelse($reviews as $review)
+            <article class="parent-account-record">
+                <div class="parent-account-record__heading">
+                    <div>
+                        <h2>{{ $review->school?->name ?? 'School listing' }}</h2>
+                        <p>Submitted {{ $review->created_at?->format('d M Y') }}</p>
+                    </div>
+                    <span class="parent-account-status">{{ str($review->status)->replace('_', ' ')->title() }}</span>
+                </div>
+                <div class="parent-account-review-title">
+                    <span aria-label="{{ $review->rating }} out of 5 stars">★ {{ $review->rating }}/5</span>
+                    @if($review->title)<strong>{{ $review->title }}</strong>@endif
+                </div>
+                <p class="parent-account-record__message">{{ $review->body }}</p>
+                @if($review->owner_response)
+                    <div class="parent-account-response">
+                        <p class="parent-account-eyebrow">SCHOOL RESPONSE</p>
+                        <p>{{ $review->owner_response }}</p>
+                    </div>
+                @endif
+            </article>
+        @empty
+            <div class="parent-account-empty parent-account-empty--page">
+                <strong>You have not submitted any reviews</strong>
+                <p>Your feedback can help other families understand a school's experience.</p>
+                <a href="{{ route('user.inquiries') }}">View your enquiries</a>
+            </div>
+        @endforelse
+    </div>
+
+    @if($reviews->hasPages())
+        <div class="parent-account-pagination">{{ $reviews->links() }}</div>
+    @endif
 </section>
