@@ -19,12 +19,13 @@
         $siteName = $siteSettings['site_name'] ?? 'FindURSCH';
         $siteTagline = $siteSettings['site_tagline'] ?? 'Discover and compare schools across Uganda';
         $siteDescription = $siteSettings['site_description'] ?? 'Uganda’s school discovery and comparison platform.';
-        $siteLogoUrl = filled($siteSettings['site_logo'] ?? null) ? $siteSettings['site_logo'] : 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png';
-        $siteHorizontalLogoUrl = filled($siteSettings['site_horizontal_logo'] ?? null) ? $siteSettings['site_horizontal_logo'] : $siteLogoUrl;
+        $siteLogoUrl = filled($siteSettings['site_logo'] ?? null) ? $siteSettings['site_logo'] : asset('brand/findursch-logo.png');
+        $defaultHorizontalLogoUrl = 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png';
+        $siteHorizontalLogoUrl = filled($siteSettings['site_horizontal_logo'] ?? null) ? $siteSettings['site_horizontal_logo'] : $defaultHorizontalLogoUrl;
         $siteHomepageLogoUrl = filled($siteSettings['site_homepage_logo'] ?? null) ? $siteSettings['site_homepage_logo'] : $siteHorizontalLogoUrl;
         $siteHeaderLogoUrl = request()->routeIs('home') ? $siteHomepageLogoUrl : $siteHorizontalLogoUrl;
         $siteMobileLogoUrl = filled($siteSettings['site_mobile_logo'] ?? null) ? $siteSettings['site_mobile_logo'] : $siteHeaderLogoUrl;
-        $siteFooterLogoUrl = filled($siteSettings['site_footer_logo'] ?? null) ? $siteSettings['site_footer_logo'] : $siteLogoUrl;
+        $siteFooterLogoUrl = filled($siteSettings['site_footer_logo'] ?? null) ? $siteSettings['site_footer_logo'] : $siteHorizontalLogoUrl;
         $siteSocialImageUrl = filled($siteSettings['site_social_image'] ?? null) ? $siteSettings['site_social_image'] : $siteLogoUrl;
         $siteFaviconUrl = filled($siteSettings['site_favicon'] ?? null) ? $siteSettings['site_favicon'] : asset('brand/findursch-icon.png');
         $siteAppleTouchIconUrl = filled($siteSettings['site_apple_touch_icon'] ?? null) ? $siteSettings['site_apple_touch_icon'] : asset('brand/apple-touch-icon.png');
