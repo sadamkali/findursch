@@ -92,6 +92,9 @@ class AdminWorkspaceController extends Controller
 
                 $query = School::query()->with([
                     'district:id,name',
+                    'county:id,name',
+                    'subCounty:id,name',
+                    'parish:id,name',
                     'type:id,name',
                     'owner:id,name,email,phone,status,owner_invitation_pending',
                     'media' => fn ($query) => $query->whereIn('collection_name', ['logo', 'badge']),
