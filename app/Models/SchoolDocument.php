@@ -11,6 +11,7 @@ class SchoolDocument extends Model
         'school_id',
         'uploaded_by',
         'title',
+        'document_type',
         'description',
         'original_filename',
         'stored_path',
