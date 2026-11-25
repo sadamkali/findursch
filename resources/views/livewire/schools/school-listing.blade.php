@@ -490,12 +490,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
               <div class="tp"><div class="fe">
                 @if($school->fees_from !== null && (float)$school->fees_from > 0 && $school->fees_to !== null && (float)$school->fees_to > 0 && (float)$school->fees_from !== (float)$school->fees_to)
                   <b>Estimated UGX {{ number_format(min((float)$school->fees_from, (float)$school->fees_to)) }} – UGX {{ number_format(max((float)$school->fees_from, (float)$school->fees_to)) }}</b> per term
-                @elseif($school->fees_from !== null && (float)$school->fees_from > 0 && $school->fees_to === null)
-                  <b>Estimated from UGX {{ number_format((float)$school->fees_from) }}</b> per term
-                @elseif($school->fees_to !== null && (float)$school->fees_to > 0 && $school->fees_from === null)
-                  <b>Estimated up to UGX {{ number_format((float)$school->fees_to) }}</b> per term
                 @else
-                  <b>Fee estimate not provided</b>
+                  <b>Fee range not provided</b>
                 @endif
               </div><h3 class="nm"><a href="{{ route('schools.show', $school) }}">{{ $school->name }}</a></h3></div>
               <p class="ds">{{ $school->tagline ?: \Illuminate\Support\Str::limit(strip_tags((string)$school->description), 160, '…') ?: ($school->type?->name.' in '.$locationText) }}</p>
