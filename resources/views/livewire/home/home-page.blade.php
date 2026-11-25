@@ -276,6 +276,18 @@
         <div class="cols sec" @if(!$homepageDisplaySettings['sidebar'] || (!$homepageDisplaySettings['videos'] && !$homepageDisplaySettings['scholarships'] && !$homepageDisplaySettings['banner_ads'])) style="grid-template-columns:minmax(0,1fr)" @endif>
             @if($homepageDisplaySettings['videos'] || $homepageDisplaySettings['scholarships'] || $homepageDisplaySettings['banner_ads'])
             <div class="stack">
+                <div class="band">
+                    <div>
+                        <small>Advertise with us</small>
+                        <h3>Reach parents and students every month</h3>
+                        <p>Promote your school, business or service to families across Uganda.</p>
+                    </div>
+                    <div class="acts">
+                        <a class="btn btn-gold" href="{{ route('contact') }}">Advertise</a>
+                        <a class="btn btn-ghost" href="{{ route('contact') }}">Send inquiry</a>
+                    </div>
+                </div>
+
                 @if($homepageDisplaySettings['videos'])
                 <div>
                     <div class="head"><h2>Featured <span>school videos</span></h2><a class="more" href="{{ route('schools.index') }}">All videos</a></div>
@@ -330,11 +342,19 @@
             <aside>
                 <div class="card box jobs">
                     <h5>Latest jobs</h5>
-                    <div class="jobs-empty">
-                        <b>School job listings are coming soon.</b>
-                        <span>Contact FindURSCH to enquire about sharing a vacancy.</span>
-                    </div>
-                    <a class="foot" href="{{ route('contact') }}">Enquire about job listings</a>
+                    <ul>
+                        @forelse($latestJobs as $job)
+                            <li>
+                                <a href="{{ route('jobs.show', $job) }}">
+                                    <strong>{{ $job->title }}</strong>
+                                    <span>{{ $job->location }} · {{ $job->employment_type_label }}</span>
+                                </a>
+                            </li>
+                        @empty
+                            <li><span class="box-empty">Current education vacancies will appear here when employers publish them.</span></li>
+                        @endforelse
+                    </ul>
+                    <a class="foot" href="{{ route('jobs.index') }}">View all jobs</a>
                 </div>
 
                 <a class="promo" href="{{ route('contact') }}">

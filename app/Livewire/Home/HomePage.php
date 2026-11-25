@@ -3,6 +3,7 @@
 namespace App\Livewire\Home;
 
 use App\Models\Article;
+use App\Models\JobListing;
 use App\Models\District;
 use App\Models\Review;
 use App\Models\School;
@@ -96,6 +97,14 @@ class HomePage extends Component
             ->whereHas('school', fn ($query) => $query->publiclyVisible())
             ->with('school')
             ->orderBy('starts_at')
+            ->limit(3)
+            ->get();
+
+        $latestJobs = JobListing::query()
+            ->publiclyVisible()
+            ->orderByDesc('is_featured')
+            ->orderByDesc('published_at')
+            ->orderByDesc('created_at')
             ->limit(3)
             ->get();
 
@@ -240,6 +249,7 @@ class HomePage extends Component
             'leadArticle',
             'newsArticles',
             'upcomingEvents',
+            'latestJobs',
             'featuredVideos',
             'featuredBursaries',
             'latestSchoolUpdates',
