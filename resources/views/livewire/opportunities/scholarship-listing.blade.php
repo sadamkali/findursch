@@ -1,11 +1,20 @@
 <div class="findursch-scholarships">
     <a class="rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
 
-    <x-site-ad-banner placement="top" />
-
     <section class="phead">
-        <h1>Scholarships &amp; <em>Bursaries</em> in Uganda</h1>
-        <p>Explore school bursaries and published funding opportunities for Ugandan learners. <b>{{ number_format($openCount) }}</b> open now.</p>
+        <div class="wrap">
+            <div class="phead-copy">
+                <nav class="crumbs" aria-label="Breadcrumb">
+                    <a href="{{ route('home') }}">Home</a>
+                    <span aria-hidden="true">›</span>
+                    <b>Scholarships &amp; bursaries</b>
+                </nav>
+                <p class="phead-eyebrow">Education funding in Uganda</p>
+                <h1>Scholarships &amp; <em>Bursaries</em> in Uganda</h1>
+                <p class="phead-intro">Explore school bursaries and published funding opportunities for Ugandan learners. <b>{{ number_format($openCount) }}</b> open now.</p>
+            </div>
+            <x-site-ad-banner placement="top" />
+        </div>
     </section>
 
     <main class="wrap">
