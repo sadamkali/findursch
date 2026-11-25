@@ -1,11 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<section class="py-10" style="background-color:var(--brand);">
-    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <h1 class="text-4xl font-normal" style="font-family: 'DM Serif Display', serif; color:#fff;">About FindURSCH</h1>
-    </div>
-</section>
+<x-site-page-hero
+    eyebrow="About the platform"
+    title="About FindURSCH"
+    description="Learn how FindURSCH helps parents discover, compare and connect with schools across Uganda."
+    :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'About']]"
+/>
 <div class="bg-gray-50 py-12">
     <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div class="prose prose-gray max-w-none">
