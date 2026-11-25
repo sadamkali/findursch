@@ -1,477 +1,104 @@
-<div class="findursch-home-reference" style="--brand: {{ $homepageTheme['primary_color'] }}; --accent: {{ $homepageTheme['accent_color'] }}; --serif: '{{ $homepageTheme['font_display'] }}', Georgia, serif; --sans: '{{ $homepageTheme['font_body'] }}', system-ui, sans-serif;">
-    @if($homepageDisplaySettings['register_tab'])
-        <a class="tab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
-    @endif
+<div class="findursch-home-page">
+<a class="rtab" href="#">REGISTER YOUR SCHOOL</a>
 
-    <section class="hero" x-data="homepageHero(@js($homepageSlides))" :style="backgroundStyle">
-        <div>
-            <h1 x-text="currentSlide.title">Find the right school for your child</h1>
-            <p x-text="currentSlide.description">Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.</p>
-            @if($homepageDisplaySettings['search'])
-                <form class="search" action="{{ route('schools.index') }}" method="GET">
-                    <input type="search" name="search" placeholder="Search by name, location or district" aria-label="Search schools">
-                    <select name="type" aria-label="School type">
-                        <option value="">All types</option>
-                        @foreach($schoolTypes as $type)
-                            <option value="{{ $type->id }}">{{ $type->name }}</option>
-                        @endforeach
-                    </select>
-                    <button class="btn btn-red" type="submit">Search</button>
-                </form>
-            @endif
-            <a class="btn btn-gold hero-slide-cta" x-cloak x-show="currentSlide.button_label && currentSlide.button_url" :href="currentSlide.button_url" x-text="currentSlide.button_label"></a>
-        </div>
-        <div class="hero-carousel-controls" x-show="slides.length > 1" x-cloak>
-            <button type="button" class="hero-carousel-arrow" @click="previous()" aria-label="Previous slide">‹</button>
-            <div class="dots" role="tablist" aria-label="Homepage slides">
-                <template x-for="(slide, index) in slides" :key="index">
-                    <button type="button" :class="{on: active === index}" :aria-label="'Show slide ' + (index + 1)" :aria-selected="active === index" role="tab" @click="show(index)"></button>
-                </template>
-            </div>
-            <button type="button" class="hero-carousel-arrow" @click="next()" aria-label="Next slide">›</button>
-        </div>
-    </section>
+<section class="hero" id="hero">
+  <div>
+    <h1>Find the <em>Perfect School</em> for your child</h1>
+    <p>Explore nurseries, primary, secondary and vocational schools, colleges and universities across Uganda, all in one place.</p>
+    <form class="search" onsubmit="return false">
+      <input type="search" placeholder="Search by name, location or district" aria-label="Search schools">
+      <select aria-label="School type"><option>All types</option><option>Nursery</option><option>Primary</option><option>Secondary</option><option>University</option></select>
+      <button class="btn btn-pill">Search</button>
+    </form>
+  </div>
+  <div class="dots" id="hdots"><i class="on"></i><i></i></div>
+</section>
 
-    <div class="wrap">
-        @if($homepageDisplaySettings['featured_schools'] || $homepageDisplaySettings['sidebar'])
-        <div class="cols sec" @if(!$homepageDisplaySettings['featured_schools'] || !$homepageDisplaySettings['sidebar']) style="grid-template-columns:minmax(0,1fr)" @endif>
-            @if($homepageDisplaySettings['featured_schools'])
-            <div>
-                <div class="head">
-                    <h2>Featured <span>schools</span></h2>
-                    <a class="more" href="{{ route('schools.index') }}">View all</a>
-                </div>
+<div class="wrap">
+  <div class="cols sec">
+    <div>
+      <div class="head"><h2>Featured <span>schools</span></h2><a class="more" href="#">View all</a></div>
+      <div class="slider"><span class="arrow l" id="fp">‹</span><span class="arrow r" id="fn">›</span><div class="track" id="ft"></div></div>
+      <div class="dots" id="fd"></div>
 
-                <div class="slider" x-data="schoolCarousel">
-                    <button type="button" class="arrow l" x-show="pages > 1" @click="previous()" aria-label="Previous featured schools">‹</button>
-                    <button type="button" class="arrow r" x-show="pages > 1" @click="next()" aria-label="Next featured schools">›</button>
-                    <div class="cards" x-ref="track" @scroll.debounce.80ms="sync()">
-                        @forelse($featuredSchools as $school)
-                            <a class="card school" href="{{ route('schools.show', $school) }}">
-                                @php
-                                    $schoolPhoto = $school->getFirstMediaUrl('cover');
-                                    $photoTone = $loop->iteration === 2 ? 'b' : ($loop->iteration === 3 ? 'c' : '');
-                                @endphp
-                                <div class="ph {{ $photoTone }}">
-                                    @if($schoolPhoto)
-                                        <img src="{{ $schoolPhoto }}" alt="{{ $school->name }}" loading="lazy">
-                                    @else
-                                        <span class="ph-initials">{{ strtoupper(mb_substr($school->name, 0, 2)) }}</span>
-                                    @endif
-                                </div>
-                                <div class="b">
-                                    <span class="kick">{{ $school->type?->name ?? 'School' }}</span>
-                                    <h3>{{ $school->name }}</h3>
-                                    <small>{{ $school->district?->name ?? 'Uganda' }} district</small>
-                                    @if($school->fees_from !== null || $school->fees_to !== null)
-                                        <small class="fee-estimate">
-                                            Approx.
-                                            @if($school->fees_from !== null && $school->fees_to !== null)
-                                                UGX {{ number_format((float) $school->fees_from) }} – {{ number_format((float) $school->fees_to) }}
-                                            @elseif($school->fees_from !== null)
-                                                from UGX {{ number_format((float) $school->fees_from) }}
-                                            @else
-                                                up to UGX {{ number_format((float) $school->fees_to) }}
-                                            @endif
-                                            / term
-                                        </small>
-                                    @endif
-                                    @foreach($school->curricula->take(1) as $curriculum)
-                                        <span class="tag">{{ $curriculum->abbreviation }}</span>
-                                    @endforeach
-                                    @if($school->created_at?->greaterThan(now()->subDays(14)))
-                                        <span class="tag new">New</span>
-                                    @endif
-                                    @if($school->verification_status === 'verified')
-                                        <span class="tag">Verified</span>
-                                    @endif
-                                </div>
-                            </a>
-                        @empty
-                            <div class="card school school-empty">
-                                <div class="ph"><span class="ph-initials">FS</span></div>
-                                <div class="b"><span class="kick">FindURSCH directory</span><h3>School listings are being prepared</h3><small>Approved school profiles will appear here.</small></div>
-                            </div>
-                        @endforelse
-                        @if($featuredSchools->count() === 1)
-                            <a class="card school school-empty-link" href="{{ route('schools.index') }}"><div class="ph b"><span class="ph-initials">+</span></div><div class="b"><span class="kick">Explore more</span><h3>Discover schools across Uganda</h3><small>Browse the school directory</small><span class="tag">View schools</span></div></a>
-                            <a class="card school school-empty-link" href="{{ route('compare') }}"><div class="ph c"><span class="ph-initials">↔</span></div><div class="b"><span class="kick">Make a shortlist</span><h3>Compare your options</h3><small>Review schools side by side</small><span class="tag">Compare</span></div></a>
-                        @elseif($featuredSchools->count() === 2)
-                            <a class="card school school-empty-link" href="{{ route('schools.index') }}"><div class="ph c"><span class="ph-initials">+</span></div><div class="b"><span class="kick">Explore more</span><h3>Find another school</h3><small>Browse schools across Uganda</small><span class="tag">View all</span></div></a>
-                        @endif
-                    </div>
-                </div>
-                <div class="school-carousel-dots" x-show="pages > 1" aria-label="Featured school pages">
-                    <template x-for="page in pages" :key="page">
-                        <button type="button" :class="{on: activePage === page - 1}" @click="go(page - 1)" :aria-label="'Show featured schools page ' + page" :aria-current="activePage === page - 1 ? 'true' : 'false'"></button>
-                    </template>
-                </div>
+      <div class="card spot"><div class="ph c"></div>
+        <div class="t"><h3>School spotlight name</h3><p>Two lines about the school, kept short so the card stays balanced beside the photo.</p><div class="meta"><b>Tel</b> 0700 000 000 &nbsp; <b>Location</b> Kampala</div><a class="more" href="#">Learn more about this school</a></div></div>
 
-                @if($spotlightSchool)
-                    <div class="card spot">
-                        <a class="ph d" href="{{ route('schools.show', $spotlightSchool) }}" aria-label="View {{ $spotlightSchool->name }}">
-                            @if($spotlightSchool->getFirstMediaUrl('cover'))
-                                <img src="{{ $spotlightSchool->getFirstMediaUrl('cover') }}" alt="{{ $spotlightSchool->name }}" loading="lazy">
-                            @else
-                                <span class="ph-initials">{{ strtoupper(mb_substr($spotlightSchool->name, 0, 2)) }}</span>
-                            @endif
-                        </a>
-                        <div class="t">
-                            <h3>{{ $spotlightSchool->name }}</h3>
-                            <p>{{ \Illuminate\Support\Str::limit($spotlightSchool->tagline ?: $spotlightSchool->description ?: 'Discover this school and explore its programmes, facilities and learning environment.', 150) }}</p>
-                            <div class="meta">
-                                @if($spotlightSchool->phone)<b>Tel</b> {{ $spotlightSchool->phone }} &nbsp;@endif
-                                <b>Location</b> {{ $spotlightSchool->district?->name ?? 'Uganda' }}
-                            </div>
-                            <a class="more" href="{{ route('schools.show', $spotlightSchool) }}">Learn more about this school</a>
-                        </div>
-                    </div>
-                @endif
-
-                <div class="strip">
-                    <div><h4>Is your school on FindURSCH?</h4><p>Parents across Uganda search here for schools every day.</p></div>
-                    <a class="btn btn-gold" href="{{ route('register') }}">List your school</a>
-                </div>
-            </div>
-            @endif
-
-            @if($homepageDisplaySettings['sidebar'])
-            <aside>
-                @if($homepageDisplaySettings['banner_ads'])
-                    <x-site-ad-banner placement="side" />
-                @endif
-
-                @if($homepageDisplaySettings['categories'])
-                <div class="card box">
-                    <h5>Browse by category</h5>
-                    <ul>
-                        @forelse($schoolTypes->take(5) as $type)
-                            <li><a href="{{ route('schools.index', ['type' => $type->id]) }}"><span class="ico">{{ mb_substr($type->name, 0, 1) }}</span>{{ $type->name }}<em>{{ number_format($type->public_schools_count) }}</em></a></li>
-                        @empty
-                            <li><span class="box-empty">School categories will appear here.</span></li>
-                        @endforelse
-                    </ul>
-                    <a class="foot" href="{{ route('schools.index') }}">All categories</a>
-                </div>
-                @endif
-
-                @if($homepageDisplaySettings['upcoming_events'])
-                <div class="card box">
-                    <h5>Upcoming events</h5>
-                    <ul>
-                        @forelse($upcomingEvents as $event)
-                            <li>
-                                <a href="{{ route('events.show', $event) }}">
-                                    @if($event->image_url || $event->school?->getFirstMediaUrl('cover'))
-                                        <img src="{{ $event->image_url ?: $event->school?->getFirstMediaUrl('cover') }}" alt="{{ $event->image_alt ?: ($event->title ?? 'School event') }}" loading="lazy" style="width:44px;height:44px;object-fit:cover;border-radius:10px;flex-shrink:0;">
-                                    @endif
-                                    <span class="date">{{ $event->starts_at?->format('d') }}<small>{{ strtoupper($event->starts_at?->format('M')) }}</small></span>
-                                    <div><strong>{{ $event->title }}</strong><span>{{ $event->school?->name }}</span></div>
-                                </a>
-                            </li>
-                        @empty
-                            <li><span class="box-empty">Upcoming school events will appear here when schools publish them.</span></li>
-                        @endforelse
-                    </ul>
-                    <a class="foot" href="{{ route('events.index') }}">View all events</a>
-                </div>
-                @endif
-            </aside>
-            @endif
-        </div>
-        @endif
-
-        @if($homepageDisplaySettings['news'])
-        <section class="sec">
-            <div class="head">
-                <h2>Education <span>news headlines</span></h2>
-                <a class="more" href="{{ route('news.index') }}">All news</a>
-            </div>
-            <div class="news">
-                @if($leadArticles->isNotEmpty())
-                    <div class="lead ph c" x-data="homepageLeadCarousel({{ $leadArticles->count() }})">
-                        @foreach($leadArticles as $article)
-                            <a class="lead-slide" href="{{ route('news.show', $article) }}" x-show="active === {{ $loop->index }}" @if(!$loop->first) x-cloak @endif>
-                                @if($article->cover_image)
-                                    <img src="{{ $article->cover_image }}" alt="{{ $article->title }}" loading="lazy">
-                                @endif
-                                <div class="cap">
-                                    <small>{{ $article->category?->name ?? 'Education news' }} · {{ $article->published_at?->diffForHumans() }}</small>
-                                    <h3>{{ $article->title }}</h3>
-                                </div>
-                            </a>
-                        @endforeach
-                        @if($leadArticles->count() > 1)
-                            <div class="dots lead-dots" role="tablist" aria-label="Education lead stories">
-                                @foreach($leadArticles as $slide)
-                                    <button type="button" :class="{on: active === {{ $loop->index }}}" @click="show({{ $loop->index }})" aria-label="Show lead story {{ $loop->iteration }}"></button>
-                                @endforeach
-                            </div>
-                            <button type="button" class="arrow l" @click="previous()" aria-label="Previous lead story">‹</button>
-                            <button type="button" class="arrow r" @click="next()" aria-label="Next lead story">›</button>
-                        @endif
-                    </div>
-                @else
-                    <div class="lead ph c"><div class="cap"><small>FindURSCH newsroom</small><h3>Education news and school announcements</h3><a class="btn btn-gold" href="{{ route('news.index') }}">Explore news</a></div></div>
-                @endif
-
-                @php
-                    $homepageNewsItems = $newsArticles->map(fn ($article) => [
-                        'id' => $article->id,
-                        'url' => route('news.show', $article),
-                        'title' => $article->title,
-                        'image' => $article->cover_image,
-                        'date' => $article->published_at?->format('d M Y'),
-                    ])->values()->all();
-                @endphp
-                <div class="card rows" x-data="homepageRows(@js($homepageNewsItems))">
-                    <template x-for="(article, position) in visibleItems" :key="article.id">
-                        <a class="row" :href="article.url">
-                            <div class="ph" :class="['b', 'd', ''][position % 3]">
-                                <template x-if="article.image"><img :src="article.image" alt="" loading="lazy"></template>
-                                <span x-show="!article.image">F</span>
-                            </div>
-                            <div><h4 x-text="article.title"></h4><small x-text="article.date"></small></div>
-                        </a>
-                    </template>
-                    @if($newsArticles->isEmpty())
-                        <p class="box-empty">Published education headlines will appear here.</p>
-                    @endif
-                    <div class="mini" x-show="items.length > 3" x-cloak>
-                        <button type="button" @click="previous()" aria-label="Previous headlines">↑</button>
-                        <button type="button" @click="next()" aria-label="Next headlines">↓</button>
-                    </div>
-                </div>
-
-                @if($latestSchoolUpdates->first())
-                    @php
-                        $featuredSchoolUpdate = $latestSchoolUpdates->first();
-                    @endphp
-                    <a class="card prem" href="{{ route('school-news.show', $featuredSchoolUpdate) }}">
-                        <div class="ph d">
-                            @if($featuredSchoolUpdate->image_url || $featuredSchoolUpdate->school?->getFirstMediaUrl('cover'))
-                                <img src="{{ $featuredSchoolUpdate->image_url ?: $featuredSchoolUpdate->school?->getFirstMediaUrl('cover') }}" alt="{{ $featuredSchoolUpdate->image_alt ?: ($featuredSchoolUpdate->school?->name ?? $featuredSchoolUpdate->title) }}" loading="lazy">
-                            @else
-                                <span class="ph-initials">{{ strtoupper(mb_substr($featuredSchoolUpdate->school?->name ?? 'FS', 0, 2)) }}</span>
-                            @endif
-                        </div>
-                        <span class="flag">School news</span>
-                        <div class="b">
-                            <h3>{{ $featuredSchoolUpdate->title }}</h3>
-                            <p>{{ \Illuminate\Support\Str::limit($featuredSchoolUpdate->description, 125) }}</p>
-                            <small><span>{{ $featuredSchoolUpdate->published_at?->format('d M Y') }}</span><span>{{ $featuredSchoolUpdate->school?->name }}</span></small>
-                        </div>
-                    </a>
-                @else
-                    <a class="card prem prem-empty" href="{{ route('news.index') }}">
-                        <div class="ph d"><span class="ph-initials">FS</span></div>
-                        <div class="b"><h3>News from school communities</h3><p>School announcements will be featured here when they are published.</p><small><span>FindURSCH</span><span>Latest updates</span></small></div>
-                    </a>
-                @endif
-            </div>
-        </section>
-        @endif
-
-        @if($homepageDisplaySettings['videos'] || $homepageDisplaySettings['scholarships'] || $homepageDisplaySettings['sidebar'] || $homepageDisplaySettings['banner_ads'])
-        <div class="cols sec" @if(!$homepageDisplaySettings['sidebar'] || (!$homepageDisplaySettings['videos'] && !$homepageDisplaySettings['scholarships'] && !$homepageDisplaySettings['banner_ads'])) style="grid-template-columns:minmax(0,1fr)" @endif>
-            @if($homepageDisplaySettings['videos'] || $homepageDisplaySettings['scholarships'] || $homepageDisplaySettings['banner_ads'])
-            <div class="stack">
-                <div class="band">
-                    <div>
-                        <small>Advertise with us</small>
-                        <h3>Reach parents and students every month</h3>
-                        <p>Promote your school, business or service to families across Uganda.</p>
-                    </div>
-                    <div class="acts">
-                        <a class="btn btn-gold" href="{{ route('contact') }}">Advertise</a>
-                        <a class="btn btn-ghost" href="{{ route('contact') }}">Send inquiry</a>
-                    </div>
-                </div>
-
-                @if($homepageDisplaySettings['videos'])
-                <div>
-                    <div class="head"><h2>Featured <span>school videos</span></h2><a class="more" href="{{ route('schools.index') }}">All videos</a></div>
-                    @if($featuredVideos->isNotEmpty())
-                        <div class="slider video-slider" x-data="homepageHorizontalCarousel">
-                            <button type="button" class="arrow l" x-show="canScroll" @click="previous()" aria-label="Previous school videos">‹</button>
-                            <button type="button" class="arrow r" x-show="canScroll" @click="next()" aria-label="Next school videos">›</button>
-                            <div class="vids" x-ref="track" @scroll.debounce.100ms="measure()">
-                                @foreach($featuredVideos as $video)
-                                    <a class="card vid" href="{{ $video->youtube_url }}" target="_blank" rel="noopener noreferrer">
-                                        <div class="ph {{ $loop->iteration === 1 ? 'c' : 'b' }}">
-                                            <img src="https://img.youtube.com/vi/{{ rawurlencode($video->youtube_video_id) }}/hqdefault.jpg" alt="" loading="lazy">
-                                            <i class="play"></i>
-                                        </div>
-                                        <div class="b"><small>{{ $video->school?->name ?? 'School' }}</small><h4>{{ $video->title }}</h4><span>Watch video ↗</span></div>
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    @else
-                        <div class="card video-empty"><p>Approved school videos will appear here when participating schools share them.</p><a href="{{ route('schools.index') }}" class="more">Explore schools →</a></div>
-                    @endif
-                </div>
-                @endif
-
-                @if($homepageDisplaySettings['scholarships'])
-                <div class="band edge">
-                    <div>
-                        <h3>Scholarships &amp; bursaries</h3>
-                        <p>Browse funding opportunities for Ugandan students at every level.</p>
-                        <div class="chips">
-                            <a href="{{ route('scholarships.index') }}">School bursaries</a>
-                            <a href="{{ route('scholarships.index') }}">Student funding</a>
-                            <a href="{{ route('scholarships.index') }}">Award opportunities</a>
-                            <a href="{{ route('scholarships.index') }}">Published deadlines</a>
-                        </div>
-                        @if($featuredBursaries->isNotEmpty())
-                            <div class="bursary-preview">
-                                @foreach($featuredBursaries->take(2) as $bursary)
-                                    <a href="{{ route('scholarships.show', $bursary) }}"><b>{{ $bursary->title }}</b><small>{{ $bursary->deadline ? 'Closes '.$bursary->deadline->format('d M Y') : 'Contact the school' }}</small></a>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                    <a class="btn btn-ghost" href="{{ route('scholarships.index') }}">Browse</a>
-                </div>
-                @endif
-            </div>
-            @endif
-
-            @if($homepageDisplaySettings['sidebar'])
-            <aside>
-                <div class="card box jobs">
-                    <h5>Latest jobs</h5>
-                    <ul>
-                        @forelse($latestJobs as $job)
-                            <li>
-                                <a href="{{ route('jobs.show', $job->slug) }}">
-                                    <strong>{{ $job->title }}</strong>
-                                    <span>{{ $job->location }} · {{ $job->employment_type_label }}</span>
-                                </a>
-                            </li>
-                        @empty
-                            <li><span class="box-empty">Current education vacancies will appear here when employers publish them.</span></li>
-                        @endforelse
-                    </ul>
-                    <a class="foot" href="{{ route('jobs.index') }}">View all jobs</a>
-                </div>
-
-                <a class="promo" href="{{ route('contact') }}">
-                    <small>Advertise</small>
-                    <h3>Put your brand in front of parents and students</h3>
-                    <p>Reach families across Uganda every month.</p>
-                    <span class="btn btn-gold">Advertise with us</span>
-                </a>
-
-                @if($homepageDisplaySettings['reviews'])
-                <div class="card box">
-                    <h5>Stories from schools &amp; families</h5>
-                    @if($featuredReviews->isNotEmpty())
-                        @php
-                            $homepageReviewItems = $featuredReviews->map(fn ($review) => [
-                                'rating' => (int) $review->rating,
-                                'body' => \Illuminate\Support\Str::limit($review->body, 190),
-                                'initial' => strtoupper(mb_substr($review->user?->name ?? 'P', 0, 1)),
-                                'name' => $review->user?->name ?? 'FindURSCH parent',
-                                'school' => $review->school?->name ?? '',
-                            ])->values()->all();
-                        @endphp
-                        <div class="quote" x-data="homepageQuotes(@js($homepageReviewItems))">
-                            <div class="st" :aria-label="quote.rating + ' out of 5 stars'" x-text="'★'.repeat(quote.rating) + '☆'.repeat(5 - quote.rating)"></div>
-                            <p>“<span x-text="quote.body"></span>”</p>
-                            <div class="who"><i x-text="quote.initial"></i><span><b x-text="quote.name"></b><span x-text="quote.school"></span></span></div>
-                            <div class="dots quote-dots" x-show="quotes.length > 1" x-cloak role="tablist" aria-label="School and family stories">
-                                <template x-for="(item, index) in quotes" :key="index">
-                                    <button type="button" :class="{on: active === index}" @click="show(index)" :aria-label="'Show review ' + (index + 1)"></button>
-                                </template>
-                            </div>
-                        </div>
-                    @else
-                        <div class="quote"><p>Approved stories and reviews from school communities will appear here.</p><a class="more" href="{{ route('schools.index') }}">Explore schools</a></div>
-                    @endif
-                </div>
-                @endif
-            </aside>
-            @endif
-        </div>
-        @endif
+      <div class="strip"><div><small>For schools</small><h4>Is your school on FindURSCH?</h4><p>Parents across Uganda search here for schools every day.</p></div><a class="btn btn-gold" href="#">List your school</a></div>
     </div>
 
-    @if($homepageDisplaySettings['insights'])
-    <section class="tinted">
-        <div class="wrap">
-            <div class="head"><h2>Educational <span>insights</span></h2><a class="more" href="{{ route('articles.index') }}">All articles</a></div>
-            <div class="ins">
-                @if($insightArticles->first())
-                    @php
-                        $primaryInsight = $insightArticles->first();
-                    @endphp
-                    <a class="card big" href="{{ route('articles.show', $primaryInsight) }}">
-                        <div class="ph d">
-                            @if($primaryInsight->cover_image)<img src="{{ $primaryInsight->cover_image }}" alt="" loading="lazy">@else<span class="ph-initials">FS</span>@endif
-                        </div>
-                        <div class="b"><h3>{{ $primaryInsight->title }}</h3><p>{{ \Illuminate\Support\Str::limit($primaryInsight->excerpt, 135) }}</p><small><span>{{ $primaryInsight->published_at?->format('M Y') }}</span><span>{{ $primaryInsight->read_time_minutes }} min read</span></small></div>
-                    </a>
-                @else
-                    <div class="card big big-empty"><div class="ph d"><span class="ph-initials">FS</span></div><div class="b"><h3>Educational insights</h3><p>Helpful articles and guidance will appear here as they are published.</p></div></div>
-                @endif
+    <aside>
+      <div class="ad">Your advert here<small>300 × 250</small></div>
+      <div class="card box"><h5>Browse by category</h5><ul>
+        <li><a href="#"><span class="ico"></span>Nursery &amp; primary<em>15</em></a></li><li><a href="#"><span class="ico"></span>Secondary school<em>10</em></a></li><li><a href="#"><span class="ico"></span>Primary school<em>5</em></a></li><li><a href="#"><span class="ico"></span>Daycare / nursery<em>2</em></a></li><li><a href="#"><span class="ico"></span>Vocational school<em>2</em></a></li>
+      </ul><a class="foot" href="#">All school categories</a></div>
+      <div class="card box"><h5>Upcoming events</h5><ul>
+        <li><a href="#"><span class="date">19<small>NOV</small></span><div><strong>Launch of the 2026 global report</strong><span>Organiser name</span></div></a></li>
+        <li><a href="#"><span class="date">19<small>NOV</small></span><div><strong>World philosophy day 2026</strong><span>Organiser name</span></div></a></li>
+        <li><a href="#"><span class="date">20<small>DEC</small></span><div><strong>Annual open day</strong><span>Host school name</span></div></a></li>
+      </ul><a class="foot" href="#">View all events</a></div>
+    </aside>
+  </div>
 
-                @php
-                    $homepageInsightItems = $insightArticles->skip(1)->map(fn ($article) => [
-                        'id' => $article->id,
-                        'url' => route('articles.show', $article),
-                        'title' => $article->title,
-                        'image' => $article->cover_image,
-                        'date' => $article->published_at?->format('M Y'),
-                    ])->values()->all();
-                @endphp
-                <div class="card rows" x-data="homepageRows(@js($homepageInsightItems))">
-                    <template x-for="(article, position) in visibleItems" :key="article.id">
-                        <a class="row" :href="article.url">
-                            <div class="ph" :class="['b', '', 'c'][position % 3]">
-                                <template x-if="article.image"><img :src="article.image" alt="" loading="lazy"></template>
-                                <span x-show="!article.image">F</span>
-                            </div>
-                            <div><h4 x-text="article.title"></h4><small x-text="article.date"></small></div>
-                        </a>
-                    </template>
-                    @if($homepageInsightItems === [])
-                        <p class="box-empty">More educational articles will appear here.</p>
-                    @endif
-                    <div class="mini" x-show="items.length > 3" x-cloak>
-                        <button type="button" @click="previous()" aria-label="Previous articles">↑</button>
-                        <button type="button" @click="next()" aria-label="Next articles">↓</button>
-                    </div>
-                </div>
+  <section class="sec">
+    <div class="head"><h2>Education <span>news headlines</span></h2><a class="more" href="#">All news</a></div>
+    <div class="news">
+      <div class="lead ph c" id="lead"><span class="arrow l" id="lp">‹</span><span class="arrow r" id="ln">›</span>
+        <div class="cap"><small id="ls"></small><h3 id="lt"></h3><div class="dots" id="ld"></div></div></div>
+      <div class="card rows" id="rows"></div>
+      <a class="card prem" href="#"><div class="ph d"></div><span class="flag">Premium school news</span>
+        <div class="b"><h3>Featured story from a partner school</h3><p>A short summary of the story that fits the card without crowding the headline.</p><small><span>23rd June 2026</span><span>3 min read</span></small></div></a>
+    </div>
+  </section>
 
-                @if($spotlightSchool)
-                    <a class="spl" href="{{ route('schools.show', $spotlightSchool) }}">
-                        @if($spotlightSchool->getFirstMediaUrl('cover'))<img src="{{ $spotlightSchool->getFirstMediaUrl('cover') }}" alt="" loading="lazy">@endif
-                        <div><small>School spotlight</small><h3>{{ $spotlightSchool->name }}</h3><p>{{ \Illuminate\Support\Str::limit($spotlightSchool->tagline ?: $spotlightSchool->description ?: 'Explore this school profile on FindURSCH.', 100) }}</p><span class="btn btn-gold btn-block">Learn more about this school</span></div>
-                    </a>
-                @else
-                    <div class="spl"><div><small>School discovery</small><h3>Find a school that fits</h3><p>Explore profiles and compare schools across Uganda.</p><a class="btn btn-gold btn-block" href="{{ route('schools.index') }}">Browse schools</a></div></div>
-                @endif
-            </div>
-        </div>
-    </section>
-    @endif
+  <div class="cols sec">
+    <div class="stack">
+      <div class="band"><div><small>Advertise with us</small><h3>Reach parents and students every month</h3><p>Promote your school, business or service to families across Uganda.</p></div><div class="acts"><a class="btn btn-gold" href="#">Advertise</a><a class="btn btn-ghost" href="#">Send inquiry</a></div></div>
+      <div><div class="head"><h2>Featured <span>school videos</span></h2><a class="more" href="#">All videos</a></div>
+        <div class="slider"><span class="arrow l" id="vp">‹</span><span class="arrow r" id="vn">›</span><div class="track" id="vt"></div></div></div>
+      <div class="band edge"><div><h3>Scholarships &amp; bursaries</h3><p>Browse funding opportunities for Ugandan students at every level of education.</p><div class="chips"><a href="#">Government</a><a href="#">Private bursaries</a><a href="#">University grants</a><a href="#">International</a></div></div><a class="btn btn-ghost" href="#">Browse</a></div>
+    </div>
+    <aside>
+      <div class="card box jobs"><h5>Latest jobs</h5><ul><li><a href="#">Programme specialist, Nairobi</a></li><li><a href="#">Debate coach, one day a month, Kampala</a></li><li><a href="#">Field officer, Kampala</a></li></ul><a class="foot" href="#">View all jobs</a></div>
+      <div class="promo"><small>Advertise</small><h3>Put your brand in front of parents and students</h3><p>Reach families across Uganda every month.</p><a class="btn btn-gold" href="#">Advertise with us</a></div>
+      <div class="card box"><h5>Stories from schools &amp; families</h5><div class="quote"><div class="st">★★★★★</div><p id="qt"></p><div class="who"><i id="qi"></i><span><b id="qn"></b><span id="qr"></span></span></div><div class="dots" id="qd"></div></div></div>
+    </aside>
+  </div>
+</div>
 
+<section class="tinted"><div class="wrap">
+  <div class="head"><h2>Educational <span>insights</span></h2><a class="more" href="#">All articles</a></div>
+  <div class="ins">
+    <a class="card big" href="#"><div class="ph d"></div><div class="b"><h3>Featured article headline runs to two lines</h3><p>A two-line excerpt for the lead article, trimmed with an ellipsis…</p><small><span>Nov 2026</span><span>2 min read</span></small></div></a>
+    <div class="card rows">
+      <a class="row" href="#"><div class="ph b"></div><div><h4>Article headline in the list</h4><small>Nov 2026</small></div></a>
+      <a class="row" href="#"><div class="ph"></div><div><h4>Article headline in the list</h4><small>Nov 2026</small></div></a>
+      <a class="row" href="#"><div class="ph c"></div><div><h4>Article headline in the list</h4><small>Nov 2026</small></div></a>
+    </div>
+    <div class="spl"><div><small>School spotlight</small><h3>Spotlight school name</h3><p>Short description of the school.</p><a class="btn btn-gold btn-block" href="#">Learn more about this school</a></div></div>
+  </div>
+</div></section>
 
+<div class="banner"><div class="ad">Wide advert<small>728 × 200</small></div><div class="ad alt">School advert<small>468 × 200</small></div></div>
 
-    @if($homepageDisplaySettings['banner_ads'])
-    <section class="banner" aria-label="Sponsored banners">
-        <x-site-ad-banner placement="foot1" />
-        <x-site-ad-banner placement="foot2" />
-    </section>
-    @endif
+<section class="cta">
+  <h2>Is your school listed?</h2>
+  <p>Join schools across Uganda reaching parents, students and educators every day.</p>
+  <div class="acts"><a class="btn btn-white" href="#">Register your school</a><a class="btn btn-ghost" href="#">View benefits</a></div>
+</section>
 
-    @if($homepageDisplaySettings['cta'])
-    <section class="cta">
-        <h2>Is your school listed?</h2>
-        <p>Join schools across Uganda reaching parents, students and educators every day.</p>
-        <div class="acts"><a class="btn btn-white" href="{{ route('register') }}">Register your school</a><a class="btn btn-ghost" href="{{ route('schools.index') }}">View school directory</a></div>
-    </section>
-    @endif
+<footer class="ref-footer">
+  <div class="wrap">
+    <div class="fgrid">
+      <div><a class="logo" href="#">Find<b>UR</b>SCH</a><p>Uganda's school discovery, comparison and admissions platform, with school profiles, news, blogs, events, jobs and scholarships.</p><p>Kampala, Uganda<br>+256 000 000 000<br>hello@findursch.ug</p></div>
+      <div><h6>Explore schools</h6><ul><li>Primary schools</li><li>Secondary schools</li><li>Universities</li><li>Vocational schools</li><li>Boarding schools</li><li>International schools</li></ul></div>
+      <div><h6>Resources</h6><ul><li>Latest news</li><li>Blogs</li><li>Scholarships</li><li>School jobs</li><li>Events calendar</li><li>Past papers</li><li>Compare schools</li></ul></div>
+      <div><h6>Support</h6><ul><li>List your school</li><li>Advertise with us</li><li>About</li><li>Contact</li><li>Terms and conditions</li><li>Privacy policy</li></ul></div>
+    </div>
+    <div class="fbar">
+      <span>© 2026 FindURSCH. All rights reserved.</span>
+      <div class="box2"><span>Want to reach parents and students every month?</span><a class="btn btn-ghost" href="#">Advertise with us</a></div>
+    </div>
+  </div>
+</footer>
 </div>

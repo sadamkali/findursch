@@ -410,4 +410,49 @@ if (!prefersReducedMotion && 'IntersectionObserver' in window) {
     document.querySelectorAll('[data-reveal]').forEach(element => element.classList.add('is-visible'));
 }
 
+
+// Uploaded homepage reference interactions, scoped away from the shared header.
+function initializeFindURSCHReferenceHome() {
+ const home = document.querySelector('.findursch-home-page');
+ if (!home || home.dataset.referenceInitialized === 'true') return;
+ home.dataset.referenceInitialized = 'true';
+const $=id=>home.querySelector('#'+id),P=["","b","c","d"];
+const dots=(el,n,i)=>el.innerHTML=Array.from({length:n},(_,k)=>`<i class="${k==i?"on":""}" data-i="${k}"></i>`).join("");
+
+/* Hero dots swap the background */
+$("hdots").onclick=e=>{const i=e.target.dataset.i;if(i==null)return;$("hero").classList.toggle("two",i==1);dots($("hdots"),2,+i)};
+
+/* Scroll carousels (featured schools, videos). In Blade: loop over schools / videos. */
+function carousel(track,prev,next,dotEl){
+  const t=$(track),step=()=>t.firstElementChild.getBoundingClientRect().width+24;
+  $(prev).onclick=()=>t.scrollBy({left:-step(),behavior:"smooth"});$(next).onclick=()=>t.scrollBy({left:step(),behavior:"smooth"});
+  if(dotEl){const n=3;dots($(dotEl),n,0);t.addEventListener("scroll",()=>{const r=t.scrollLeft/(t.scrollWidth-t.clientWidth||1);dots($(dotEl),n,Math.min(n-1,Math.round(r*(n-1))))},{passive:true})}
+}
+const SCH=[["Nursery & primary","Acacia Grove Nursery & Primary","Wakiso district","UNEB"],["Secondary","Lakeview Senior Secondary","Mukono district","UNEB"],["Nursery & primary","Sunrise Day Care School","Kampala district","Other"],["Primary","Hillcrest Education Service","Kampala district","UNEB"],["Secondary","Cedar Ridge Secondary","Wakiso district","UNEB"],["Nursery & primary","Nilebridge International","Wakiso district","Cambridge"]];
+$("ft").innerHTML=SCH.map((s,i)=>`<a class="card fc" href="#"><div class="ph ${P[i%4]}"></div><div class="b"><span class="kick">${s[0]}</span><h3>${s[1]}</h3><small>${s[2]}</small><span class="tag">${s[3]}</span> <span class="tag new">New</span></div></a>`).join("");
+const VID=[["School name","Children's music classes","2026 · 0 views"],["School name","A visit to our school","2026 · 0 views"],["School name","Open day highlights","2026 · 0 views"]];
+$("vt").innerHTML=VID.map((v,i)=>`<a class="card vid" href="#"><div class="ph ${P[(i+2)%4]}"><i class="play"></i></div><div class="b"><small>${v[0]}</small><h4>${v[1]}</h4><span>${v[2]}</span></div></a>`).join("");
+carousel("ft","fp","fn","fd");carousel("vt","vp","vn");
+
+/* News lead slider */
+const L=[["Makerere University · Yesterday","Lead story headline sits over a dark gradient for contrast","c"],["Education desk · 2 days ago","Second lead story from the news desk","d"],["Policy · 3 days ago","Third lead story on education policy","b"],["Schools · 4 days ago","Fourth lead story from a partner school",""]];
+let li=0;
+function lead(i){li=(i+L.length)%L.length;const l=L[li];$("ls").textContent=l[0];$("lt").textContent=l[1];$("lead").className="lead ph "+l[2];dots($("ld"),L.length,li)}
+$("lp").onclick=()=>lead(li-1);$("ln").onclick=()=>lead(li+1);$("ld").onclick=e=>{if(e.target.dataset.i!=null)lead(+e.target.dataset.i)};lead(0);
+
+/* News list: arrows rotate the list */
+let N=["Headline for a short news item","Second headline in the list","Third headline in the list","Fourth headline in the list","Fifth headline in the list"],ni=0;
+function rows(){$("rows").innerHTML=[0,1,2].map(k=>{const j=(ni+k)%N.length;return `<a class="row" href="#"><div class="ph ${P[j%4]}"></div><div><h4>${N[j]}</h4><small>18th November 2026</small></div></a>`}).join("")+'<div class="mini"><button id="ru" aria-label="Previous">↑</button><button id="rd" aria-label="Next">↓</button></div>';
+  $("ru").onclick=()=>{ni=(ni+N.length-1)%N.length;rows()};$("rd").onclick=()=>{ni=(ni+1)%N.length;rows()}}
+rows();
+
+/* Testimonials */
+const Q=[["“Joining FindURSCH made our digital presence reach families we could not reach before. Enquiries have grown steadily.”","KM","Person name","Director, School name"],["“Parents now find our fees, facilities and contacts in one place, and the enquiries arrive ready to act on.”","AB","Person name","Head teacher, School name"],["“The listing took five minutes and the verified badge gave families more confidence in us.”","CD","Person name","Bursar, School name"]];
+function quote(i){const q=Q[i];$("qt").textContent=q[0];$("qi").textContent=q[1];$("qn").textContent=q[2];$("qr").textContent=q[3];dots($("qd"),Q.length,i)}
+$("qd").onclick=e=>{if(e.target.dataset.i!=null)quote(+e.target.dataset.i)};quote(0);
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initializeFindURSCHReferenceHome, { once: true });
+else initializeFindURSCHReferenceHome();
+document.addEventListener('livewire:navigated', initializeFindURSCHReferenceHome);
+
 Alpine.start();
