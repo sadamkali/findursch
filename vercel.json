@@ -13,12 +13,6 @@
   },
   "rewrites": [
     {
-      "source": "/build/assets/(.*)",
-      "destination": {
-        "service": "static-assets"
-      }
-    },
-    {
       "source": "/css/(.*)",
       "destination": {
         "service": "static-assets"
@@ -41,6 +35,35 @@
       "destination": {
         "service": "backend-laravel"
       }
+    }
+  ],
+  "headers": [
+    {
+      "source": "/css/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/vendor/livewire/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/favicon.ico",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=3600"
+        }
+      ]
     }
   ]
 }
