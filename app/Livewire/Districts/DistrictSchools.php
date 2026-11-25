@@ -174,11 +174,6 @@ class DistrictSchools extends Component
             ->orderBy('name')
             ->get();
 
-        $publicSchoolIds = School::query()
-            ->publiclyVisible()
-            ->where('district_id', $this->district->id)
-            ->select('id');
-
         $feeEstimateSchoolsCount = School::query()
             ->publiclyVisible()
             ->where('district_id', $this->district->id)
