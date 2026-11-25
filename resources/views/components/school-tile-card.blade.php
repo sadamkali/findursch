@@ -19,16 +19,17 @@
     $isFeatured = (bool) $school->is_featured
         && (!$school->featured_until || $school->featured_until->isFuture());
 
+    $feeFrom = is_numeric($school->fees_from) && (float) $school->fees_from > 0 ? (float) $school->fees_from : null;
+    $feeTo = is_numeric($school->fees_to) && (float) $school->fees_to > 0 ? (float) $school->fees_to : null;
     $feeLabel = null;
-    if ($school->getAttribute('lowest_term_tuition') !== null) {
-        $feeLabel = 'UGX '.number_format((float) $school->getAttribute('lowest_term_tuition')).' per term';
-    } elseif ($school->fees_from !== null && (float) $school->fees_from > 0) {
-        $feeLabel = 'From UGX '.number_format((float) $school->fees_from);
-        if ($school->fees_to !== null && (float) $school->fees_to > (float) $school->fees_from) {
-            $feeLabel .= ' – UGX '.number_format((float) $school->fees_to);
-        }
+    if ($feeFrom !== null && $feeTo !== null && $feeFrom !== $feeTo) {
+        $feeLabel = 'Estimated UGX '.number_format(min($feeFrom, $feeTo)).' – UGX '.number_format(max($feeFrom, $feeTo)).' per term';
+    } elseif ($feeFrom !== null && $feeTo === null) {
+        $feeLabel = 'Estimated from UGX '.number_format($feeFrom).' per term';
+    } elseif ($feeTo !== null && $feeFrom === null) {
+        $feeLabel = 'Estimated up to UGX '.number_format($feeTo).' per term';
     } elseif ($showFee) {
-        $feeLabel = 'Fees not published';
+        $feeLabel = 'Fee estimate not provided';
     }
 
     $description = $school->tagline
