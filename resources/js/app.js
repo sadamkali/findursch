@@ -518,7 +518,11 @@ function initializeFindURSCHHomepage() {
 
         if (heroSlides.length > 1) {
             const autoplay = window.setInterval(() => {
-                if (!heroPaused && !document.hidden && hero.isConnected) {
+                if (!hero.isConnected) {
+                    window.clearInterval(autoplay);
+                    return;
+                }
+                if (!heroPaused && !document.hidden) {
                     showHeroSlide(activeHeroSlide + 1);
                 }
             }, 6500);
