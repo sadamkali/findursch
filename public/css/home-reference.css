@@ -445,7 +445,6 @@
 @media (max-width: 760px) {
   .findursch-home-page {
     --gap: 18px;
-    overflow-wrap: anywhere;
   }
 
   .findursch-home-page .wrap {
@@ -525,13 +524,13 @@
   }
 
   .findursch-home-page .tab {
-    top: auto;
-    right: 12px;
-    bottom: 14px;
-    writing-mode: horizontal-tb;
-    padding: 10px 13px;
-    border-radius: 999px;
-    font-size: 10px;
+    top: 38%;
+    right: 0;
+    bottom: auto;
+    writing-mode: vertical-rl;
+    padding: 12px 7px;
+    border-radius: 8px 0 0 8px;
+    font-size: 9.5px;
     letter-spacing: .045em;
   }
 
@@ -769,10 +768,11 @@
   }
 
   .findursch-home-page .tab {
-    right: 10px;
-    bottom: 10px;
-    padding: 9px 12px;
-    font-size: 9.5px;
+    top: 40%;
+    right: 0;
+    bottom: auto;
+    padding: 10px 6px;
+    font-size: 9px;
   }
 
   .findursch-home-page .sec {
