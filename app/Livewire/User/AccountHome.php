@@ -1,9 +1,9 @@
 <?php
 
-namespace App\\Livewire\\User;
+namespace App\Livewire\User;
 
-use Livewire\\Attributes\\Layout;
-use Livewire\\Component;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 #[Layout('layouts.account')]
 class AccountHome extends Component
