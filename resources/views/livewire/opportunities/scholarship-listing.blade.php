@@ -1,21 +1,12 @@
 <div class="findursch-scholarships">
     <a class="rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
 
-    <section class="phead">
-        <div class="wrap">
-            <div class="phead-copy">
-                <nav class="crumbs" aria-label="Breadcrumb">
-                    <a href="{{ route('home') }}">Home</a>
-                    <span aria-hidden="true">›</span>
-                    <b>Scholarships &amp; bursaries</b>
-                </nav>
-                <p class="phead-eyebrow">Education funding in Uganda</p>
-                <h1>Scholarships &amp; <em>Bursaries</em> in Uganda</h1>
-                <p class="phead-intro">Explore school bursaries and published funding opportunities for Ugandan learners. <b>{{ number_format($openCount) }}</b> open now.</p>
-            </div>
-            <x-site-ad-banner placement="top" />
-        </div>
-    </section>
+    <x-site-page-hero
+        eyebrow="Education funding in Uganda"
+        title="Scholarships &amp; Bursaries in Uganda"
+        :description="'Explore school bursaries and published funding opportunities for Ugandan learners. '.number_format($openCount).' open now.'"
+        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Scholarships & bursaries']]"
+    />
 
     <main class="wrap">
         <div class="pills" role="tablist" aria-label="Scholarship categories">
