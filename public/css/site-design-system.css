@@ -1809,3 +1809,11 @@ body main a[class*="rounded"][class*="bg-primary"] {
     .site-header-icon { transition: none; }
     .site-menu-toggle { transition: none; }
 }
+
+/* Match the Schools reference: keep saved-school shortcut on desktop; use
+   the account shortcut plus menu control on compact screens. */
+@media (max-width: 1000px) {
+    .site-header__actions > .site-header-icon[aria-label="Saved schools"] {
+        display: none !important;
+    }
+}
