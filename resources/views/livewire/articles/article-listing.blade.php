@@ -7,15 +7,12 @@
     @endphp
 
     <a class="blogs-rtab" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
-<x-site-ad-banner placement="top" />
-
-    <section class="blogs-phead">
-        <div class="blogs-wrap">
-            <p class="blogs-eyebrow">FindURSCH resources</p>
-            <h1>{{ $isNews ? 'School' : 'FindURSCH' }} <em>{{ $isNews ? 'News &amp; Updates' : 'Blogs' }}</em></h1>
-            <p>{{ $isNews ? 'Stay informed with education news, school announcements, policy updates and stories from school communities across Uganda.' : 'Practical advice, inspiring stories and fresh ideas for parents, students and teachers, from study skills and school life to careers, health, faith and culture.' }}</p>
-        </div>
-    </section>
+    <x-site-page-hero
+        eyebrow="FindURSCH resources"
+        :title="($isNews ? 'School News &amp; Updates' : 'FindURSCH Blogs')"
+        :description="$isNews ? 'Stay informed with education news, school announcements, policy updates and stories from school communities across Uganda.' : 'Practical advice, inspiring stories and fresh ideas for parents, students and teachers, from study skills and school life to careers, health, faith and culture.'"
+        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => $isNews ? 'News' : 'Blogs']]"
+    />
 
     <main class="blogs-wrap">
         <nav class="blogs-pills" aria-label="{{ $isNews ? 'News categories' : 'Blog categories' }}">
