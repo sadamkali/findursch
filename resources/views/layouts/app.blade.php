@@ -105,7 +105,7 @@
     </style>
     <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=6">
     <link rel="stylesheet" href="{{ asset('css/site-page-hero.css') }}?v=1">
-    @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=16">@endif
+    @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=17">@endif
     <link rel="stylesheet" href="{{ asset('css/school-tile-cards.css') }}?v=2">
 </head>
 <body class="h-full bg-white text-gray-900 antialiased">
