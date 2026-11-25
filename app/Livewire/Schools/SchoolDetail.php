@@ -45,8 +45,6 @@ class SchoolDetail extends Component
             'curricula',
             'programs' => fn ($query) => $query->where('is_active', true)->orderBy('name'),
             'programs.curriculum',
-            'programs.fees' => fn ($query) => $query->where('is_active', true)->orderBy('amount'),
-            'fees' => fn ($query) => $query->where('is_active', true)->orderBy('category')->orderBy('amount'),
             'facilities' => fn ($query) => $query->where('is_active', true)->orderBy('category')->orderBy('name'),
             'contacts',
             'approvedReviews' => fn ($query) => $query->latest()->with('user'),
