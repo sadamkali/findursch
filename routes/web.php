@@ -10,7 +10,6 @@ use App\Livewire\Opportunities\SchoolPostShow;
 use App\Livewire\Jobs\Index as JobIndex;
 use App\Livewire\Jobs\Show as JobShow;
 use App\Livewire\Articles\ArticleShow;
-use App\Livewire\Compare\CompareSchools;
 use App\Livewire\Districts\DistrictSchools;
 use App\Livewire\Home\HomePage;
 use App\Livewire\Schools\SchoolDetail;
@@ -81,7 +80,7 @@ Route::get('/api/search/suggest', function (Request $request) {
     return response()->json(['data' => $schools->concat($districts)->values()]);
 })->middleware('throttle:30,1')->name('search.suggest');
 
-Route::get('/compare', CompareSchools::class)->name('compare');
+Route::redirect('/compare', '/schools', 302)->name('compare');
 Route::get('/articles', ArticleListing::class)->name('articles.index');
 Route::get('/articles/{article:slug}', ArticleShow::class)->name('articles.show');
 Route::get('/news', NewsListing::class)->name('news.index');
