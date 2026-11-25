@@ -1,12 +1,14 @@
 <div class="event-reference">
     <a class="rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
+    <x-site-page-hero
+        eyebrow="FindURSCH community calendar"
+        :title="$event->title"
+        :description="\Illuminate\Support\Str::limit(strip_tags($event->description), 230)"
+        :meta="($event->starts_at?->format('D, d M Y · g:i A') ?: 'Date to be confirmed').($event->venue ? ' · '.$event->venue : '')"
+        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Events', 'url' => route('events.index')], ['label' => $event->title]]"
+    />
 
     <div class="wrap">
-        <x-site-ad-banner placement="top" />
-
-        <nav class="crumbs" aria-label="Breadcrumb">
-            <a href="{{ route('home') }}">Home</a><span>›</span><a href="{{ route('events.index') }}">Events</a><span>›</span><b>{{ $event->title }}</b>
-        </nav>
 
         @php
             $eventEnded = $event->ends_at ? $event->ends_at->isPast() : ($event->starts_at ? $event->starts_at->isPast() : false);
@@ -26,7 +28,6 @@
                     @endif
                 </div>
 
-                <h1>{{ $event->title }}</h1>
 
                 <div class="hd">
                     <div class="poster ph">
