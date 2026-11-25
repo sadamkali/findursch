@@ -1,14 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-8" style="background-color:var(--brand);">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h1 class="text-4xl font-normal mb-4" style="font-family: 'DM Serif Display', serif; color:#fff;">Compare Schools</h1>
-        <p style="color:rgba(255,255,255,.88)">Side-by-side comparison of up to 3 schools</p>
-    </div>
-</div>
-
-<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+<x-site-page-hero
+    eyebrow="School comparison"
+    title="Compare Schools"
+    description="Review school details side by side and compare up to three schools on fees, curriculum, facilities and other key information."
+    :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Compare']]"
+/><div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
     @if($schools->count() === 0)
         <div class="text-center py-20">
             <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
