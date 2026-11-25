@@ -400,9 +400,14 @@ class OwnerWorkspaceController extends Controller
 
             $from = $validated['fees_from'] === null ? null : (float) $validated['fees_from'];
             $to = $validated['fees_to'] === null ? null : (float) $validated['fees_to'];
-            if ($from !== null && $to !== null && $from > $to) {
+            if (($from === null) !== ($to === null)) {
                 throw ValidationException::withMessages([
-                    'fees_to' => ['The upper estimate must be equal to or higher than the lower estimate.'],
+                    'fees_to' => ['Enter both the lower and upper estimates to publish a fee range, or clear both fields.'],
+                ]);
+            }
+            if ($from !== null && $to !== null && $from >= $to) {
+                throw ValidationException::withMessages([
+                    'fees_to' => ['The upper estimate must be greater than the lower estimate.'],
                 ]);
             }
 
