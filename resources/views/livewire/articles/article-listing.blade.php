@@ -9,7 +9,7 @@
     <a class="blogs-rtab" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
     <x-site-page-hero
         eyebrow="FindURSCH resources"
-        :title="($isNews ? 'School News &amp; Updates' : 'FindURSCH Blogs')"
+        :title="($isNews ? 'School News & Updates' : 'FindURSCH Blogs')"
         :description="$isNews ? 'Stay informed with education news, school announcements, policy updates and stories from school communities across Uganda.' : 'Practical advice, inspiring stories and fresh ideas for parents, students and teachers, from study skills and school life to careers, health, faith and culture.'"
         :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => $isNews ? 'News' : 'Blogs']]"
     />
