@@ -75,7 +75,6 @@
     @if (request()->routeIs('district.show'))<link rel="stylesheet" href="{{ asset('css/district-reference.css') }}?v=1">@endif
     @if (request()->routeIs('jobs.*'))<link rel="stylesheet" href="{{ asset('css/jobs-reference.css') }}?v=1">@endif
     <link rel="stylesheet" href="{{ asset('css/mobile-drawer-reference.css') }}?v=3">
-    @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=11">@endif
     @if (request()->routeIs('articles.*', 'news.*', 'events.*', 'school-news.*', 'scholarships.*'))<link rel="stylesheet" href="{{ asset('css/blogs.css') }}?v=4">@endif
     @if (request()->routeIs('scholarships.*'))<link rel="stylesheet" href="{{ asset('css/scholarships-reference.css') }}?v=5">@endif
     @if (request()->routeIs('news.*'))<link rel="stylesheet" href="{{ asset('css/news.css') }}?v=5">@endif
@@ -104,6 +103,7 @@
         body { font-family: '{{ $siteBodyFont }}', system-ui, sans-serif; }
     </style>
     <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=3">
+    @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=12">@endif
 </head>
 <body class="h-full bg-white text-gray-900 antialiased">
     @php
