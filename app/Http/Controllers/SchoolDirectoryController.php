@@ -44,12 +44,6 @@ class SchoolDirectoryController extends Controller
         $sort = $filters['sort'] ?? 'newest';
         $viewMode = $filters['view'] ?? 'grid';
 
-        $termTuition = static fn ($fees) => $fees
-            ->where('category', 'tuition')
-            ->where('is_active', true)
-            ->where('currency', 'UGX')
-            ->where('period', 'per_term');
-
         $query = School::query()
             ->publiclyVisible()
             ->with([
@@ -60,8 +54,7 @@ class SchoolDirectoryController extends Controller
                 'type',
                 'curricula',
                 'media',
-            ])
-            ->withMin(['fees as lowest_term_tuition' => $termTuition], 'amount');
+            ]);
 
         if ($search !== '') {
             $term = '%'.mb_strtolower($search).'%';
@@ -97,23 +90,24 @@ class SchoolDirectoryController extends Controller
             $query->where('admissions_open', true);
         }
         if ($feeMin !== null || $feeMax !== null) {
-            $query->whereHas('fees', function ($fees) use ($termTuition, $feeMin, $feeMax) {
-                $termTuition($fees);
-                if ($feeMin !== null) {
-                    $fees->where('amount', '>=', $feeMin);
-                }
-                if ($feeMax !== null) {
-                    $fees->where('amount', '<=', $feeMax);
-                }
-            });
+            $query->whereNotNull('fees_from')
+                ->where('fees_from', '>', 0);
+
+            if ($feeMin !== null) {
+                $query->whereRaw('COALESCE(schools.fees_to, schools.fees_from) >= ?', [$feeMin]);
+            }
+
+            if ($feeMax !== null) {
+                $query->where('fees_from', '<=', $feeMax);
+            }
         }
 
         match ($sort) {
             'featured' => $query->orderByDesc('is_featured')->latest('created_at'),
             'name' => $query->orderBy('name'),
             'rating' => $query->orderByDesc('rating_average')->latest('created_at'),
-            'fee_low' => $query->orderByRaw('CASE WHEN lowest_term_tuition IS NULL THEN 1 ELSE 0 END')->orderBy('lowest_term_tuition'),
-            'fee_high' => $query->orderByRaw('CASE WHEN lowest_term_tuition IS NULL THEN 1 ELSE 0 END')->orderByDesc('lowest_term_tuition'),
+            'fee_low' => $query->orderByRaw('CASE WHEN schools.fees_from IS NULL OR schools.fees_from <= 0 THEN 1 ELSE 0 END')->orderBy('schools.fees_from'),
+            'fee_high' => $query->orderByRaw('CASE WHEN schools.fees_from IS NULL OR schools.fees_from <= 0 THEN 1 ELSE 0 END')->orderByDesc('schools.fees_from'),
             default => $query->latest('created_at'),
         };
 
