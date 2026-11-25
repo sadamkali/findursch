@@ -2,7 +2,6 @@
     'school',
     'showSave' => true,
     'saved' => false,
-    'showCompare' => true,
     'showFee' => true,
     'showDescription' => true,
     'showActions' => true,
@@ -116,13 +115,6 @@
         @if($showActions)
             <div class="findursch-school-tile__actions">
                 <a href="{{ route('schools.show', $school) }}">View school</a>
-                @if($showCompare)
-                    <button
-                        type="button"
-                        x-data
-                        @click.stop.prevent="window.dispatchEvent(new CustomEvent('findursch:compare-add', { detail: @js($school->slug) }))"
-                    >Add to compare</button>
-                @endif
             </div>
         @endif
     </div>
