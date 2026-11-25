@@ -237,8 +237,20 @@ class DistrictSchools extends Component
             ],
         ];
 
+        $schools = $this->orderedSchools($filtered)->paginate(12)->withQueryString();
+        $savedSchoolIds = [];
+
+        if (auth()->check() && $schools->getCollection()->isNotEmpty()) {
+            $savedSchoolIds = auth()->user()->savedSchools()
+                ->whereIn('schools.id', $schools->getCollection()->pluck('id'))
+                ->pluck('schools.id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+        }
+
         return view('livewire.districts.district-schools', [
-            'schools' => $this->orderedSchools($filtered)->paginate(12)->withQueryString(),
+            'schools' => $schools,
+            'savedSchoolIds' => $savedSchoolIds,
             'filteredCount' => (clone $filtered)->count(),
             'totalSchools' => $totalSchools,
             'admissionsOpenCount' => $admissionsOpenCount,
