@@ -17,8 +17,8 @@
             ])
             ->pluck('value', 'key');
         $siteName = $siteSettings['site_name'] ?? 'FindURSCH';
-        $siteTagline = $siteSettings['site_tagline'] ?? 'Discover and compare schools across Uganda';
-        $siteDescription = $siteSettings['site_description'] ?? 'Uganda’s school discovery and comparison platform.';
+        $siteTagline = $siteSettings['site_tagline'] ?? 'Discover schools across Uganda';
+        $siteDescription = $siteSettings['site_description'] ?? 'Uganda’s school discovery platform.';
         $siteLogoUrl = filled($siteSettings['site_logo'] ?? null) ? $siteSettings['site_logo'] : asset('brand/findursch-logo.png');
         $defaultHorizontalLogoUrl = 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png';
         $siteHorizontalLogoUrl = filled($siteSettings['site_horizontal_logo'] ?? null) ? $siteSettings['site_horizontal_logo'] : $defaultHorizontalLogoUrl;
@@ -106,7 +106,7 @@
     <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=7">
     <link rel="stylesheet" href="{{ asset('css/site-page-hero.css') }}?v=1">
     @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=17">@endif
-    <link rel="stylesheet" href="{{ asset('css/school-tile-cards.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/school-tile-cards.css') }}?v=3">
     <link rel="stylesheet" href="{{ asset('css/site-footer.css') }}?v=2">
 </head>
 <body class="h-full bg-white text-gray-900 antialiased">
@@ -124,7 +124,6 @@
         $navigationFallback = [
             ['label' => 'Home', 'href' => route('home')],
             ['label' => 'Schools', 'href' => route('schools.index')],
-            ['label' => 'Compare', 'href' => route('compare')],
             ['label' => 'Scholarships', 'href' => route('scholarships.index')],
             ['label' => 'News', 'href' => route('news.index')],
             ['label' => 'Jobs', 'href' => route('jobs.index')],
@@ -278,15 +277,6 @@
     @unless(request()->routeIs('home', 'schools.index'))
         <a class="site-register-tab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
     @endunless
-    <div x-data="compareBar" x-cloak x-show="schools.length > 0" class="compare-bar">
-        <div class="site-wrap compare-bar__inner">
-            <p><strong x-text="schools.length"></strong> of 3 schools selected to compare</p>
-            <div class="compare-bar__actions">
-                <button type="button" @click="clear()">Clear</button>
-                <a :href="'/compare?schools=' + encodeURIComponent(schools.join(','))" class="btn btn-brand">Compare schools</a>
-            </div>
-        </div>
-    </div>
 
     <main class="min-h-screen">
         {{ $slot ?? '' }}
