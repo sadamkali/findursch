@@ -256,3 +256,129 @@
   .site-footer__column a,
   .site-footer__cta>a{transition:none}
 }
+
+/* --------------------------------------------------------------------------
+   FindURSCH unified footer finish.
+   All colours remain linked to the public brand settings passed by the
+   shared footer component: primary green and gold accent.
+   -------------------------------------------------------------------------- */
+.site-footer{
+  margin-top:clamp(44px,6vw,72px);
+  background:
+    radial-gradient(ellipse at 88% 0%, color-mix(in srgb,var(--fd-accent,#f0b030) 11%,transparent),transparent 34%),
+    linear-gradient(128deg,var(--fd-brand-deep,#052a22) 0%,var(--fd-brand,#0c5a49) 58%,color-mix(in srgb,var(--fd-brand,#0c5a49) 72%,#052a22) 100%) !important;
+  border-top:1px solid color-mix(in srgb,var(--fd-accent,#f0b030) 28%,transparent);
+}
+.site-footer__accent{
+  height:5px;
+  background:linear-gradient(90deg,
+    var(--fd-accent,#f0b030) 0%,
+    color-mix(in srgb,var(--fd-accent,#f0b030) 42%,#fff) 48%,
+    var(--fd-accent,#f0b030) 100%);
+  box-shadow:0 2px 12px color-mix(in srgb,var(--fd-accent,#f0b030) 20%,transparent);
+}
+.site-footer__inner{
+  width:min(1240px,calc(100% - 64px));
+  max-width:1240px;
+  padding-top:58px;
+}
+.site-footer__main{
+  grid-template-columns:minmax(250px,1.5fr) repeat(3,minmax(0,1fr));
+  gap:clamp(24px,3.2vw,44px);
+}
+.site-footer__logo{
+  min-height:60px;
+  margin-bottom:17px;
+}
+.site-footer__logo img{
+  max-width:min(236px,100%) !important;
+  max-height:58px !important;
+}
+.site-footer__description{
+  max-width:380px;
+  color:rgba(255,255,255,.82);
+  line-height:1.8;
+}
+.site-footer__column h2{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:19px !important;
+}
+.site-footer__column h2::after{
+  display:block;
+  width:30px;
+  height:2px;
+  border-radius:2px;
+  background:var(--fd-accent,#f0b030);
+  content:"";
+}
+.site-footer__column ul{gap:12px}
+.site-footer__column a{font-size:12.75px;line-height:1.6}
+.site-footer__contact-label{min-width:52px}
+.site-footer__whatsapp{
+  align-items:center;
+  min-height:34px;
+  margin-top:12px;
+  padding:7px 11px;
+  border:1px solid color-mix(in srgb,var(--fd-accent,#f0b030) 52%,transparent);
+  border-radius:7px;
+  background:color-mix(in srgb,var(--fd-accent,#f0b030) 10%,transparent);
+  transition:background .16s ease,border-color .16s ease;
+}
+.site-footer__whatsapp:hover{
+  border-color:var(--fd-accent,#f0b030);
+  background:color-mix(in srgb,var(--fd-accent,#f0b030) 17%,transparent);
+}
+.site-footer__cta{
+  margin-top:46px;
+  padding:21px 24px;
+  border-color:color-mix(in srgb,var(--fd-accent,#f0b030) 28%,rgba(255,255,255,.16));
+  background:linear-gradient(105deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
+}
+.site-footer__cta strong{font-size:13.5px}
+.site-footer__cta>a{
+  min-height:42px;
+  padding-inline:18px;
+  box-shadow:0 4px 12px rgba(0,0,0,.12);
+}
+.site-footer__bottom{
+  min-height:72px;
+  margin-top:36px;
+  border-top-color:rgba(255,255,255,.18);
+  color:rgba(255,255,255,.72);
+}
+.site-footer__credit{color:rgba(255,255,255,.62)}
+.site-footer a:focus-visible{
+  outline-color:var(--fd-accent,#f0b030);
+  outline-offset:4px;
+}
+@media(max-width:1000px){
+  .site-footer__inner{width:calc(100% - 48px)}
+  .site-footer__main{gap:28px}
+}
+@media(max-width:640px){
+  .site-footer{margin-top:46px}
+  .site-footer__inner{
+    width:calc(100% - 32px);
+    padding-top:39px;
+  }
+  .site-footer__main{gap:27px 18px}
+  .site-footer__logo{min-height:50px;margin-bottom:13px}
+  .site-footer__logo img{max-height:50px !important;max-width:min(210px,100%) !important}
+  .site-footer__description{line-height:1.7}
+  .site-footer__column h2{gap:8px;margin-bottom:14px !important}
+  .site-footer__column ul{gap:10px}
+  .site-footer__cta{margin-top:31px;padding:18px}
+  .site-footer__bottom{margin-top:25px;padding:18px 0 22px}
+}
+@media(max-width:370px){
+  .site-footer__inner{width:calc(100% - 28px)}
+  .site-footer__main{gap:24px 13px}
+  .site-footer__column h2{font-size:10.5px !important}
+  .site-footer__column a{font-size:10.75px}
+}
+@media(prefers-reduced-motion:reduce){
+  .site-footer__whatsapp{transition:none}
+}
