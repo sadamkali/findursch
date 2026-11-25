@@ -100,10 +100,6 @@ class HomePage extends Component
             ->whereHas('school', fn (Builder $school) => $school->publiclyVisible())
             ->with(['school', 'user'])->latest()->limit(3)->get();
 
-        $footerSettings = Setting::query()
-            ->whereIn('key', ['site_name', 'site_description', 'contact_address', 'support_phone', 'support_email', 'site_footer_copyright_text'])
-            ->pluck('value', 'key');
-
         $homepageCarouselSettings = Setting::query()
             ->whereIn('key', ['homepage_slides', 'homepage_hero_image_url'])
             ->pluck('value', 'key');
@@ -176,7 +172,7 @@ class HomePage extends Component
         return view('livewire.home.home-page', compact(
             'featuredSchools', 'spotlightSchool', 'schoolTypes', 'newsArticles',
             'insightArticles', 'partnerSchoolNews', 'upcomingEvents', 'scholarshipCount',
-            'latestJobs', 'videos', 'reviews', 'footerSettings', 'savedSchoolIds',
+            'latestJobs', 'videos', 'reviews', 'savedSchoolIds',
             'homepageSlides', 'firstHeroSlide'
         ))->layout('layouts.app', [
             'title' => 'FindURSCH — Find the right school in Uganda',
