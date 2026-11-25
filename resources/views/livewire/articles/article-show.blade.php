@@ -1,16 +1,14 @@
 <div class="article-reference-page">
     <a class="ar-register" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
+    <x-site-page-hero
+        :eyebrow="request()->routeIs('news.show') ? 'FindURSCH news' : 'FindURSCH blog'"
+        :title="$article->title"
+        :description="$article->excerpt"
+        :meta="($article->category?->name ?: 'Education').' · '.($article->published_at?->format('d F Y') ?: 'Recently published').' · '.max(1, (int) $article->read_time_minutes).' min read'"
+        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => request()->routeIs('news.show') ? 'News' : 'Blogs', 'url' => request()->routeIs('news.show') ? route('news.index') : route('articles.index')], ['label' => $article->title]]"
+    />
 
     <main class="ar-wrap">
-        <x-site-ad-banner placement="top" />
-
-        <nav class="ar-crumbs" aria-label="Breadcrumb">
-            <a href="{{ route('home') }}">Home</a><span>›</span>
-            <a href="{{ request()->routeIs('news.show') ? route('news.index') : route('articles.index') }}">{{ request()->routeIs('news.show') ? 'News' : 'Blogs' }}</a><span>›</span>
-            <a href="{{ request()->routeIs('news.show') ? route('news.index', ['category' => $article->category_id]) : route('articles.index', ['category' => $article->category_id]) }}">{{ $article->category?->name ?? 'Education' }}</a><span>›</span>
-            <b>{{ $article->title }}</b>
-        </nav>
-
         <div class="ar-layout">
             <article class="ar-content">
                 <div class="ar-tags">
@@ -19,7 +17,6 @@
                     <span class="ar-tag">{{ max(1, (int) $article->read_time_minutes) }} min read</span>
                 </div>
 
-                <h1>{{ $article->title }}</h1>
 
                 @if($article->cover_image)
                     <figure class="ar-photo">
