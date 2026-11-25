@@ -21,7 +21,7 @@ class SavedSchools extends Component
     {
         $schools = auth()->user()
             ->savedSchools()
-            ->with('district', 'type', 'curricula')
+            ->with(['district', 'type', 'curricula', 'media'])
             ->paginate(12);
 
         return view('livewire.user.saved-schools', compact('schools'));
