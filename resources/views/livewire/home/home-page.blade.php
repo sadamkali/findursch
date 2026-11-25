@@ -81,7 +81,6 @@
                 :school="$school"
                 :saved="in_array((int) $school->id, $savedSchoolIds, true)"
                 :show-save="true"
-                :show-compare="true"
                 :show-fee="true"
                 :show-description="true"
               />
@@ -102,7 +101,6 @@
           :school="$spotlightSchool"
           :saved="in_array((int) $spotlightSchool->id, $savedSchoolIds, true)"
           :show-save="true"
-          :show-compare="true"
           :show-fee="true"
           :show-description="true"
           variant="spotlight"
@@ -261,7 +259,7 @@
           <div><small>School spotlight</small><h3>{{ $spotlightSchool->name }}</h3><p>{{ \Illuminate\Support\Str::limit($spotlightSchool->tagline ?: $spotlightSchool->description ?: 'Explore this school profile and the information shared with families.', 100) }}</p><a class="btn btn-gold btn-block" href="{{ route('schools.show', $spotlightSchool) }}">Learn more about this school</a></div>
         </div>
       @else
-        <div class="spl"><div><small>School spotlight</small><h3>Discover schools across Uganda</h3><p>Browse verified school profiles and compare your options.</p><a class="btn btn-gold btn-block" href="{{ route('schools.index') }}">Explore schools</a></div></div>
+        <div class="spl"><div><small>School spotlight</small><h3>Discover schools across Uganda</h3><p>Browse verified school profiles and explore your options.</p><a class="btn btn-gold btn-block" href="{{ route('schools.index') }}">Explore schools</a></div></div>
       @endif
     </div>
   </div></section>
