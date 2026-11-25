@@ -1,10 +1,39 @@
 <div class="findursch-home-page">
 <a class="tab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
 
-<section class="hero" data-home-hero>
-  <div>
-    <h1>Find the <em>right school</em> for your child</h1>
-    <p>Browse nursery, primary, secondary, vocational and university listings across Uganda, and compare them side by side.</p>
+<section class="hero" data-home-hero role="region" aria-label="FindURSCH homepage highlights" aria-roledescription="carousel">
+  <div class="hero-slides" aria-hidden="true">
+    @foreach($homepageSlides as $heroIndex => $heroSlide)
+      <div
+        class="hero-slide {{ $loop->first ? 'is-active' : '' }}"
+        data-home-hero-slide
+        data-slide-title="{{ $heroSlide['title'] }}"
+        data-slide-description="{{ $heroSlide['description'] }}"
+        data-slide-button-label="{{ $heroSlide['button_label'] }}"
+        data-slide-button-url="{{ $heroSlide['button_url'] }}"
+        aria-hidden="true"
+      >
+        @if($heroSlide['image_url'])
+          <img
+            src="{{ $heroSlide['image_url'] }}"
+            alt=""
+            @if($loop->first) fetchpriority="high" decoding="async" @else loading="lazy" decoding="async" @endif
+          >
+        @endif
+      </div>
+    @endforeach
+  </div>
+
+  <div class="hero-content">
+    <h1 data-home-hero-title>{{ $firstHeroSlide['title'] }}</h1>
+    <p data-home-hero-description @if($firstHeroSlide['description'] === '') hidden @endif>{{ $firstHeroSlide['description'] }}</p>
+    <a
+      class="hero-cta btn btn-gold"
+      data-home-hero-cta
+      href="{{ $firstHeroSlide['button_url'] ?: '#' }}"
+      @if($firstHeroSlide['button_label'] === '' || $firstHeroSlide['button_url'] === '') hidden @endif
+    >{{ $firstHeroSlide['button_label'] }}</a>
+
     <form class="search" method="GET" action="{{ route('schools.index') }}" role="search">
       <input type="search" name="search" placeholder="Search by name, location or district" aria-label="Search schools">
       <select name="type" aria-label="School type">
@@ -14,10 +43,25 @@
       <button class="btn btn-red" type="submit">Search</button>
     </form>
   </div>
-  <div class="dots" aria-label="Hero background options">
-    <button type="button" class="on" data-home-hero-dot="0" aria-label="Show first background"></button>
-    <button type="button" data-home-hero-dot="1" aria-label="Show second background"></button>
-  </div>
+
+  @if(count($homepageSlides) > 1)
+    <button class="hero-arrow hero-arrow--prev" type="button" data-home-hero-prev aria-label="Previous homepage slide">‹</button>
+    <button class="hero-arrow hero-arrow--next" type="button" data-home-hero-next aria-label="Next homepage slide">›</button>
+  @endif
+
+  @if(count($homepageSlides) > 1)
+    <div class="dots hero-dots" role="group" aria-label="Choose homepage slide">
+      @foreach($homepageSlides as $heroIndex => $heroSlide)
+        <button
+          type="button"
+          data-home-hero-dot="{{ $heroIndex }}"
+          class="{{ $loop->first ? 'on' : '' }}"
+          aria-label="Show homepage slide {{ $loop->iteration }}"
+          aria-pressed="{{ $loop->first ? 'true' : 'false' }}"
+        ></button>
+      @endforeach
+    </div>
+  @endif
 </section>
 
 <div class="wrap">
