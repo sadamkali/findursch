@@ -411,6 +411,129 @@ if (!prefersReducedMotion && 'IntersectionObserver' in window) {
 }
 
 
-// The current homepage reference is static markup; no legacy carousel initializer is required.
+// The reference homepage is connected to live FindURSCH data and accessible controls.
+function initializeFindURSCHHomepage() {
+    const home = document.querySelector('.findursch-home-page');
+    if (!home || home.dataset.homeInteractionsReady === 'true') return;
+    home.dataset.homeInteractionsReady = 'true';
+
+    const schoolTrack = home.querySelector('[data-home-school-track]');
+    const schoolStep = () => {
+        const card = schoolTrack?.querySelector('.school');
+        return card ? card.getBoundingClientRect().width + 24 : 320;
+    };
+    home.querySelector('[data-home-school-prev]')?.addEventListener('click', () => {
+        schoolTrack?.scrollBy({ left: -schoolStep(), behavior: 'smooth' });
+    });
+    home.querySelector('[data-home-school-next]')?.addEventListener('click', () => {
+        schoolTrack?.scrollBy({ left: schoolStep(), behavior: 'smooth' });
+    });
+
+    const schoolDots = [...home.querySelectorAll('[data-home-school-dot]')];
+    schoolDots.forEach(dot => dot.addEventListener('click', () => {
+        schoolTrack?.scrollTo({
+            left: Number(dot.dataset.homeSchoolDot || 0) * schoolStep(),
+            behavior: 'smooth'
+        });
+    }));
+    schoolTrack?.addEventListener('scroll', () => {
+        if (!schoolDots.length) return;
+        const active = Math.max(0, Math.min(
+            schoolDots.length - 1,
+            Math.round(schoolTrack.scrollLeft / schoolStep())
+        ));
+        schoolDots.forEach((dot, index) => dot.classList.toggle('on', index === active));
+    }, { passive: true });
+
+    const hero = home.querySelector('[data-home-hero]');
+    home.querySelectorAll('[data-home-hero-dot]').forEach(dot => {
+        dot.addEventListener('click', () => {
+            hero?.classList.toggle('is-alt', Number(dot.dataset.homeHeroDot) === 1);
+            home.querySelectorAll('[data-home-hero-dot]').forEach(item => {
+                item.classList.toggle('on', item === dot);
+            });
+        });
+    });
+
+    const lead = home.querySelector('[data-home-news-lead]');
+    if (lead) {
+        const slides = [...lead.querySelectorAll('[data-home-news-slide]')];
+        const dots = [...lead.querySelectorAll('[data-home-news-dot]')];
+        let active = Math.max(0, slides.findIndex(slide => !slide.hidden));
+        const show = index => {
+            if (!slides.length) return;
+            active = (index + slides.length) % slides.length;
+            slides.forEach((slide, i) => { slide.hidden = i !== active; });
+            dots.forEach((dot, i) => dot.classList.toggle('on', i === active));
+        };
+        lead.querySelector('[data-home-news-prev]')?.addEventListener('click', () => show(active - 1));
+        lead.querySelector('[data-home-news-next]')?.addEventListener('click', () => show(active + 1));
+        dots.forEach(dot => dot.addEventListener('click', () => show(Number(dot.dataset.homeNewsDot || 0))));
+    }
+
+    home.querySelectorAll('[data-home-row-rotator]').forEach(list => {
+        const rows = [...list.querySelectorAll('.row')];
+        if (rows.length <= 3) return;
+        let start = 0;
+        const render = () => rows.forEach((row, index) => {
+            row.hidden = ((index - start + rows.length) % rows.length) >= 3;
+        });
+        list.querySelector('[data-home-row-prev]')?.addEventListener('click', () => {
+            start = (start - 1 + rows.length) % rows.length;
+            render();
+        });
+        list.querySelector('[data-home-row-next]')?.addEventListener('click', () => {
+            start = (start + 1) % rows.length;
+            render();
+        });
+        render();
+    });
+
+    home.querySelectorAll('[data-home-reviews]').forEach(reviews => {
+        const slides = [...reviews.querySelectorAll('[data-home-review-slide]')];
+        const dots = [...reviews.querySelectorAll('[data-home-review-dot]')];
+        const show = index => {
+            slides.forEach((slide, i) => { slide.hidden = i !== index; });
+            dots.forEach((dot, i) => dot.classList.toggle('on', i === index));
+        };
+        dots.forEach(dot => dot.addEventListener('click', () => {
+            show(Number(dot.dataset.homeReviewDot || 0));
+        }));
+    });
+
+    home.querySelectorAll('[data-compare-school]').forEach(button => {
+        button.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+            const slug = button.dataset.compareSchool;
+            let selected = [];
+            try {
+                selected = JSON.parse(localStorage.getItem('compare_schools') || '[]');
+            } catch (error) {
+                selected = [];
+            }
+            if (selected.includes(slug)) {
+                button.textContent = 'Already selected';
+                button.disabled = true;
+                return;
+            }
+            if (selected.length >= 3) {
+                button.textContent = 'Compare limit reached';
+                button.disabled = true;
+                return;
+            }
+            window.dispatchEvent(new CustomEvent('findursch:compare-add', { detail: slug }));
+            button.textContent = 'Added to compare';
+            button.disabled = true;
+        });
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeFindURSCHHomepage, { once: true });
+} else {
+    initializeFindURSCHHomepage();
+}
+document.addEventListener('livewire:navigated', initializeFindURSCHHomepage);
 
 Alpine.start();
