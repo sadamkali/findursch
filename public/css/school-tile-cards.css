@@ -300,3 +300,17 @@
 @media(prefers-reduced-motion:reduce){
   .findursch-school-tile,.findursch-school-tile__media img{transition:none}
 }
+
+/* The Schools tile puts the school name first, then the fee and category chips. */
+.findursch-school-tile__fee-line{
+  color:#5d6b65;
+  font:500 12px/1.4 Inter,system-ui,sans-serif;
+}
+.findursch-school-tile__fee-line::first-letter{color:#1b2420}
+.findursch-school-tile__chips>.is-type{
+  border-color:#d5e4dc;
+  background:#eaf2ed;
+  color:#0c5a49;
+  font-weight:800;
+}
+.findursch-school-tile--compact .findursch-school-tile__fee-line{display:none}
