@@ -56,6 +56,7 @@
     </style>
     <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=5">
     <link rel="stylesheet" href="{{ asset('css/school-tile-cards.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/site-footer.css') }}?v=1">
     @livewireStyles
 </head>
 <body class="h-full antialiased">
@@ -152,6 +153,7 @@
         <main class="account-workspace-content">
             {{ $slot ?? '' }}
         </main>
+        <x-site-footer />
     </div>
 </div>
 @livewireScripts
