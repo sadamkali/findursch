@@ -1,13 +1,10 @@
 <div>
-<div class="py-8" style="background-color:var(--brand);">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h1 class="text-3xl font-normal mb-4" style="font-family: 'DM Serif Display', serif; color:#fff;">
-            Search Results
-            @if($q) <span class="font-normal" style="color:#fff">for "{{ $q }}"</span> @endif
-        </h1>
-        <p style="color:rgba(255,255,255,.88)">{{ $schools->total() }} schools found</p>
-    </div>
-</div>
+<x-site-page-hero
+    eyebrow="FindURSCH school search"
+    title="Search Results"
+    :description="$q ? 'Showing '.$schools->total().' schools matching '.$q.'.' : 'Search schools by name, district or curriculum across Uganda.'"
+    :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Search']]"
+/>
 
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
     <div class="grid lg:grid-cols-[280px_1fr] gap-8">
