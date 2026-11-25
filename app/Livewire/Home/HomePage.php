@@ -112,7 +112,7 @@ class HomePage extends Component
         $storedHomepageSlides = is_array($storedHomepageSlides) ? $storedHomepageSlides : [];
 
         $homepageSlides = collect($storedHomepageSlides)
-            ->filter(fn ($slide) => is_array($slide) && ($slide['enabled'] ?? true) !== false && ($slide['enabled'] ?? true) !== 0 && ($slide['enabled'] ?? true) !== '0')
+            ->filter(fn ($slide) => is_array($slide) && filter_var($slide['enabled'] ?? true, FILTER_VALIDATE_BOOLEAN))
             ->map(function (array $slide): array {
                 $imageUrl = trim((string) ($slide['image_url'] ?? ''));
                 $imageScheme = $imageUrl !== '' ? strtolower((string) parse_url($imageUrl, PHP_URL_SCHEME)) : '';
