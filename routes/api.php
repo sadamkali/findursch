@@ -17,6 +17,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/exchange-dashboard-session', [DashboardAuthController::class, 'exchangeDashboardSession'])->middleware('throttle:10,1');
     Route::post('/login', [DashboardAuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('/register', [DashboardAuthController::class, 'register'])->middleware('throttle:5,1');
+    Route::post('/register-parent', [DashboardAuthController::class, 'registerParent'])->middleware('throttle:5,1');
     Route::post('/register-school', [DashboardAuthController::class, 'registerSchool'])->middleware('throttle:5,1');
     Route::post('/reset-password', [DashboardAuthController::class, 'resetPassword'])->middleware('throttle:5,1');
     Route::post('/verify-admin-code', [DashboardAuthController::class, 'verifyAdminCode'])->middleware('throttle:10,1');
