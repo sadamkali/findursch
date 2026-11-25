@@ -351,7 +351,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </div></div>
 
 <header><div class="wrap">
-  <a class="logo logo-image" href="{{ route('home') }}"><img src="https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png" alt="FindURSCH" width="168" height="37" fetchpriority="high"></a>
+  <a class="logo logo-image" href="{{ route('home') }}"><img src="{{ $headerLogoUrl }}" alt="FindURSCH" width="168" height="37" fetchpriority="high"></a>
   <nav aria-label="Main navigation">
     <a href="{{ route('home') }}">Home</a>
     <a class="on" href="{{ route('schools.index') }}">Schools</a>
@@ -530,7 +530,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     const shade=document.createElement('div'); shade.className='ov'; document.body.appendChild(shade);
     const links=nav?Array.from(nav.querySelectorAll('a')).map(a=>'<a href="'+a.href+'">'+a.textContent+'</a>').join(''):'';
     const other=Array.from(extras).map(a=>'<a href="'+a.href+'">'+a.textContent+'</a>').join('');
-    drawer.innerHTML='<div class="dh"><a class="logo logo-image" href="{{ route('home') }}"><img src="https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png" alt="FindURSCH" width="156" height="34"></a><div class="dh-actions"><a class="hb account-btn" href="{{ auth()->check() ? route('user.home') : route('login') }}" aria-label="Account"><svg class="i"><use href="#i-user"/></svg></a><button class="dx" type="button" aria-label="Close menu">✕</button></div></div><div class="dl">'+links+'<hr>'+other+'</div>';
+    drawer.innerHTML='<div class="dh"><a class="logo logo-image" href="{{ route('home') }}"><img src="{{ $mobileLogoUrl }}" alt="FindURSCH" width="156" height="34"></a><div class="dh-actions"><a class="hb account-btn" href="{{ auth()->check() ? route('user.home') : route('login') }}" aria-label="Account"><svg class="i"><use href="#i-user"/></svg></a><button class="dx" type="button" aria-label="Close menu">✕</button></div></div><div class="dl">'+links+'<hr>'+other+'</div>';
     document.body.appendChild(drawer);
     const setOpen=open=>{drawer.classList.toggle('open',open);shade.classList.toggle('open',open);document.body.classList.toggle('nolock',open);burger.setAttribute('aria-expanded',String(open));(open?drawer.querySelector('.dx'):burger).focus()};
     burger.addEventListener('click',()=>setOpen(true)); shade.addEventListener('click',()=>setOpen(false)); drawer.querySelector('.dx').addEventListener('click',()=>setOpen(false)); drawer.addEventListener('click',e=>{if(e.target.closest('a'))setOpen(false)}); document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false)});
