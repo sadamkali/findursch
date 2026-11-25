@@ -392,6 +392,33 @@ class OwnerWorkspaceController extends Controller
     {
         $record = $this->school($request, $school);
 
+        if ($request->isMethod('put')) {
+            $validated = $request->validate([
+                'fees_from' => ['present', 'nullable', 'numeric', 'min:0', 'max:999999999999.99'],
+                'fees_to' => ['present', 'nullable', 'numeric', 'min:0', 'max:999999999999.99'],
+            ]);
+
+            $from = $validated['fees_from'] === null ? null : (float) $validated['fees_from'];
+            $to = $validated['fees_to'] === null ? null : (float) $validated['fees_to'];
+            if ($from !== null && $to !== null && $from > $to) {
+                throw ValidationException::withMessages([
+                    'fees_to' => ['The upper estimate must be equal to or higher than the lower estimate.'],
+                ]);
+            }
+
+            $record->forceFill($validated)->save();
+
+            return response()->json([
+                'data' => [
+                    'school' => [
+                        'fees_from' => $record->fees_from,
+                        'fees_to' => $record->fees_to,
+                    ],
+                ],
+                'message' => 'Estimated fee range saved.',
+            ]);
+        }
+
         if ($request->isMethod('post') || $request->isMethod('patch')) {
             $validated = $request->validate([
                 'program_id' => [
@@ -428,7 +455,13 @@ class OwnerWorkspaceController extends Controller
             return response()->json(['message' => 'Fee removed.']);
         }
 
-        return response()->json(['data' => ['records' => $record->fees()->with('program')->latest()->get()]]);
+        return response()->json(['data' => [
+            'school' => [
+                'fees_from' => $record->fees_from,
+                'fees_to' => $record->fees_to,
+            ],
+            'records' => $record->fees()->with('program')->latest()->get(),
+        ]]);
     }
 
     public function media(Request $request, int $school, string $collection, ?int $mediaId = null): JsonResponse
