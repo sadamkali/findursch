@@ -1,5 +1,5 @@
 @php
-    $footerSettings = \\App\\Models\\Setting::query()
+    $footerSettings = \App\Models\Setting::query()
         ->whereIn('key', [
             'site_name', 'site_description', 'site_footer_logo', 'site_horizontal_logo',
             'contact_address', 'support_phone', 'support_email', 'support_whatsapp',
