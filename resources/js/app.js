@@ -446,14 +446,114 @@ function initializeFindURSCHHomepage() {
     }, { passive: true });
 
     const hero = home.querySelector('[data-home-hero]');
-    home.querySelectorAll('[data-home-hero-dot]').forEach(dot => {
-        dot.addEventListener('click', () => {
-            hero?.classList.toggle('is-alt', Number(dot.dataset.homeHeroDot) === 1);
-            home.querySelectorAll('[data-home-hero-dot]').forEach(item => {
-                item.classList.toggle('on', item === dot);
+    if (hero) {
+        const heroSlides = [...hero.querySelectorAll('[data-home-hero-slide]')];
+        const heroDots = [...hero.querySelectorAll('[data-home-hero-dot]')];
+        const heroTitle = hero.querySelector('[data-home-hero-title]');
+        const heroDescription = hero.querySelector('[data-home-hero-description]');
+        const heroCta = hero.querySelector('[data-home-hero-cta]');
+        const previousButton = hero.querySelector('[data-home-hero-prev]');
+        const nextButton = hero.querySelector('[data-home-hero-next]');
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        let activeHeroSlide = Math.max(0, heroSlides.findIndex(slide => slide.classList.contains('is-active')));
+        let heroPaused = reducedMotion;
+        let pointerStart = null;
+
+        const showHeroSlide = index => {
+            if (!heroSlides.length) return;
+            activeHeroSlide = (index + heroSlides.length) % heroSlides.length;
+
+            heroSlides.forEach((slide, slideIndex) => {
+                const isActive = slideIndex === activeHeroSlide;
+                slide.classList.toggle('is-active', isActive);
+                slide.setAttribute('aria-hidden', String(!isActive));
             });
-        });
-    });
+
+            heroDots.forEach((dot, dotIndex) => {
+                const isActive = dotIndex === activeHeroSlide;
+                dot.classList.toggle('on', isActive);
+                dot.setAttribute('aria-pressed', String(isActive));
+            });
+
+            const slide = heroSlides[activeHeroSlide];
+            if (heroTitle) heroTitle.textContent = slide.dataset.slideTitle || '';
+            if (heroDescription) {
+                heroDescription.textContent = slide.dataset.slideDescription || '';
+                heroDescription.hidden = !slide.dataset.slideDescription;
+            }
+
+            if (heroCta) {
+                const label = (slide.dataset.slideButtonLabel || '').trim();
+                const url = (slide.dataset.slideButtonUrl || '').trim();
+                const internalUrl = url.startsWith('/') && !url.startsWith('//');
+                let safeExternalUrl = false;
+                try {
+                    safeExternalUrl = new URL(url).protocol === 'https:';
+                } catch {
+                    safeExternalUrl = false;
+                }
+
+                if (label && (internalUrl || safeExternalUrl)) {
+                    heroCta.textContent = label;
+                    heroCta.href = url;
+                    heroCta.hidden = false;
+                } else {
+                    heroCta.hidden = true;
+                    heroCta.removeAttribute('href');
+                    heroCta.textContent = '';
+                }
+            }
+        };
+
+        if (heroSlides.length > 0) {
+            showHeroSlide(activeHeroSlide);
+        }
+
+        previousButton?.addEventListener('click', () => showHeroSlide(activeHeroSlide - 1));
+        nextButton?.addEventListener('click', () => showHeroSlide(activeHeroSlide + 1));
+        heroDots.forEach(dot => dot.addEventListener('click', () => {
+            showHeroSlide(Number(dot.dataset.homeHeroDot || 0));
+        }));
+
+        if (heroSlides.length > 1) {
+            const autoplay = window.setInterval(() => {
+                if (!heroPaused && !document.hidden && hero.isConnected) {
+                    showHeroSlide(activeHeroSlide + 1);
+                }
+            }, 6500);
+
+            home.__homepageHeroTimer = autoplay;
+            hero.addEventListener('mouseenter', () => { heroPaused = true; });
+            hero.addEventListener('mouseleave', () => { heroPaused = reducedMotion; });
+            hero.addEventListener('focusin', () => { heroPaused = true; });
+            hero.addEventListener('focusout', event => {
+                if (!hero.contains(event.relatedTarget)) heroPaused = reducedMotion;
+            });
+
+            hero.addEventListener('pointerdown', event => {
+                if (event.pointerType !== 'touch') return;
+                pointerStart = { x: event.clientX, y: event.clientY };
+                heroPaused = true;
+            }, { passive: true });
+
+            hero.addEventListener('pointerup', event => {
+                if (!pointerStart) return;
+                const deltaX = event.clientX - pointerStart.x;
+                const deltaY = event.clientY - pointerStart.y;
+                pointerStart = null;
+                if (Math.abs(deltaX) > 48 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25) {
+                    showHeroSlide(activeHeroSlide + (deltaX < 0 ? 1 : -1));
+                }
+                heroPaused = reducedMotion;
+            }, { passive: true });
+
+            hero.addEventListener('pointercancel', () => {
+                pointerStart = null;
+                heroPaused = reducedMotion;
+            }, { passive: true });
+        }
+    }
 
     const lead = home.querySelector('[data-home-news-lead]');
     if (lead) {
