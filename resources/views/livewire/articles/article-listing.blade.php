@@ -3,21 +3,21 @@
         $isNews = ($mode ?? 'blogs') === 'news';
         $indexRoute = $isNews ? 'news.index' : 'articles.index';
         $showRoute = $isNews ? 'news.show' : 'articles.show';
-        $kindLabel = $isNews ? 'news' : 'blogs';
+        $kindLabel = $isNews ? 'news' : 'articles & blogs';
     @endphp
 
     <a class="blogs-rtab" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
     <x-site-page-hero
         eyebrow="FindURSCH resources"
-        :title="($isNews ? 'School News & Updates' : 'FindURSCH Blogs')"
-        :description="$isNews ? 'Stay informed with education news, school announcements, policy updates and stories from school communities across Uganda.' : 'Practical advice, inspiring stories and fresh ideas for parents, students and teachers, from study skills and school life to careers, health, faith and culture.'"
-        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => $isNews ? 'News' : 'Blogs']]"
+        :title="($isNews ? 'School News & Updates' : 'Education Articles & Blogs')"
+        :description="$isNews ? 'Stay informed with education news, school announcements, policy updates and stories from school communities across Uganda.' : 'Explore practical guides, in-depth education articles and helpful ideas for parents, students and teachers at every stage of the learning journey.'"
+        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => $isNews ? 'News' : 'Articles & Blogs']]"
     />
 
     <main class="blogs-wrap">
-        <nav class="blogs-pills" aria-label="{{ $isNews ? 'News categories' : 'Blog categories' }}">
+        <nav class="blogs-pills" aria-label="{{ $isNews ? 'News categories' : 'Article and blog categories' }}">
             <a href="{{ route($indexRoute, array_filter(['q' => $search ?: null, 'sort' => $sort !== 'latest' ? $sort : null])) }}"
-               class="{{ ! $category ? 'is-active' : '' }}">{{ $isNews ? 'All news' : 'All blogs' }}</a>
+               class="{{ ! $category ? 'is-active' : '' }}">{{ $isNews ? 'All news' : 'All articles & blogs' }}</a>
             @foreach($categories as $item)
                 <a href="{{ route($indexRoute, array_filter(['category' => $item->id, 'q' => $search ?: null, 'sort' => $sort !== 'latest' ? $sort : null])) }}"
                    class="{{ (string) $category === (string) $item->id ? 'is-active' : '' }}">{{ $item->name }}</a>
@@ -26,13 +26,13 @@
 
         <form class="blogs-bar" method="GET" action="{{ route($indexRoute) }}" role="search">
             <label class="blogs-search-field">
-                <span class="sr-only">{{ $isNews ? 'Search news, topics or schools' : 'Search blogs, topics or authors' }}</span>
-                <input type="search" name="q" value="{{ $search }}" placeholder="{{ $isNews ? 'Search news, topics or schools' : 'Search blogs, topics or authors' }}">
+                <span class="sr-only">{{ $isNews ? 'Search news, topics or schools' : 'Search articles, blogs, topics or authors' }}</span>
+                <input type="search" name="q" value="{{ $search }}" placeholder="{{ $isNews ? 'Search news, topics or schools' : 'Search articles, blogs, topics or authors' }}">
             </label>
             <button class="blogs-btn blogs-btn-brand" type="submit">Search</button>
             <label>
                 <span class="sr-only">Category</span>
-                <select name="category" aria-label="{{ $isNews ? 'News category' : 'Blog category' }}">
+                <select name="category" aria-label="{{ $isNews ? 'News category' : 'Article and blog category' }}">
                     <option value="">All categories</option>
                     @foreach($categories as $item)
                         <option value="{{ $item->id }}" {{ (string) $category === (string) $item->id ? 'selected' : '' }}>{{ $item->name }}</option>
@@ -41,7 +41,7 @@
             </label>
             <label>
                 <span class="sr-only">Sort {{ $kindLabel }}</span>
-                <select name="sort" aria-label="Sort blogs">
+                <select name="sort" aria-label="Sort {{ $kindLabel }}">
                     <option value="latest" {{ $sort !== 'popular' ? 'selected' : '' }}>Latest first</option>
                     <option value="popular" {{ $sort === 'popular' ? 'selected' : '' }}>Most read</option>
                 </select>
@@ -58,7 +58,7 @@
                             @endif
                             <span class="blogs-lead__shade"></span>
                             <span class="blogs-lead__caption">
-                                <small>{{ $leadArticle->category?->name ?? 'FindURSCH editorial' }} · {{ $leadArticle->published_at?->format('d M Y') }}</small>
+                                <small>{{ $leadArticle->content_type === 'article' ? 'ARTICLE' : ($isNews ? 'NEWS' : 'BLOG') }} · {{ $leadArticle->category?->name ?? 'FindURSCH editorial' }} · {{ $leadArticle->published_at?->format('d M Y') }}</small>
                                 <strong>{{ $leadArticle->title }}</strong>
                                 <span class="blogs-lead__meta">{{ $leadArticle->read_time_minutes }} min read @if($leadArticle->is_featured) · Featured {{ $kindLabel }} @endif</span>
                             </span>
@@ -75,7 +75,7 @@
                                 @endif
                             </div>
                             <div class="blogs-card-body">
-                                <span class="blogs-kick">{{ $secondaryArticle->category?->name ?? 'Education' }} · {{ $secondaryArticle->published_at?->format('d M Y') }}</span>
+                                <span class="blogs-kick">{{ $secondaryArticle->content_type === 'article' ? 'ARTICLE' : ($isNews ? 'NEWS' : 'BLOG') }} · {{ $secondaryArticle->category?->name ?? 'Education' }} · {{ $secondaryArticle->published_at?->format('d M Y') }}</span>
                                 <h2>{{ $secondaryArticle->title }}</h2>
                                 @if($secondaryArticle->excerpt)<p>{{ \Illuminate\Support\Str::limit($secondaryArticle->excerpt, 115) }}</p>@endif
                                 <small>{{ $secondaryArticle->read_time_minutes }} min read</small>
@@ -113,10 +113,10 @@
                     <h2 id="blogs-results-title">
                         @if($selectedCategory){{ $selectedCategory->name }}
                         @elseif($search !== '')Search results
-                        @else All blogs
+                        @else All articles & blogs
                         @endif
                     </h2>
-                    <span>{{ $searchResults->total() }} {{ \Illuminate\Support\Str::plural('blog', $searchResults->total()) }}</span>
+                    <span>{{ $searchResults->total() }} {{ \Illuminate\Support\Str::plural('story', $searchResults->total()) }}</span>
                 </div>
 
                 @if($searchResults->isNotEmpty())
@@ -131,7 +131,7 @@
                                     @endif
                                 </div>
                                 <div class="blogs-card-body">
-                                    <span class="blogs-kick">{{ $article->category?->name ?? 'Education' }}</span>
+                                    <span class="blogs-kick">{{ $article->content_type === 'article' ? 'ARTICLE' : ($isNews ? 'NEWS' : 'BLOG') }} · {{ $article->category?->name ?? 'Education' }}</span>
                                     <h3>{{ $article->title }}</h3>
                                     @if($article->excerpt)<p>{{ \Illuminate\Support\Str::limit($article->excerpt, 135) }}</p>@endif
                                     <small>{{ $article->published_at?->format('d M Y') }} · {{ $article->read_time_minutes }} min read</small>
@@ -174,7 +174,7 @@
                             <div class="blogs-card-body">
                                 <h3>{{ $sectionLead->title }}</h3>
                                 @if($sectionLead->excerpt)<p>{{ \Illuminate\Support\Str::limit($sectionLead->excerpt, 145) }}</p>@endif
-                                <small><span>{{ $sectionLead->published_at?->format('d M Y') }}</span><span>{{ $sectionLead->read_time_minutes }} min read</span></small>
+                                <small><span>{{ $sectionLead->content_type === 'article' ? 'Article' : ($isNews ? 'News' : 'Blog') }}</span><span>{{ $sectionLead->published_at?->format('d M Y') }}</span><span>{{ $sectionLead->read_time_minutes }} min read</span></small>
                             </div>
                         </a>
 
@@ -190,11 +190,11 @@
                                     </div>
                                     <span class="blogs-row-copy">
                                         <strong>{{ $rowArticle->title }}</strong>
-                                        <small>{{ $rowArticle->published_at?->format('d M Y') }}</small>
+                                        <small>{{ $rowArticle->content_type === 'article' ? 'Article' : ($isNews ? 'News' : 'Blog') }} · {{ $rowArticle->published_at?->format('d M Y') }}</small>
                                     </span>
                                 </a>
                             @empty
-                                <p class="blogs-rows-empty">More blogs in this category will appear here as they are published.</p>
+                                <p class="blogs-rows-empty">More stories in this category will appear here as they are published.</p>
                             @endforelse
                         </div>
 
@@ -209,7 +209,7 @@
                                 </div>
                                 @if($sectionFeature->is_featured)<span class="blogs-flag">Featured</span>@endif
                                 <div class="blogs-card-body">
-                                    <span class="blogs-kick">{{ $sectionCategory->name }}</span>
+                                    <span class="blogs-kick">{{ $sectionFeature->content_type === 'article' ? 'ARTICLE' : ($isNews ? 'NEWS' : 'BLOG') }} · {{ $sectionCategory->name }}</span>
                                     <h3>{{ $sectionFeature->title }}</h3>
                                     @if($sectionFeature->excerpt)<p>{{ \Illuminate\Support\Str::limit($sectionFeature->excerpt, 110) }}</p>@endif
                                     <small><span>{{ $sectionFeature->published_at?->format('d M Y') }}</span><span>{{ $sectionFeature->read_time_minutes }} min read</span></small>
@@ -230,7 +230,7 @@
             @empty
                 <section class="blogs-empty">
                     <h3>No published {{ $kindLabel }} yet</h3>
-                    <p>{{ $isNews ? 'Education news and school updates will appear here when they are published.' : 'New stories and useful education guides will appear here when they are published.' }}</p>
+                    <p>{{ $isNews ? 'Education news and school updates will appear here when they are published.' : 'Education articles and practical blog guides will appear here when they are published.' }}</p>
                 </section>
             @endforelse
         @endif

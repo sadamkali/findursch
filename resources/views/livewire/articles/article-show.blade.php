@@ -1,11 +1,11 @@
 <div class="article-reference-page">
     <a class="ar-register" href="{{ rtrim(config('services.dashboard.url', 'https://findursch-dashboard.vercel.app'), '/') }}/register?type=school_owner">REGISTER YOUR SCHOOL</a>
     <x-site-page-hero
-        :eyebrow="request()->routeIs('news.show') ? 'FindURSCH news' : 'FindURSCH blog'"
+        :eyebrow="request()->routeIs('news.show') ? 'FindURSCH news' : ($article->content_type === 'article' ? 'FindURSCH article' : 'FindURSCH blog')"
         :title="$article->title"
         :description="$article->excerpt"
         :meta="($article->category?->name ?: 'Education').' · '.($article->published_at?->format('d F Y') ?: 'Recently published').' · '.max(1, (int) $article->read_time_minutes).' min read'"
-        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => request()->routeIs('news.show') ? 'News' : 'Blogs', 'url' => request()->routeIs('news.show') ? route('news.index') : route('articles.index')], ['label' => $article->title]]"
+        :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => request()->routeIs('news.show') ? 'News' : ($article->content_type === 'article' ? 'Articles' : 'Blogs'), 'url' => request()->routeIs('news.show') ? route('news.index') : route('articles.index')], ['label' => $article->title]]"
     />
 
     <main class="ar-wrap">
@@ -13,7 +13,7 @@
             <article class="ar-content">
                 <div class="ar-tags">
                     <span class="ar-tag ar-tag-category">{{ $article->category?->name ?? 'Education' }}</span>
-                    <span class="ar-tag">{{ request()->routeIs('news.show') ? 'News story' : 'Education blog' }}</span>
+                    <span class="ar-tag">{{ request()->routeIs('news.show') ? 'News story' : ($article->content_type === 'article' ? 'Education article' : 'Education blog') }}</span>
                     <span class="ar-tag">{{ max(1, (int) $article->read_time_minutes) }} min read</span>
                 </div>
 
@@ -119,7 +119,7 @@
                     <h2>Explore more</h2>
                     <a href="{{ route('events.index') }}">Upcoming school events <b aria-hidden="true">→</b></a>
                     <a href="{{ route('scholarships.index') }}">Scholarships and bursaries <b aria-hidden="true">→</b></a>
-                    <a href="{{ route('articles.index') }}">More education blogs <b aria-hidden="true">→</b></a>
+                    <a href="{{ route('articles.index') }}">More education articles & blogs <b aria-hidden="true">→</b></a>
                     <a href="{{ route('news.index') }}">Latest education news <b aria-hidden="true">→</b></a>
                 </section>
             </aside>
@@ -129,7 +129,7 @@
             <section class="ar-related">
                 <div class="ar-related-heading">
                     <h2>Related stories</h2>
-                    <a href="{{ request()->routeIs('news.show') ? route('news.index') : route('articles.index') }}">More {{ request()->routeIs('news.show') ? 'news' : 'blogs' }} <b aria-hidden="true">→</b></a>
+                    <a href="{{ request()->routeIs('news.show') ? route('news.index') : route('articles.index') }}">More {{ request()->routeIs('news.show') ? 'news' : ($article->content_type === 'article' ? 'articles' : 'blogs') }} <b aria-hidden="true">→</b></a>
                 </div>
                 <div class="ar-related-grid">
                     @foreach($related as $item)
@@ -140,7 +140,7 @@
                                 <span class="ar-related-placeholder">FindURSCH</span>
                             @endif
                             <div class="ar-related-card-copy">
-                                <small>{{ $item->category?->name ?? 'Education' }} · {{ $item->published_at?->format('d M Y') }}</small>
+                                <small>{{ $item->content_type === 'article' ? 'ARTICLE' : (request()->routeIs('news.show') ? 'NEWS' : 'BLOG') }} · {{ $item->category?->name ?? 'Education' }} · {{ $item->published_at?->format('d M Y') }}</small>
                                 <b>{{ $item->title }}</b>
                             </div>
                             <span class="ar-related-meta">{{ max(1, (int) $item->read_time_minutes) }} min read <b aria-hidden="true">→</b></span>
