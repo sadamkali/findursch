@@ -53,14 +53,10 @@
                             $feeTo = is_numeric($s->fees_to) && (float) $s->fees_to > 0 ? (float) $s->fees_to : null;
                         @endphp
                         <td class="p-4 text-center">
-                            @if($feeFrom !== null && $feeTo !== null && $feeFrom !== $feeTo)
+                            @if($feeFrom !== null && $feeTo !== null && $feeFrom < $feeTo)
                                 UGX {{ number_format(min($feeFrom, $feeTo)) }} – UGX {{ number_format(max($feeFrom, $feeTo)) }}
-                            @elseif($feeFrom !== null && $feeTo === null)
-                                From UGX {{ number_format($feeFrom) }}
-                            @elseif($feeTo !== null && $feeFrom === null)
-                                Up to UGX {{ number_format($feeTo) }}
                             @else
-                                Fee estimate not provided
+                                Fee range not provided
                             @endif
                         </td>
                     @endforeach</tr>
