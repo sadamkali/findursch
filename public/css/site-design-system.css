@@ -747,7 +747,6 @@ body .account-workspace-content h1,
 body .account-workspace-content h2,
 body .account-workspace-content h3 {
     font-family: var(--fd-display) !important;
-    color: var(--fd-ink);
 }
 
 body .account-workspace-content h1 {
@@ -1420,11 +1419,7 @@ body main a[class*="rounded"][class*="bg-primary"] {
     font-family: 'Inter', system-ui, sans-serif !important;
 }
 
-body main h1,
-body main h2,
-body main h3 {
-    color: #1b2420;
-}
+
 
 /* Keep the reference's mobile header and horizontal gutters predictable. */
 @media (max-width: 1000px) {
