@@ -3,7 +3,7 @@
 
     <x-site-page-hero
         eyebrow="Education funding in Uganda"
-        title="Scholarships &amp; Bursaries in Uganda"
+        title="Scholarships & Bursaries in Uganda"
         :description="'Explore school bursaries and published funding opportunities for Ugandan learners. '.number_format($openCount).' open now.'"
         :breadcrumbs="[['label' => 'Home', 'url' => route('home')], ['label' => 'Scholarships & bursaries']]"
     />
