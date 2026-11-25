@@ -73,7 +73,8 @@
     </style>
     <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=9">
     <link rel="stylesheet" href="{{ asset('css/school-tile-cards.css') }}?v=3">
-    <link rel="stylesheet" href="{{ asset('css/site-footer.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/parent-account.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/site-footer.css') }}?v=3">
     @livewireStyles
 </head>
 <body class="h-full antialiased">
