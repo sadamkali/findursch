@@ -175,10 +175,11 @@ class SchoolListing extends Component
         }
 
         if ($this->feeFilterEnabled) {
-            $query->where(function ($rangeQuery) {
-                $rangeQuery->whereNotNull('schools.fees_from')
-                    ->orWhereNotNull('schools.fees_to');
-            })->whereRaw('COALESCE(schools.fees_from, schools.fees_to) <= ?', [max(0, (int) $this->maxFee)]);
+            $query->whereNotNull('schools.fees_from')
+                ->whereNotNull('schools.fees_to')
+                ->where('schools.fees_from', '>', 0)
+                ->whereColumn('schools.fees_to', '>', 'schools.fees_from')
+                ->where('schools.fees_from', '<=', max(0, (int) $this->maxFee));
         }
 
         match ($this->sort) {
@@ -238,7 +239,7 @@ class SchoolListing extends Component
     private function sortByTermFee(Builder $query, string $direction): Builder
     {
         return $query
-            ->orderByRaw('CASE WHEN COALESCE(schools.fees_from, schools.fees_to) IS NULL OR COALESCE(schools.fees_from, schools.fees_to) <= 0 THEN 1 ELSE 0 END ASC')
-            ->orderByRaw('COALESCE(schools.fees_from, schools.fees_to) '.$direction);
+            ->orderByRaw('CASE WHEN schools.fees_from IS NULL OR schools.fees_to IS NULL OR schools.fees_from <= 0 OR schools.fees_to <= schools.fees_from THEN 1 ELSE 0 END ASC')
+            ->orderBy('schools.fees_from', $direction);
     }
 }
