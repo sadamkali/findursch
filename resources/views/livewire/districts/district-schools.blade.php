@@ -105,83 +105,15 @@
                 @if($schools->isNotEmpty())
                     <div class="district-school-grid">
                         @foreach($schools as $school)
-                            <article class="district-school-card" wire:key="district-school-{{ $school->id }}">
-                                @if($school->getFirstMediaUrl('cover'))
-                                    <a class="district-school-cover" href="{{ route('schools.show', $school) }}">
-                                        <img src="{{ $school->getFirstMediaUrl('cover') }}" alt="{{ $school->name }}" loading="lazy" decoding="async">
-                                    </a>
-                                @endif
-
-                                <div class="district-school-body">
-                                    <div class="district-school-tags">
-                                        @if($school->type?->name)
-                                            <span class="district-tag district-tag-type">{{ $school->type->name }}</span>
-                                        @endif
-                                        <span class="district-tag district-tag-verified">✓ Verified</span>
-                                        @if($school->is_featured)
-                                            <span class="district-tag district-tag-featured">Featured</span>
-                                        @endif
-                                    </div>
-
-                                    <h2><a href="{{ route('schools.show', $school) }}">{{ $school->name }}</a></h2>
-                                    @if($school->tagline)
-                                        <p class="district-school-tagline">{{ $school->tagline }}</p>
-                                    @endif
-
-                                    <div class="district-school-location">
-                                        <span aria-hidden="true">⌖</span>
-                                        {{ collect([$school->town, $school->subCounty?->name, $school->county?->name])->filter()->unique()->implode(' · ') ?: $district->name }}
-                                    </div>
-
-                                    <div class="district-school-facts">
-                                        <span>{{ match($school->boarding_type) { 'boarding' => 'Boarding', 'mixed' => 'Day & boarding', default => 'Day' } }}</span>
-                                        @if($school->gender_policy)
-                                            <span>{{ ucfirst($school->gender_policy) }}</span>
-                                        @endif
-                                        @if($school->admissions_open)
-                                            <span class="district-admissions-open">Admissions open</span>
-                                        @endif
-                                    </div>
-
-                                    @if($school->curricula->isNotEmpty())
-                                        <div class="district-curricula">
-                                            @foreach($school->curricula->take(3) as $curriculum)
-                                                <span>{{ $curriculum->abbreviation ?: $curriculum->name }}</span>
-                                            @endforeach
-                                        </div>
-                                    @endif
-
-                                    <div class="district-school-meta">
-                                        <div class="district-rating">
-                                            @if((float) $school->rating_average > 0)
-                                                <span aria-hidden="true">★</span>
-                                                <b>{{ number_format((float) $school->rating_average, 1) }}</b>
-                                                <small>({{ number_format((int) $school->reviews_count) }} reviews)</small>
-                                            @else
-                                                <small>No reviews yet</small>
-                                            @endif
-                                        </div>
-                                        <div class="district-fee">
-                                            @if($school->lowest_term_tuition !== null)
-                                                <b>UGX {{ number_format((float) $school->lowest_term_tuition) }}</b>
-                                                <small>starting tuition / term</small>
-                                            @elseif($school->fees_from !== null)
-                                                <b>UGX {{ number_format((float) $school->fees_from) }}</b>
-                                                <small>published starting fee</small>
-                                            @else
-                                                <small>Fees not published</small>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="district-school-footer">
-                                    <a class="district-profile-link" href="{{ route('schools.show', $school) }}">View school profile <span aria-hidden="true">→</span></a>
-                                    <button type="button" x-data @click.stop.prevent="window.dispatchEvent(new CustomEvent('findursch:compare-add', { detail: @js($school->slug) }))">
-                                        Add to compare
-                                    </button>
-                                </div>
-                            </article>
+                            <x-school-tile-card
+                                    wire:key="district-school-{{ $school->id }}"
+                                    :school="$school"
+                                    :saved="in_array((int) $school->id, $savedSchoolIds, true)"
+                                    :show-save="true"
+                                    :show-compare="true"
+                                    :show-fee="true"
+                                    :show-description="true"
+                                />
 
                             @if($loop->iteration === 6)
                                 <div class="district-list-ad"><x-site-ad-banner placement="inlist" /></div>
