@@ -15,6 +15,7 @@ class SitemapController extends Controller
         $urls[] = ['url' => route('home'), 'priority' => '1.0'];
         $urls[] = ['url' => route('schools.index'), 'priority' => '0.9'];
         $urls[] = ['url' => route('articles.index'), 'priority' => '0.8'];
+        $urls[] = ['url' => route('news.index'), 'priority' => '0.8'];
         $urls[] = ['url' => route('jobs.index'), 'priority' => '0.8'];
 
         foreach (School::publiclyVisible()->get() as $s) {
@@ -31,7 +32,8 @@ class SitemapController extends Controller
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
             ->get() as $a) {
-            $urls[] = ['url' => route('articles.show', $a), 'priority' => '0.5'];
+            $route = $a->content_type === 'news' ? 'news.show' : 'articles.show';
+            $urls[] = ['url' => route($route, $a), 'priority' => '0.5'];
         }
 
         return response()->view('sitemap', compact('urls'))
