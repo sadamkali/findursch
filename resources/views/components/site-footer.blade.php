@@ -19,15 +19,15 @@
 
     $footerPrimaryColor = is_string($footerSettings['primary_color'] ?? null) && preg_match('/^#[0-9a-fA-F]{6}$/', $footerSettings['primary_color']) ? $footerSettings['primary_color'] : '#0c5a49';
     $footerAccentColor = is_string($footerSettings['accent_color'] ?? null) && preg_match('/^#[0-9a-fA-F]{6}$/', $footerSettings['accent_color']) ? $footerSettings['accent_color'] : '#f0b030';
-    $footerName = $footerSettings['site_name'] ?: 'FindURSCH';
-    $footerDescription = $footerSettings['site_description'] ?: 'Discover, compare and learn about schools across Uganda.';
-    $footerLogo = $footerSettings['site_footer_logo']
-        ?: ($footerSettings['site_horizontal_logo'] ?: 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png');
+    $footerName = ($footerSettings['site_name'] ?? null) ?: 'FindURSCH';
+    $footerDescription = ($footerSettings['site_description'] ?? null) ?: 'Discover, compare and learn about schools across Uganda.';
+    $footerLogo = ($footerSettings['site_footer_logo'] ?? null)
+        ?: (($footerSettings['site_horizontal_logo'] ?? null) ?: 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png');
     $footerAddress = $footerSettings['contact_address'] ?? '';
     $footerPhone = $footerSettings['support_phone'] ?? '';
     $footerEmail = $footerSettings['support_email'] ?? '';
     $footerWhatsapp = preg_replace('/\\D+/', '', (string) ($footerSettings['support_whatsapp'] ?? ''));
-    $footerCopyright = $footerSettings['site_footer_copyright_text']
+    $footerCopyright = ($footerSettings['site_footer_copyright_text'] ?? null)
         ?: ('© '.date('Y').' '.$footerName.'. All rights reserved.');
 @endphp
 
