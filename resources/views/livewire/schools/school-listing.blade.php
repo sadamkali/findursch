@@ -343,6 +343,26 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <symbol id="i-cap" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.9V17h2V9L12 3zM5 13.2v4L12 21l7-3.8v-4L12 17l-7-3.8z" fill="#b9c8c1" stroke="none"/></symbol>
 </defs></svg>
 
+@php
+  $directoryIdentity = session('dashboard_identity');
+  $directoryIdentityRole = is_array($directoryIdentity) ? ($directoryIdentity['role'] ?? null) : null;
+  if (auth()->check()) {
+    if (auth()->user()->hasRole('admin')) {
+      $directoryAccountUrl = route('auth.dashboard-login', ['returnTo' => '/admin']);
+    } elseif (auth()->user()->hasRole('school_owner')) {
+      $directoryAccountUrl = route('auth.dashboard-login', ['returnTo' => '/owner']);
+    } else {
+      $directoryAccountUrl = route('user.home');
+    }
+  } elseif ($directoryIdentityRole === 'admin') {
+    $directoryAccountUrl = route('auth.dashboard-login', ['returnTo' => '/admin']);
+  } elseif ($directoryIdentityRole === 'school_owner') {
+    $directoryAccountUrl = route('auth.dashboard-login', ['returnTo' => '/owner']);
+  } else {
+    $directoryAccountUrl = route('login');
+  }
+@endphp
+
 <div class="topbar"><div class="wrap">
   <a href="{{ route('scholarships.index') }}">Scholarships</a>
   <a href="{{ route('events.index') }}">Events</a>
@@ -363,7 +383,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   </nav>
   <div class="hic">
     <a class="hb" href="{{ auth()->check() ? route('user.saved-schools') : route('login') }}" aria-label="Saved schools"><svg class="i"><use href="#i-bm"/></svg>@if(auth()->check() && $savedSchoolCount > 0)<em>{{ $savedSchoolCount }}</em>@endif</a>
-    <a class="hb" href="{{ auth()->check() ? route('user.home') : route('login') }}" aria-label="Account"><svg class="i"><use href="#i-user"/></svg></a>
+    <a class="hb" href="{{ $directoryAccountUrl }}" aria-label="Account"><svg class="i"><use href="#i-user"/></svg></a>
   </div>
   <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false">☰</button>
 </div></header>
@@ -530,7 +550,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     const shade=document.createElement('div'); shade.className='ov'; document.body.appendChild(shade);
     const links=nav?Array.from(nav.querySelectorAll('a')).map(a=>'<a href="'+a.href+'">'+a.textContent+'</a>').join(''):'';
     const other=Array.from(extras).map(a=>'<a href="'+a.href+'">'+a.textContent+'</a>').join('');
-    drawer.innerHTML='<div class="dh"><a class="logo logo-image" href="{{ route('home') }}"><img src="{{ $mobileLogoUrl }}" alt="FindURSCH" width="156" height="34"></a><div class="dh-actions"><a class="hb account-btn" href="{{ auth()->check() ? route('user.home') : route('login') }}" aria-label="Account"><svg class="i"><use href="#i-user"/></svg></a><button class="dx" type="button" aria-label="Close menu">✕</button></div></div><div class="dl">'+links+'<hr>'+other+'</div>';
+    drawer.innerHTML='<div class="dh"><a class="logo logo-image" href="{{ route('home') }}"><img src="{{ $mobileLogoUrl }}" alt="FindURSCH" width="156" height="34"></a><div class="dh-actions"><a class="hb account-btn" href="{{ $directoryAccountUrl }}" aria-label="Account"><svg class="i"><use href="#i-user"/></svg></a><button class="dx" type="button" aria-label="Close menu">✕</button></div></div><div class="dl">'+links+'<hr>'+other+'</div>';
     document.body.appendChild(drawer);
     const setOpen=open=>{drawer.classList.toggle('open',open);shade.classList.toggle('open',open);document.body.classList.toggle('nolock',open);burger.setAttribute('aria-expanded',String(open));(open?drawer.querySelector('.dx'):burger).focus()};
     burger.addEventListener('click',()=>setOpen(true)); shade.addEventListener('click',()=>setOpen(false)); drawer.querySelector('.dx').addEventListener('click',()=>setOpen(false)); drawer.addEventListener('click',e=>{if(e.target.closest('a'))setOpen(false)}); document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false)});
