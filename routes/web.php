@@ -14,7 +14,6 @@ use App\Livewire\Compare\CompareSchools;
 use App\Livewire\Districts\DistrictSchools;
 use App\Livewire\Home\HomePage;
 use App\Livewire\Schools\SchoolDetail;
-use App\Livewire\Schools\SchoolListing;
 use App\Livewire\Search\SearchResults;
 use App\Livewire\User\AccountHome;
 use App\Livewire\User\MyInquiries;
@@ -39,7 +38,7 @@ $accountDashboardUrl = static fn (): string => rtrim((string) config('services.d
 
 // =============== PUBLIC WEBSITE ===============
 Route::get('/', HomePage::class)->name('home');
-Route::get('/schools', SchoolListing::class)->name('schools.index');
+Route::view('/schools', 'livewire.schools.school-listing')->name('schools.index');
 Route::get('/schools/{school:slug}', SchoolDetail::class)->name('schools.show');
 Route::get('/schools/{school:slug}/requirements/{document}/download', SchoolRequirementDownloadController::class)
     ->whereNumber('document')->middleware('throttle:20,1')->name('schools.requirements.download');
