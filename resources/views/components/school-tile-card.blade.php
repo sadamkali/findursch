@@ -58,22 +58,20 @@
     </a>
 
     <div class="findursch-school-tile__body">
-        <div class="findursch-school-tile__eyebrow">
-            <span>{{ $school->type?->name ?? 'School' }}</span>
-            @if($feeLabel && $showFee)
-                <span class="findursch-school-tile__fee">{{ $feeLabel }}</span>
-            @endif
-        </div>
-
         <h3 class="findursch-school-tile__title">
             <a href="{{ route('schools.show', $school) }}">{{ $school->name }}</a>
         </h3>
+
+        @if($feeLabel && $showFee)
+            <div class="findursch-school-tile__fee-line">{{ $feeLabel }}</div>
+        @endif
 
         @if($showDescription && $description)
             <p class="findursch-school-tile__description">{{ $description }}</p>
         @endif
 
         <div class="findursch-school-tile__chips">
+            <span class="is-type">{{ $school->type?->name ?? 'School' }}</span>
             @foreach($school->curricula->take(3) as $curriculum)
                 <span>{{ $curriculum->abbreviation ?: $curriculum->name }}</span>
             @endforeach
