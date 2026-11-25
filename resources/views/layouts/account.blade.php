@@ -56,7 +56,7 @@
     </style>
     <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=6">
     <link rel="stylesheet" href="{{ asset('css/school-tile-cards.css') }}?v=2">
-    <link rel="stylesheet" href="{{ asset('css/site-footer.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/site-footer.css') }}?v=2">
     @livewireStyles
 </head>
 <body class="h-full antialiased">
