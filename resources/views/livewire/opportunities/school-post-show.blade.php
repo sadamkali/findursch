@@ -17,7 +17,7 @@
 <div class="resource-page school-news-detail-page">
     <a class="blogs-rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
     <x-site-page-hero
-        eyebrow="School news · Published {{ $post->published_at?->format('d F Y') }}"
+        :eyebrow="'School news · Published '.($post->published_at?->format('d F Y') ?: 'Recently published')"
         :title="$post->title"
         :description="\Illuminate\Support\Str::limit(strip_tags($post->description), 250)"
         :meta="$locationLabel.' · '.$readingMinutes.' min read'"
