@@ -3,7 +3,6 @@
   "services": {
     "static-assets": {
       "root": "public",
-      "framework": null,
       "outputDirectory": "."
     },
     "backend-laravel": {
