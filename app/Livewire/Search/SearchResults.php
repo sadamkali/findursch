@@ -33,7 +33,7 @@ class SearchResults extends Component
                           ->orWhere('description', 'like', "%{$this->q}%")
                           ->orWhere('address', 'like', "%{$this->q}%");
                 })
-                ->with(['district', 'type', 'curricula'])
+                ->with(['district', 'type', 'curricula', 'media'])
                 ->paginate(15);
 
             $districts = \App\Models\District::where('name', 'like', "%{$this->q}%")->limit(6)->get();
