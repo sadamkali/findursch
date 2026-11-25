@@ -52,10 +52,11 @@ class HomePage extends Component
             ->with(['category', 'author']);
 
         $newsArticles = (clone $publishedArticles)
+            ->where('content_type', 'news')
             ->orderByDesc('is_featured')->latest('published_at')->limit(6)->get();
 
         $insightArticles = (clone $publishedArticles)
-            ->whereNotIn('id', $newsArticles->take(3)->pluck('id'))
+            ->whereIn('content_type', ['blog', 'article'])
             ->orderByDesc('is_featured')->latest('published_at')->limit(4)->get();
 
         $partnerSchoolNews = SchoolPost::query()

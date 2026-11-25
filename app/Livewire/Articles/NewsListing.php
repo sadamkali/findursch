@@ -36,6 +36,7 @@ class NewsListing extends Component
     private function publishedNewsQuery(): Builder
     {
         return Article::query()
+            ->where('content_type', 'news')
             ->where('status', 'published')
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())

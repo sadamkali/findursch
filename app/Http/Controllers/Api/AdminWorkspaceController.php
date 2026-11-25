@@ -1249,17 +1249,22 @@ class AdminWorkspaceController extends Controller
                 $article = Article::query()->findOrFail($id);
                 $data = $request->validate([
                     'title' => ['sometimes', 'required', 'string', 'min:2', 'max:255'],
+                    'content_type' => ['sometimes', 'in:news,blog,article'],
                     'excerpt' => ['sometimes', 'nullable', 'string', 'max:2000'],
                     'body' => ['sometimes', 'required', 'string', 'max:500000'],
                     'category_id' => ['sometimes', 'nullable', 'integer', 'exists:article_categories,id'],
                     'cover_image' => ['sometimes', 'nullable', 'url', 'max:2048'],
                     'status' => ['sometimes', 'in:draft,published,archived'],
+                    'published_at' => ['sometimes', 'nullable', 'date'],
                     'is_featured' => ['sometimes', 'boolean'],
                     'meta_title' => ['sometimes', 'nullable', 'string', 'max:255'],
                     'meta_description' => ['sometimes', 'nullable', 'string', 'max:2000'],
                 ]);
                 abort_unless($data !== [], 422);
-                if (($data['status'] ?? null) === 'published' && ! $article->published_at) {
+                if (($data['status'] ?? null) === 'draft') {
+                    $data['published_at'] = null;
+                } elseif (($data['status'] ?? null) === 'published'
+                    && (! array_key_exists('published_at', $data) || ! $data['published_at'])) {
                     $data['published_at'] = now();
                 }
                 if (array_key_exists('body', $data)) {
@@ -1383,7 +1388,9 @@ class AdminWorkspaceController extends Controller
             'body' => ['required', 'string', 'max:500000'],
             'category_id' => ['nullable', 'integer', 'exists:article_categories,id'],
             'cover_image' => ['nullable', 'url', 'max:2048'],
+            'content_type' => ['sometimes', 'in:news,blog,article'],
             'status' => ['required', 'in:draft,published'],
+            'published_at' => ['nullable', 'date'],
             'is_featured' => ['sometimes', 'boolean'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:2000'],
@@ -1399,8 +1406,11 @@ class AdminWorkspaceController extends Controller
         $article = Article::query()->create([
             ...$data,
             'slug' => $slug,
+            'content_type' => $data['content_type'] ?? 'blog',
             'author_id' => $request->user()->id,
-            'published_at' => $data['status'] === 'published' ? now() : null,
+            'published_at' => $data['status'] === 'draft'
+                ? null
+                : (($data['published_at'] ?? null) ?: now()),
             'read_time_minutes' => max(1, (int) ceil(str_word_count(strip_tags($data['body'])) / 200)),
         ]);
 

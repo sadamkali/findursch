@@ -42,6 +42,7 @@ class ArticleListing extends Component
     private function publishedArticlesQuery(): Builder
     {
         return Article::query()
+            ->whereIn('content_type', ['blog', 'article'])
             ->where('status', 'published')
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
@@ -78,8 +79,14 @@ class ArticleListing extends Component
 
     public function render()
     {
+        $publishedCategoryIds = (clone $this->publishedArticlesQuery())
+            ->select('category_id')
+            ->whereNotNull('category_id')
+            ->distinct();
+
         $categories = ArticleCategory::query()
             ->where('is_active', true)
+            ->whereIn('id', $publishedCategoryIds)
             ->orderBy('name')
             ->get();
 

@@ -14,12 +14,19 @@ class ArticleShow extends Component
 
     public function mount(Article $article): void
     {
-        $this->article = Article::query()
+        $articleQuery = Article::query()
             ->where('status', 'published')
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
-            ->whereKey($article->id)
-            ->firstOrFail();
+            ->whereKey($article->id);
+
+        if (request()->routeIs('news.show')) {
+            $articleQuery->where('content_type', 'news');
+        } else {
+            $articleQuery->whereIn('content_type', ['blog', 'article']);
+        }
+
+        $this->article = $articleQuery->firstOrFail();
 
         $this->article->load(['category', 'author']);
         $this->article->increment('views_count');
@@ -28,6 +35,7 @@ class ArticleShow extends Component
     public function render()
     {
         $published = Article::query()
+            ->where('content_type', $this->article->content_type)
             ->where('status', 'published')
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
