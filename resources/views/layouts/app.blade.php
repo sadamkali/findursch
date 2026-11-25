@@ -19,7 +19,7 @@
         $siteName = $siteSettings['site_name'] ?? 'FindURSCH';
         $siteTagline = $siteSettings['site_tagline'] ?? 'Discover and compare schools across Uganda';
         $siteDescription = $siteSettings['site_description'] ?? 'Uganda’s school discovery and comparison platform.';
-        $siteLogoUrl = filled($siteSettings['site_logo'] ?? null) ? $siteSettings['site_logo'] : asset('brand/findursch-logo.png');
+        $siteLogoUrl = filled($siteSettings['site_logo'] ?? null) ? $siteSettings['site_logo'] : 'https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png';
         $siteHorizontalLogoUrl = filled($siteSettings['site_horizontal_logo'] ?? null) ? $siteSettings['site_horizontal_logo'] : $siteLogoUrl;
         $siteHomepageLogoUrl = filled($siteSettings['site_homepage_logo'] ?? null) ? $siteSettings['site_homepage_logo'] : $siteHorizontalLogoUrl;
         $siteHeaderLogoUrl = request()->routeIs('home') ? $siteHomepageLogoUrl : $siteHorizontalLogoUrl;
@@ -102,7 +102,7 @@
         }
         body { font-family: '{{ $siteBodyFont }}', system-ui, sans-serif; }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=5">
+    <link rel="stylesheet" href="{{ asset('css/site-design-system.css') }}?v=6">
     <link rel="stylesheet" href="{{ asset('css/site-page-hero.css') }}?v=1">
     @if (request()->routeIs('home'))<link rel="stylesheet" href="{{ asset('css/home-reference.css') }}?v=15">@endif
 </head>
@@ -113,37 +113,32 @@
         $signInUrl = $accountDashboardUrl.'/login?returnTo=%2Faccount';
         $schoolRegistrationUrl = $accountDashboardUrl.'/register?type=school_owner&returnTo=%2Faccount';
 
-        // One settings-backed navigation list drives desktop and mobile menus.
+        // One canonical navigation list keeps the public header identical across pages.
+        // The settings page can disable standard items, but the order and labels match
+        // the Schools reference header.
         $savedNavigation = json_decode((string) ($siteSettings['site_navigation'] ?? '[]'), true);
+        $savedNavigation = is_array($savedNavigation) ? collect($savedNavigation) : collect();
         $navigationFallback = [
-            ['label' => 'Home', 'href' => '/'],
-            ['label' => 'Schools', 'href' => '/schools'],
-            ['label' => 'Compare', 'href' => '/compare'],
-            ['label' => 'Scholarships', 'href' => '/scholarships'],
-            ['label' => 'News', 'href' => '/news'],
-            ['label' => 'Events', 'href' => '/events'],
-            ['label' => 'Blogs', 'href' => '/articles'],
+            ['label' => 'Home', 'href' => route('home')],
+            ['label' => 'Schools', 'href' => route('schools.index')],
+            ['label' => 'Compare', 'href' => route('compare')],
+            ['label' => 'Scholarships', 'href' => route('scholarships.index')],
+            ['label' => 'News', 'href' => route('news.index')],
+            ['label' => 'Jobs', 'href' => route('jobs.index')],
+            ['label' => 'Events', 'href' => route('events.index')],
         ];
-        $navigationItems = is_array($savedNavigation) ? $savedNavigation : $navigationFallback;
-        if ($navigationItems === []) $navigationItems = $navigationFallback;
-        if (! collect($navigationItems)->contains(fn ($item) => is_array($item) && ($item['href'] ?? null) === '/jobs')) {
-            $navigationItems[] = ['label' => 'Jobs', 'href' => '/jobs', 'enabled' => true];
-        }
         $currentPath = '/'.trim(request()->path(), '/');
-        $primaryNavigation = collect($navigationItems)
-            ->filter(fn ($item) => is_array($item)
-                && ($item['enabled'] ?? true)
-                && is_string($item['href'] ?? null)
-                && str_starts_with($item['href'], '/')
-                && ! str_starts_with($item['href'], '//')
-                && filled($item['label'] ?? null))
+        $primaryNavigation = collect($navigationFallback)
+            ->filter(function ($item) use ($savedNavigation) {
+                $saved = $savedNavigation->firstWhere('href', $item['href']);
+                return ! is_array($saved) || ($saved['enabled'] ?? true);
+            })
             ->map(function ($item) use ($currentPath) {
-                $href = $item['href'];
-                $path = parse_url($href, PHP_URL_PATH) ?: '/';
+                $path = parse_url($item['href'], PHP_URL_PATH) ?: '/';
                 $active = $path === '/'
                     ? $currentPath === '/'
                     : ($currentPath === $path || str_starts_with($currentPath, rtrim($path, '/').'/'));
-                return ['label' => $item['label'], 'href' => $href, 'active' => $active];
+                return ['label' => $item['label'], 'href' => $item['href'], 'active' => $active];
             })
             ->values();
 
@@ -151,6 +146,7 @@
         $dashboardIdentityRole = is_array($dashboardIdentity) ? ($dashboardIdentity['role'] ?? null) : null;
         $accountLinkLabel = null;
         $accountLinkUrl = null;
+        $savedSchoolCount = auth()->check() ? auth()->user()->savedSchools()->count() : 0;
 
         if (auth()->check()) {
             if (auth()->user()->hasRole('admin')) {
@@ -172,20 +168,14 @@
         }
     @endphp
 
-    {{-- Utility information only: page navigation and account actions live in the main header. --}}
+    {{-- Shared public header — aligned with the Schools directory reference. --}}
     @if($siteTopbarEnabled)
-    <div class="site-topbar" role="region" aria-label="Site information and account links">
+    <div class="site-topbar" role="region" aria-label="Quick links">
         <div class="site-wrap site-topbar__inner">
-            <span class="site-topbar__message">{{ $siteTagline }}</span>
-            <div class="site-topbar__actions">
-                @if($siteAccountActionsEnabled)
-                    @if(!auth()->check() && !is_array($dashboardIdentity))
-                        <a class="site-topbar__signin" href="{{ $signInUrl }}">Sign in</a>
-                        <a class="site-topbar__signup" href="{{ $schoolRegistrationUrl }}">Sign up</a>
-                    @endif
-                @endif
-                <a class="site-topbar__contact" href="{{ route('contact') }}">Contact us <span aria-hidden="true">→</span></a>
-            </div>
+            <a class="site-topbar__link" href="{{ route('scholarships.index') }}">Scholarships</a>
+            <a class="site-topbar__link" href="{{ route('events.index') }}">Events</a>
+            <a class="site-topbar__link" href="{{ route('articles.index') }}">Articles</a>
+            <a class="site-topbar__link" href="{{ route('contact') }}">Contact</a>
         </div>
     </div>
     @endif
@@ -197,11 +187,13 @@
         class="site-header">
         <div class="site-wrap site-header__inner">
             <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">
-                @if($siteHeaderLogoUrl)<img src="{{ $siteHeaderLogoUrl }}" alt="{{ $siteName }}" onerror="this.onerror=null;this.src='{{ asset('brand/findursch-logo.png') }}';" style="max-height:44px;max-width:200px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
+                @if($siteHeaderLogoUrl)
+                    <img src="{{ $siteHeaderLogoUrl }}" alt="{{ $siteName }}" width="168" height="37" fetchpriority="high" onerror="this.onerror=null;this.src='https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png';">
+                @else{{ $siteName }}@endif
             </a>
 
             @if($siteNavigationEnabled)
-            <nav class="site-nav" aria-label="Primary navigation">
+            <nav class="site-nav" aria-label="Main navigation">
                 @foreach($primaryNavigation as $item)
                     <a href="{{ $item['href'] }}" @class(['is-active' => $item['active']])>{{ $item['label'] }}</a>
                 @endforeach
@@ -210,16 +202,13 @@
 
             <div class="site-header__actions">
                 @if($siteAccountActionsEnabled)
-                @if(auth()->check() || is_array($dashboardIdentity))
-                    <a class="site-account-link" href="{{ $accountLinkUrl }}">{{ $accountLinkLabel }}</a>
-                    @if(auth()->check())
-                        <form method="POST" action="{{ route('logout') }}" class="site-logout-form">@csrf
-                            <button type="submit" class="site-account-link">Log out</button>
-                        </form>
-                    @endif
-                @else
-                    <a href="{{ $schoolRegistrationUrl }}" class="site-header__cta">{{ $siteHeaderCtaLabel }}</a>
-                @endif
+                    <a class="site-header-icon" href="{{ auth()->check() ? route('user.saved-schools') : route('login') }}" aria-label="Saved schools" title="Saved schools">
+                        <svg class="site-header-icon__svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-3.5-6 3.5z"/></svg>
+                        @if(auth()->check() && $savedSchoolCount > 0)<em>{{ $savedSchoolCount }}</em>@endif
+                    </a>
+                    <a class="site-header-icon" href="{{ $accountLinkUrl ?? route('login') }}" aria-label="Account" title="Account">
+                        <svg class="site-header-icon__svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.6-3.6 3-5.5 7-5.5s6.4 1.9 7 5.5"/></svg>
+                    </a>
                 @endif
                 @if($siteNavigationEnabled)
                 <button type="button"
@@ -253,36 +242,39 @@
             ">
             <div class="site-mobile-drawer__head">
                 <a href="{{ route('home') }}" class="site-logo" aria-label="{{ $siteName }} home">
-                @if($siteMobileLogoUrl)<img src="{{ $siteMobileLogoUrl }}" alt="{{ $siteName }}" onerror="this.onerror=null;this.src='{{ asset('brand/findursch-logo.png') }}';" style="max-height:44px;max-width:200px;width:auto;object-fit:contain">@else{{ $siteName }}@endif
-            </a>
-                <button type="button" class="site-mobile-drawer__close" x-ref="mobileClose" @click="mobileMenuOpen = false" aria-label="Close menu">×</button>
+                    @if($siteMobileLogoUrl)
+                        <img src="{{ $siteMobileLogoUrl }}" alt="{{ $siteName }}" width="168" height="37" onerror="this.onerror=null;this.src='https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev/site-media/branding/site_horizontal_logo/062d6754-5266-46a5-9f83-1a97bc393a19.png';">
+                    @else{{ $siteName }}@endif
+                </a>
+                <div class="site-mobile-drawer__head-actions">
+                    @if($siteAccountActionsEnabled)
+                    <a class="site-header-icon site-header-icon--drawer" href="{{ $accountLinkUrl ?? route('login') }}" aria-label="Account">
+                        <svg class="site-header-icon__svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.6-3.6 3-5.5 7-5.5s6.4 1.9 7 5.5"/></svg>
+                    </a>
+                    @endif
+                    <button type="button" class="site-mobile-drawer__close" x-ref="mobileClose" @click="mobileMenuOpen = false" aria-label="Close menu">×</button>
+                </div>
             </div>
 
             <nav class="site-mobile-drawer__links" aria-label="Mobile navigation">
                 @foreach($primaryNavigation as $item)
                     <a @click="mobileMenuOpen = false" href="{{ $item['href'] }}" @class(['is-active' => $item['active']])>{{ $item['label'] }}</a>
                 @endforeach
+                <hr>
+                <div class="site-mobile-drawer__secondary">
+                    <a @click="mobileMenuOpen = false" href="{{ route('scholarships.index') }}">Scholarships</a>
+                    <a @click="mobileMenuOpen = false" href="{{ route('events.index') }}">Events</a>
+                    <a @click="mobileMenuOpen = false" href="{{ route('articles.index') }}">Articles</a>
+                    <a @click="mobileMenuOpen = false" href="{{ route('contact') }}">Contact</a>
+                </div>
             </nav>
-
-            @if($siteAccountActionsEnabled)
-            <div class="site-mobile-drawer__footer">
-                @if(!auth()->check() && !is_array($dashboardIdentity))
-                    <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ $signInUrl }}" @click="mobileMenuOpen = false">Sign in</a>
-                    <a class="site-mobile-drawer__button site-mobile-drawer__button--gold" href="{{ $schoolRegistrationUrl }}" @click="mobileMenuOpen = false">List your school</a>
-                @else
-                    <a class="site-mobile-drawer__button site-mobile-drawer__button--outline" href="{{ $accountLinkUrl }}" @click="mobileMenuOpen = false">{{ $accountLinkLabel }}</a>
-                    @if(auth()->check())
-                        <form method="POST" action="{{ route('logout') }}">@csrf
-                            <button type="submit" class="site-mobile-drawer__button site-mobile-drawer__button--gold">Log out</button>
-                        </form>
-                    @endif
-                @endif
-            </div>
-            @endif
         </aside>
         @endif
     </header>
 
+    @unless(request()->routeIs('home', 'schools.index'))
+        <a class="site-register-tab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
+    @endunless
     <div x-data="compareBar" x-cloak x-show="schools.length > 0" class="compare-bar">
         <div class="site-wrap compare-bar__inner">
             <p><strong x-text="schools.length"></strong> of 3 schools selected to compare</p>
