@@ -53,6 +53,10 @@ class SchoolDetail extends Component
             'activeSubscription.plan',
         ]);
 
+        // Public school profiles use estimates only; suppress the exact application fee
+        // from the model state as well as from the rendered profile.
+        $this->school->setAttribute('application_fee', null);
+
         if (auth()->check()) {
             $this->inquiryPhone = (string) (auth()->user()->phone ?? '');
         }
