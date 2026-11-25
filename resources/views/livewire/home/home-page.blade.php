@@ -32,23 +32,15 @@
           @endif
           <div class="cards" data-home-school-track>
             @foreach($featuredSchools as $school)
-              @php($schoolCover = $school->getFirstMediaUrl('cover'))
-              <article class="card school">
-                <a class="school-main" href="{{ route('schools.show', $school) }}">
-                  <div class="ph {{ ['','b','c','d'][$loop->index % 4] }}"
-                    @if($schoolCover) style="background-image:linear-gradient(135deg,rgba(5,30,24,.06),rgba(5,30,24,.14)),url('{{ $schoolCover }}');background-size:cover;background-position:center" role="img" aria-label="{{ $school->name }} school photo" @else role="img" aria-label="{{ $school->name }} image placeholder" @endif>
-                    @unless($schoolCover)<span>{{ strtoupper(mb_substr($school->name, 0, 2)) }}</span>@endunless
-                  </div>
-                  <div class="b">
-                    <span class="kick">{{ $school->type?->name ?? 'School' }}</span>
-                    <h3>{{ $school->name }}</h3>
-                    <small>{{ $school->district?->name ?? 'Uganda' }} district</small>
-                    @foreach($school->curricula->take(2) as $curriculum)<span class="tag">{{ $curriculum->abbreviation }}</span>@endforeach
-                    @if($school->is_featured)<span class="tag new">Featured</span>@elseif($school->verification_status === 'verified')<span class="tag new">Verified</span>@endif
-                  </div>
-                </a>
-                <div class="school-actions"><a href="{{ route('schools.show', $school) }}">View school</a><button type="button" data-compare-school="{{ $school->slug }}">Add to compare</button></div>
-              </article>
+              <x-school-tile-card
+                class="school"
+                :school="$school"
+                :saved="in_array((int) $school->id, $savedSchoolIds, true)"
+                :show-save="true"
+                :show-compare="true"
+                :show-fee="true"
+                :show-description="true"
+              />
             @endforeach
           </div>
         </div>
@@ -62,18 +54,15 @@
       @endif
 
       @if($spotlightSchool)
-        @php($spotlightCover = $spotlightSchool->getFirstMediaUrl('cover'))
-        <div class="card spot">
-          <div class="ph d" @if($spotlightCover) style="background-image:url('{{ $spotlightCover }}');background-size:cover;background-position:center" @endif>
-            @unless($spotlightCover)<span>{{ strtoupper(mb_substr($spotlightSchool->name, 0, 2)) }}</span>@endunless
-          </div>
-          <div class="t">
-            <h3>{{ $spotlightSchool->name }}</h3>
-            <p>{{ \Illuminate\Support\Str::limit($spotlightSchool->tagline ?: $spotlightSchool->description ?: 'Explore this school profile, its location and the information shared with families.', 150) }}</p>
-            <div class="meta">@if($spotlightSchool->phone)<b>Tel</b> {{ $spotlightSchool->phone }} &nbsp;@endif <b>Location</b> {{ $spotlightSchool->district?->name ?? 'Uganda' }}</div>
-            <a class="more" href="{{ route('schools.show', $spotlightSchool) }}">Learn more about this school</a>
-          </div>
-        </div>
+        <x-school-tile-card
+          :school="$spotlightSchool"
+          :saved="in_array((int) $spotlightSchool->id, $savedSchoolIds, true)"
+          :show-save="true"
+          :show-compare="true"
+          :show-fee="true"
+          :show-description="true"
+          variant="spotlight"
+        />
       @endif
 
       <div class="strip"><div><h4>Is your school on FindURSCH?</h4><p>Parents across Uganda search here for schools every day.</p></div><a class="btn btn-gold" href="{{ route('register') }}">List your school</a></div>
