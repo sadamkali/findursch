@@ -2,7 +2,7 @@
     <a class="district-rtab" href="{{ route('register') }}">REGISTER YOUR SCHOOL</a>
     <x-site-page-hero
         class="district-page-hero"
-        eyebrow="{{ $district->region?->name }} Region · School directory"
+        :eyebrow="($district->region?->name ? $district->region->name.' Region · School directory' : 'School directory in Uganda')"
         :title="'Schools in '.$district->name.' District'"
         :description="'Discover active, verified schools in '.$district->name.' District. Compare school levels, published fees and admission information, then visit each profile to contact the school.'"
         :meta="number_format($totalSchools).' verified schools in '.$district->name"
