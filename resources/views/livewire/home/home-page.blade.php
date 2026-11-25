@@ -345,7 +345,7 @@
                     <ul>
                         @forelse($latestJobs as $job)
                             <li>
-                                <a href="{{ route('jobs.show', $job) }}">
+                                <a href="{{ route('jobs.show', $job->slug) }}">
                                     <strong>{{ $job->title }}</strong>
                                     <span>{{ $job->location }} · {{ $job->employment_type_label }}</span>
                                 </a>
