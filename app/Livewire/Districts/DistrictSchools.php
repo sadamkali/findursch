@@ -4,7 +4,6 @@ namespace App\Livewire\Districts;
 
 use App\Models\District;
 use App\Models\School;
-use App\Models\SchoolFee;
 use App\Models\SchoolType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -77,12 +76,6 @@ class DistrictSchools extends Component
 
     private function baseSchools(): Builder
     {
-        $termTuition = fn (Builder $fees) => $fees
-            ->where('category', 'tuition')
-            ->where('is_active', true)
-            ->where('currency', 'UGX')
-            ->where('period', 'per_term');
-
         return School::query()
             ->publiclyVisible()
             ->where('district_id', $this->district->id)
@@ -93,8 +86,7 @@ class DistrictSchools extends Component
                 'type',
                 'curricula',
                 'media',
-            ])
-            ->withMin(['fees as lowest_term_tuition' => $termTuition], 'amount');
+            ]);
     }
 
     private function filteredSchools(): Builder
@@ -142,8 +134,8 @@ class DistrictSchools extends Component
     {
         return match ($this->sort) {
             'fee_low' => $query
-                ->orderByRaw('CASE WHEN lowest_term_tuition IS NULL THEN 1 ELSE 0 END ASC')
-                ->orderBy('lowest_term_tuition')
+                ->orderByRaw('CASE WHEN COALESCE(schools.fees_from, schools.fees_to) IS NULL OR COALESCE(schools.fees_from, schools.fees_to) <= 0 THEN 1 ELSE 0 END ASC')
+                ->orderByRaw('COALESCE(schools.fees_from, schools.fees_to) ASC')
                 ->orderBy('name'),
             'name' => $query->orderBy('name'),
             default => $query
@@ -187,18 +179,14 @@ class DistrictSchools extends Component
             ->where('district_id', $this->district->id)
             ->select('id');
 
-        $lowestTermFees = SchoolFee::query()
-            ->selectRaw('school_id, MIN(amount) AS minimum_amount')
-            ->where('category', 'tuition')
-            ->where('is_active', true)
-            ->where('currency', 'UGX')
-            ->where('period', 'per_term')
-            ->whereIn('school_id', $publicSchoolIds)
-            ->groupBy('school_id');
-
-        $averageTermFee = DB::query()
-            ->fromSub($lowestTermFees, 'district_school_term_fees')
-            ->avg('minimum_amount');
+        $feeEstimateSchoolsCount = School::query()
+            ->publiclyVisible()
+            ->where('district_id', $this->district->id)
+            ->where(function (Builder $query) {
+                $query->whereNotNull('fees_from')
+                    ->orWhereNotNull('fees_to');
+            })
+            ->count();
 
         $totalSchools = (clone $base)->count();
         $admissionsOpenCount = (clone $base)->where('admissions_open', true)->count();
@@ -258,11 +246,11 @@ class DistrictSchools extends Component
             'schoolTypes' => $schoolTypes,
             'areas' => $areas,
             'nearbyDistricts' => $nearbyDistricts,
-            'averageTermFee' => $averageTermFee,
+            'feeEstimateSchoolsCount' => $feeEstimateSchoolsCount,
             'faqs' => $faqs,
         ])->layout('layouts.app', [
             'title' => 'Schools in '.$this->district->name.' District — FindURSCH',
-            'description' => 'Discover verified nursery, primary, secondary, university and vocational school listings in '.$this->district->name.' District, '.$this->district->region?->name.' Region. Compare school profiles, facilities and published fees.',
+            'description' => 'Discover verified nursery, primary, secondary, university and vocational school listings in '.$this->district->name.' District, '.$this->district->region?->name.' Region. Compare school profiles, facilities and estimated fee ranges.',
         ]);
     }
 }
