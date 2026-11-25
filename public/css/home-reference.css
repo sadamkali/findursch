@@ -369,5 +369,18 @@
 }
 
 
+/* Pin the reference's intended white heading colour against global body-main heading rules. */
+.findursch-home-page .hero h1,
+.findursch-home-page .band h3,
+.findursch-home-page .promo h3,
+.findursch-home-page .lead h3,
+.findursch-home-page .strip h4,
+.findursch-home-page .spl h3,
+.findursch-home-page .cta h2 {
+  color:#fff;
+}
+/* The hero's emphasized phrase intentionally stays gold. */
+.findursch-home-page .hero h1 em { color:var(--accent); }
+
 /* Keep every sidebar card heading on the same reference green, above global design-system styles. */
 .findursch-home-page .box h5{background:#0c5a49;color:#fff;font:700 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:11px 16px;}
