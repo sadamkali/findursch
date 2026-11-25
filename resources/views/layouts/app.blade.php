@@ -226,13 +226,14 @@
                         <svg class="site-header-icon__svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-3.5-6 3.5z"/></svg>
                         @if(auth()->check() && $savedSchoolCount > 0)<em>{{ $savedSchoolCount }}</em>@endif
                     </a>
-                    <a class="site-header-icon site-header-account-avatar" href="{{ $accountLinkUrl ?? route('login') }}"
+                    <a class="site-header-icon site-header-account-avatar @if(auth()->check() && !$headerAccountAvatarUrl) site-header-account-avatar--with-name @endif" href="{{ $accountLinkUrl ?? route('login') }}"
                        aria-label="{{ auth()->check() ? (($accountLinkLabel ?? 'My account').' for '.$headerAccountName) : 'Sign in to your account' }}"
                        title="{{ auth()->check() ? ($headerAccountSchool?->name ?? $headerAccountName) : 'Account' }}">
                         @if($headerAccountAvatarUrl)
                             <img class="site-header-account-avatar__image" src="{{ $headerAccountAvatarUrl }}" alt="{{ $headerAccountSchool?->name ?? $headerAccountName }}">
                         @elseif(auth()->check())
                             <span class="site-header-account-avatar__initials" aria-hidden="true">{{ $headerAccountInitials }}</span>
+                            <span class="site-header-account-avatar__name" aria-hidden="true">{{ $headerAccountName }}</span>
                         @else
                             <svg class="site-header-icon__svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.6-3.6 3-5.5 7-5.5s6.4 1.9 7 5.5"/></svg>
                         @endif
@@ -276,13 +277,14 @@
                 </a>
                 <div class="site-mobile-drawer__head-actions">
                     @if($siteAccountActionsEnabled)
-                    <a class="site-header-icon site-header-icon--drawer site-header-account-avatar" href="{{ $accountLinkUrl ?? route('login') }}"
+                    <a class="site-header-icon site-header-icon--drawer site-header-account-avatar @if(auth()->check() && !$headerAccountAvatarUrl) site-header-account-avatar--with-name @endif" href="{{ $accountLinkUrl ?? route('login') }}"
                        aria-label="{{ auth()->check() ? (($accountLinkLabel ?? 'My account').' for '.$headerAccountName) : 'Sign in to your account' }}"
                        title="{{ auth()->check() ? ($headerAccountSchool?->name ?? $headerAccountName) : 'Account' }}">
                         @if($headerAccountAvatarUrl)
                             <img class="site-header-account-avatar__image" src="{{ $headerAccountAvatarUrl }}" alt="{{ $headerAccountSchool?->name ?? $headerAccountName }}">
                         @elseif(auth()->check())
                             <span class="site-header-account-avatar__initials" aria-hidden="true">{{ $headerAccountInitials }}</span>
+                            <span class="site-header-account-avatar__name" aria-hidden="true">{{ $headerAccountName }}</span>
                         @else
                             <svg class="site-header-icon__svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.6-3.6 3-5.5 7-5.5s6.4 1.9 7 5.5"/></svg>
                         @endif
