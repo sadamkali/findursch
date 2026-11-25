@@ -116,6 +116,7 @@ Route::middleware(['auth:sanctum', 'role:admin|school_owner'])
         Route::delete('/schools/{school}/programmes/{programme}', [OwnerWorkspaceController::class, 'programmes']);
 
         Route::get('/schools/{school}/fees', [OwnerWorkspaceController::class, 'fees']);
+        Route::put('/schools/{school}/fees', [OwnerWorkspaceController::class, 'fees']);
         Route::post('/schools/{school}/fees', [OwnerWorkspaceController::class, 'fees']);
         Route::patch('/schools/{school}/fees/{fee}', [OwnerWorkspaceController::class, 'fees']);
         Route::delete('/schools/{school}/fees/{fee}', [OwnerWorkspaceController::class, 'fees']);
