@@ -1004,3 +1004,16 @@
     font-size: 11px;
   }
 }
+
+/* Homepage content wrappers: use the full available width on mobile.
+   Keep the 16px gutter as inner padding, with no extra outer side margin. */
+@media (max-width: 760px) {
+  .findursch-home-page .wrap {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
