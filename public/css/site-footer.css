@@ -382,3 +382,122 @@
 @media(prefers-reduced-motion:reduce){
   .site-footer__whatsapp{transition:none}
 }
+
+
+/* Final responsive footer guardrails for narrow public and parent-account viewports. */
+.site-footer {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+.site-footer__inner {
+  box-sizing: border-box;
+  min-width: 0;
+}
+.site-footer__main > *,
+.site-footer__bottom > * {
+  min-width: 0;
+}
+.site-footer__column a,
+.site-footer__contact,
+.site-footer__description,
+.site-footer__bottom > span {
+  overflow-wrap: anywhere;
+}
+.site-footer__bottom-links {
+  flex-wrap: wrap;
+}
+@media (max-width: 1000px) {
+  .site-footer__inner {
+    width: calc(100% - 48px);
+  }
+  .site-footer__main {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+  }
+  .site-footer__brand {
+    grid-column: 1 / -1;
+    max-width: 570px;
+  }
+}
+@media (max-width: 640px) {
+  .site-footer {
+    margin-top: 42px;
+  }
+  .site-footer__inner {
+    width: calc(100% - 32px);
+    padding-top: 38px;
+  }
+  .site-footer__main {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 25px 16px;
+  }
+  .site-footer__brand {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+  .site-footer__column {
+    min-width: 0;
+  }
+  .site-footer__logo {
+    min-height: 50px;
+    margin-bottom: 13px;
+  }
+  .site-footer__logo img {
+    max-width: min(210px, 100%) !important;
+    max-height: 50px !important;
+  }
+  .site-footer__column h2 {
+    gap: 8px;
+    margin-bottom: 14px !important;
+    font-size: 10.75px !important;
+  }
+  .site-footer__column ul {
+    gap: 10px;
+  }
+  .site-footer__column a {
+    font-size: 11.25px;
+    line-height: 1.55;
+  }
+  .site-footer__cta {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 13px;
+    margin-top: 30px;
+    padding: 17px;
+  }
+  .site-footer__cta > a {
+    width: 100%;
+  }
+  .site-footer__bottom {
+    min-height: 0;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 11px;
+    margin-top: 25px;
+    padding: 18px 0 22px;
+  }
+  .site-footer__bottom-links {
+    gap: 14px;
+  }
+}
+@media (max-width: 380px) {
+  .site-footer__inner {
+    width: calc(100% - 28px);
+  }
+  .site-footer__main {
+    gap: 22px 12px;
+  }
+  .site-footer__column h2 {
+    font-size: 10px !important;
+  }
+  .site-footer__column a {
+    font-size: 10.5px;
+  }
+  .site-footer__bottom-links {
+    gap: 12px;
+  }
+}
