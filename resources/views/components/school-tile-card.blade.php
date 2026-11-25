@@ -22,14 +22,10 @@
     $feeFrom = is_numeric($school->fees_from) && (float) $school->fees_from > 0 ? (float) $school->fees_from : null;
     $feeTo = is_numeric($school->fees_to) && (float) $school->fees_to > 0 ? (float) $school->fees_to : null;
     $feeLabel = null;
-    if ($feeFrom !== null && $feeTo !== null && $feeFrom !== $feeTo) {
-        $feeLabel = 'Estimated UGX '.number_format(min($feeFrom, $feeTo)).' – UGX '.number_format(max($feeFrom, $feeTo)).' per term';
-    } elseif ($feeFrom !== null && $feeTo === null) {
-        $feeLabel = 'Estimated from UGX '.number_format($feeFrom).' per term';
-    } elseif ($feeTo !== null && $feeFrom === null) {
-        $feeLabel = 'Estimated up to UGX '.number_format($feeTo).' per term';
+    if ($feeFrom !== null && $feeTo !== null && $feeFrom < $feeTo) {
+        $feeLabel = 'Estimated UGX '.number_format($feeFrom).' – UGX '.number_format($feeTo).' per term';
     } elseif ($showFee) {
-        $feeLabel = 'Fee estimate not provided';
+        $feeLabel = 'Fee range not provided';
     }
 
     $description = $school->tagline
