@@ -1039,3 +1039,45 @@ body:has(.findursch-home-reference) .site-footer__promo .btn {
   .findursch-home-reference .big,
   .findursch-home-reference .lead-slide { transition: none !important; }
 }
+
+
+/* Featured schools rail: the reference uses a horizontal snap track, not a static grid. */
+.findursch-home-reference .slider .cards {
+  display: flex;
+  grid-template-columns: none;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: var(--gap);
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.findursch-home-reference .slider .cards::-webkit-scrollbar {
+  display: none;
+}
+.findursch-home-reference .slider .cards > .school {
+  flex: 0 0 29%;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+@media (max-width: 1000px) {
+  .findursch-home-reference .slider .cards > .school {
+    flex-basis: 70%;
+  }
+}
+@media (max-width: 640px) {
+  .findursch-home-reference .slider .cards > .school {
+    flex-basis: 86%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .findursch-home-reference .slider .cards {
+    scroll-behavior: auto;
+  }
+}
