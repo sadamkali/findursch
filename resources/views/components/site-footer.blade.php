@@ -6,7 +6,7 @@
             'facebook_url', 'twitter_url', 'instagram_url', 'youtube_url',
             'site_footer_enabled', 'site_footer_explore_enabled', 'site_footer_resources_enabled',
             'site_footer_support_enabled', 'site_footer_social_enabled', 'site_footer_promo_enabled',
-            'site_footer_copyright_text',
+            'site_footer_copyright_text', 'primary_color', 'accent_color',
         ])
         ->pluck('value', 'key');
 
@@ -17,6 +17,8 @@
     $footerSocialEnabled = filter_var($footerSettings['site_footer_social_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
     $footerPromoEnabled = filter_var($footerSettings['site_footer_promo_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
 
+    $footerPrimaryColor = is_string($footerSettings['primary_color'] ?? null) && preg_match('/^#[0-9a-fA-F]{6}$/', $footerSettings['primary_color']) ? $footerSettings['primary_color'] : '#0c5a49';
+    $footerAccentColor = is_string($footerSettings['accent_color'] ?? null) && preg_match('/^#[0-9a-fA-F]{6}$/', $footerSettings['accent_color']) ? $footerSettings['accent_color'] : '#f0b030';
     $footerName = $footerSettings['site_name'] ?: 'FindURSCH';
     $footerDescription = $footerSettings['site_description'] ?: 'Discover, compare and learn about schools across Uganda.';
     $footerLogo = $footerSettings['site_footer_logo']
@@ -30,7 +32,7 @@
 @endphp
 
 @if($footerEnabled)
-<footer class="site-footer" aria-label="Website footer">
+<footer class="site-footer" aria-label="Website footer" style="--fd-brand: {{ $footerPrimaryColor }}; --fd-brand-deep: color-mix(in srgb, {{ $footerPrimaryColor }} 58%, #052a22); --fd-accent: {{ $footerAccentColor }}; --fd-accent-dark: color-mix(in srgb, {{ $footerAccentColor }} 78%, #000);">
     <div class="site-footer__accent" aria-hidden="true"></div>
     <div class="site-footer__inner">
         <div class="site-footer__main">
