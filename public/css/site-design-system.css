@@ -1301,7 +1301,7 @@ body .account-workspace-content > section {
 }
 
 .site-footer {
-    background: #052a22 !important;
+    background: var(--fd-brand-deep, #052a22) !important;
     font-family: 'Inter', system-ui, sans-serif !important;
 }
 
