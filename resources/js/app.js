@@ -579,8 +579,6 @@ function initializeFindURSCHHomepage() {
             show(Number(dot.dataset.homeReviewDot || 0));
         }));
     });
-
-;
 }
 
 if (document.readyState === 'loading') {
