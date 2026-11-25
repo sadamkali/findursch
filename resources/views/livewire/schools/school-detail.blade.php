@@ -252,7 +252,7 @@
                         <h2>Official <span>fees circular</span></h2>
                         <p class="sref-description">Download the school's official fee structure for the applicable classes and academic period. Exact fee details are provided in this document; FindURSCH displays estimates only on the website.</p>
                         <div class="sref-post-row">
-                            <span class="sref-post-date">PDF / DOC</span>
+                            <span class="sref-post-date">{{ strtoupper(pathinfo($feeCircular->original_filename, PATHINFO_EXTENSION)) }}</span>
                             <span class="sref-post-copy">
                                 <strong>{{ $feeCircular->title }}</strong>
                                 <small>{{ $feeCircular->original_filename }} · {{ number_format($feeCircular->file_size / 1024, 0) }} KB · Updated {{ $feeCircular->created_at?->format('d M Y') }}</small>
