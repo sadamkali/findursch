@@ -1,14 +1,23 @@
-export interface AuthSessionKV {
-  get(key: string): Promise<string | null>;
-  put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
-  delete(key: string): Promise<void>;
+export interface D1PreparedStatement {
+  bind(...values: unknown[]): D1PreparedStatement;
+  first<T = Record<string, unknown>>(columnName?: string): Promise<T | null>;
+  run<T = Record<string, unknown>>(): Promise<{
+    success?: boolean;
+    error?: string;
+    results?: T[];
+    meta?: { changes?: number; rows_read?: number; rows_written?: number };
+  }>;
+}
+
+export interface AuthSessionDatabase {
+  prepare(query: string): D1PreparedStatement;
 }
 
 export interface AuthEnv {
   SUPABASE_URL?: string;
   SUPABASE_ANON_KEY?: string;
   SUPABASE_SECRET_KEY?: string;
-  AUTH_SESSIONS?: AuthSessionKV;
+  AUTH_DB?: AuthSessionDatabase;
 }
 
 export interface SupabaseTokenResponse {
@@ -33,16 +42,6 @@ export interface LegacyAppUser {
   email_verified_at: string | null;
 }
 
-export interface AuthIdentity {
-  user: LegacyAppUser;
-  roles: string[];
-  permissions: string[];
-  isAdmin: boolean;
-  isSchoolOwner: boolean;
-  isParent: boolean;
-  redirectTo: "/admin" | "/owner" | "/parent";
-}
-
 export interface StoredAuthSession {
   supabaseUserId: string;
   legacyUserId: number;
@@ -56,5 +55,3 @@ export interface StoredAuthSession {
 }
 
 export const SESSION_COOKIE = "findursch_session";
-export const SESSION_KEY_PREFIX = "findursch:session:";
-export const DEFAULT_SUPABASE_URL = "https://gpsfttpeikatxszswljo.supabase.co";

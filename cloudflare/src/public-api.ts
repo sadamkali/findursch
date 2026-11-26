@@ -1,9 +1,10 @@
+import type { AuthSessionDatabase } from "./auth/types";
 export interface PublicApiEnv {
   SUPABASE_URL?: string;
   SUPABASE_ANON_KEY?: string;
   SUPABASE_SECRET_KEY?: string;
   PUBLIC_MEDIA_BASE_URL?: string;
-  AUTH_SESSIONS?: { get(key: string): Promise<string | null> };
+  AUTH_DB?: AuthSessionDatabase;
 }
 
 type JsonRecord = Record<string, unknown>;
@@ -163,7 +164,7 @@ export async function handlePublicApi(
       status: "ok",
       databaseConfigured: configured(env),
       dataSource: "supabase-rest",
-      sessionStoreConfigured: Boolean(env.AUTH_SESSIONS),
+      sessionStoreConfigured: Boolean(env.AUTH_DB),
       authSecretsConfigured: Boolean(env.SUPABASE_SECRET_KEY),
     });
   }
