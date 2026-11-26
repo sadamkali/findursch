@@ -2,11 +2,6 @@ name: One-time legacy account import
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - cloudflare-free-migration
-    paths:
-      - "cloudflare/scripts/IMPORT_LEGACY_AUTH_USERS_NOW"
 
 permissions:
   contents: read
