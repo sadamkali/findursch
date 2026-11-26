@@ -170,6 +170,7 @@
         <x-site-footer />
     </div>
 </div>
-@livewireScripts
+@livewireScriptConfig
+<script src="{{ asset('vendor/livewire/livewire.min.js') }}" defer></script>
 </body>
 </html>
