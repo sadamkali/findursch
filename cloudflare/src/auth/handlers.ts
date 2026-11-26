@@ -71,7 +71,7 @@ async function resolveSessionIdentity(
 
 async function login(request: Request, env: AuthEnv): Promise<Response> {
   if (!requestIsSameOrigin(request)) return json({ message: "Cross-origin sign-in requests are not allowed." }, 403);
-  if (!env.AUTH_SESSIONS) return json({ message: "The session store is not available." }, 503);
+  if (!env.AUTH_DB) return json({ message: "The session store is not available." }, 503);
 
   let body: unknown;
   try {
