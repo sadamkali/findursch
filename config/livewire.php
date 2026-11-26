@@ -40,6 +40,12 @@ return [
 
     'layout' => 'layouts.app',
 
+    // Serve the published Livewire runtime from the same public CDN as Vite assets.
+    // This must be the full file URL for Livewire 3.8.1's published-asset resolver.
+    'asset_url' => env('ASSET_URL')
+        ? rtrim(env('ASSET_URL'), '/') . '/vendor/livewire/livewire.min.js'
+        : null,
+
     /*
     |---------------------------------------------------------------------------
     | Lazy Loading Placeholder

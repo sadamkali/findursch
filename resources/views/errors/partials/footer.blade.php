@@ -1,13 +1,5 @@
 @php
-    $footerSettings = \App\Models\Setting::query()
-        ->whereIn('key', [
-            'site_name', 'site_description', 'contact_address', 'support_phone',
-            'support_email', 'site_footer_enabled', 'site_footer_explore_enabled',
-            'site_footer_resources_enabled', 'site_footer_support_enabled',
-            'site_footer_promo_enabled', 'site_footer_copyright_text',
-            'primary_color', 'accent_color',
-        ])
-        ->pluck('value', 'key');
+    $footerSettings = \App\Models\Setting::publicSiteValues();
 
     $footerEnabled = filter_var($footerSettings['site_footer_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
     $footerExploreEnabled = filter_var($footerSettings['site_footer_explore_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
