@@ -163,6 +163,7 @@ export async function handlePublicApi(
       databaseConfigured: configured(env),
       dataSource: "supabase-rest",
       sessionStrategy: "supabase-auth-encrypted-cookie",
+      loginRateLimitStrategy: "supabase-postgres-hmac-10-per-minute",
       authSecretsConfigured: Boolean(env.SUPABASE_SECRET_KEY),
     });
   }
