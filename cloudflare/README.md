@@ -29,9 +29,20 @@ The existing production Supabase project `findursch` remains the system of recor
 
 A dedicated Cloudflare D1 database named `findursch-auth-sessions` is attached to the staging Pages Functions as `AUTH_DB`. It is located in the EU, has read replication disabled, and stores only opaque server-side auth sessions. Supabase access and refresh tokens are AES-GCM encrypted before they are written to D1; the AES-256 key is derived with HKDF from the server-only Supabase secret. Rotating or removing that secret invalidates stored sessions. Login attempts are rate-limited to 10 per connecting IP per 60-second window using an atomic D1 upsert; only an HMAC of the IP is stored.
 
-A one-time, idempotent import script is prepared for the nine active legacy accounts. It imports supported PHP bcrypt password hashes into Supabase Auth and tags each identity with its existing legacy user ID. It does not modify `public.users` or reset existing passwords. The import has **not** yet been run. Never paste the secret key into chat or commit it to the repository; supply it only to the local import command through a hidden terminal prompt.
+### Legacy account import — completed
 
-The existing `require_two_step` admin setting is currently disabled. Administrator two-step verification has not yet been ported; the Cloudflare login handler deliberately blocks admin login if that setting is enabled rather than silently bypassing it.
+The one-time, idempotent import script imported all nine active legacy accounts into Supabase Auth using their existing supported PHP bcrypt password hashes. Verification against the production database confirmed:
+
+- 9 active legacy accounts in `public.users`.
+- 9 corresponding Supabase Auth users.
+- 9 of 9 email/password identities.
+- 9 of 9 password hashes present.
+- 9 of 9 trusted `legacy_user_id` and `legacy_user_type` metadata values attached.
+- All 9 Supabase Auth email identities are confirmed, matching the prior Laravel behavior that did not block sign-in when `public.users.email_verified_at` was null.
+
+The import only reads `public.users` and creates identities in `auth.users`; it does not update or reset legacy passwords or modify legacy user records. The temporary GitHub Actions trigger workflow and marker file used for this one-time import have been removed. The import script remains in the repository for controlled, idempotent maintenance.
+
+The existing `require_two_step` admin setting was disabled at the time of migration. Administrator two-step email verification is not yet ported; the Cloudflare login handler deliberately blocks admin login if that setting is enabled rather than silently bypassing it.
 
 ## Cloudflare staging
 
@@ -60,9 +71,9 @@ Verification performed with `SET LOCAL ROLE anon`:
 
 The remaining tables with RLS enabled but no policies were not opened to the anon role and remain outside this migration slice.
 
-## Not yet migrated
+## Not yet migrated or fully verified
 
-- Completion and end-to-end verification of the legacy password-hash import and real account sign-in.
+- End-to-end sign-in using real legacy user credentials and browser cookie/session lifecycle.
 - Administrator two-step email verification.
 - Full admin and school-owner dashboards, including write APIs and moderation workflows.
 - Parent registration/login, password reset and account flows.
