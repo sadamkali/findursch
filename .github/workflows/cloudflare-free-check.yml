@@ -42,3 +42,74 @@ jobs:
 
       - name: Type-check Worker and public site
         run: npm run typecheck
+
+  staging-api-smoke-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check deployed Cloudflare staging API
+        env:
+          STAGING_URL: https://findursch-app-staging.pages.dev
+        run: |
+          node --input-type=module <<'NODE'
+          const base = process.env.STAGING_URL;
+          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+          async function getJson(path, attempts = 12) {
+            let lastError;
+            for (let attempt = 1; attempt <= attempts; attempt++) {
+              try {
+                const response = await fetch(new URL(path, base), {
+                  headers: { Accept: "application/json" },
+                  signal: AbortSignal.timeout(12000)
+                });
+                const body = await response.json().catch(() => null);
+                if (response.ok) return body;
+                lastError = new Error(\`\${path} returned HTTP \${response.status}: \${JSON.stringify(body)}\`);
+              } catch (error) {
+                lastError = error;
+              }
+              if (attempt < attempts) await sleep(10000);
+            }
+            throw lastError ?? new Error(\`\${path} did not become available\`);
+          }
+
+          const health = await getJson("/api/health");
+          if (health.status !== "ok" || health.databaseConfigured !== true) {
+            throw new Error(\`API health check failed: \${JSON.stringify(health)}\`);
+          }
+          console.log("PASS /api/health");
+
+          const locations = await getJson("/api/v1/locations");
+          const locationData = locations.data;
+          for (const key of ["regions", "districts", "school_types", "curricula"]) {
+            if (!Array.isArray(locationData?.[key])) {
+              throw new Error(\`Locations response is missing \${key}\`);
+            }
+          }
+          console.log("PASS /api/v1/locations");
+
+          const listing = await getJson("/api/v1/schools?limit=5&sort=featured");
+          if (!Array.isArray(listing.data) || !listing.meta || Number(listing.meta.total) < 1) {
+            throw new Error(\`School listing returned no public schools: \${JSON.stringify(listing)}\`);
+          }
+          for (const school of listing.data) {
+            if (!school.slug || !school.name) throw new Error("School listing contains an incomplete public record");
+            for (const forbidden of ["owner_id", "registration_number", "verified_by", "password"]) {
+              if (forbidden in school) throw new Error(\`Sensitive field \${forbidden} leaked in school listing\`);
+            }
+          }
+          console.log(\`PASS /api/v1/schools (\${listing.meta.total} visible public records)\`);
+
+          const first = listing.data[0];
+          const profile = await getJson(\`/api/v1/schools/\${encodeURIComponent(first.slug)}\`);
+          const school = profile.data;
+          if (!school || school.slug !== first.slug || school.id !== first.id) {
+            throw new Error(\`School profile did not match listing record \${first.slug}\`);
+          }
+          for (const forbidden of ["owner_id", "registration_number", "verified_by", "password"]) {
+            if (forbidden in school) throw new Error(\`Sensitive field \${forbidden} leaked in school profile\`);
+          }
+          console.log(\`PASS /api/v1/schools/\${first.slug}\`);
+
+          console.log("All Cloudflare staging API smoke tests passed.");
+          NODE
