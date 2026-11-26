@@ -2,9 +2,69 @@ import type { AuthEnv, StoredAuthSession, SupabaseTokenResponse } from "./types"
 import { SESSION_COOKIE } from "./types";
 import { refreshSupabaseTokens } from "./supabase";
 
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
 function randomSessionId(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   return Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
+}
+
+function toBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
+function fromBase64(value: string): Uint8Array {
+  const binary = atob(value);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function deriveSessionEncryptionKey(env: AuthEnv): Promise<CryptoKey> {
+  if (!env.SUPABASE_SECRET_KEY) throw new Error("The server-only session encryption key is unavailable.");
+  const material = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(env.SUPABASE_SECRET_KEY),
+    "HKDF",
+    false,
+    ["deriveKey"],
+  );
+  return crypto.subtle.deriveKey(
+    {
+      name: "HKDF",
+      hash: "SHA-256",
+      salt: encoder.encode("FindURSCH D1 auth session key v1"),
+      info: encoder.encode("encrypt-supabase-session-tokens"),
+    },
+    material,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"],
+  );
+}
+
+async function encryptToken(key: CryptoKey, value: string): Promise<string> {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    encoder.encode(value),
+  );
+  return toBase64(iv) + "." + toBase64(new Uint8Array(encrypted));
+}
+
+async function decryptToken(key: CryptoKey, value: string): Promise<string> {
+  const parts = value.split(".");
+  if (parts.length !== 2) throw new Error("Invalid encrypted session token.");
+  const plaintext = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: fromBase64(parts[0]) },
+    key,
+    fromBase64(parts[1]),
+  );
+  return decoder.decode(plaintext);
 }
 
 function cookieValue(request: Request, name: string): string | null {
@@ -44,14 +104,18 @@ export function clearSessionCookie(): string {
   ].join("; ");
 }
 
-function parseSession(row: Record<string, unknown>): StoredAuthSession | null {
+async function parseSession(
+  row: Record<string, unknown>,
+  env: AuthEnv,
+): Promise<StoredAuthSession | null> {
   const workspace = String(row.workspace);
   if (workspace !== "admin" && workspace !== "owner" && workspace !== "parent") return null;
+  const key = await deriveSessionEncryptionKey(env);
   const session: StoredAuthSession = {
     supabaseUserId: String(row.supabase_user_id || ""),
     legacyUserId: Number(row.legacy_user_id),
-    accessToken: String(row.access_token || ""),
-    refreshToken: String(row.refresh_token || ""),
+    accessToken: await decryptToken(key, String(row.access_token_enc || "")),
+    refreshToken: await decryptToken(key, String(row.refresh_token_enc || "")),
     accessTokenExpiresAt: Number(row.access_token_expires_at),
     absoluteExpiresAt: Number(row.absolute_expires_at),
     createdAt: Number(row.created_at),
@@ -101,13 +165,24 @@ export async function createStoredSession(
     remember,
     workspace,
   };
+
+  const key = await deriveSessionEncryptionKey(env);
+  const encryptedAccessToken = await encryptToken(key, value.accessToken);
+  const encryptedRefreshToken = await encryptToken(key, value.refreshToken);
   const id = randomSessionId();
   const result = await env.AUTH_DB.prepare(
-    "INSERT INTO auth_sessions (session_id, supabase_user_id, legacy_user_id, access_token, refresh_token, access_token_expires_at, absolute_expires_at, created_at, remember, workspace) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO auth_sessions (session_id, supabase_user_id, legacy_user_id, access_token_enc, refresh_token_enc, access_token_expires_at, absolute_expires_at, created_at, remember, workspace) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
   ).bind(
-    id, value.supabaseUserId, value.legacyUserId, value.accessToken,
-    value.refreshToken, value.accessTokenExpiresAt, value.absoluteExpiresAt,
-    value.createdAt, value.remember ? 1 : 0, value.workspace,
+    id,
+    value.supabaseUserId,
+    value.legacyUserId,
+    encryptedAccessToken,
+    encryptedRefreshToken,
+    value.accessTokenExpiresAt,
+    value.absoluteExpiresAt,
+    value.createdAt,
+    value.remember ? 1 : 0,
+    value.workspace,
   ).run();
   if (result.success === false) throw new Error("Session could not be persisted.");
   return { id, cookie: setCookie(id, lifetimeSeconds) };
@@ -122,11 +197,16 @@ export async function readStoredSession(
   if (!id || !/^[a-f0-9]{64}$/.test(id)) return null;
 
   const row = await env.AUTH_DB.prepare(
-    "SELECT session_id, supabase_user_id, legacy_user_id, access_token, refresh_token, access_token_expires_at, absolute_expires_at, created_at, remember, workspace FROM auth_sessions WHERE session_id = ? LIMIT 1",
+    "SELECT session_id, supabase_user_id, legacy_user_id, access_token_enc, refresh_token_enc, access_token_expires_at, absolute_expires_at, created_at, remember, workspace FROM auth_sessions WHERE session_id = ? LIMIT 1",
   ).bind(id).first<Record<string, unknown>>();
   if (!row) return null;
 
-  const value = parseSession(row);
+  let value: StoredAuthSession | null;
+  try {
+    value = await parseSession(row, env);
+  } catch {
+    value = null;
+  }
   if (!value || Date.now() >= value.absoluteExpiresAt) {
     await env.AUTH_DB.prepare("DELETE FROM auth_sessions WHERE session_id = ?").bind(id).run();
     return null;
@@ -142,9 +222,19 @@ export async function readStoredSession(
       value.accessToken = fresh.access_token;
       value.refreshToken = fresh.refresh_token;
       value.accessTokenExpiresAt = Date.now() + Math.max(60, Number(fresh.expires_in || 3600)) * 1000;
+
+      const key = await deriveSessionEncryptionKey(env);
+      const encryptedAccessToken = await encryptToken(key, value.accessToken);
+      const encryptedRefreshToken = await encryptToken(key, value.refreshToken);
       const update = await env.AUTH_DB.prepare(
-        "UPDATE auth_sessions SET access_token = ?, refresh_token = ?, access_token_expires_at = ? WHERE session_id = ? AND absolute_expires_at > ?",
-      ).bind(value.accessToken, value.refreshToken, value.accessTokenExpiresAt, id, Date.now()).run();
+        "UPDATE auth_sessions SET access_token_enc = ?, refresh_token_enc = ?, access_token_expires_at = ? WHERE session_id = ? AND absolute_expires_at > ?",
+      ).bind(
+        encryptedAccessToken,
+        encryptedRefreshToken,
+        value.accessTokenExpiresAt,
+        id,
+        Date.now(),
+      ).run();
       if (update.success === false) throw new Error("Session refresh could not be persisted.");
     } catch {
       await env.AUTH_DB.prepare("DELETE FROM auth_sessions WHERE session_id = ?").bind(id).run();
