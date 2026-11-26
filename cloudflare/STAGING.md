@@ -21,7 +21,7 @@
 - Supabase remains the existing production PostgreSQL database. No PostgreSQL data has been moved to Cloudflare.
 - Production verification confirmed 9 active legacy accounts and 9 Supabase Auth users with trusted numeric `legacy_user_id` mappings. The identity import did not modify `public.users` passwords or other legacy records.
 - The Supabase secret is held as an encrypted Pages Function secret for private legacy-user/role lookups and server-side cookie encryption. It is not a database copy.
-- The Cloudflare D1 session database is being removed after the new cookie-based authentication deployment is verified.
+- The former Cloudflare D1 session database has been deleted after the Supabase-cookie deployment passed build, type-check and staging API smoke tests. No D1 binding remains on the Pages project.
 - Administrator two-step email verification is not yet migrated. The existing `require_two_step` setting was disabled at the time of the initial auth migration; if it is enabled, Cloudflare sign-in deliberately blocks administrator login.
 - The nine users' real password sign-in and browser session lifecycle have not yet been tested end-to-end.
 - Full admin, school-owner and parent dashboard functionality has not yet been ported. This remains an initial migration slice, not a complete Laravel replacement.
