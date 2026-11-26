@@ -1,12 +1,20 @@
 <?php
 
-namespace App\Models;
+namespace App\\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\\Database\\Eloquent\\Model;
+use Illuminate\\Support\\Facades\\Cache;
 
 class Setting extends Model
 {
+    protected $fillable = [
+        'key',
+        'value',
+        'type',
+        'group',
+        'label',
+    ];
+
     private const PUBLIC_SITE_SETTING_CACHE_KEY = 'findursch:public-site-settings:v1';
 
     /**
