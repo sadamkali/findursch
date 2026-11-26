@@ -288,7 +288,7 @@ export async function checkLoginRateLimit(
   const now = Date.now();
   const ipHash = await hashRateLimitIp(env, ipAddress || "unknown");
   const row = await env.AUTH_DB.prepare(
-    \`INSERT INTO auth_login_attempts (ip_hash, window_started_at, attempts)
+    `INSERT INTO auth_login_attempts (ip_hash, window_started_at, attempts)
      VALUES (?, ?, 1)
      ON CONFLICT(ip_hash) DO UPDATE SET
        window_started_at = CASE
@@ -299,7 +299,7 @@ export async function checkLoginRateLimit(
          WHEN auth_login_attempts.window_started_at <= ? THEN 1
          ELSE auth_login_attempts.attempts + 1
        END
-     RETURNING attempts, window_started_at\`,
+     RETURNING attempts, window_started_at`,
   ).bind(ipHash, now, now - 60_000, now - 60_000)
     .first<{ attempts: number; window_started_at: number }>();
 
