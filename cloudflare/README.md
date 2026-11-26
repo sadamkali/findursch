@@ -1,6 +1,6 @@
 # FindURSCH Cloudflare Free migration
 
-This is the first Cloudflare-native migration slice. It does not replace the Laravel application yet and does not change production DNS, Supabase data, or the existing Vercel production deployment.
+This is the first Cloudflare-native migration slice. It does not replace the Laravel application yet and does not change production DNS, production application records, or the existing Vercel production deployment. A narrowly scoped, read-only anonymous access policy set has now been enabled in the existing FindURSCH Supabase database.
 
 ## Target architecture
 
@@ -32,11 +32,21 @@ The API is read-only. It does not expose users, payment data, subscriptions, inq
 
 The existing findursch-static project and static.findursch.riotinvestments.space remain unchanged. No production hostname or Vercel alias has been moved.
 
-## Supabase setup
+## Supabase setup and security verification
 
 The REST API uses the Supabase anon role, not a service-role key and not a direct database connection. The project URL is https://gpsfttpeikatxszswljo.supabase.co.
 
-Review sql/public_api_anon_policies.sql and sql/README.md. The SQL is a proposed permissions change only; it has not been executed. It must be approved before the staging API can read the live school tables. Configure the active legacy anon key as a Pages Function secret named SUPABASE_ANON_KEY in Cloudflare. Never use service_role.
+The SQL in sql/public_api_anon_policies.sql was applied to the existing production FindURSCH database on 26 November 2026 after approval. It grants SELECT on only the public fields needed by the directory and adds 11 RLS policies across schools and their public reference/related tables.
+
+Verification performed with SET LOCAL ROLE anon:
+- 3 active + verified schools visible.
+- 4 active regions, 128 active districts, 6 active school types and 3 active curricula visible.
+- No SELECT access to public.users, password columns, school_documents, schools.owner_id, schools.registration_number, or private media metadata.
+- RLS remains enabled on all 11 tables covered by the public API policies.
+
+The Supabase security advisor still reports other tables with RLS enabled but no policies. Those tables were not included in the public API grants and remain outside this migration slice. Do not grant access to them as part of this change.
+
+Cloudflare Pages project findursch-app-staging has SUPABASE_URL and PUBLIC_MEDIA_BASE_URL configured, with the legacy anon key stored as a Pages Function secret named SUPABASE_ANON_KEY. The service_role key is not used.
 
 ## Not yet migrated
 

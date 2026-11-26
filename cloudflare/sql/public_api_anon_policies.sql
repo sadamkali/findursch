@@ -1,6 +1,7 @@
 -- FindURSCH public directory read access for Cloudflare Pages Functions.
--- This script changes PRODUCTION DATABASE PERMISSIONS only. Review and run
--- manually in Supabase SQL Editor after the staging application is ready.
+-- APPLIED to production project findursch on 2026-11-26 after user approval.
+-- Re-running is safe: only this script's named policies are recreated.
+-- This grants public read-only access to selected school fields only.
 -- Never put the Supabase service_role key in Cloudflare or the browser.
 
 GRANT USAGE ON SCHEMA public TO anon;
