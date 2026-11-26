@@ -87,39 +87,39 @@ const schoolCard = (school: SchoolCard): string => {
     .join(", ");
   const fees =
     school.fees_from || school.fees_to
-      ? \`\${formatMoney(school.fees_from)} – \${formatMoney(school.fees_to)}\`
+      ? `${formatMoney(school.fees_from)} – ${formatMoney(school.fees_to)}`
       : "Fees available on request";
   const media = school.image_url
-    ? \`<img src="\${escapeHtml(school.image_url)}" alt="" loading="lazy" />\`
-    : \`<div class="school-placeholder" aria-hidden="true"><span>\${escapeHtml(school.name.slice(0, 1).toUpperCase())}</span></div>\`;
+    ? `<img src="${escapeHtml(school.image_url)}" alt="" loading="lazy" />`
+    : `<div class="school-placeholder" aria-hidden="true"><span>${escapeHtml(school.name.slice(0, 1).toUpperCase())}</span></div>`;
 
-  return \`
+  return `
     <article class="school-card">
-      <a class="school-image" href="/schools/\${encodeURIComponent(school.slug)}">\${media}</a>
+      <a class="school-image" href="/schools/${encodeURIComponent(school.slug)}">${media}</a>
       <div class="school-card-content">
         <div class="school-card-topline">
-          <span class="type-pill">\${escapeHtml(school.school_type ?? "School")}</span>
-          \${school.is_featured ? '<span class="featured-pill">Featured</span>' : ""}
+          <span class="type-pill">${escapeHtml(school.school_type ?? "School")}</span>
+          ${school.is_featured ? '<span class="featured-pill">Featured</span>' : ""}
         </div>
-        <h3><a href="/schools/\${encodeURIComponent(school.slug)}">\${escapeHtml(school.name)}</a></h3>
-        <p class="school-place">\${escapeHtml(place || "Uganda")}</p>
-        <p class="school-tagline">\${escapeHtml(school.tagline || "Explore this school's profile, programmes and admissions information.")}</p>
+        <h3><a href="/schools/${encodeURIComponent(school.slug)}">${escapeHtml(school.name)}</a></h3>
+        <p class="school-place">${escapeHtml(place || "Uganda")}</p>
+        <p class="school-tagline">${escapeHtml(school.tagline || "Explore this school's profile, programmes and admissions information.")}</p>
         <div class="school-card-bottom">
-          <span class="fee-label">\${escapeHtml(fees)}</span>
-          <a class="text-link" href="/schools/\${encodeURIComponent(school.slug)}">View profile <span aria-hidden="true">→</span></a>
+          <span class="fee-label">${escapeHtml(fees)}</span>
+          <a class="text-link" href="/schools/${encodeURIComponent(school.slug)}">View profile <span aria-hidden="true">→</span></a>
         </div>
       </div>
-    </article>\`;
+    </article>`;
 };
 
-const searchPanel = (value = ""): string => \`
+const searchPanel = (value = ""): string => `
   <form class="school-search" id="school-search">
     <label class="search-field">
       <span>School name or location</span>
-      <input name="q" type="search" value="\${escapeHtml(value)}" placeholder="Try a school, town or district" />
+      <input name="q" type="search" value="${escapeHtml(value)}" placeholder="Try a school, town or district" />
     </label>
     <button class="button button-primary" type="submit">Search schools <span aria-hidden="true">→</span></button>
-  </form>\`;
+  </form>`;
 
 async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(path, {
@@ -128,7 +128,7 @@ async function getJson<T>(path: string): Promise<T> {
   });
   const body = (await response.json()) as T & { error?: string };
   if (!response.ok) {
-    throw new Error(body.error || \`Request failed (\${response.status})\`);
+    throw new Error(body.error || `Request failed (${response.status})`);
   }
   return body;
 }
@@ -147,7 +147,7 @@ function attachSearch(): void {
 
 async function renderHome(): Promise<void> {
   if (!app) return;
-  app.innerHTML = \`
+  app.innerHTML = `
     <section class="hero">
       <div class="hero-orbit hero-orbit-one"></div>
       <div class="hero-orbit hero-orbit-two"></div>
@@ -155,7 +155,7 @@ async function renderHome(): Promise<void> {
         <p class="eyebrow eyebrow-light">SCHOOL DISCOVERY, MADE CLEARER</p>
         <h1>Find a school that fits <em>your learner.</em></h1>
         <p class="hero-copy">Explore schools across Uganda, compare the details that matter and make a more confident choice for the next step.</p>
-        \${searchPanel()}
+        ${searchPanel()}
         <div class="hero-trust"><span>Explore school profiles</span><span>Compare locations and fees</span><span>Review admissions details</span></div>
       </div>
       <div class="hero-caption"><span class="caption-mark"></span> Discover schools across Uganda</div>
@@ -183,7 +183,7 @@ async function renderHome(): Promise<void> {
       <h2>More clarity for every <em>school journey.</em></h2>
       <p>Our goal is to make school discovery more accessible by bringing useful school information into one place for families and communities across Uganda.</p>
       <a class="button button-outline" href="/schools">Explore the directory</a>
-    </section>\`;
+    </section>`;
 
   attachSearch();
 
@@ -204,20 +204,20 @@ async function renderDirectory(): Promise<void> {
   if (!app) return;
   const params = new URLSearchParams(window.location.search);
   const search = params.get("q") ?? "";
-  app.innerHTML = \`
+  app.innerHTML = `
     <section class="page-intro">
       <div class="page-intro-inner">
         <p class="eyebrow">FIND YOUR SCHOOL</p>
         <h1>Explore schools <em>across Uganda.</em></h1>
         <p>Search published school profiles and compare the information available for each school.</p>
-        \${searchPanel(search)}
+        ${searchPanel(search)}
       </div>
     </section>
     <section class="section directory-section">
       <div class="directory-heading"><div><p class="eyebrow">SCHOOL DIRECTORY</p><h2 id="result-title">Published schools</h2></div><span id="result-count" class="result-count"></span></div>
       <div id="directory-schools" class="school-grid"><div class="loading-card">Searching schools…</div></div>
       <nav class="pagination" id="pagination" aria-label="School directory pages"></nav>
-    </section>\`;
+    </section>`;
   attachSearch();
 
   const page = Math.max(1, Number(params.get("page") || "1"));
@@ -225,7 +225,7 @@ async function renderDirectory(): Promise<void> {
   if (search) query.set("q", search);
 
   try {
-    const result = await getJson<ListResponse>(\`/api/v1/schools?\${query.toString()}\`);
+    const result = await getJson<ListResponse>(`/api/v1/schools?${query.toString()}`);
     const target = document.querySelector<HTMLElement>("#directory-schools");
     const count = document.querySelector<HTMLElement>("#result-count");
     if (target) {
@@ -233,7 +233,7 @@ async function renderDirectory(): Promise<void> {
         ? result.data.map(schoolCard).join("")
         : '<p class="empty-state">No schools matched this search. Try another school name or location.</p>';
     }
-    if (count) count.textContent = \`\${result.meta?.total ?? result.data.length} schools found\`;
+    if (count) count.textContent = `${result.meta?.total ?? result.data.length} schools found`;
     const pagination = document.querySelector<HTMLElement>("#pagination");
     const totalPages = result.meta?.total_pages ?? 1;
     if (pagination && totalPages > 1) {
@@ -242,9 +242,9 @@ async function renderDirectory(): Promise<void> {
       const link = (targetPage: number, label: string, disabled: boolean): string => {
         const nextParams = new URLSearchParams(window.location.search);
         nextParams.set("page", String(targetPage));
-        return \`<a class="page-button \${disabled ? "is-disabled" : ""}" href="/schools?\${nextParams.toString()}" \${disabled ? 'aria-disabled="true"' : ""}>\${label}</a>\`;
+        return `<a class="page-button ${disabled ? "is-disabled" : ""}" href="/schools?${nextParams.toString()}" ${disabled ? 'aria-disabled="true"' : ""}>${label}</a>`;
       };
-      pagination.innerHTML = \`\${link(previous ?? 1, "← Previous", !previous)}<span>Page \${page} of \${totalPages}</span>\${link(next ?? totalPages, "Next →", !next)}\`;
+      pagination.innerHTML = `${link(previous ?? 1, "← Previous", !previous)}<span>Page ${page} of ${totalPages}</span>${link(next ?? totalPages, "Next →", !next)}`;
     }
   } catch {
     const target = document.querySelector<HTMLElement>("#directory-schools");
@@ -256,47 +256,49 @@ async function renderSchool(slug: string): Promise<void> {
   if (!app) return;
   app.innerHTML = '<section class="section"><div class="loading-card">Loading school profile…</div></section>';
   try {
-    const response = await getJson<{ data: SchoolDetail }>(\`/api/v1/schools/\${encodeURIComponent(slug)}\`);
+    const response = await getJson<{ data: SchoolDetail }>(`/api/v1/schools/${encodeURIComponent(slug)}`);
     const school = response.data;
     const place = [school.town, school.district?.name, school.region?.name].filter(Boolean).join(", ");
     const gallery = (school.media ?? []).filter((item) => item.url);
-    const curricula = (school.curricula ?? []).map((item) => \`<span class="detail-chip">\${escapeHtml(item.name)}</span>\`).join("");
-    const programmes = (school.programs ?? []).map((item) => \`<article class="detail-list-item"><strong>\${escapeHtml(item.name)}</strong><span>\${escapeHtml([item.level, item.duration].filter(Boolean).join(" · "))}</span></article>\`).join("");
-    const facilities = (school.facilities ?? []).map((item) => \`<span class="detail-chip">\${escapeHtml(item.name)}</span>\`).join("");
-    const fees = (school.fees ?? []).map((item) => \`<article class="fee-row"><span><strong>\${escapeHtml(item.label)}</strong><small>\${escapeHtml(item.period)}\${item.academic_year ? \` · \${escapeHtml(item.academic_year)}\` : ""}</small></span><strong>\${formatMoney(item.amount)}</strong></article>\`).join("");
+    const curricula = (school.curricula ?? []).map((item) => `<span class="detail-chip">${escapeHtml(item.name)}</span>`).join("");
+    const programmes = (school.programs ?? []).map((item) => `<article class="detail-list-item"><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml([item.level, item.duration].filter(Boolean).join(" · "))}</span></article>`).join("");
+    const facilities = (school.facilities ?? []).map((item) => `<span class="detail-chip">${escapeHtml(item.name)}</span>`).join("");
+    const fees = (school.fees ?? []).map((item) => `<article class="fee-row"><span><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.period)}${item.academic_year ? ` · ${escapeHtml(item.academic_year)}` : ""}</small></span><strong>${formatMoney(item.amount)}</strong></article>`).join("");
     const heroImage = gallery.find((item) => item.url)?.url ?? "";
+    const websiteUrl = safeExternalUrl(school.website);
+    const mapsUrl = safeExternalUrl(school.maps_url);
 
-    app.innerHTML = \`
+    app.innerHTML = `
       <section class="detail-hero">
         <div class="detail-hero-inner">
           <a class="back-link" href="/schools">← Back to schools</a>
-          <p class="eyebrow eyebrow-light">\${escapeHtml(school.type?.name ?? school.school_type ?? "School")} · \${escapeHtml(place || "Uganda")}</p>
-          <h1>\${escapeHtml(school.name)}</h1>
-          <p class="detail-tagline">\${escapeHtml(school.tagline ?? "")}</p>
-          <div class="detail-tags"><span>\${escapeHtml(school.boarding_type ?? "School")}</span><span>\${escapeHtml(school.gender_policy ?? "")}</span>\${school.admissions_open ? "<span>Admissions open</span>" : ""}</div>
+          <p class="eyebrow eyebrow-light">${escapeHtml(school.type?.name ?? school.school_type ?? "School")} · ${escapeHtml(place || "Uganda")}</p>
+          <h1>${escapeHtml(school.name)}</h1>
+          <p class="detail-tagline">${escapeHtml(school.tagline ?? "")}</p>
+          <div class="detail-tags"><span>${escapeHtml(school.boarding_type ?? "School")}</span><span>${escapeHtml(school.gender_policy ?? "")}</span>${school.admissions_open ? "<span>Admissions open</span>" : ""}</div>
         </div>
       </section>
       <section class="section detail-section">
         <div class="detail-main">
-          <div class="detail-block"><p class="eyebrow">ABOUT THE SCHOOL</p><h2>School <em>overview.</em></h2><p class="detail-description">\${escapeHtml(school.description ?? "More information about this school will be added to its profile.")}</p></div>
-          \${heroImage ? \`<img class="detail-cover" src="\${escapeHtml(heroImage)}" alt="\${escapeHtml(school.name)}" />\` : ""}
-          \${curricula ? \`<div class="detail-block"><p class="eyebrow">CURRICULUM</p><h2>Learning <em>pathways.</em></h2><div class="detail-chip-list">\${curricula}</div></div>\` : ""}
-          \${programmes ? \`<div class="detail-block"><p class="eyebrow">PROGRAMMES</p><h2>What students <em>can study.</em></h2><div class="detail-list">\${programmes}</div></div>\` : ""}
-          \${facilities ? \`<div class="detail-block"><p class="eyebrow">FACILITIES</p><h2>School <em>facilities.</em></h2><div class="detail-chip-list">\${facilities}</div></div>\` : ""}
-          \${fees ? \`<div class="detail-block"><p class="eyebrow">SCHOOL FEES</p><h2>Fee <em>information.</em></h2><div class="fee-list">\${fees}</div></div>\` : ""}
-          \${school.admission_requirements || school.how_to_apply ? \`<div class="detail-block"><p class="eyebrow">ADMISSIONS</p><h2>Joining the <em>school.</em></h2>\${school.admission_classes ? \`<p><strong>Classes:</strong> \${escapeHtml(school.admission_classes)}</p>\` : ""}\${school.admission_requirements ? \`<p>\${escapeHtml(school.admission_requirements)}</p>\` : ""}\${school.how_to_apply ? \`<p>\${escapeHtml(school.how_to_apply)}</p>\` : ""}</div>\` : ""}
+          <div class="detail-block"><p class="eyebrow">ABOUT THE SCHOOL</p><h2>School <em>overview.</em></h2><p class="detail-description">${escapeHtml(school.description ?? "More information about this school will be added to its profile.")}</p></div>
+          ${heroImage ? `<img class="detail-cover" src="${escapeHtml(heroImage)}" alt="${escapeHtml(school.name)}" />` : ""}
+          ${curricula ? `<div class="detail-block"><p class="eyebrow">CURRICULUM</p><h2>Learning <em>pathways.</em></h2><div class="detail-chip-list">${curricula}</div></div>` : ""}
+          ${programmes ? `<div class="detail-block"><p class="eyebrow">PROGRAMMES</p><h2>What students <em>can study.</em></h2><div class="detail-list">${programmes}</div></div>` : ""}
+          ${facilities ? `<div class="detail-block"><p class="eyebrow">FACILITIES</p><h2>School <em>facilities.</em></h2><div class="detail-chip-list">${facilities}</div></div>` : ""}
+          ${fees ? `<div class="detail-block"><p class="eyebrow">SCHOOL FEES</p><h2>Fee <em>information.</em></h2><div class="fee-list">${fees}</div></div>` : ""}
+          ${school.admission_requirements || school.how_to_apply ? `<div class="detail-block"><p class="eyebrow">ADMISSIONS</p><h2>Joining the <em>school.</em></h2>${school.admission_classes ? `<p><strong>Classes:</strong> ${escapeHtml(school.admission_classes)}</p>` : ""}${school.admission_requirements ? `<p>${escapeHtml(school.admission_requirements)}</p>` : ""}${school.how_to_apply ? `<p>${escapeHtml(school.how_to_apply)}</p>` : ""}</div>` : ""}
         </div>
         <aside class="detail-aside">
           <div class="contact-card"><p class="eyebrow">SCHOOL INFORMATION</p><h2>Contact & <em>location.</em></h2>
-            <p><span>Location</span><strong>\${escapeHtml(place || school.address || "Uganda")}</strong></p>
-            \${school.phone ? \`<p><span>Phone</span><strong>\${escapeHtml(school.phone)}</strong></p>\` : ""}
-            \${school.email ? \`<p><span>Email</span><strong>\${escapeHtml(school.email)}</strong></p>\` : ""}
-            \${school.website ? \`<p><span>Website</span><a href="\${escapeHtml(school.website)}" rel="noopener noreferrer" target="_blank">Visit school website ↗</a></p>\` : ""}
-            \${school.maps_url ? \`<a class="button button-primary button-full" href="\${escapeHtml(school.maps_url)}" rel="noopener noreferrer" target="_blank">View on map ↗</a>\` : ""}
+            <p><span>Location</span><strong>${escapeHtml(place || school.address || "Uganda")}</strong></p>
+            ${school.phone ? `<p><span>Phone</span><strong>${escapeHtml(school.phone)}</strong></p>` : ""}
+            ${school.email ? `<p><span>Email</span><strong>${escapeHtml(school.email)}</strong></p>` : ""}
+            ${websiteUrl ? `<p><span>Website</span><a href="${escapeHtml(websiteUrl)}" rel="noopener noreferrer" target="_blank">Visit school website ↗</a></p>` : ""}
+            ${mapsUrl ? `<a class="button button-primary button-full" href="${escapeHtml(mapsUrl)}" rel="noopener noreferrer" target="_blank">View on map ↗</a>` : ""}
           </div>
         </aside>
-      </section>\`;
-    document.title = \`\${school.name} | FindURSCH\`;
+      </section>`;
+    document.title = `${school.name} | FindURSCH`;
   } catch {
     app.innerHTML = '<section class="section"><div class="empty-state"><h2>School profile not found</h2><p>This school may not have a published profile yet.</p><a class="button button-primary" href="/schools">Back to schools</a></div></section>';
   }

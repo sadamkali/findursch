@@ -66,7 +66,7 @@ const optionalNumber = (value: string | null): number | undefined => {
 const mediaUrl = (env: PublicApiEnv, media: MediaRecord | null): string | null => {
   const base = env.PUBLIC_MEDIA_BASE_URL?.replace(/\/+$/, "");
   if (!base || !media) return null;
-  return \`\${base}/\${media.id}/\${encodeURIComponent(media.file_name)}\`;
+  return `${base}/${media.id}/${encodeURIComponent(media.file_name)}`;
 };
 
 const publicSchoolVisibility = "s.status = 'active' AND s.verification_status = 'verified'";
@@ -130,22 +130,22 @@ async function listSchools(url: URL, env: PublicApiEnv): Promise<Response> {
   const values: unknown[] = [];
   const add = (value: unknown): string => {
     values.push(value);
-    return \`$\${values.length}\`;
+    return `$${values.length}`;
   };
 
   if (search) {
-    const p = add(\`%\${search}%\`);
-    where.push(\`(s.name ILIKE \${p} OR COALESCE(s.tagline, '') ILIKE \${p} OR COALESCE(s.description, '') ILIKE \${p} OR COALESCE(s.town, '') ILIKE \${p} OR COALESCE(s.address, '') ILIKE \${p})\`);
+    const p = add(`%${search}%`);
+    where.push(`(s.name ILIKE ${p} OR COALESCE(s.tagline, '') ILIKE ${p} OR COALESCE(s.description, '') ILIKE ${p} OR COALESCE(s.town, '') ILIKE ${p} OR COALESCE(s.address, '') ILIKE ${p})`);
   }
-  if (type) where.push(\`s.type_id = \${add(Number(type))}\`);
-  if (district) where.push(\`s.district_id = \${add(Number(district))}\`);
-  if (region) where.push(\`d.region_id = \${add(Number(region))}\`);
-  if (feeMin !== undefined) where.push(\`s.fees_to >= \${add(feeMin)}\`);
-  if (feeMax !== undefined) where.push(\`s.fees_from <= \${add(feeMax)}\`);
+  if (type) where.push(`s.type_id = ${add(Number(type))}`);
+  if (district) where.push(`s.district_id = ${add(Number(district))}`);
+  if (region) where.push(`d.region_id = ${add(Number(region))}`);
+  if (feeMin !== undefined) where.push(`s.fees_to >= ${add(feeMin)}`);
+  if (feeMax !== undefined) where.push(`s.fees_from <= ${add(feeMax)}`);
   if (admissionsOpen === "true" || admissionsOpen === "1") where.push("s.admissions_open = true");
   if (boarding) {
     if (!["day", "boarding", "both"].includes(boarding)) return json({ error: "invalid_boarding" }, 400);
-    where.push(\`s.boarding_type = \${add(boarding)}\`);
+    where.push(`s.boarding_type = ${add(boarding)}`);
   }
 
   const sort = url.searchParams.get("sort") ?? "newest";
@@ -164,7 +164,7 @@ async function listSchools(url: URL, env: PublicApiEnv): Promise<Response> {
   try {
     const result = await withDatabase(env, (client) =>
       client.query<{ total: number; data: SchoolRow[] }>(
-        \`WITH filtered AS (
+        `WITH filtered AS (
           SELECT
             s.id, s.name, s.slug, s.tagline, s.description, s.town, s.address,
             s.boarding_type, s.gender_policy, s.admissions_open, s.admission_deadline,
@@ -195,7 +195,7 @@ async function listSchools(url: URL, env: PublicApiEnv): Promise<Response> {
           JOIN districts d ON d.id = s.district_id
           JOIN regions r ON r.id = d.region_id
           JOIN school_types st ON st.id = s.type_id
-          WHERE \${where.join(" AND ")}
+          WHERE ${where.join(" AND ")}
         )
         SELECT
           (SELECT COUNT(*)::int FROM filtered) AS total,
@@ -203,10 +203,10 @@ async function listSchools(url: URL, env: PublicApiEnv): Promise<Response> {
             SELECT json_agg(to_jsonb(page_row))
             FROM (
               SELECT * FROM filtered
-              ORDER BY \${orderBy}
-              LIMIT \${limitParam} OFFSET \${offsetParam}
+              ORDER BY ${orderBy}
+              LIMIT ${limitParam} OFFSET ${offsetParam}
             ) AS page_row
-          ), '[]'::json) AS data\`,
+          ), '[]'::json) AS data`,
         values,
       ),
     );
@@ -244,7 +244,7 @@ async function schoolDetail(slug: string, env: PublicApiEnv): Promise<Response> 
   try {
     const result = await withDatabase(env, (client) =>
       client.query(
-        \`SELECT
+        `SELECT
           s.id, s.name, s.slug, s.tagline, s.description, s.founded_year,
           s.address, s.town, s.po_box, s.nearest_landmark, s.maps_url,
           s.phone, s.email, s.website, s.whatsapp, s.facebook_url, s.instagram_url,
@@ -308,7 +308,7 @@ async function schoolDetail(slug: string, env: PublicApiEnv): Promise<Response> 
         WHERE s.slug = $1
           AND s.status = 'active'
           AND s.verification_status = 'verified'
-        LIMIT 1\`,
+        LIMIT 1`,
         [slug],
       ),
     );
@@ -342,7 +342,7 @@ async function locations(env: PublicApiEnv): Promise<Response> {
   try {
     const result = await withDatabase(env, (client) =>
       client.query(
-        \`SELECT
+        `SELECT
           COALESCE((
             SELECT json_agg(json_build_object('id', id, 'name', name, 'slug', slug) ORDER BY name)
             FROM regions WHERE is_active = true
@@ -363,7 +363,7 @@ async function locations(env: PublicApiEnv): Promise<Response> {
           COALESCE((
             SELECT json_agg(json_build_object('id', id, 'name', name, 'slug', slug) ORDER BY name)
             FROM curricula WHERE is_active = true
-          ), '[]'::json) AS curricula\`,
+          ), '[]'::json) AS curricula`,
       ),
     );
 
