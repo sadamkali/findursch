@@ -1,6 +1,7 @@
 export interface PublicApiEnv {
   SUPABASE_URL?: string;
   SUPABASE_ANON_KEY?: string;
+  SUPABASE_SECRET_KEY?: string;
   PUBLIC_MEDIA_BASE_URL?: string;
   AUTH_SESSIONS?: { get(key: string): Promise<string | null> };
 }
