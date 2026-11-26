@@ -2,20 +2,7 @@
 <html lang="en" class="h-full">
 <head>
     @php
-        $siteSettings = \App\Models\Setting::query()
-            ->whereIn('key', [
-                'site_name', 'site_tagline', 'site_description', 'site_logo', 'site_horizontal_logo', 'site_homepage_logo',
-                'site_footer_logo', 'site_mobile_logo', 'site_favicon', 'site_apple_touch_icon', 'site_social_image',
-                'meta_title', 'meta_description', 'meta_keywords',
-                'support_email', 'support_phone', 'support_whatsapp', 'contact_address',
-                'facebook_url', 'twitter_url', 'instagram_url', 'youtube_url',
-                'site_navigation', 'site_topbar_enabled', 'site_navigation_enabled',
-                'site_account_actions_enabled', 'site_header_cta_label', 'site_footer_enabled',
-                'site_footer_explore_enabled', 'site_footer_resources_enabled', 'site_footer_support_enabled',
-                'site_footer_social_enabled', 'site_footer_promo_enabled', 'site_footer_copyright_text',
-                'primary_color', 'accent_color', 'font_display', 'font_body',
-            ])
-            ->pluck('value', 'key');
+        $siteSettings = \App\Models\Setting::publicSiteValues();
         $siteName = $siteSettings['site_name'] ?? 'FindURSCH';
         $siteTagline = $siteSettings['site_tagline'] ?? 'Discover schools across Uganda';
         $siteDescription = $siteSettings['site_description'] ?? 'Uganda’s school discovery platform.';
@@ -321,6 +308,7 @@
 
     <x-site-footer />
 
-    @livewireScripts
+    @livewireScriptConfig
+    <script src="{{ asset('vendor/livewire/livewire.min.js') }}" defer></script>
 </body>
 </html>
