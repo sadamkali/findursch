@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "findursch-cloudflare-staging",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-26",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "assets": {
+    "directory": "./public-site/dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+    "not_found_handling": "single-page-application"
+  },
+  "vars": {
+    "PUBLIC_MEDIA_BASE_URL": "https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev"
+  },
+  "observability": {
+    "enabled": true
+  }
+  // Add after creating the Hyperdrive configuration in Cloudflare:
+  // "hyperdrive": [
+  //   { "binding": "HYPERDRIVE", "id": "YOUR_HYPERDRIVE_ID" }
+  // ]
+}

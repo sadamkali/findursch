@@ -1,0 +1,22 @@
+{
+  "name": "findursch-cloudflare",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:site": "vite --config public-site/vite.config.ts",
+    "build:site": "vite build --config public-site/vite.config.ts",
+    "typecheck": "tsc --noEmit",
+    "deploy:dry-run": "npm run build:site && wrangler deploy --dry-run",
+    "deploy": "npm run build:site && wrangler deploy"
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.15.5",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.7",
+    "wrangler": "^4.0.0"
+  }
+}
