@@ -268,6 +268,25 @@ export async function getSupabaseUser(
   return await response.json() as { id: string; app_metadata?: Record<string, unknown> };
 }
 
+export async function signOutSupabase(env: AuthEnv, accessToken: string): Promise<void> {
+  if (!env.SUPABASE_ANON_KEY) {
+    throw new AuthConfigurationError("Supabase public API key is not configured.");
+  }
+  const response = await fetch(baseUrl(env) + "/auth/v1/logout?scope=local", {
+    method: "POST",
+    headers: {
+      apikey: env.SUPABASE_ANON_KEY,
+      Authorization: "Bearer " + accessToken,
+      Accept: "application/json",
+    },
+    cache: "no-store",
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!response.ok && response.status !== 401 && response.status !== 403) {
+    throw new SupabaseRequestError("Sign-out was rejected by Supabase Auth.", response.status, await responseBody(response));
+  }
+}
+
 export async function readBooleanSetting(env: AuthEnv, key: string, fallback: boolean): Promise<boolean> {
   const params = new URLSearchParams({ select: "value", key: "eq." + key, limit: "1" });
   const rows = await adminRest<Array<{ value: string | null }>>(env, "settings", params);

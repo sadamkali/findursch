@@ -1,12 +1,10 @@
 import { handlePublicApi } from "../../src/public-api";
-import type { AuthSessionDatabase } from "../../src/auth/types";
 
 interface PagesEnv {
   SUPABASE_URL?: string;
   SUPABASE_ANON_KEY?: string;
   SUPABASE_SECRET_KEY?: string;
   PUBLIC_MEDIA_BASE_URL?: string;
-  AUTH_DB?: AuthSessionDatabase;
 }
 
 interface PagesContext {

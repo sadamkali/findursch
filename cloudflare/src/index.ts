@@ -1,5 +1,4 @@
 import { handlePublicApi } from "./public-api";
-import type { AuthSessionDatabase } from "./auth/types";
 
 interface AssetsBinding {
   fetch(request: Request): Promise<Response>;
@@ -10,7 +9,6 @@ export interface Env {
   SUPABASE_URL?: string;
   SUPABASE_ANON_KEY?: string;
   PUBLIC_MEDIA_BASE_URL?: string;
-  AUTH_SESSIONS?: { get(key: string): Promise<string | null> };
 }
 
 const corsHeaders = {

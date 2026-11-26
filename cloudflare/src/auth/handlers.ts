@@ -1,6 +1,6 @@
 import type { AuthEnv, LegacyAppUser } from "./types";
 import { AuthConfigurationError, SupabaseRequestError, assertAuthConfigured, enforceLegacyAdminCountryRule, findLegacyUser, getSupabaseUser, loadAuthorization, loadLegacyUser, readBooleanSetting, readIntegerSetting, resolveWorkspace, signInWithPassword } from "./supabase";
-import { checkLoginRateLimit, clearSessionCookie, createStoredSession, destroyStoredSession, readStoredSession, sessionCookieValue } from "./session";
+import { clearSessionCookie, createStoredSession, readStoredSession } from "./session";
 import type { StoredAuthSession } from "./types";
 
 function json(data: unknown, status = 200, headers?: HeadersInit): Response {
@@ -33,8 +33,8 @@ async function resolveSessionIdentity(
   request: Request,
   env: AuthEnv,
 ): Promise<{
-  id: string;
   session: StoredAuthSession;
+  cookie?: string;
   user: LegacyAppUser;
   auth: ReturnType<typeof resolveWorkspace>;
 } | null> {
@@ -42,53 +42,30 @@ async function resolveSessionIdentity(
   if (!stored) return null;
 
   const authUser = await getSupabaseUser(env, stored.value.accessToken);
-  if (!authUser || authUser.id !== stored.value.supabaseUserId) {
-    await destroyStoredSession(env, stored.id);
-    return null;
-  }
+  if (!authUser || authUser.id !== stored.value.supabaseUserId) return null;
 
   const legacyIdFromMetadata = Number(authUser.app_metadata?.legacy_user_id);
-  if (!Number.isSafeInteger(legacyIdFromMetadata) || legacyIdFromMetadata !== stored.value.legacyUserId) {
-    await destroyStoredSession(env, stored.id);
-    return null;
-  }
+  if (!Number.isSafeInteger(legacyIdFromMetadata) || legacyIdFromMetadata !== stored.value.legacyUserId) return null;
 
   const user = await loadLegacyUser(env, stored.value.legacyUserId);
-  if (!user || user.status !== "active") {
-    await destroyStoredSession(env, stored.id);
-    return null;
-  }
+  if (!user || user.status !== "active") return null;
 
   const access = await loadAuthorization(env, user.id);
   const auth = resolveWorkspace(access.roles, access.permissions);
-  if (!auth.isAdmin && !auth.isSchoolOwner && !auth.isParent) {
-    await destroyStoredSession(env, stored.id);
-    return null;
-  }
+  if (!auth.isAdmin && !auth.isSchoolOwner && !auth.isParent) return null;
 
-  return { id: stored.id, session: stored.value, user, auth };
+  return { session: stored.value, cookie: stored.cookie, user, auth };
 }
 
 async function login(request: Request, env: AuthEnv): Promise<Response> {
   if (!requestIsSameOrigin(request)) return json({ message: "Cross-origin sign-in requests are not allowed." }, 403);
-  if (!env.AUTH_DB) return json({ message: "The session store is not available." }, 503);
 
   try {
     assertAuthConfigured(env);
-    const clientIp = request.headers.get("CF-Connecting-IP") ?? "unknown";
-    const rateLimit = await checkLoginRateLimit(env, clientIp);
-    if (!rateLimit.allowed) {
-      return json(
-        { message: "Too many sign-in attempts. Please wait before trying again." },
-        429,
-        { "Retry-After": String(rateLimit.retryAfterSeconds) },
-      );
-    }
   } catch (error) {
     if (error instanceof AuthConfigurationError) {
       return json({ message: "Cloudflare sign-in is not fully configured. The server-only Supabase secret key is required." }, 503);
     }
-    console.error("FindURSCH login throttle is unavailable.");
     return json({ message: "Sign-in is temporarily unavailable. Please try again." }, 503);
   }
 
@@ -169,10 +146,11 @@ async function me(request: Request, env: AuthEnv): Promise<Response> {
     if (!identity) {
       return json({ authenticated: false }, 401, { "Set-Cookie": clearSessionCookie() });
     }
+    const headers = identity.cookie ? { "Set-Cookie": identity.cookie } : undefined;
     return json({
       data: publicUser(identity.user, identity.auth),
       redirectTo: identity.auth.redirectTo,
-    });
+    }, 200, headers);
   } catch {
     return json({ authenticated: false, message: "Session validation is temporarily unavailable." }, 503);
   }
@@ -180,8 +158,17 @@ async function me(request: Request, env: AuthEnv): Promise<Response> {
 
 async function logout(request: Request, env: AuthEnv): Promise<Response> {
   if (!requestIsSameOrigin(request)) return json({ message: "Cross-origin sign-out requests are not allowed." }, 403);
-  const id = sessionCookieValue(request);
-  if (id) await destroyStoredSession(env, id);
+
+  try {
+    const stored = await readStoredSession(request, env);
+    if (stored?.value.accessToken) {
+      const { signOutSupabase } = await import("./supabase");
+      await signOutSupabase(env, stored.value.accessToken);
+    }
+  } catch {
+    // Always clear the local browser cookie; Supabase Auth remains authoritative.
+  }
+
   return json({ message: "Signed out." }, 200, { "Set-Cookie": clearSessionCookie() });
 }
 

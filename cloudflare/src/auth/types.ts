@@ -1,23 +1,7 @@
-export interface D1PreparedStatement {
-  bind(...values: unknown[]): D1PreparedStatement;
-  first<T = Record<string, unknown>>(columnName?: string): Promise<T | null>;
-  run<T = Record<string, unknown>>(): Promise<{
-    success?: boolean;
-    error?: string;
-    results?: T[];
-    meta?: { changes?: number; rows_read?: number; rows_written?: number };
-  }>;
-}
-
-export interface AuthSessionDatabase {
-  prepare(query: string): D1PreparedStatement;
-}
-
 export interface AuthEnv {
   SUPABASE_URL?: string;
   SUPABASE_ANON_KEY?: string;
   SUPABASE_SECRET_KEY?: string;
-  AUTH_DB?: AuthSessionDatabase;
 }
 
 export interface SupabaseTokenResponse {

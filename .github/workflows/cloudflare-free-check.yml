@@ -88,13 +88,13 @@ jobs:
             if (attempt < 24) await sleep(10000);
           }
 
-          if (health.status !== "ok" || health.databaseConfigured !== true || health.sessionStoreConfigured !== true) {
+          if (health.status !== "ok" || health.databaseConfigured !== true || health.sessionStrategy !== "supabase-auth-encrypted-cookie") {
             throw new Error("API health check failed: " + JSON.stringify(health));
           }
           if (health.authSecretsConfigured !== true) {
             throw new Error("The server-only Supabase secret is not available in the active Cloudflare deployment.");
           }
-          console.log("PASS /api/health (Supabase public key, privileged server secret and D1 are configured)");
+          console.log("PASS /api/health (Supabase database and encrypted Supabase Auth cookie sessions are configured)");
 
           const locations = await getJson("/api/v1/locations");
           const locationData = locations.data;
