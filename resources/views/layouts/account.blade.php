@@ -171,6 +171,6 @@
     </div>
 </div>
 @livewireScriptConfig
-<script src="{{ asset('vendor/livewire/livewire.min.js') }}" defer></script>
+<script src="{{ asset('vendor/livewire/livewire.min.js') }}" defer onload="if (window.Livewire) window.Livewire.start()"></script>
 </body>
 </html>
