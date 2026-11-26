@@ -70,7 +70,7 @@ jobs:
           }
 
           const health = await getJson("/api/health");
-          if (health.status !== "ok" || health.databaseConfigured !== true) {
+          if (health.status !== "ok" || health.databaseConfigured !== true || health.sessionStoreConfigured !== true) {
             throw new Error("API health check failed: " + JSON.stringify(health));
           }
           console.log("PASS /api/health");

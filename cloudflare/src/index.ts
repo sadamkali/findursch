@@ -9,6 +9,7 @@ export interface Env {
   SUPABASE_URL?: string;
   SUPABASE_ANON_KEY?: string;
   PUBLIC_MEDIA_BASE_URL?: string;
+  AUTH_SESSIONS?: { get(key: string): Promise<string | null> };
 }
 
 const corsHeaders = {

@@ -19,6 +19,10 @@ This is the first Cloudflare-native migration slice. It does not replace the Lar
 
 The API is read-only. It does not expose users, payment data, subscriptions, inquiries, admin operations or school documents.
 
+## Authentication session foundation
+
+A Cloudflare KV namespace named `findursch-auth-sessions-staging` is attached to the staging Pages Functions as `AUTH_SESSIONS`. It is reserved for opaque server-side sessions and short-lived login challenges. The namespace contains no imported users or active sessions yet. KV is on the Workers Free plan, with finite daily read/write/delete quotas; the app must handle quota errors safely and never fall back to client-stored bearer tokens.
+
 ## Pages staging
 
 - Project: findursch-app-staging
