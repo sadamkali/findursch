@@ -86,7 +86,7 @@ Supabase Auth owns account identity, refresh-token sessions, token rotation and 
 - Each `/api/auth/me` call validates the Supabase Auth user and checks that the linked legacy `public.users` row remains active, then reloads current role and permission data.
 - Logout requests Supabase Auth local-scope sign-out and always clears the browser cookie.
 - Admin sessions follow the live `admin_session_timeout_minutes` setting with Laravel's 30-minute minimum (currently 120 minutes). Owner/parent sessions retain the existing 30-day remembered or 1-day non-remembered lifetime.
-- No D1 or KV namespace is used for sessions. The former D1 10-attempts-per-minute login throttle is preserved by a private Supabase PostgreSQL table and a SECURITY DEFINER RPC function. The application stores only an HMAC digest of the Cloudflare connecting IP, never the raw address. Supabase Auth's built-in protections also apply.
+- No D1 or KV namespace is used for sessions. Login throttling runs on Cloudflare through the `LOGIN_RATE_LIMITER` Durable Object namespace. The Pages Function HMACs the Cloudflare connecting IP with the Cloudflare-only `LOGIN_RATE_LIMIT_HMAC_KEY`; each IP digest maps to one SQLite-backed Durable Object that enforces 10 attempts in a rolling 60-second window. Only timestamps are stored in Cloudflare and automatically expired by an alarm. Supabase is not called for rate-limit checks.
 - Rotating the server-only secret invalidates existing encrypted session cookies, so affected users must sign in again.
 
 ## Authorization model

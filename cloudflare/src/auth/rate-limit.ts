@@ -42,7 +42,7 @@ export async function checkLoginRateLimit(
     method: "POST",
     headers: { "Cache-Control": "no-store" },
   });
-  if (!response.ok) {
+  if (!response.ok && response.status !== 429) {
     throw new Error("Cloudflare Durable Object login rate-limit check failed with status " + response.status);
   }
 

@@ -1,3 +1,8 @@
+-- DEPRECATED 27 November 2026: DO NOT EXECUTE OR RE-APPLY.
+-- FindURSCH login throttling now runs in a Cloudflare Durable Object.
+-- The existing Supabase table/function created by this script are currently
+-- retained but are no longer called. Their removal requires separate approval.
+
 -- FindURSCH login rate limiting, replacing the former temporary Cloudflare D1 counter.
 -- The function accepts only a keyed HMAC of the client IP; the raw IP is never stored.
 

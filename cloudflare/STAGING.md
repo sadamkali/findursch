@@ -34,3 +34,5 @@
 - Public API routes are GET-only and expose only records permitted by existing Supabase anon-role RLS policies.
 - The encrypted Supabase secret remains server-side only. The browser receives an encrypted HttpOnly cookie, not Supabase tokens.
 - Do not direct production traffic to this staging project until login/session lifecycle, role/permission checks, admin two-step flow, dashboards and required Laravel features have been migrated and tested.
+
+- The legacy Supabase rate-limit table/RPC created during an earlier iteration are not called by this deployment. They remain in the database, unchanged, pending separate explicit approval before cleanup.
