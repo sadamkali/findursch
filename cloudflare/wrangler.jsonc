@@ -12,13 +12,10 @@
     "not_found_handling": "single-page-application"
   },
   "vars": {
+    "SUPABASE_URL": "https://gpsfttpeikatxszswljo.supabase.co",
     "PUBLIC_MEDIA_BASE_URL": "https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev"
   },
   "observability": {
     "enabled": true
   }
-  // Add after creating the Hyperdrive configuration in Cloudflare:
-  // "hyperdrive": [
-  //   { "binding": "HYPERDRIVE", "id": "YOUR_HYPERDRIVE_ID" }
-  // ]
 }
