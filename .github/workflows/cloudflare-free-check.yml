@@ -42,25 +42,35 @@ jobs:
         run: npm run typecheck
 
   staging-api-smoke-tests:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Check deployed Cloudflare staging API and auth boundary
+      - name: Check deployed Cloudflare staging API and server-side Supabase access
         env:
-          STAGING_URL: https://79d0d7ba.findursch-app-staging.pages.dev
+          STAGING_URL: https://findursch-app-staging.pages.dev
         run: |
           node --input-type=module <<'NODE'
           const base = process.env.STAGING_URL;
           const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+          async function requestJson(path, options = {}) {
+            const response = await fetch(new URL(path, base), {
+              ...options,
+              headers: {
+                Accept: "application/json",
+                ...(options.headers || {})
+              },
+              signal: AbortSignal.timeout(12000)
+            });
+            const body = await response.json().catch(() => null);
+            return { response, body };
+          }
+
           async function getJson(path, attempts = 24) {
             let lastError;
             for (let attempt = 1; attempt <= attempts; attempt++) {
               try {
-                const response = await fetch(new URL(path, base), {
-                  headers: { Accept: "application/json" },
-                  signal: AbortSignal.timeout(12000)
-                });
-                const body = await response.json().catch(() => null);
+                const { response, body } = await requestJson(path);
                 if (response.ok) return body;
                 lastError = new Error(path + " returned HTTP " + response.status + ": " + JSON.stringify(body));
               } catch (error) {
@@ -71,14 +81,20 @@ jobs:
             throw lastError || new Error(path + " did not become available");
           }
 
-          const health = await getJson("/api/health");
+          let health;
+          for (let attempt = 1; attempt <= 24; attempt++) {
+            health = await getJson("/api/health");
+            if (health.authSecretsConfigured === true) break;
+            if (attempt < 24) await sleep(10000);
+          }
+
           if (health.status !== "ok" || health.databaseConfigured !== true || health.sessionStoreConfigured !== true) {
             throw new Error("API health check failed: " + JSON.stringify(health));
           }
-          if (health.authSecretsConfigured !== false) {
-            throw new Error("Staging auth secret should remain absent until controlled account import.");
+          if (health.authSecretsConfigured !== true) {
+            throw new Error("The server-only Supabase secret is not available in the active Cloudflare deployment.");
           }
-          console.log("PASS /api/health (Supabase anon + D1 bound; privileged auth secret withheld)");
+          console.log("PASS /api/health (Supabase public key, privileged server secret and D1 are configured)");
 
           const locations = await getJson("/api/v1/locations");
           const locationData = locations.data;
@@ -121,21 +137,24 @@ jobs:
           }
           console.log("PASS /api/auth/me rejects unauthenticated visitors");
 
-          const login = await fetch(new URL("/api/auth/login", base), {
+          // This reserved test address must never match a real account. A 422 response
+          // proves the Worker successfully queried the private users table with its
+          // server-only Supabase key; a 503 indicates a configuration or DB problem.
+          const login = await requestJson("/api/auth/login", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Accept: "application/json",
               Origin: base
             },
-            body: JSON.stringify({ login: "migration-smoke@example.invalid", password: "not-a-real-password" }),
-            signal: AbortSignal.timeout(12000)
+            body: JSON.stringify({ login: "migration-smoke@example.invalid", password: "not-a-real-password" })
           });
-          const loginBody = await login.json().catch(() => null);
-          if (login.status !== 503 || !String(loginBody?.message || "").includes("server-only Supabase secret key")) {
-            throw new Error("Auth login did not fail closed while SUPABASE_SECRET_KEY is absent: HTTP " + login.status);
+          if (login.response.status !== 422 || !String(login.body?.message || "").includes("sign-in details are incorrect")) {
+            throw new Error("Server-side Supabase account lookup did not complete safely: HTTP " + login.response.status + " " + JSON.stringify(login.body));
           }
-          console.log("PASS /api/auth/login fails closed without privileged server secret");
+          if (login.response.headers.get("set-cookie")?.includes("findursch_session=")) {
+            throw new Error("A smoke-test login unexpectedly created a session cookie.");
+          }
+          console.log("PASS /api/auth/login can query private legacy users and rejects the reserved test identity");
 
           const logout = await fetch(new URL("/api/auth/logout", base), {
             method: "POST",
@@ -147,5 +166,5 @@ jobs:
           }
           console.log("PASS /api/auth/logout clears the session cookie");
 
-          console.log("All Cloudflare staging API and auth-boundary smoke tests passed.");
+          console.log("All Cloudflare staging API and Supabase secret smoke tests passed.");
           NODE
