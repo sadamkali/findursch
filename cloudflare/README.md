@@ -52,7 +52,7 @@ Supabase Auth is the session authority and owns refresh-token sessions. The Clou
 - Logout requests Supabase Auth local-scope revocation and always clears the browser cookie.
 - Rotating the server-only secret invalidates existing encrypted cookies, so users will need to sign in again.
 
-No D1 or KV binding is used for sessions. Credential-attempt protections are handled by Supabase Auth's configured protections; Cloudflare Turnstile or edge rate-limit hardening can be added in a later security phase.
+No D1 or KV binding is used for sessions. The Laravel login throttle is preserved at 10 attempts per connecting IP per 60-second window by a private Supabase PostgreSQL function. Only an HMAC of the connecting IP is stored in Supabase; Supabase Auth's own protections also remain active.
 
 ## Cloudflare staging
 

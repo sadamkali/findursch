@@ -1,5 +1,5 @@
 import type { AuthEnv, LegacyAppUser } from "./types";
-import { AuthConfigurationError, SupabaseRequestError, assertAuthConfigured, enforceLegacyAdminCountryRule, findLegacyUser, getSupabaseUser, loadAuthorization, loadLegacyUser, readBooleanSetting, readIntegerSetting, resolveWorkspace, signInWithPassword } from "./supabase";
+import { AuthConfigurationError, SupabaseRequestError, assertAuthConfigured, checkLoginRateLimit, enforceLegacyAdminCountryRule, findLegacyUser, getSupabaseUser, loadAuthorization, loadLegacyUser, readBooleanSetting, readIntegerSetting, resolveWorkspace, signInWithPassword } from "./supabase";
 import { clearSessionCookie, createStoredSession, readStoredSession } from "./session";
 import type { StoredAuthSession } from "./types";
 
@@ -67,6 +67,19 @@ async function login(request: Request, env: AuthEnv): Promise<Response> {
       return json({ message: "Cloudflare sign-in is not fully configured. The server-only Supabase secret key is required." }, 503);
     }
     return json({ message: "Sign-in is temporarily unavailable. Please try again." }, 503);
+  }
+
+  try {
+    const rate = await checkLoginRateLimit(env, request);
+    if (!rate.allowed) {
+      return json(
+        { message: "Too many sign-in attempts. Please wait before trying again." },
+        429,
+        { "Retry-After": String(rate.retryAfterSeconds) },
+      );
+    }
+  } catch {
+    return json({ message: "Sign-in protection is temporarily unavailable. Please try again shortly." }, 503);
   }
 
   let body: unknown;

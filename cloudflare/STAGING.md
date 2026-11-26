@@ -11,6 +11,7 @@
 - Pages Functions enabled
 - Supabase project: `findursch` (`gpsfttpeikatxszswljo`, eu-west-1)
 - Session strategy: Supabase Auth refresh-token session, carried in an AES-GCM encrypted HttpOnly cookie.
+- Login throttle: 10 attempts per Cloudflare connecting IP per 60 seconds, counted by a restricted Supabase PostgreSQL function; only HMAC digests are stored.
 - No D1 or KV binding is required for authentication.
 - Production variables: `SUPABASE_URL`, `PUBLIC_MEDIA_BASE_URL`
 - Production encrypted Pages secrets: `SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`

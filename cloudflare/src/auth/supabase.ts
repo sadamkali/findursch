@@ -4,6 +4,8 @@ import type {
   SupabaseTokenResponse,
 } from "./types";
 
+const encoder = new TextEncoder();
+
 export class AuthConfigurationError extends Error {
   constructor(message: string) {
     super(message);
@@ -37,6 +39,57 @@ export function assertAuthConfigured(env: AuthEnv): void {
 
 async function responseBody(response: Response): Promise<unknown> {
   return response.json().catch(() => null);
+}
+
+export async function checkLoginRateLimit(
+  env: AuthEnv,
+  request: Request,
+): Promise<{ allowed: boolean; retryAfterSeconds: number }> {
+  assertAuthConfigured(env);
+  const clientIp = request.headers.get("CF-Connecting-IP");
+  if (!clientIp) throw new Error("Cloudflare did not provide the connecting IP address.");
+
+  const secretKey = env.SUPABASE_SECRET_KEY as string;
+  const hmacKey = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secretKey),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const digest = new Uint8Array(
+    await crypto.subtle.sign("HMAC", hmacKey, encoder.encode(clientIp)),
+  );
+  const ipHash = Array.from(digest, byte => byte.toString(16).padStart(2, "0")).join("");
+
+  const response = await fetch(baseUrl(env) + "/rest/v1/rpc/findursch_check_login_rate_limit", {
+    method: "POST",
+    headers: {
+      apikey: secretKey,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ p_ip_hash: ipHash }),
+    cache: "no-store",
+    signal: AbortSignal.timeout(8000),
+  });
+  const body = await responseBody(response);
+  if (!response.ok) {
+    throw new SupabaseRequestError("Supabase login rate-limit check failed.", response.status, body);
+  }
+
+  const row = (Array.isArray(body) ? body[0] : body) as {
+    allowed?: unknown;
+    retry_after_seconds?: unknown;
+  } | null;
+  if (!row || typeof row.allowed !== "boolean") {
+    throw new Error("Supabase returned an invalid login rate-limit response.");
+  }
+  const retry = Number(row.retry_after_seconds);
+  return {
+    allowed: row.allowed,
+    retryAfterSeconds: Number.isFinite(retry) ? Math.max(1, Math.floor(retry)) : 60,
+  };
 }
 
 export async function adminRest<T>(

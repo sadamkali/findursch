@@ -35,3 +35,17 @@ The findursch-app-staging Pages project has these Production environment values 
 - PUBLIC_MEDIA_BASE_URL (plain text): https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev
 
 The key is used only by Pages Functions. It is not bundled into JavaScript or returned to visitors. The service_role key is not used.
+
+
+## Private login rate limit
+
+The `findursch_login_rate_limits.sql` migration has been applied to the existing production FindURSCH project.
+
+- Stores only a keyed HMAC-SHA256 digest of the Cloudflare connecting IP.
+- Enforces 10 login attempts per 60-second window per IP, with a retry-after value.
+- Uses a SECURITY DEFINER RPC function callable only by `service_role`.
+- RLS is enabled and direct access is revoked from PUBLIC, `anon`, `authenticated`, and `service_role`; the function owner performs the atomic counter update.
+- Old counters older than 24 hours are cleaned during login checks.
+- The Cloudflare Pages Function sends the encrypted Supabase secret key in the `apikey` header only; it is never sent as an Authorization bearer token.
+
+The runtime server secret is `SUPABASE_SECRET_KEY` (an encrypted Pages Function secret). It is required for private legacy account lookups, role/permission queries, the restricted rate-limit RPC and the encrypted session cookie. The Supabase database itself remains hosted in Supabase.
