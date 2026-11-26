@@ -1,5 +1,5 @@
 import type { AuthEnv, LegacyAppUser } from "./types";
-import { assertAuthConfigured, enforceLegacyAdminCountryRule, findLegacyUser, getSupabaseUser, loadAuthorization, loadLegacyUser, readBooleanSetting, readIntegerSetting, resolveWorkspace, signInWithPassword } from "./supabase";
+import { AuthConfigurationError, SupabaseRequestError, assertAuthConfigured, enforceLegacyAdminCountryRule, findLegacyUser, getSupabaseUser, loadAuthorization, loadLegacyUser, readBooleanSetting, readIntegerSetting, resolveWorkspace, signInWithPassword } from "./supabase";
 import { checkLoginRateLimit, clearSessionCookie, createStoredSession, destroyStoredSession, readStoredSession, sessionCookieValue } from "./session";
 import type { StoredAuthSession } from "./types";
 
@@ -73,6 +73,25 @@ async function login(request: Request, env: AuthEnv): Promise<Response> {
   if (!requestIsSameOrigin(request)) return json({ message: "Cross-origin sign-in requests are not allowed." }, 403);
   if (!env.AUTH_DB) return json({ message: "The session store is not available." }, 503);
 
+  try {
+    assertAuthConfigured(env);
+    const clientIp = request.headers.get("CF-Connecting-IP") ?? "unknown";
+    const rateLimit = await checkLoginRateLimit(env, clientIp);
+    if (!rateLimit.allowed) {
+      return json(
+        { message: "Too many sign-in attempts. Please wait before trying again." },
+        429,
+        { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      );
+    }
+  } catch (error) {
+    if (error instanceof AuthConfigurationError) {
+      return json({ message: "Cloudflare sign-in is not fully configured. The server-only Supabase secret key is required." }, 503);
+    }
+    console.error("FindURSCH login throttle is unavailable.");
+    return json({ message: "Sign-in is temporarily unavailable. Please try again." }, 503);
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -90,17 +109,6 @@ async function login(request: Request, env: AuthEnv): Promise<Response> {
   }
 
   try {
-    assertAuthConfigured(env);
-    const clientIp = request.headers.get("CF-Connecting-IP") ?? "unknown";
-    const rateLimit = await checkLoginRateLimit(env, clientIp);
-    if (!rateLimit.allowed) {
-      return json(
-        { message: "Too many sign-in attempts. Please wait before trying again." },
-        429,
-        { "Retry-After": String(rateLimit.retryAfterSeconds) },
-      );
-    }
-
     const legacyUser = await findLegacyUser(env, identifier);
     if (!legacyUser) return json({ message: "The supplied sign-in details are incorrect." }, 422);
     if (legacyUser.status !== "active") {
@@ -144,8 +152,11 @@ async function login(request: Request, env: AuthEnv): Promise<Response> {
       redirectTo: auth.redirectTo,
     }, 200, { "Set-Cookie": created.cookie });
   } catch (error) {
-    if (error instanceof Error && error.name === "AuthConfigurationError") {
+    if (error instanceof AuthConfigurationError) {
       return json({ message: "Cloudflare sign-in is not fully configured. The server-only Supabase secret key is required." }, 503);
+    }
+    if (error instanceof SupabaseRequestError && [400, 401, 422].includes(error.status)) {
+      return json({ message: "The supplied sign-in details are incorrect." }, 422);
     }
     console.error("FindURSCH sign-in failed.");
     return json({ message: "Sign-in is temporarily unavailable. Please try again." }, 503);

@@ -202,6 +202,9 @@ export async function readStoredSession(
   ).bind(id).first<Record<string, unknown>>();
   if (!row) return null;
 
+  // A temporarily missing deployment secret must fail closed without deleting valid rows.
+  if (!env.SUPABASE_SECRET_KEY) throw new Error("Session encryption key is unavailable.");
+
   let value: StoredAuthSession | null;
   try {
     value = await parseSession(row, env);
