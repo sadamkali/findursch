@@ -84,7 +84,7 @@ jobs:
           let health;
           for (let attempt = 1; attempt <= 24; attempt++) {
             health = await getJson("/api/health");
-            if (health.authSecretsConfigured === true) break;
+            if (health.authSecretsConfigured === true && health.sessionStrategy === "supabase-auth-encrypted-cookie") break;
             if (attempt < 24) await sleep(10000);
           }
 
