@@ -93,9 +93,9 @@ A dedicated Cloudflare D1 database has been created for staging:
 
 Planned session model:
 - The browser receives only a cryptographically random opaque session ID in an HttpOnly, Secure, SameSite=Lax, host-only cookie.
-- Supabase access and refresh tokens are retained server-side in the D1 `auth_sessions` table, not returned to browser JavaScript.
+- Supabase access and refresh tokens are AES-GCM encrypted before storage in the D1 `auth_sessions` table, not returned to browser JavaScript. The AES-256 key is derived with HKDF from `SUPABASE_SECRET_KEY`; rotating the secret invalidates existing sessions safely.
 - Admin sessions use the live `admin_session_timeout_minutes` setting, preserving Laravel's 30-minute minimum (currently 120 minutes); owner sessions enforce the selected 30-day or 1-day lifetime.
-- Login is rate-limited to 10 attempts per connecting IP per 60-second window using an atomic D1 upsert. Only an HMAC of the IP is stored. The limiter returns HTTP 429 with `Retry-After` after the tenth attempt.
+- Login is rate-limited before credential parsing to 10 attempts per connecting IP per 60-second window using an atomic D1 upsert. Only an HMAC of the IP is stored. The limiter returns HTTP 429 with `Retry-After` after the tenth attempt.
 - Session refresh, logout and session reads fail closed if D1 storage or token refresh is unavailable.
 - KV quota is finite on Free. The code must handle write/read quota errors, avoid per-request writes, and never downgrade to a bearer token in localStorage.
 - The service-role/secret key is used only by the trusted Pages Function for controlled user/role lookups. Public directory routes continue to use the anon key and RLS.

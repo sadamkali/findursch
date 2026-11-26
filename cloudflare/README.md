@@ -21,7 +21,11 @@ The API is read-only. It does not expose users, payment data, subscriptions, inq
 
 ## Authentication session foundation
 
-A dedicated Cloudflare D1 database named `findursch-auth-sessions` is attached to the staging Pages Functions as `AUTH_DB`. It is located in the EU, has read replication disabled, and stores only opaque server-side auth sessions. Its `auth_sessions` table and expiry indexes are created; it contains no active sessions. D1 is included on Cloudflare Workers Free within its daily row-read/write and storage allowances. Browser clients receive only an opaque HttpOnly cookie; Supabase access and refresh tokens remain in D1.
+A dedicated Cloudflare D1 database named `findursch-auth-sessions` is attached to the staging Pages Functions as `AUTH_DB`. It is located in the EU, has read replication disabled, and stores only opaque server-side auth sessions. Its `auth_sessions` table and expiry indexes are created; it contains no active sessions. D1 is included on Cloudflare Workers Free within its daily row-read/write and storage allowances. Browser clients receive only an opaque HttpOnly cookie. Supabase access and refresh tokens are AES-GCM encrypted before they are written to D1; the AES-256 key is derived with HKDF from the server-only `SUPABASE_SECRET_KEY`. Rotating/removing that secret invalidates stored sessions rather than exposing old tokens. Login attempts are rate-limited to 10 per connecting IP per 60-second window using an atomic D1 upsert; only an HMAC of the IP is stored. Administrator session duration reads the live `admin_session_timeout_minutes` setting (currently 120 minutes, minimum 30); owner/parent sessions follow the remembered 30-day or non-remembered 1-day rule.
+
+## Auth staging status
+
+The sign-in endpoints are implemented but intentionally fail closed until `SUPABASE_SECRET_KEY` (a new `sb_secret_...` key) is added as a Cloudflare Pages **secret** and the one-time legacy Auth import is run. The secret key is opaque, so the Worker sends it in the `apikey` header only. It is not committed to GitHub and must never be exposed to browser code. No Auth users have been imported and no user passwords or public user records have been changed.
 
 ## Pages staging
 
