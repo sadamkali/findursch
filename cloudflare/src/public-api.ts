@@ -64,7 +64,7 @@ const optionalNumber = (value: string | null): number | undefined => {
 };
 
 const mediaUrl = (env: PublicApiEnv, media: MediaRecord | null): string | null => {
-  const base = env.PUBLIC_MEDIA_BASE_URL?.replace(/\/+$/, "");
+  const base = (env.PUBLIC_MEDIA_BASE_URL ?? "https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev").replace(/\/+$/, "");
   if (!base || !media) return null;
   return `${base}/${media.id}/${encodeURIComponent(media.file_name)}`;
 };

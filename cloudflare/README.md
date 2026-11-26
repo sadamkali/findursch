@@ -10,6 +10,12 @@ This folder is the first Cloudflare-native migration slice. It does not replace 
 - Public images: the existing public R2 media origin.
 - Private documents and school-owner/admin operations: separate authenticated migration phases; do not make private files public.
 
+## Cloudflare Pages staging
+
+A separate Pages project named `findursch-app-staging` is intended to build this branch from the `cloudflare/` directory. It will use the branch `cloudflare-free-migration` as its staging production branch, with previews disabled. The existing `findursch-static` Pages project and `static.findursch.riotinvestments.space` remain unchanged.
+
+Pages Functions serve `/api/*` from `functions/api/[[path]].ts`; static requests are served directly from `public-site/dist`. The Pages Functions deployment uses `nodejs_compat` and a 10 ms CPU limit. Hyperdrive is added later after a restricted database login is configured.
+
 ## Current first-slice routes
 
 - `GET /api/health` — Worker health and whether a Hyperdrive binding has been configured.
