@@ -44,7 +44,7 @@ jobs:
     steps:
       - name: Check deployed Cloudflare staging API
         env:
-          STAGING_URL: https://findursch-app-staging.pages.dev
+          STAGING_URL: https://fe6ca89a.findursch-app-staging.pages.dev
         run: |
           node --input-type=module <<'NODE'
           const base = process.env.STAGING_URL;
