@@ -42,7 +42,8 @@ async function restGet<T>(
   const key = env.SUPABASE_ANON_KEY;
   if (!key) throw new Error("Supabase public API key is not configured.");
 
-  const url = supabaseUrl(env) + "/rest/v1/" + table + (params.size ? "?" + params.toString() : "");
+  const queryString = params.toString();
+  const url = supabaseUrl(env) + "/rest/v1/" + table + (queryString ? "?" + queryString : "");
   const headers = new Headers({
     apikey: key,
     Authorization: "Bearer " + key,

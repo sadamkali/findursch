@@ -5,8 +5,9 @@ interface AssetsBinding {
 }
 
 export interface Env {
-  HYPERDRIVE?: { connectionString: string };
   ASSETS: AssetsBinding;
+  SUPABASE_URL?: string;
+  SUPABASE_ANON_KEY?: string;
   PUBLIC_MEDIA_BASE_URL?: string;
 }
 
