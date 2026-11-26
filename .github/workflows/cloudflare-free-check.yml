@@ -157,6 +157,31 @@ jobs:
           if (login.response.headers.get("set-cookie")?.includes("findursch_session=")) {
             throw new Error("A smoke-test login unexpectedly created a session cookie.");
           }
+
+          // The first reserved-identity login above is attempt 1. Nine malformed
+          // requests fill the remaining allowed slots without querying Supabase.
+          for (let attempt = 0; attempt < 9; attempt++) {
+            const malformed = await fetch(new URL("/api/auth/login", base), {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Origin: base },
+              body: "{",
+              signal: AbortSignal.timeout(12000)
+            });
+            if (malformed.status !== 400) {
+              throw new Error("Expected attempt " + (attempt + 2) + " to pass the limiter before the threshold, got HTTP " + malformed.status);
+            }
+          }
+          const blockedAttempt = await fetch(new URL("/api/auth/login", base), {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Origin: base },
+            body: "{",
+            signal: AbortSignal.timeout(12000)
+          });
+          const retryAfter = Number(blockedAttempt.headers.get("Retry-After"));
+          if (blockedAttempt.status !== 429 || !Number.isSafeInteger(retryAfter) || retryAfter < 1 || retryAfter > 60) {
+            throw new Error("The 11th login attempt must return HTTP 429 with a 1–60 second Retry-After header; got HTTP " + blockedAttempt.status);
+          }
+          console.log("PASS Cloudflare login limiter allows 10 attempts and blocks the 11th with Retry-After");
           console.log("PASS /api/auth/login can query private legacy users and rejects the reserved test identity");
 
           const logout = await fetch(new URL("/api/auth/logout", base), {
