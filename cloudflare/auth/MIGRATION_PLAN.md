@@ -82,16 +82,18 @@ The import script creates Auth identities with `email_confirm: true` so their si
 
 ## Cloudflare session architecture
 
-A Free Workers KV namespace has been created for staging:
+A dedicated Cloudflare D1 database has been created for staging:
 
-- Namespace: `findursch-auth-sessions-staging`
-- Binding: `AUTH_SESSIONS`
-- Binding is attached to `findursch-app-staging` production Pages Functions.
-- The namespace is currently empty.
+- Database: `findursch-auth-sessions`
+- Database ID: `d9cf085f-35af-4b2e-be5b-991b4241c51f`
+- Region: EU (`EEUR`), jurisdiction `eu`
+- Binding: `AUTH_DB`, attached to `findursch-app-staging` production Pages Functions.
+- Read replication is disabled so all session queries use the primary database.
+- The `auth_sessions` table and expiry indexes have been created; no active sessions exist.
 
 Planned session model:
 - The browser receives only a cryptographically random opaque session ID in an HttpOnly, Secure, SameSite=Lax, host-only cookie.
-- Supabase access and refresh tokens are retained server-side in KV, not returned to browser JavaScript.
+- Supabase access and refresh tokens are retained server-side in the D1 `auth_sessions` table, not returned to browser JavaScript.
 - Admin sessions enforce an absolute 120-minute maximum; owner sessions enforce the selected 30-day or 1-day lifetime.
 - Login, refresh, logout, handoff and session reads are rate-limited and fail closed if session storage or token refresh is unavailable.
 - KV quota is finite on Free. The code must handle write/read quota errors, avoid per-request writes, and never downgrade to a bearer token in localStorage.

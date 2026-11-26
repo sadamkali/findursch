@@ -1,4 +1,5 @@
 import { handlePublicApi } from "./public-api";
+import type { AuthSessionDatabase } from "./auth/types";
 
 interface AssetsBinding {
   fetch(request: Request): Promise<Response>;

@@ -21,7 +21,7 @@ The API is read-only. It does not expose users, payment data, subscriptions, inq
 
 ## Authentication session foundation
 
-A Cloudflare KV namespace named `findursch-auth-sessions-staging` is attached to the staging Pages Functions as `AUTH_SESSIONS`. It is reserved for opaque server-side sessions and short-lived login challenges. The namespace contains no imported users or active sessions yet. KV is on the Workers Free plan, with finite daily read/write/delete quotas; the app must handle quota errors safely and never fall back to client-stored bearer tokens.
+A dedicated Cloudflare D1 database named `findursch-auth-sessions` is attached to the staging Pages Functions as `AUTH_DB`. It is located in the EU, has read replication disabled, and stores only opaque server-side auth sessions. Its `auth_sessions` table and expiry indexes are created; it contains no active sessions. D1 is included on Cloudflare Workers Free within its daily row-read/write and storage allowances. Browser clients receive only an opaque HttpOnly cookie; Supabase access and refresh tokens remain in D1.
 
 ## Pages staging
 

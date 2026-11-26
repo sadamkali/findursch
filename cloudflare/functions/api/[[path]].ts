@@ -1,10 +1,12 @@
 import { handlePublicApi } from "../../src/public-api";
+import type { AuthSessionDatabase } from "../../src/auth/types";
 
 interface PagesEnv {
   SUPABASE_URL?: string;
   SUPABASE_ANON_KEY?: string;
+  SUPABASE_SECRET_KEY?: string;
   PUBLIC_MEDIA_BASE_URL?: string;
-  AUTH_SESSIONS?: { get(key: string): Promise<string | null> };
+  AUTH_DB?: AuthSessionDatabase;
 }
 
 interface PagesContext {
@@ -20,19 +22,16 @@ const corsHeaders = {
 };
 
 export async function onRequest({ request, env }: PagesContext): Promise<Response> {
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders });
+  if (request.method !== "GET") {
+    return new Response(JSON.stringify({ error: "method_not_allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
+    });
   }
 
   const response = await handlePublicApi(request, env);
   const headers = new Headers(response.headers);
-  for (const [name, value] of Object.entries(corsHeaders)) {
-    headers.set(name, value);
-  }
-
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
+  for (const [name, value] of Object.entries(corsHeaders)) headers.set(name, value);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }

@@ -8,7 +8,7 @@
 - Output: public-site/dist
 - Preview deployments: disabled
 - Pages Functions CPU limit: 10 ms
-- KV binding: `AUTH_SESSIONS` → `findursch-auth-sessions-staging`
+- D1 binding: `AUTH_DB` → `findursch-auth-sessions` (EU jurisdiction; read replication disabled)
 - Supabase REST is used; Hyperdrive and PostgreSQL drivers are not required.
 - Supabase URL and anon key are Pages Function environment values; the anon key is set as a secret and is never embedded in the frontend.
 - Custom domains: none.
