@@ -46,7 +46,7 @@ jobs:
     steps:
       - name: Check deployed Cloudflare staging API and auth boundary
         env:
-          STAGING_URL: https://db2df30b.findursch-app-staging.pages.dev
+          STAGING_URL: https://79d0d7ba.findursch-app-staging.pages.dev
         run: |
           node --input-type=module <<'NODE'
           const base = process.env.STAGING_URL;
