@@ -56,7 +56,10 @@ class Setting extends Model
 
     protected static function booted(): void
     {
-        $forgetPublicSiteSettings = static fn () => Cache::forget(self::PUBLIC_SITE_SETTING_CACHE_KEY);
+        $forgetPublicSiteSettings = static function (): void {
+            Cache::forget(self::PUBLIC_SITE_SETTING_CACHE_KEY);
+            Cache::forget('findursch:homepage-public-content:v1');
+        };
 
         static::saved($forgetPublicSiteSettings);
         static::deleted($forgetPublicSiteSettings);
