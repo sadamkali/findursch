@@ -1,27 +1,31 @@
-# Supabase to Cloudflare Hyperdrive (read-only staging role)
+# Supabase public API permissions
 
-This SQL prepares a least-privilege database login for the Cloudflare public API.
+The Cloudflare staging public directory reads the existing FindURSCH PostgreSQL database through the Supabase REST API using the anon/publishable key only.
 
-## Permissions
+## Before running this SQL
 
-- Creates findursch_cloudflare_ro without superuser, database creation, role creation or RLS bypass.
-- Grants SELECT only on columns used by the public directory and public school profiles.
-- Adds RLS SELECT policies for verified, active schools and their public related data.
-- Does not grant access to users, roles, permissions, inquiries, payments, subscriptions, school documents, imports, exports or admin tables.
-- Does not change, delete, or migrate application records.
+This file changes permissions and RLS policies in the live Supabase project. Do not run it until you have reviewed the exact grants below and approved enabling anonymous read-only access for the public school directory.
 
-## Apply only after approval
+The script:
+- Grants the anon database role SELECT on a defined list of public school, taxonomy, curriculum, programme, facility, fee and media columns only.
+- Adds RLS policies allowing only active + verified school records and their associated public listing data.
+- Limits public media to image files in cover, badge and gallery collections.
+- Does not grant access to users, roles, permissions, payments, subscriptions, inquiries, school documents, imports, exports, or admin tables.
+- Does not insert, update or delete application records.
 
-1. Open Supabase project findursch and go to SQL Editor.
-2. Paste create_public_api_role.sql.
-3. Replace REPLACE_WITH_A_LONG_RANDOM_PASSWORD with a new random password. Do not commit it or paste it in chat.
-4. Review the SQL and run it once. It requires a database role that can create roles and manage grants/policies.
-5. Keep the password private; use the role name findursch_cloudflare_ro when creating Hyperdrive.
+## Apply
 
-The script is a first-time setup script and is not run by this repository or by Cloudflare deployments.
+1. Open the findursch project in Supabase and use SQL Editor.
+2. Review public_api_anon_policies.sql.
+3. Run it only after approval. It is safe to re-run because the policy names are dropped and recreated; the column grants are additive.
+4. Confirm the anon role can SELECT only the intended public columns and that hidden/pending schools remain invisible.
 
-## Hyperdrive setup
+## Cloudflare Pages environment
 
-After the database role exists, create a Hyperdrive configuration for the Supabase Direct PostgreSQL connection, not the Supavisor pooler. Use the host, port and database shown by Supabase Direct connection details, the findursch_cloudflare_ro user, the password you set, and required TLS/SSL.
+Set the following in the findursch-app-staging Pages project, under Settings -> Variables and Secrets -> Production:
 
-Bind the Hyperdrive configuration to the Cloudflare Pages project as HYPERDRIVE for the production environment. Do not put database credentials in build variables or source files.
+- SUPABASE_URL (plain text): https://gpsfttpeikatxszswljo.supabase.co
+- SUPABASE_ANON_KEY (secret): the active legacy anon key from the Supabase project's API Keys page. Do not use service_role or a secret key.
+- PUBLIC_MEDIA_BASE_URL (plain text): https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev
+
+The key is used only by Pages Functions. It is not bundled into JavaScript or returned to visitors. Keep service-role keys out of Cloudflare Pages entirely.
