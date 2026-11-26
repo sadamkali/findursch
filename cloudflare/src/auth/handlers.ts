@@ -1,5 +1,6 @@
 import type { AuthEnv, LegacyAppUser } from "./types";
-import { AuthConfigurationError, SupabaseRequestError, assertAuthConfigured, checkLoginRateLimit, enforceLegacyAdminCountryRule, findLegacyUser, getSupabaseUser, loadAuthorization, loadLegacyUser, readBooleanSetting, readIntegerSetting, resolveWorkspace, signInWithPassword } from "./supabase";
+import { AuthConfigurationError, SupabaseRequestError, assertAuthConfigured, enforceLegacyAdminCountryRule, findLegacyUser, getSupabaseUser, loadAuthorization, loadLegacyUser, readBooleanSetting, readIntegerSetting, resolveWorkspace, signInWithPassword } from "./supabase";
+import { checkLoginRateLimit } from "./rate-limit";
 import { clearSessionCookie, createStoredSession, readStoredSession } from "./session";
 import type { StoredAuthSession } from "./types";
 

@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "findursch-login-rate-limiter",
+  "main": "src/login-rate-limiter-worker.ts",
+  "compatibility_date": "2026-11-26",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["LoginRateLimiter"]
+    }
+  ]
+}

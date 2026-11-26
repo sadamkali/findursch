@@ -2,6 +2,8 @@ export interface PublicApiEnv {
   SUPABASE_URL?: string;
   SUPABASE_ANON_KEY?: string;
   SUPABASE_SECRET_KEY?: string;
+  LOGIN_RATE_LIMIT_HMAC_KEY?: string;
+  LOGIN_RATE_LIMITER?: unknown;
   PUBLIC_MEDIA_BASE_URL?: string;
 }
 
@@ -163,7 +165,8 @@ export async function handlePublicApi(
       databaseConfigured: configured(env),
       dataSource: "supabase-rest",
       sessionStrategy: "supabase-auth-encrypted-cookie",
-      loginRateLimitStrategy: "supabase-postgres-hmac-10-per-minute",
+      loginRateLimitStrategy: "cloudflare-durable-object-sliding-window-10-per-60s",
+      loginRateLimitConfigured: Boolean(env.LOGIN_RATE_LIMIT_HMAC_KEY && env.LOGIN_RATE_LIMITER),
       authSecretsConfigured: Boolean(env.SUPABASE_SECRET_KEY),
     });
   }

@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit",
     "deploy:dry-run": "npm run build:site && wrangler deploy --dry-run",
     "deploy": "npm run build:site && wrangler deploy",
+    "deploy:rate-limiter": "wrangler deploy --config login-rate-limiter.wrangler.jsonc",
     "auth:import-users": "node scripts/import-legacy-auth-users.mjs"
   },
   "devDependencies": {

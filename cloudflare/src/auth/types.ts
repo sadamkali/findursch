@@ -1,7 +1,18 @@
+export interface LoginRateLimiterStub {
+  fetch(input: string, init?: RequestInit): Promise<Response>;
+}
+
+export interface LoginRateLimiterNamespace {
+  idFromName(name: string): unknown;
+  get(id: unknown): LoginRateLimiterStub;
+}
+
 export interface AuthEnv {
   SUPABASE_URL?: string;
   SUPABASE_ANON_KEY?: string;
   SUPABASE_SECRET_KEY?: string;
+  LOGIN_RATE_LIMIT_HMAC_KEY?: string;
+  LOGIN_RATE_LIMITER?: LoginRateLimiterNamespace;
 }
 
 export interface SupabaseTokenResponse {

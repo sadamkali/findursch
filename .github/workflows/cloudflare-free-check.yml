@@ -84,7 +84,7 @@ jobs:
           let health;
           for (let attempt = 1; attempt <= 24; attempt++) {
             health = await getJson("/api/health");
-            if (health.authSecretsConfigured === true && health.sessionStrategy === "supabase-auth-encrypted-cookie" && health.loginRateLimitStrategy === "supabase-postgres-hmac-10-per-minute") break;
+            if (health.authSecretsConfigured === true && health.sessionStrategy === "supabase-auth-encrypted-cookie" && health.loginRateLimitStrategy === "cloudflare-durable-object-sliding-window-10-per-60s") break;
             if (attempt < 24) await sleep(10000);
           }
 
@@ -93,6 +93,9 @@ jobs:
           }
           if (health.authSecretsConfigured !== true) {
             throw new Error("The server-only Supabase secret is not available in the active Cloudflare deployment.");
+          }
+          if (health.loginRateLimitConfigured !== true) {
+            throw new Error("The Cloudflare Durable Object login limiter or its HMAC secret is not configured.");
           }
           console.log("PASS /api/health (Supabase database and encrypted Supabase Auth cookie sessions are configured)");
 

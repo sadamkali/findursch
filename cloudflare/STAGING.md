@@ -11,8 +11,8 @@
 - Pages Functions enabled
 - Supabase project: `findursch` (`gpsfttpeikatxszswljo`, eu-west-1)
 - Session strategy: Supabase Auth refresh-token session, carried in an AES-GCM encrypted HttpOnly cookie.
-- Login throttle: 10 attempts per Cloudflare connecting IP per 60 seconds, counted by a restricted Supabase PostgreSQL function; only HMAC digests are stored.
-- No D1 or KV binding is required for authentication.
+- Login throttle: Cloudflare Durable Object, 10 attempts per connecting IP in a rolling 60-second window. The Pages Function HMACs the IP with the Cloudflare-only `LOGIN_RATE_LIMIT_HMAC_KEY`; the Durable Object stores only timestamp rows and expires them automatically. No Supabase rate-limit table or RPC is called.
+- No D1 or KV binding is required for authentication sessions. A Cloudflare Durable Object binding is used only for login rate limiting.
 - Production variables: `SUPABASE_URL`, `PUBLIC_MEDIA_BASE_URL`
 - Production encrypted Pages secrets: `SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`
 
