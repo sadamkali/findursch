@@ -76,7 +76,9 @@ Planned migration behavior:
 5. Do not change existing `public.users` IDs, roles, permissions, school ownership references, or other business records.
 6. Make the migration script idempotent: match existing Auth users by the trusted legacy ID/email, report conflicts, and never silently overwrite a different account.
 
-Supabase service/secret keys are required for user import and server-side account lookups. They must be stored only as Cloudflare Pages Function secrets and never be returned to the browser. The current staging project has only the anon key configured; no service/secret key has been added yet.
+Supabase's new secret keys (`sb_secret_...`) are opaque and are not JWTs. Send them in the `apikey` header only; never send them as `Authorization: Bearer`. The auth Worker follows this rule. A secret key is required for user import and server-side account lookups. Store it only as the Cloudflare Pages Function secret `SUPABASE_SECRET_KEY`, never in browser code or GitHub. The current staging project has only the anon key configured; no secret key has been added yet.
+
+The import script creates Auth identities with `email_confirm: true` so their sign-in behavior matches the current Laravel application, which does not block login based on `public.users.email_verified_at`. It does not change that legacy column: it remains null and must continue to be used for any separate business/email-verification indicators. The import is deliberately a separate, one-time operation and has not been run.
 
 ## Cloudflare session architecture
 

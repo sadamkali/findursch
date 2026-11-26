@@ -52,7 +52,6 @@ export async function adminRest<T>(
   const url = baseUrl(env) + "/rest/v1/" + table + (params.size ? "?" + params.toString() : "");
   const headers = new Headers({
     apikey: key,
-    Authorization: "Bearer " + key,
     Accept: "application/json",
   });
   if (body !== undefined) headers.set("Content-Type", "application/json");

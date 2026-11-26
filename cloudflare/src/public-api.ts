@@ -163,6 +163,7 @@ export async function handlePublicApi(
       databaseConfigured: configured(env),
       dataSource: "supabase-rest",
       sessionStoreConfigured: Boolean(env.AUTH_SESSIONS),
+      authSecretsConfigured: Boolean(env.SUPABASE_SECRET_KEY),
     });
   }
 

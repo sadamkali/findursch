@@ -7,7 +7,8 @@
     "build:site": "vite build --config public-site/vite.config.ts",
     "typecheck": "tsc --noEmit",
     "deploy:dry-run": "npm run build:site && wrangler deploy --dry-run",
-    "deploy": "npm run build:site && wrangler deploy"
+    "deploy": "npm run build:site && wrangler deploy",
+    "auth:import-users": "node scripts/import-legacy-auth-users.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
