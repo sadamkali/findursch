@@ -34,7 +34,7 @@ type SchoolDetail = SchoolCard & {
   curricula?: Array<{ id: number; name: string; abbreviation: string }>;
   programs?: Array<{ id: number; name: string; level?: string; duration?: string; description?: string }>;
   facilities?: Array<{ id: number; name: string; category?: string; notes?: string }>;
-  fees?: Array<{ id: number; category: string; label: string; amount: number | string; currency: string; period: string; notes?: string }>;
+  fees?: Array<{ id: number; category: string; label: string; amount: number | string; currency: string; period: string; academic_year?: string | null; notes?: string }>;
   media?: Array<{ id: number; url?: string | null; name?: string }>;
   region?: { name: string; slug: string };
   district?: { name: string; slug: string };
