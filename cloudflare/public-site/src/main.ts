@@ -60,6 +60,16 @@ const escapeHtml = (value: unknown): string =>
     return map[char] ?? char;
   });
 
+const safeExternalUrl = (value: string | null | undefined): string | null => {
+  if (!value) return null;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" || parsed.protocol === "http:" ? parsed.toString() : null;
+  } catch {
+    return null;
+  }
+};
+
 const formatMoney = (value: number | string | null | undefined): string => {
   if (value === null || value === undefined || value === "") return "Ask school";
   const amount = Number(value);

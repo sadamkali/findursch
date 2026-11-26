@@ -184,7 +184,7 @@ async function listSchools(url: URL, env: PublicApiEnv): Promise<Response> {
             (
               SELECT json_build_object('id', m.id, 'file_name', m.file_name)
               FROM media m
-              WHERE m.model_type = 'App\\\\Models\\\\School'
+              WHERE m.model_type LIKE '%School'
                 AND m.model_id = s.id
                 AND m.collection_name = 'cover'
                 AND m.mime_type LIKE 'image/%'
@@ -296,7 +296,7 @@ async function schoolDetail(slug: string, env: PublicApiEnv): Promise<Response> 
               'collection_name', m.collection_name
             ) ORDER BY m.order_column NULLS LAST, m.id)
             FROM media m
-            WHERE m.model_type = 'App\\\\Models\\\\School'
+            WHERE m.model_type LIKE '%School'
               AND m.model_id = s.id
               AND m.collection_name IN ('cover', 'badge', 'gallery')
               AND m.mime_type LIKE 'image/%'
