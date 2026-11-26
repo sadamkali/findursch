@@ -323,3 +323,17 @@ export async function enforceLegacyAdminCountryRule(
 
   return autoApprove ? "allowed" : "blocked";
 }
+
+
+export async function readIntegerSetting(
+  env: AuthEnv,
+  key: string,
+  fallback: number,
+): Promise<number> {
+  const params = new URLSearchParams({ select: "value", key: "eq." + key, limit: "1" });
+  const rows = await adminRest<Array<{ value: string | null }>>(env, "settings", params);
+  const raw = rows[0]?.value;
+  if (raw === null || raw === undefined || !/^-?\d+$/.test(raw)) return fallback;
+  const parsed = Number(raw);
+  return Number.isSafeInteger(parsed) ? parsed : fallback;
+}

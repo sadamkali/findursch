@@ -1,6 +1,6 @@
 import type { AuthEnv, LegacyAppUser } from "./types";
-import { assertAuthConfigured, enforceLegacyAdminCountryRule, findLegacyUser, getSupabaseUser, loadAuthorization, loadLegacyUser, readBooleanSetting, resolveWorkspace, signInWithPassword } from "./supabase";
-import { clearSessionCookie, createStoredSession, destroyStoredSession, readStoredSession, sessionCookieValue } from "./session";
+import { assertAuthConfigured, enforceLegacyAdminCountryRule, findLegacyUser, getSupabaseUser, loadAuthorization, loadLegacyUser, readBooleanSetting, readIntegerSetting, resolveWorkspace, signInWithPassword } from "./supabase";
+import { checkLoginRateLimit, clearSessionCookie, createStoredSession, destroyStoredSession, readStoredSession, sessionCookieValue } from "./session";
 import type { StoredAuthSession } from "./types";
 
 function json(data: unknown, status = 200, headers?: HeadersInit): Response {
@@ -91,6 +91,16 @@ async function login(request: Request, env: AuthEnv): Promise<Response> {
 
   try {
     assertAuthConfigured(env);
+    const clientIp = request.headers.get("CF-Connecting-IP") ?? "unknown";
+    const rateLimit = await checkLoginRateLimit(env, clientIp);
+    if (!rateLimit.allowed) {
+      return json(
+        { message: "Too many sign-in attempts. Please wait before trying again." },
+        429,
+        { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      );
+    }
+
     const legacyUser = await findLegacyUser(env, identifier);
     if (!legacyUser) return json({ message: "The supplied sign-in details are incorrect." }, 422);
     if (legacyUser.status !== "active") {
@@ -103,7 +113,9 @@ async function login(request: Request, env: AuthEnv): Promise<Response> {
       return json({ message: "This account does not have access to the FindURSCH workspace." }, 403);
     }
 
+    let adminTimeoutMinutes = 120;
     if (auth.isAdmin) {
+      adminTimeoutMinutes = Math.max(30, await readIntegerSetting(env, "admin_session_timeout_minutes", 120));
       const requireTwoStep = await readBooleanSetting(env, "require_two_step", false);
       if (requireTwoStep) {
         return json({ message: "Administrator two-step verification is not yet enabled on the Cloudflare sign-in service. Sign-in is blocked until that flow is migrated." }, 503);
@@ -126,7 +138,7 @@ async function login(request: Request, env: AuthEnv): Promise<Response> {
     }
 
     const workspace = auth.isAdmin ? "admin" : (auth.isSchoolOwner ? "owner" : "parent");
-    const created = await createStoredSession(env, tokens, legacyUser.id, workspace, remember);
+    const created = await createStoredSession(env, tokens, legacyUser.id, workspace, remember, adminTimeoutMinutes);
     return json({
       user: publicUser(legacyUser, auth),
       redirectTo: auth.redirectTo,

@@ -144,6 +144,7 @@ export async function createStoredSession(
   legacyUserId: number,
   workspace: "admin" | "owner" | "parent",
   remember: boolean,
+  adminTimeoutMinutes = 120,
 ): Promise<{ id: string; cookie: string }> {
   if (!env.AUTH_DB) throw new Error("Session database is unavailable.");
   if (!tokens.access_token || !tokens.refresh_token || !tokens.user?.id) {
@@ -151,7 +152,7 @@ export async function createStoredSession(
   }
   const now = Date.now();
   const lifetimeSeconds = workspace === "admin"
-    ? 120 * 60
+    ? Math.max(30, Math.floor(adminTimeoutMinutes)) * 60
     : (remember ? 30 * 24 * 60 * 60 : 24 * 60 * 60);
   const absoluteExpiresAt = now + lifetimeSeconds * 1000;
   const value: StoredAuthSession = {
@@ -252,4 +253,62 @@ export async function destroyStoredSession(env: AuthEnv, id: string): Promise<vo
 
 export function sessionCookieValue(request: Request): string | null {
   return cookieValue(request, SESSION_COOKIE);
+}
+
+
+export interface LoginRateLimitResult {
+  allowed: boolean;
+  retryAfterSeconds: number;
+}
+
+async function hashRateLimitIp(env: AuthEnv, ip: string): Promise<string> {
+  if (!env.SUPABASE_SECRET_KEY) throw new Error("Login rate-limit key is unavailable.");
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(env.SUPABASE_SECRET_KEY),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode("FindURSCH login rate limit v1:" + ip));
+  return Array.from(new Uint8Array(signature), (value) => value.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Fixed 60-second window, atomically incremented by D1.
+ * Attempts 1-10 are admitted; attempt 11 is denied.
+ * Only an HMAC of the connecting IP is stored, never the IP itself.
+ */
+export async function checkLoginRateLimit(
+  env: AuthEnv,
+  ipAddress: string,
+): Promise<LoginRateLimitResult> {
+  if (!env.AUTH_DB) throw new Error("Login rate-limit database is unavailable.");
+
+  const now = Date.now();
+  const ipHash = await hashRateLimitIp(env, ipAddress || "unknown");
+  const row = await env.AUTH_DB.prepare(
+    \`INSERT INTO auth_login_attempts (ip_hash, window_started_at, attempts)
+     VALUES (?, ?, 1)
+     ON CONFLICT(ip_hash) DO UPDATE SET
+       window_started_at = CASE
+         WHEN auth_login_attempts.window_started_at <= ? THEN excluded.window_started_at
+         ELSE auth_login_attempts.window_started_at
+       END,
+       attempts = CASE
+         WHEN auth_login_attempts.window_started_at <= ? THEN 1
+         ELSE auth_login_attempts.attempts + 1
+       END
+     RETURNING attempts, window_started_at\`,
+  ).bind(ipHash, now, now - 60_000, now - 60_000)
+    .first<{ attempts: number; window_started_at: number }>();
+
+  if (!row) throw new Error("Login attempt counter could not be updated.");
+  if (Number(row.attempts) <= 10) return { allowed: true, retryAfterSeconds: 0 };
+
+  const retryAfterSeconds = Math.max(
+    1,
+    Math.ceil((Number(row.window_started_at) + 60_000 - now) / 1000),
+  );
+  return { allowed: false, retryAfterSeconds };
 }
