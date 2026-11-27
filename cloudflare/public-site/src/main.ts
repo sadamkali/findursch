@@ -151,7 +151,7 @@ function schoolTile(school: SchoolCard, variant = "tile"): string {
     '<div class="findursch-school-tile__fee-line">' + escapeHtml(estimatedFee(school)) + "</div>" +
     '<p class="findursch-school-tile__description">' + escapeHtml(description) + "</p>" +
     '<div class="findursch-school-tile__chips">' + chips + "</div>" +
-    '<div class="findursch-school-tile__meta"><span class="findursch-school-tile__location"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>' + escapeHtml(locationLabel(school)) + "</span></span>" + rating + '<a class="findursch-school-tile__save" href="' + escapeHtml(accountUrl("/login?returnTo=%2Faccount")) + '" aria-label="Sign in to save ' + escapeHtml(school.name) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-3.5-6 3.5z"/></svg></a></div>" +
+    '<div class="findursch-school-tile__meta"><span class="findursch-school-tile__location"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>' + escapeHtml(locationLabel(school)) + "</span></span>" + rating + '<a class="findursch-school-tile__save" href="' + escapeHtml(accountUrl("/login?returnTo=%2Faccount")) + '" aria-label="Sign in to save ' + escapeHtml(school.name) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-3.5-6 3.5z"/></svg></a></div>' +
     '<div class="findursch-school-tile__actions"><a href="' + url + '">View school →</a></div>' +
     "</div></article>";
 }

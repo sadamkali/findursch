@@ -497,21 +497,21 @@ async function schoolDetail(slug: string, env: PublicApiEnv): Promise<Response> 
 
     const schoolId = Number(school.id);
     const related = await Promise.all([
-      restGet<JsonRecord>(env, "school_curriculum", new URLSearchParams({
+      optionalRows(env, "school_curriculum", new URLSearchParams({
         select: "curricula(id,name,abbreviation)",
         school_id: "eq." + schoolId,
       })),
-      restGet<JsonRecord>(env, "school_programs", new URLSearchParams({
+      optionalRows(env, "school_programs", new URLSearchParams({
         select: "id,name,level,duration,description",
         school_id: "eq." + schoolId,
         is_active: "eq.true",
         order: "name.asc",
       })),
-      restGet<JsonRecord>(env, "school_facilities", new URLSearchParams({
+      optionalRows(env, "school_facilities", new URLSearchParams({
         select: "notes,facilities(id,name,category)",
         school_id: "eq." + schoolId,
       })),
-      restGet<JsonRecord>(env, "media", new URLSearchParams({
+      optionalRows(env, "media", new URLSearchParams({
         select: "id,model_id,collection_name,name,file_name,mime_type,order_column",
         model_type: "like.*School",
         model_id: "eq." + schoolId,
