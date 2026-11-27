@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "findursch-cloudflare-staging",
+  "name": "findursch",
   "main": "src/index.ts",
   "compatibility_date": "2026-11-26",
   "compatibility_flags": ["nodejs_compat"],
