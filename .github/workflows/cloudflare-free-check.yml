@@ -43,7 +43,7 @@ jobs:
         run: npm run typecheck
 
   deployed-public-site-smoke-tests:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Check deployed public website and anonymous Supabase API
@@ -75,7 +75,14 @@ jobs:
             return result.body;
           }
 
-          const home = await request("/");
+          const revision = '<meta name="findursch-build-revision" content="findursch-public-site-2026-11-27-v1" />';
+          let home = null;
+          for (let attempt = 1; attempt <= 36; attempt++) {
+            home = await request("/");
+            if (home.response.ok && home.response.headers.get("content-type")?.includes("text/html") && home.text.includes(revision)) break;
+            if (attempt === 36) throw new Error("Cloudflare Worker did not serve the expected Git build revision after 180 seconds. Last response: HTTP " + home.response.status);
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+          }
           if (!home.response.ok || !home.response.headers.get("content-type")?.includes("text/html")) {
             throw new Error("Homepage did not return an HTML document: HTTP " + home.response.status);
           }
