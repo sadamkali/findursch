@@ -23,6 +23,8 @@ type SchoolCard = {
 };
 type SchoolDetail = SchoolCard & {
   address?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
   maps_url?: string | null;
   phone?: string | null;
   email?: string | null;
