@@ -1,0 +1,92 @@
+/* Shared public header: one slim utility strip, one primary nav, one consistent mobile drawer. */
+.site-topbar{display:block;background:var(--brand-dark);color:#fff;font-size:12px}
+.site-topbar__inner{display:flex;min-height:34px;align-items:center;justify-content:space-between;gap:16px;overflow:hidden}
+.site-topbar__message{min-width:0;overflow:hidden;color:rgba(255,255,255,.82);font-size:11px;font-weight:500;letter-spacing:.01em;text-overflow:ellipsis;white-space:nowrap}
+.site-topbar__contact{display:inline-flex;flex:none;align-items:center;gap:6px;color:#fff;font-size:11px;font-weight:700;white-space:nowrap;transition:color .18s ease}
+.site-topbar__contact:hover{color:var(--gold)}
+.site-logo{font-family:'Playfair Display',Georgia,serif;font-size:26px;letter-spacing:-.3px}
+.site-menu-toggle{width:44px;height:44px;border:1.5px solid rgba(255,255,255,.8);border-radius:8px;background:transparent;color:#fff}
+.site-menu-toggle svg{width:21px;height:21px}
+.site-mobile-overlay{display:none}
+.site-mobile-drawer{display:none}
+.site-menu-open{overflow:hidden}
+.site-drawer-transition{transition:transform .25s ease,opacity .25s ease}
+.site-drawer-from{opacity:0;transform:translateX(100%)}
+.site-drawer-to{opacity:1;transform:translateX(0)}
+.site-mobile-drawer__head{display:flex;align-items:center;justify-content:space-between;flex:none;padding:16px 20px;border-bottom:1px solid #2a5a4d}
+.site-mobile-drawer__head .site-logo{color:#fff;font-size:24px}
+.site-mobile-drawer__head .site-logo b{color:var(--gold)}
+.site-mobile-drawer__close{width:40px;height:40px;border:0;border-radius:8px;background:transparent;color:#fff;font:400 27px/1 Inter,sans-serif;cursor:pointer}
+.site-mobile-drawer__close:hover{background:#12453a}
+.site-mobile-drawer__links{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:8px 0}
+.site-mobile-drawer__links a{display:block;padding:15px 20px;border-bottom:1px solid #1d4a3f;color:#fff;font-size:16px;font-weight:500}
+.site-mobile-drawer__links a:hover{background:#0c3d33}
+.site-mobile-drawer__links a.is-active{color:var(--gold);font-weight:700;background:rgba(255,255,255,.035)}
+.site-mobile-drawer__footer{display:grid;flex:none;gap:12px;border-top:1px solid #2a5a4d;padding:18px 20px 24px;background:var(--brand-deep)}
+.site-mobile-drawer__footer form{margin:0}
+.site-mobile-drawer__button{display:flex;width:100%;min-height:48px;align-items:center;justify-content:center;border:1.5px solid #fff;border-radius:8px;color:#fff;font:700 15px Inter,sans-serif;text-align:center;transition:background .18s ease,border-color .18s ease}
+.site-mobile-drawer__button--outline:hover{background:#12453a}
+.site-mobile-drawer__button--gold{border-color:var(--gold);background:var(--gold);color:#2a1d00;cursor:pointer}
+.site-mobile-drawer__button--gold:hover{background:var(--gold-dark)}
+.site-account-link{display:inline-flex;align-items:center;color:rgba(255,255,255,.95);font-size:12px;font-weight:600;white-space:nowrap}
+.site-logout-form button{border:0;background:transparent;cursor:pointer}
+.site-header__actions{gap:15px}
+@media(max-width:1120px){
+  .site-header__inner{gap:14px}
+  .site-nav a{padding-inline:8px;font-size:12px}
+  .site-logo{font-size:23px}
+}
+@media(max-width:1000px){
+  .site-topbar{display:block}
+  .site-topbar__inner{min-height:32px;gap:12px}
+  .site-header__inner{min-height:64px;gap:12px}
+  .site-nav{display:none}
+  .site-header__actions{margin-left:auto}
+  .site-header__actions>.site-account-link,
+  .site-header__actions>.site-logout-form,
+  .site-header__actions>.site-header__cta{display:none}
+  .site-menu-toggle{display:inline-flex;align-items:center;justify-content:center;margin-left:auto}
+  .site-mobile-overlay{position:fixed;inset:0;z-index:70;display:block;width:100%;height:100%;border:0;background:rgba(0,0,0,.6);cursor:pointer}
+  .site-mobile-drawer{position:fixed;inset:0 0 0 auto;z-index:80;display:flex;width:min(82vw,380px);max-width:100%;flex-direction:column;overflow:hidden;background:var(--brand-deep);color:#fff;box-shadow:-12px 0 32px rgba(0,0,0,.4)}
+  .site-footer__grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px}
+  .site-footer__brand{grid-column:1/-1}
+  .site-footer__bar{flex-direction:column;align-items:stretch}
+  .site-footer__promo{flex-direction:column;align-items:stretch}
+  .site-footer__promo .btn{width:100%}
+}
+@media(max-width:640px){
+  .site-topbar__inner{min-height:30px;gap:10px}
+  .site-topbar__message{font-size:10px}
+  .site-topbar__contact{font-size:10px}
+  .site-logo{font-size:23px}
+  .site-mobile-drawer{width:min(82vw,380px)}
+  .site-footer__grid{grid-template-columns:1fr 1fr;gap:32px 24px}
+  .site-footer__grid>div:last-child{grid-column:1/-1}
+  .site-footer__bar{align-items:stretch}
+  .site-footer__promo{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.site-drawer-transition{transition:none!important}}
+
+/* Top utility actions: sign-in and sign-up sit beside contact without repeating page navigation. */
+.site-topbar__actions{display:flex;flex:none;align-items:center;gap:16px}
+.site-topbar__signin{color:rgba(255,255,255,.92);font-size:11px;font-weight:600;white-space:nowrap;transition:color .18s ease}
+.site-topbar__signin:hover{color:var(--gold)}
+.site-topbar__signup{display:inline-flex;min-height:25px;align-items:center;justify-content:center;padding:0 11px;border:1px solid var(--gold);border-radius:5px;background:var(--gold);color:#2a1d00;font-size:10px;font-weight:800;letter-spacing:.01em;white-space:nowrap;transition:background .18s ease,border-color .18s ease}
+.site-topbar__signup:hover{border-color:#ffd36c;background:#ffd36c}
+.site-topbar__contact{margin-left:1px;padding-left:15px;border-left:1px solid rgba(255,255,255,.22)}
+@media(max-width:1000px){
+  .site-topbar__inner{justify-content:space-between}
+  .site-topbar__actions{gap:13px}
+}
+@media(max-width:640px){
+  .site-topbar__inner{min-height:34px;gap:8px}
+  .site-topbar__message{max-width:42%;font-size:9px;line-height:1.25}
+  .site-topbar__actions{gap:9px}
+  .site-topbar__signin{font-size:10px}
+  .site-topbar__signup{min-height:23px;padding-inline:8px;font-size:9px}
+  .site-topbar__contact{padding-left:9px;font-size:9px}
+}
+@media(max-width:370px){
+  .site-topbar__message{display:none}
+  .site-topbar__inner{justify-content:flex-end}
+}

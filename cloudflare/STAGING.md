@@ -1,38 +1,40 @@
-# FindURSCH Cloudflare staging
+# FindURSCH public website — Cloudflare migration
 
-- Cloudflare Pages project: `findursch-app-staging`
-- Staging hostname: https://findursch-app-staging.pages.dev
-- GitHub repository: `sadamkali/findursch`
-- GitHub branch: `cloudflare-free-migration`
-- Root directory: `cloudflare`
-- Build command: `npm install --no-audit --no-fund && npm run build:site`
-- Output: `public-site/dist`
-- Preview deployments: disabled
-- Pages Functions enabled
-- Supabase project: `findursch` (`gpsfttpeikatxszswljo`, eu-west-1)
-- Session strategy: Supabase Auth refresh-token session, carried in an AES-GCM encrypted HttpOnly cookie.
-- Login throttle: Cloudflare Durable Object, 10 attempts per connecting IP in a rolling 60-second window. The Pages Function HMACs the IP with the Cloudflare-only `LOGIN_RATE_LIMIT_HMAC_KEY`; the Durable Object stores only timestamp rows and expires them automatically. No Supabase rate-limit table or RPC is called.
-- No D1 or KV binding is required for authentication sessions. A Cloudflare Durable Object binding is used only for login rate limiting.
-- Production variables: `SUPABASE_URL`, `PUBLIC_MEDIA_BASE_URL`
-- Production encrypted Pages secrets: `SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`
+- Cloudflare Worker: findursch
+- Temporary URL: https://findursch.propipspath.workers.dev
+- GitHub repository: sadamkali/findursch
+- GitHub branch: cloudflare-free-migration
+- Worker entrypoint: cloudflare/src/index.ts
+- Static build: cloudflare/public-site/dist
+- Build command from cloudflare/: npm install --no-audit --no-fund && npm run build:site
+- Database: existing Supabase project findursch (gpsfttpeikatxszswljo, eu-west-1)
+- Public media: existing Cloudflare R2 public origin.
+- No production custom domain is attached to this Worker.
+
+The Pages project findursch-static is separate and remains the static asset delivery host at static.findursch.riotinvestments.space. The old findursch-app-staging.pages.dev staging hostname is no longer the active public-site test target.
 
 ## Current migration status
 
-- The latest Pages deployment is built from `cloudflare-free-migration` and has Pages Functions enabled.
-- Supabase remains the existing production PostgreSQL database. No PostgreSQL data has been moved to Cloudflare.
-- Production verification confirmed 9 active legacy accounts and 9 Supabase Auth users with trusted numeric `legacy_user_id` mappings. The identity import did not modify `public.users` passwords or other legacy records.
-- The Supabase secret is held as an encrypted Pages Function secret for private legacy-user/role lookups and server-side cookie encryption. It is not a database copy.
-- The former Cloudflare D1 session database has been deleted after the Supabase-cookie deployment passed build, type-check and staging API smoke tests. No D1 binding remains on the Pages project.
-- Administrator two-step email verification is not yet migrated. The existing `require_two_step` setting was disabled at the time of the initial auth migration; if it is enabled, Cloudflare sign-in deliberately blocks administrator login.
-- The nine users' real password sign-in and browser session lifecycle have not yet been tested end-to-end.
-- Full admin, school-owner and parent dashboard functionality has not yet been ported. This remains an initial migration slice, not a complete Laravel replacement.
+- The public Worker serves the port of the original Laravel homepage shell and shared design CSS.
+- Homepage school cards, news, insights, school posts, events, scholarships, jobs, videos and approved fallback advertisements are read from the existing Supabase database through the anon key and RLS.
+- Directory and school-profile API routes remain read-only.
+- Public school cards/profiles show only estimated fee ranges. Exact fee amounts and application fees are blocked from anonymous access.
+- The public website build and TypeScript checks run in GitHub Actions.
+- Public API smoke tests target https://findursch.propipspath.workers.dev.
+
+## Still outstanding
+
+- Full public Blade route parity for articles/news, events, jobs, scholarships, contact, legal pages, registration and account flows. Until ported, those links temporarily open the live Vercel public website.
+- End-to-end sign-in/session testing and binding of the private auth secret.
+- Deployment of the login-rate-limit Durable Object binding and HMAC secret.
+- Protected school document and fees-circular delivery.
+- Complete SEO, sitemap, canonical URLs and redirects.
+- Full end-to-end mobile/desktop browser review.
 
 ## Safety boundaries
 
 - No production DNS, custom domain, Vercel alias or Vercel deployment has been changed.
-- The existing `findursch-static` Pages project and its domain remain unchanged.
-- Public API routes are GET-only and expose only records permitted by existing Supabase anon-role RLS policies.
-- The encrypted Supabase secret remains server-side only. The browser receives an encrypted HttpOnly cookie, not Supabase tokens.
-- Do not direct production traffic to this staging project until login/session lifecycle, role/permission checks, admin two-step flow, dashboards and required Laravel features have been migrated and tested.
-
-- The legacy Supabase rate-limit table/RPC created during an earlier iteration are not called by this deployment. They remain in the database, unchanged, pending separate explicit approval before cleanup.
+- The separate sadamkali/findursch-dashboard repository and its Vercel deployment remain untouched.
+- The existing findursch-static Pages project and its custom domain remain unchanged.
+- Supabase remains the existing system of record; no database copy, new application table or application data migration was performed by this frontend port.
+- Dashboard/admin/owner pages must not be merged into this public website repository.

@@ -1,96 +1,88 @@
 # FindURSCH Cloudflare migration
 
-This branch contains the Cloudflare-native migration of FindURSCH. It does not replace the Laravel application yet and does not change production DNS, the production hostname, or the existing Vercel deployment.
+This branch is the Cloudflare migration for the **public FindURSCH website only**. The public website and the management dashboard are separate GitHub repositories and separate applications:
+
+- Public website: sadamkali/findursch — Laravel, Blade and Livewire source being ported here.
+- Management dashboard: sadamkali/findursch-dashboard — separate Next.js application. It is not part of this repository's deployment and is not changed by this migration.
+
+The migration branch does not modify main, the current Vercel production deployment, production aliases or DNS.
+
+## Current public-site deployment
+
+- Cloudflare Worker: findursch
+- Temporary Worker URL: https://findursch.propipspath.workers.dev
+- Source repository: sadamkali/findursch
+- Migration branch: cloudflare-free-migration
+- Worker entrypoint: src/index.ts
+- Static assets: public-site/dist
+- Build command: npm install --no-audit --no-fund && npm run build:site
+- GitHub Actions checks: build, TypeScript and public API smoke tests.
+
+The separate Cloudflare Pages project findursch-static remains the static asset host at static.findursch.riotinvestments.space. It is not the public website application.
 
 ## Target architecture
 
-- **GitHub:** source code, version control, CI checks and Cloudflare build triggers.
-- **Cloudflare Pages + Functions:** public website, application API and server-side application logic.
-- **Supabase PostgreSQL:** the existing production database and system of record. No database has been copied to Cloudflare.
-- **Supabase Auth:** account identities, password authentication, refresh-token sessions, token rotation and session revocation.
-- **Cloudflare R2:** existing public media origin. Private documents must remain protected and are a separate migration phase.
+- **GitHub:** source code, version control and migration checks.
+- **Cloudflare Workers:** public website assets and public read-only API.
+- **Supabase PostgreSQL:** existing FindURSCH database and system of record. No database was copied to Cloudflare and no new application tables were created for this public-site slice.
+- **Supabase Auth:** existing account authority. Public homepage and directory routes do not require private Supabase keys.
+- **Cloudflare R2:** existing public media origin. Private school documents and fees circular access remain a separate protected workflow.
+- **Cloudflare Pages findursch-static:** existing static delivery hostname, retained independently.
 
-Cloudflare does not host a replacement PostgreSQL database and no D1 or KV database is required for application authentication sessions.
+## Migrated public routes
 
-## First-slice routes
+- GET / — public homepage matching the Laravel/Blade homepage design and content hierarchy.
+- GET /schools — paginated public school directory.
+- GET /schools/:slug — public school profile.
+- GET /api/health — Worker and public database configuration.
+- GET /api/v1/homepage — homepage content collections.
+- GET /api/v1/schools — active and verified public schools.
+- GET /api/v1/schools/:slug — public school profile data.
+- GET /api/v1/locations — active regions, districts, school types and curricula.
 
-- `GET /api/health` — Pages Function health and configuration status.
-- `GET /api/v1/schools` — paginated public directory; only schools with `status = active` and `verification_status = verified`.
-- `GET /api/v1/schools/:slug` — public profile and related public listing data.
-- `GET /api/v1/locations` — active regions, districts, school types and curricula.
-- `POST /api/auth/login` — email or phone sign-in using the imported Supabase Auth identity.
-- `GET /api/auth/me` — validates the Supabase Auth session and current authorization.
-- `POST /api/auth/logout` — revokes the current Supabase Auth session where possible and clears the browser cookie.
+The homepage uses read-only, anonymous Supabase REST requests. Unavailable editorial sections degrade to empty content rather than breaking the homepage.
 
-The public directory API is read-only. It does not expose users, payment data, subscriptions, inquiries, admin operations or school documents.
+Other public Laravel routes (including full news/article detail, events, jobs, scholarships, contact, legal pages, registration and account features) are not yet ported. Until those routes are migrated, the Cloudflare frontend links them to the still-live Vercel public-site deployment. This is temporary and must be resolved before a production-domain cutover.
 
-## Authentication and data protection
+## Public data security
 
-The existing production Supabase project `findursch` remains the database and authentication provider. The public directory uses the anon key with carefully scoped RLS. Private legacy account, role, permission and settings lookups use the encrypted server-only Pages secret `SUPABASE_SECRET_KEY`; this is an API credential, not a copy or migration of the database.
+- Public school rows require status = active and verification_status = verified.
+- Public school media is limited to images in the cover, badge and gallery collections for active, verified schools.
+- Public articles require status = published, a publication date not in the future and an active category.
+- School news, events and videos require an approved/published status and an active, verified school.
+- Public jobs require a published status, a publication date not in the future and an unexpired (or absent) deadline.
+- Advertisements are limited to approved fallback banners that are within their display dates.
+- User, role, permission, owner id, registration numbers, private school documents, billing data and moderation metadata are not part of the public API.
 
-### Legacy account import — verified complete
+### School fee privacy
 
-Read-only verification against production confirmed:
+The public directory and school profiles may show only estimated fee ranges from schools.fees_from and schools.fees_to. Itemised school_fees.amount, fee labels and application fees are not available to the anon role and are not returned by the Cloudflare public API. Exact school fees remain private and should be provided through the school's fees circular.
 
-- 9 active legacy accounts in `public.users`.
-- 9 Supabase Auth users with numeric trusted `app_metadata.legacy_user_id` mappings.
-- The imported identities use the existing Laravel bcrypt password hashes.
-- Existing `public.users` IDs, password hashes, role assignments, permissions and ownership records were not changed by the identity import.
+The existing Supabase migrations applied for the public content slice are:
 
-The import script is idempotent and remains in the repository for controlled maintenance. The user's actual password sign-in and browser session lifecycle still require an end-to-end test.
+- findursch_public_content_read_access_and_fee_privacy
+- findursch_public_article_category_policy_dependency
+- findursch_public_fallback_ad_read_access
 
-### Session handling
-
-Supabase Auth is the session authority and owns refresh-token sessions. The Cloudflare Pages Function stores the session in a sealed cookie rather than a Cloudflare database:
-
-- Cookie name: `findursch_session`.
-- Attributes: `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, and a bounded `Max-Age`.
-- Access and refresh tokens are encrypted with AES-GCM. The encryption key is derived using HKDF from the server-only Supabase secret.
-- Browser JavaScript cannot read the access or refresh tokens.
-- Near expiry, Cloudflare refreshes through Supabase Auth, verifies the returned user identity and returns a newly encrypted cookie containing the rotated tokens.
-- `/api/auth/me` validates the session with Supabase Auth and reloads the active legacy user and current roles/permissions from PostgreSQL.
-- Logout requests Supabase Auth local-scope revocation and always clears the browser cookie.
-- Rotating the server-only secret invalidates existing encrypted cookies, so users will need to sign in again.
-
-No D1 or KV binding is used for sessions. The login throttle is executed entirely on Cloudflare by a SQLite-backed Durable Object bound to the Pages Function. It allows 10 attempts per connecting IP in a rolling 60-second window, with requests for the same IP serialized by one Durable Object instance. Cloudflare stores only attempt timestamps in that IP's object; the IP is converted to an HMAC digest in the Pages Function using the separate Cloudflare secret `LOGIN_RATE_LIMIT_HMAC_KEY`. The raw IP, login identifier, password and Supabase tokens are not sent to the Durable Object. The Durable Object automatically expires its attempt timestamps after the window. Supabase is not called for rate-limit checks.
-
-## Cloudflare staging
-
-- Pages project: `findursch-app-staging`
-- Staging hostname: https://findursch-app-staging.pages.dev
-- Source repository: `sadamkali/findursch`
-- Source branch: `cloudflare-free-migration`
-- Root directory: `cloudflare`
-- Build output: `public-site/dist`
-- Pages Functions enabled.
-- Encrypted production secrets: `SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`.
-- Plaintext production variables: `SUPABASE_URL`, `PUBLIC_MEDIA_BASE_URL`.
-- No custom domain is attached.
-
-GitHub Actions builds the static site, type-checks TypeScript routes and validates the deployed staging API, including a no-account-match test that confirms private legacy-user lookup works using the server-only Supabase key.
-
-## Supabase public API and security verification
-
-The SQL in `sql/public_api_anon_policies.sql` was applied to the existing production FindURSCH database on 26 November 2026. It grants SELECT only on the public fields needed by the directory and adds 11 RLS policies across schools and their public reference/related tables.
-
-Verification performed with the PostgreSQL `anon` role:
-- 3 active + verified schools visible.
-- 4 active regions, 128 active districts, 6 active school types and 3 active curricula visible.
-- No SELECT access to `public.users`, password columns, `school_documents`, `schools.owner_id`, `schools.registration_number`, or private media metadata.
-- RLS remains enabled on all 11 tables covered by the public API policies.
-
-The remaining tables with RLS enabled but no policies were not opened to the anon role and remain outside this migration slice.
+The corresponding SQL documentation is in sql/public_api_anon_policies.sql and sql/public_content_anon_policies.sql. Those scripts are read-access/RLS changes only; they do not insert or change business records.
 
 ## Not yet migrated or fully verified
 
-- End-to-end sign-in with a real migrated user and browser cookie lifecycle, including token refresh and logout.
-- Administrator two-step email verification.
-- Full admin and school-owner dashboards, including write APIs and moderation workflows.
-- Parent registration/login, password reset and account flows.
-- Articles, news, events, jobs, scholarships, reviews, saved schools and enquiries.
-- School owner media uploads, private documents and PDF/DOCX watermark processing.
-- Imports/exports, advertisements, billing/subscriptions and background processing.
-- Remaining public Blade/Livewire pages, SEO metadata, sitemap and redirects.
-- Separate Next.js dashboard migration (see the dashboard repository's `CLOUDFLARE_MIGRATION.md`).
+- Full Laravel public page catalogue, including article/news/event/job/scholarship detail pages, forms and SEO redirects.
+- Real password sign-in, sealed browser session and refresh lifecycle on the deployed Worker.
+- Cloudflare login rate-limit binding and secret in the deployed Worker.
+- Private school document and fees-circular delivery.
+- Full admin and school-owner dashboard APIs and workflows.
+- Parent registration/account workflows.
+- Imports, exports, advertisement billing, subscriptions, payments and background processing.
+- The separate Next.js dashboard repository migration.
 
-Do not direct production traffic to this staging project until the required user flows and business rules have been ported and tested.
+The current Worker configuration exposes the public Supabase anon key only. The health route reports private auth and login-rate-limit configuration as not-configured until those bindings are deliberately installed and tested. Do not treat authentication as migrated.
+
+## Production safety
+
+- Keep the public Vercel production deployment and alias available during this migration.
+- Keep the dashboard Vercel project and sadamkali/findursch-dashboard repository separate and unchanged.
+- Keep main unchanged.
+- Keep findursch-static, its custom domain, R2 media and the existing Supabase project.
+- Do not change production DNS or direct the public custom domain to this Worker until required routes, login, permissions, media and redirect behavior have passed end-to-end tests.

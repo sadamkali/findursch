@@ -1,8 +1,6 @@
--- FindURSCH public directory read access for Cloudflare Pages Functions.
--- APPLIED to production project findursch on 2026-11-26 after user approval.
--- Re-running is safe: only this script's named policies are recreated.
--- This grants public read-only access to selected school fields only.
--- Never put the Supabase service_role key in Cloudflare or the browser.
+-- FindURSCH public school directory read access for Cloudflare Workers.
+-- Re-running is safe: this grants only selected fields needed for public school
+-- search, profile display and cards. Never use a service_role key in a Worker.
 
 GRANT USAGE ON SCHEMA public TO anon;
 
@@ -11,11 +9,15 @@ GRANT SELECT (
   town, address, po_box, nearest_landmark, maps_url, phone, email, website,
   whatsapp, facebook_url, instagram_url, ownership, religious_affiliation,
   boarding_type, gender_policy, student_count_approx, admissions_open,
-  admission_classes, admission_deadline, application_fee, admissions_contact,
+  admission_classes, admission_deadline, admissions_contact,
   admission_requirements, how_to_apply, fees_from, fees_to, rating_average,
   reviews_count, is_featured, featured_until, meta_title, meta_description,
   created_at, status, verification_status
 ) ON public.schools TO anon;
+
+-- Exact application fees are not public. Only estimated school fee ranges
+-- from fees_from/fees_to may be displayed on public pages.
+REVOKE SELECT (application_fee) ON public.schools FROM anon;
 
 GRANT SELECT (id, name, slug, region_id, is_active)
   ON public.districts TO anon;
@@ -37,10 +39,12 @@ GRANT SELECT (school_id, facility_id, notes)
   ON public.school_facilities TO anon;
 GRANT SELECT (id, name, category, is_active)
   ON public.facilities TO anon;
-GRANT SELECT (
+
+-- Itemised fee records, amounts, periods and labels remain private.
+REVOKE SELECT (
   id, school_id, category, label, amount, currency, period,
   academic_year, notes, is_active
-) ON public.school_fees TO anon;
+) ON public.school_fees FROM anon;
 
 DROP POLICY IF EXISTS findursch_public_anon_schools ON public.schools;
 CREATE POLICY findursch_public_anon_schools ON public.schools
@@ -108,18 +112,9 @@ CREATE POLICY findursch_public_anon_school_facilities ON public.school_facilitie
     )
   );
 
+-- Explicitly remove the previous public policy. This script must never make
+-- exact fee amounts readable by anonymous visitors.
 DROP POLICY IF EXISTS findursch_public_anon_school_fees ON public.school_fees;
-CREATE POLICY findursch_public_anon_school_fees ON public.school_fees
-  FOR SELECT TO anon
-  USING (
-    is_active = true
-    AND EXISTS (
-      SELECT 1 FROM public.schools s
-      WHERE s.id = school_id
-        AND s.status = 'active'
-        AND s.verification_status = 'verified'
-    )
-  );
 
 DROP POLICY IF EXISTS findursch_public_anon_school_media ON public.media;
 CREATE POLICY findursch_public_anon_school_media ON public.media

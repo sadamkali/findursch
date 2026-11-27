@@ -1,0 +1,1882 @@
+/*
+ * FindUrSch public design system
+ * One shared visual foundation for public pages and the signed-in parent workspace.
+ * Keep the configured brand colours as the single source of truth:
+ * primary #0C5A49, accent #F0B030.
+ */
+
+:root {
+    --fd-brand: var(--brand, #0c5a49);
+    --fd-brand-dark: var(--brand-dark, #083f33);
+    --fd-brand-deep: var(--brand-deep, #052a22);
+    --fd-accent: var(--gold, #f0b030);
+    --fd-accent-dark: var(--gold-dark, #d99a1a);
+    --fd-tint: var(--tint, #f1f6f3);
+    --fd-line: var(--line, #e4e8e6);
+    --fd-ink: var(--ink, #1b2420);
+    --fd-muted: var(--muted, #5d6b65);
+    --fd-display: var(--font-display, var(--display-font, 'Playfair Display')), Georgia, serif;
+    --fd-body: var(--font-body, 'Inter'), system-ui, sans-serif;
+    --fd-radius: 12px;
+    --fd-control-radius: 8px;
+    --fd-shadow: 0 2px 12px rgba(6, 45, 35, .055);
+    --fd-shadow-hover: 0 10px 26px rgba(6, 45, 35, .10);
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+    color-scheme: light;
+}
+
+body,
+body.antialiased,
+body.h-full {
+    color: var(--fd-ink);
+    background: #fff;
+    font-family: var(--fd-body) !important;
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+:where(button, input, select, textarea) {
+    font: inherit;
+}
+
+:where(h1, h2, h3, h4, h5, h6, .site-logo, .blogs-page h1, .news-page h1, .event-reference h1, .event-directory-reference h1, .findursch-scholarships h1, .school-directory-reference h1, .school-detail-reference h1) {
+    font-family: var(--fd-display) !important;
+    color: var(--fd-ink);
+    letter-spacing: -.025em;
+}
+
+h1 { line-height: 1.16; }
+h2 { line-height: 1.25; }
+h3, h4, h5, h6 { line-height: 1.35; }
+
+p, li, label, small, input, select, textarea, button, table, th, td {
+    font-family: var(--fd-body);
+}
+
+a {
+    text-underline-offset: 3px;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--fd-accent) 72%, transparent);
+    outline-offset: 3px;
+}
+
+/* Consistent page widths for the reference pages and legacy utility pages. */
+:where(.site-wrap, .wrap, .blogs-wrap, .news-wrap, .ed-shell, .ed-wrap, .resource-detail-wrap, .site-footer__inner) {
+    width: min(1200px, calc(100% - 48px));
+    max-width: 1200px;
+    margin-inline: auto;
+}
+
+body .mx-auto.max-w-7xl {
+    width: min(1200px, calc(100% - 48px));
+    max-width: 1200px;
+}
+
+body .account-workspace-content > section {
+    width: min(1200px, calc(100% - 48px));
+    max-width: 1200px;
+}
+
+/* Public header: same brand, typography, navigation rhythm and controls on every route. */
+.site-topbar {
+    background: var(--fd-brand-dark);
+    color: #fff;
+    font-family: var(--fd-body);
+}
+
+.site-topbar__inner {
+    min-height: 34px;
+    gap: 18px;
+}
+
+.site-header {
+    background: var(--fd-brand) !important;
+    color: #fff;
+    box-shadow: 0 3px 14px rgba(4, 34, 26, .16);
+}
+
+.site-header__inner {
+    min-height: 70px;
+    gap: 24px;
+}
+
+.site-logo {
+    color: #fff !important;
+    font-size: 25px;
+    line-height: 1;
+}
+
+.site-nav {
+    gap: 4px;
+}
+
+.site-nav a {
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: rgba(255,255,255,.94);
+    font-family: var(--fd-body);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.site-nav a:hover,
+.site-nav a.is-active {
+    background: rgba(255,255,255,.15);
+    color: #fff;
+}
+
+.site-header__cta,
+.site-topbar__signup {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    border: 1px solid var(--fd-accent);
+    border-radius: 8px;
+    background: var(--fd-accent);
+    padding: 0 16px;
+    color: #2b210b !important;
+    font-family: var(--fd-body);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background .18s ease, transform .18s ease;
+}
+
+.site-header__cta:hover,
+.site-topbar__signup:hover {
+    background: var(--fd-accent-dark);
+    transform: translateY(-1px);
+}
+
+.site-account-link {
+    color: #fff;
+    font-family: var(--fd-body);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.site-menu-toggle {
+    border-radius: 8px;
+    color: #fff;
+}
+
+.site-mobile-drawer {
+    font-family: var(--fd-body);
+}
+
+.site-mobile-drawer__links a {
+    border-radius: 8px;
+}
+
+.site-mobile-drawer__links a.is-active {
+    background: var(--fd-tint);
+    color: var(--fd-brand);
+}
+
+.site-mobile-drawer__button {
+    min-height: 44px;
+    border-radius: 8px;
+    font-family: var(--fd-body);
+    font-weight: 700;
+}
+
+/* Consistent footer treatment. */
+.site-footer {
+    background: var(--fd-brand-deep, #052a22);
+    color: rgba(255,255,255,.86);
+}
+
+.site-footer h2,
+.site-footer .site-logo {
+    color: #fff !important;
+}
+
+.site-footer a {
+    color: rgba(255,255,255,.84);
+    text-decoration: none;
+}
+
+.site-footer a:hover {
+    color: var(--fd-accent);
+}
+
+.site-footer__bar {
+    border-color: rgba(255,255,255,.16);
+}
+
+.site-footer .btn-footer {
+    border-radius: 8px;
+    background: var(--fd-accent);
+    color: #2b210b;
+}
+
+/* Unified button system across reference pages, legacy pages and account pages. */
+:where(
+    .btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-accent,
+    .btn-brand,
+    .btn-gold,
+    .btn-red,
+    .btn-search,
+    .blogs-btn,
+    .news-toolbar button,
+    .news-digest,
+    .go,
+    .sform button,
+    .site-header__cta,
+    .site-mobile-drawer__button,
+    .account-workspace-logout,
+    .account-workspace-menu-button
+) {
+    min-height: 42px;
+    border-radius: var(--fd-control-radius);
+    font-family: var(--fd-body);
+    font-size: 13px;
+    font-weight: 650;
+    letter-spacing: 0;
+    text-decoration: none;
+    transition: color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.btn-primary,
+.btn-brand,
+.btn-search,
+.btn-red,
+.blogs-btn-brand,
+.news-toolbar button,
+.go,
+.sform button,
+.account-workspace-content .btn-primary {
+    border: 1px solid var(--fd-brand) !important;
+    background: var(--fd-brand) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 5px rgba(12, 90, 73, .12);
+}
+
+.btn-primary:hover,
+.btn-brand:hover,
+.btn-search:hover,
+.btn-red:hover,
+.blogs-btn-brand:hover,
+.news-toolbar button:hover,
+.go:hover,
+.sform button:hover,
+.account-workspace-content .btn-primary:hover {
+    border-color: var(--fd-brand-dark) !important;
+    background: var(--fd-brand-dark) !important;
+    color: #fff !important;
+    transform: translateY(-1px);
+}
+
+.btn-accent,
+.btn-gold,
+.blogs-btn-gold {
+    border: 1px solid var(--fd-accent) !important;
+    background: var(--fd-accent) !important;
+    color: #2b210b !important;
+}
+
+.btn-accent:hover,
+.btn-gold:hover,
+.blogs-btn-gold:hover {
+    border-color: var(--fd-accent-dark) !important;
+    background: var(--fd-accent-dark) !important;
+    color: #2b210b !important;
+    transform: translateY(-1px);
+}
+
+.btn-secondary,
+.btn-outline,
+.account-workspace-content .btn-secondary {
+    border: 1px solid color-mix(in srgb, var(--fd-brand) 42%, #fff) !important;
+    background: #fff !important;
+    color: var(--fd-brand) !important;
+}
+
+.btn-secondary:hover,
+.btn-outline:hover,
+.account-workspace-content .btn-secondary:hover {
+    border-color: var(--fd-brand) !important;
+    background: var(--fd-tint) !important;
+}
+
+.btn-ghost {
+    color: var(--fd-brand);
+    border-radius: var(--fd-control-radius);
+}
+
+.btn-ghost:hover {
+    background: var(--fd-tint);
+    color: var(--fd-brand-dark);
+}
+
+button[disabled],
+button:disabled,
+[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: .58;
+    transform: none !important;
+}
+
+/* Form controls: consistent size, border, radius and focus treatment. */
+:where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]),
+    select,
+    textarea
+) {
+    min-height: 42px;
+    border: 1px solid #d9e2dd;
+    border-radius: var(--fd-control-radius);
+    background-color: #fff;
+    padding: 9px 12px;
+    color: var(--fd-ink);
+    font-family: var(--fd-body);
+    font-size: 13px;
+    line-height: 1.45;
+    box-shadow: none;
+    transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+:where(input, select, textarea)::placeholder {
+    color: #8b9892;
+    opacity: 1;
+}
+
+:where(input, select, textarea):focus {
+    border-color: var(--fd-brand) !important;
+    outline: 0 !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--fd-brand) 12%, transparent) !important;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    accent-color: var(--fd-brand);
+}
+
+label {
+    color: var(--fd-ink);
+    font-size: 13px;
+    font-weight: 550;
+}
+
+.form-error,
+.text-red-600,
+.text-red-700 {
+    color: #b42318;
+}
+
+/* Shared surfaces and listing cards. Preserve each page's image and content layout. */
+:where(
+    .school-directory-reference .card,
+    .findursch-home-reference .card,
+    .blogs-page .blogs-card,
+    .news-page .news-card,
+    .event-directory-reference .event-card,
+    .event-reference .event-card,
+    .findursch-scholarships .scholarship-card,
+    .account-workspace-content .rounded-xl.border,
+    .account-workspace-content .rounded-2xl.border
+) {
+    border-color: var(--fd-line);
+    border-radius: var(--fd-radius);
+    box-shadow: var(--fd-shadow);
+}
+
+:where(
+    .school-directory-reference .card:hover,
+    .findursch-home-reference .card:hover,
+    .blogs-page .blogs-card:hover,
+    .news-page .news-card:hover,
+    .event-directory-reference .event-card:hover,
+    .findursch-scholarships .scholarship-card:hover
+) {
+    box-shadow: var(--fd-shadow-hover);
+}
+
+body .rounded-xl.border,
+body .rounded-2xl.border {
+    border-color: var(--fd-line);
+}
+
+body .rounded-xl.bg-white,
+body .rounded-2xl.bg-white {
+    border-radius: var(--fd-radius);
+}
+
+.prose,
+.prose-gray {
+    color: var(--fd-ink);
+    font-family: var(--fd-body);
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+    font-family: var(--fd-display) !important;
+    color: var(--fd-ink);
+    font-weight: 600;
+    letter-spacing: -.02em;
+}
+
+.prose a {
+    color: var(--fd-brand);
+    text-decoration-color: color-mix(in srgb, var(--fd-brand) 35%, transparent);
+}
+
+.prose a:hover {
+    color: var(--fd-brand-dark);
+}
+
+/* Shared page heading, breadcrumb and section-title rhythm. */
+:where(.crumbs, .resource-crumbs, .resource-page .resource-crumbs, .blogs-crumbs, .ed-crumbs) {
+    color: var(--fd-muted);
+    font-family: var(--fd-body);
+    font-size: 12px;
+}
+
+:where(.crumbs a, .resource-crumbs a, .ed-crumbs a) {
+    color: var(--fd-brand);
+    text-decoration: none;
+}
+
+:where(.crumbs a:hover, .resource-crumbs a:hover, .ed-crumbs a:hover) {
+    color: var(--fd-brand-dark);
+    text-decoration: underline;
+}
+
+:where(.bg-gray-50.py-8, .bg-gray-50.py-12) {
+    background: var(--fd-tint) !important;
+}
+
+:where(.bg-gray-50.py-8, .bg-gray-50.py-12) h1,
+:where(.bg-gray-50.py-8, .bg-gray-50.py-12) h2 {
+    color: var(--fd-ink);
+}
+
+.text-primary,
+.hover\:text-primary:hover {
+    color: var(--fd-brand) !important;
+}
+
+.bg-primary,
+.hover\:bg-primary:hover {
+    background-color: var(--fd-brand) !important;
+}
+
+.border-primary {
+    border-color: var(--fd-brand) !important;
+}
+
+/* Home page reference: remove legacy red CTA treatment and keep its search controls aligned. */
+.findursch-home-reference .btn-red,
+.findursch-home-reference .hero .search button {
+    border-color: var(--fd-brand) !important;
+    background: var(--fd-brand) !important;
+    color: #fff !important;
+    border-radius: 8px;
+}
+
+.findursch-home-reference .btn-red:hover,
+.findursch-home-reference .hero .search button:hover {
+    background: var(--fd-brand-dark) !important;
+}
+
+.findursch-home-reference .hero .search input,
+.findursch-home-reference .hero .search select {
+    min-height: 48px;
+    border-radius: 8px;
+}
+
+.findursch-home-reference .head h2,
+.findursch-home-reference .head h2 span {
+    font-family: var(--fd-display) !important;
+}
+
+/* School discovery and school detail. */
+.school-directory-reference .phead,
+.school-detail-reference {
+    color: var(--fd-ink);
+}
+
+.school-directory-reference .go {
+    border-radius: 8px;
+}
+
+.school-directory-reference .sform input,
+.school-directory-reference .sform select {
+    min-height: 46px;
+}
+
+.school-directory-reference .card,
+.school-detail-reference .sref-panel,
+.school-detail-reference .sref-card {
+    border-color: var(--fd-line);
+    border-radius: var(--fd-radius);
+}
+
+.school-detail-reference .sref-chip {
+    border-radius: 6px;
+}
+
+.school-detail-reference a,
+.school-directory-reference a {
+    text-decoration-thickness: 1px;
+}
+
+/* Editorial, news, events and scholarship pages use the same controls and title face. */
+.blogs-page,
+.news-page,
+.event-directory-reference,
+.event-reference,
+.findursch-scholarships,
+.resource-page {
+    color: var(--fd-ink);
+    font-family: var(--fd-body);
+}
+
+.blogs-page h1,
+.blogs-page h2,
+.news-page h1,
+.news-page h2,
+.event-directory-reference h1,
+.event-directory-reference h2,
+.event-reference h1,
+.event-reference h2,
+.findursch-scholarships h1,
+.findursch-scholarships h2,
+.resource-page h1,
+.resource-page h2 {
+    font-family: var(--fd-display) !important;
+}
+
+.blogs-page input,
+.blogs-page select,
+.news-page input,
+.news-page select,
+.event-directory-reference input,
+.event-directory-reference select,
+.findursch-scholarships input,
+.findursch-scholarships select,
+.findursch-scholarships textarea {
+    border-radius: 8px;
+}
+
+.blogs-btn,
+.blogs-bar button,
+.news-toolbar button,
+.news-digest {
+    border-radius: 8px;
+}
+
+.resource-detail-content,
+.resource-detail-sidebar,
+.article-body {
+    font-family: var(--fd-body);
+}
+
+.resource-detail-content h1,
+.resource-detail-content h2,
+.resource-detail-content h3 {
+    font-family: var(--fd-display) !important;
+}
+
+/* General information and legal pages. */
+body main > .prose,
+body section > .prose {
+    max-width: 100%;
+}
+
+body .prose-gray {
+    color: var(--fd-ink);
+}
+
+body .prose-gray p,
+body .prose-gray li {
+    color: #45534c;
+}
+
+body .prose-gray h2 {
+    margin-top: 2rem;
+    margin-bottom: .75rem;
+}
+
+/* Tables and pagination: one restrained, readable treatment. */
+table {
+    border-color: var(--fd-line);
+    font-family: var(--fd-body);
+}
+
+thead,
+thead tr,
+th {
+    background-color: var(--fd-tint);
+}
+
+th {
+    color: #53635b;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .045em;
+    text-transform: uppercase;
+}
+
+td {
+    color: #33433b;
+    font-size: 13px;
+}
+
+.pagination a,
+.pagination span,
+nav[role="navigation"] a,
+nav[role="navigation"] span {
+    border-radius: 7px;
+}
+
+/* Parent workspace: keep its sidebar navigation, align its complete appearance with the public brand. */
+body .account-workspace {
+    --fd-primary: var(--brand, #0c5a49);
+    --fd-primary-dark: var(--brand-dark, #083f33);
+    --fd-primary-soft: var(--tint, #f1f6f3);
+    --fd-page: #f5f8f6;
+    --fd-border: var(--line, #e4e8e6);
+    --fd-text: var(--ink, #1b2420);
+    --fd-muted: var(--muted, #5d6b65);
+    background: #f5f8f6;
+    color: var(--fd-ink);
+    font-family: var(--fd-body);
+}
+
+.account-workspace-sidebar {
+    border-right-color: var(--fd-line);
+    background: #fff;
+}
+
+.account-workspace-brand {
+    border-bottom-color: var(--fd-line);
+}
+
+.account-workspace-brand-mark {
+    color: var(--fd-brand);
+    font-family: var(--fd-display);
+}
+
+.account-workspace-brand-caption,
+.account-workspace-nav-label {
+    color: var(--fd-muted);
+}
+
+.account-workspace-user {
+    border-color: var(--fd-line);
+    border-radius: 10px;
+    background: var(--fd-tint);
+}
+
+.account-workspace-avatar,
+.account-workspace-topbar-avatar {
+    background: color-mix(in srgb, var(--fd-brand) 12%, white);
+    color: var(--fd-brand);
+}
+
+.account-workspace-user-copy p {
+    color: var(--fd-ink);
+    font-family: var(--fd-body);
+}
+
+.account-workspace-user-copy span {
+    color: var(--fd-muted);
+}
+
+.account-workspace-nav-item {
+    min-height: 43px;
+    border-radius: 8px;
+    color: #53635b;
+    font-family: var(--fd-body);
+    font-size: 13px;
+}
+
+.account-workspace-nav-item:hover {
+    background: var(--fd-tint);
+    color: var(--fd-brand);
+}
+
+.account-workspace-nav-item.is-active {
+    background: var(--fd-tint);
+    color: var(--fd-brand);
+    font-weight: 700;
+}
+
+.account-workspace-bottom-link:hover,
+.account-workspace-public-link:hover {
+    color: var(--fd-brand);
+}
+
+.account-workspace-topbar {
+    border-bottom-color: var(--fd-line);
+    background: rgba(255,255,255,.97);
+}
+
+.account-workspace-breadcrumb strong {
+    color: var(--fd-brand);
+    font-family: var(--fd-body);
+}
+
+.account-workspace-content {
+    font-family: var(--fd-body);
+}
+
+body .account-workspace-content h1,
+body .account-workspace-content h2,
+body .account-workspace-content h3 {
+    font-family: var(--fd-display) !important;
+}
+
+body .account-workspace-content h1 {
+    font-size: clamp(24px, 2.2vw, 32px);
+    font-weight: 600;
+}
+
+body .account-workspace-content h2 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+body .account-workspace-content h3 {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.account-workspace-content .btn-primary {
+    min-height: 40px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.account-workspace-content .btn-secondary {
+    min-height: 40px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.account-workspace-content input:not([type="checkbox"]):not([type="radio"]),
+.account-workspace-content select,
+.account-workspace-content textarea {
+    border-color: #d9e2dd;
+    border-radius: 8px;
+    color: var(--fd-ink);
+    font-size: 13px;
+}
+
+.account-workspace-content input:focus,
+.account-workspace-content select:focus,
+.account-workspace-content textarea:focus {
+    border-color: var(--fd-brand);
+    outline: 0;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--fd-brand) 12%, transparent);
+}
+
+.account-workspace-content input[type="checkbox"] {
+    accent-color: var(--fd-brand);
+}
+
+.account-workspace-content th {
+    background: var(--fd-tint);
+    color: var(--fd-muted);
+}
+
+.account-workspace-content td {
+    color: #45534c;
+}
+
+.account-workspace-logout {
+    border-color: var(--fd-line);
+    border-radius: 8px;
+    color: #53635b;
+    font-size: 12px;
+}
+
+.account-workspace-logout:hover {
+    border-color: var(--fd-brand);
+    background: var(--fd-tint);
+    color: var(--fd-brand);
+}
+
+/* Responsive sizing shared by every page family. */
+@media (max-width: 760px) {
+    :where(.site-wrap, .wrap, .blogs-wrap, .news-wrap, .ed-shell, .ed-wrap, .resource-detail-wrap) {
+        width: calc(100% - 32px);
+    }
+
+    body .mx-auto.max-w-7xl,
+    body .account-workspace-content > section {
+        width: calc(100% - 32px);
+    }
+
+    .site-header__inner {
+        min-height: 62px;
+        gap: 12px;
+    }
+
+    .site-logo {
+        max-width: 190px;
+        font-size: 22px;
+    }
+
+    .site-nav {
+        gap: 2px;
+    }
+
+    .site-header__cta {
+        min-height: 38px;
+        padding-inline: 12px;
+        font-size: 12px;
+    }
+
+    .account-workspace-content > section {
+        padding-top: 22px;
+        padding-bottom: 26px;
+    }
+}
+
+@media (max-width: 520px) {
+    body {
+        font-size: 13px;
+    }
+
+    :where(.site-wrap, .wrap, .blogs-wrap, .news-wrap, .ed-shell, .ed-wrap, .resource-detail-wrap) {
+        width: calc(100% - 28px);
+    }
+
+    body .mx-auto.max-w-7xl,
+    body .account-workspace-content > section {
+        width: calc(100% - 28px);
+    }
+
+    .site-header__inner {
+        min-height: 58px;
+    }
+
+    .site-logo {
+        max-width: 164px;
+        font-size: 20px;
+    }
+
+    .site-header__cta {
+        min-height: 36px;
+        padding-inline: 10px;
+        font-size: 11px;
+    }
+
+    .site-footer__bar > div {
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    body .account-workspace-content h1 {
+        font-size: 23px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *,
+    *::before,
+    *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+
+/*
+ * Bind every imported/reference page palette and font token to the active
+ * FindUrSch theme. These selectors deliberately override the old per-page
+ * template defaults so no route silently switches back to a different font
+ * or gold/green shade.
+ */
+.findursch-home-reference,
+.school-directory-reference,
+.event-reference,
+.findursch-scholarships {
+    --brand: var(--fd-brand) !important;
+    --brand-dk: var(--fd-brand-dark) !important;
+    --brand-xdk: var(--fd-brand-deep) !important;
+    --accent: var(--fd-accent) !important;
+    --accent-dk: var(--fd-accent-dark) !important;
+    --tint: var(--fd-tint) !important;
+    --line: var(--fd-line) !important;
+    --ink: var(--fd-ink) !important;
+    --mute: var(--fd-muted) !important;
+    --serif: var(--fd-display) !important;
+    --sans: var(--fd-body) !important;
+    --wrap: 1200px !important;
+}
+
+.blogs-page {
+    --blogs-brand: var(--fd-brand) !important;
+    --blogs-brand-dark: var(--fd-brand-dark) !important;
+    --blogs-brand-deep: var(--fd-brand-deep) !important;
+    --blogs-accent: var(--fd-accent) !important;
+    --blogs-accent-dark: var(--fd-accent-dark) !important;
+    --blogs-tint: var(--fd-tint) !important;
+    --blogs-line: var(--fd-line) !important;
+    --blogs-ink: var(--fd-ink) !important;
+    --blogs-muted: var(--fd-muted) !important;
+    --blogs-serif: var(--fd-display) !important;
+    --blogs-sans: var(--fd-body) !important;
+    --blogs-radius: 12px !important;
+}
+
+.resource-page {
+    --rp-brand: var(--fd-brand) !important;
+    --rp-dark: var(--fd-brand-dark) !important;
+    --rp-deep: var(--fd-brand-deep) !important;
+    --rp-gold: var(--fd-accent) !important;
+    --rp-tint: var(--fd-tint) !important;
+    --rp-line: var(--fd-line) !important;
+    --rp-ink: var(--fd-ink) !important;
+    --rp-muted: var(--fd-muted) !important;
+}
+
+.news-page {
+    --nb: var(--fd-brand) !important;
+    --nd: var(--fd-brand-dark) !important;
+    --nx: var(--fd-brand-deep) !important;
+    --na: var(--fd-accent) !important;
+    --nt: var(--fd-tint) !important;
+    --nl: var(--fd-line) !important;
+    --ni: var(--fd-ink) !important;
+    --nm: var(--fd-muted) !important;
+    --ns: var(--fd-display) !important;
+    --nn: var(--fd-body) !important;
+}
+
+.event-directory-reference {
+    --ed-brand: var(--fd-brand) !important;
+    --ed-dark: var(--fd-brand-dark) !important;
+    --ed-deep: var(--fd-brand-deep) !important;
+    --ed-gold: var(--fd-accent) !important;
+    --ed-tint: var(--fd-tint) !important;
+    --ed-line: var(--fd-line) !important;
+    --ed-ink: var(--fd-ink) !important;
+    --ed-muted: var(--fd-muted) !important;
+    --ed-serif: var(--fd-display) !important;
+    --ed-sans: var(--fd-body) !important;
+}
+
+/* The display face is the same even on older utility-based pages that used
+   inline DM Serif Display declarations in their Blade markup. */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--fd-display) !important;
+}
+
+/* Keep the custom event-directory controls on the shared button system. */
+.event-directory-reference .ed-search button,
+.event-directory-reference .ed-button:not(.ed-button-outline) {
+    min-height: 42px;
+    border: 1px solid var(--fd-brand);
+    border-radius: 8px;
+    background: var(--fd-brand);
+    color: #fff;
+    font-family: var(--fd-body);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.event-directory-reference .ed-search button:hover,
+.event-directory-reference .ed-button:not(.ed-button-outline):hover {
+    border-color: var(--fd-brand-dark);
+    background: var(--fd-brand-dark);
+    color: #fff;
+}
+
+.event-directory-reference .ed-button-outline {
+    min-height: 42px;
+    border: 1px solid var(--fd-brand);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--fd-brand);
+    font-family: var(--fd-body);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.event-directory-reference .ed-bottom-cta .ed-button {
+    border-color: var(--fd-accent);
+    background: var(--fd-accent);
+    color: #2b210b;
+}
+
+/* Match the same outer content grid on the newer reference-page families. */
+.findursch-home-reference .wrap,
+.school-directory-reference .wrap,
+.event-reference .wrap,
+.event-directory-reference .ed-shell,
+.blogs-page .blogs-wrap,
+.news-page .news-wrap,
+.resource-page .blogs-wrap {
+    width: min(1200px, calc(100% - 48px)) !important;
+    max-width: 1200px !important;
+    margin-inline: auto;
+}
+
+@media (max-width: 760px) {
+    .findursch-home-reference .wrap,
+    .school-directory-reference .wrap,
+    .event-reference .wrap,
+    .event-directory-reference .ed-shell,
+    .blogs-page .blogs-wrap,
+    .news-page .news-wrap,
+    .resource-page .blogs-wrap {
+        width: calc(100% - 32px) !important;
+    }
+}
+
+@media (max-width: 520px) {
+    .findursch-home-reference .wrap,
+    .school-directory-reference .wrap,
+    .event-reference .wrap,
+    .event-directory-reference .ed-shell,
+    .blogs-page .blogs-wrap,
+    .news-page .news-wrap,
+    .resource-page .blogs-wrap {
+        width: calc(100% - 28px) !important;
+    }
+}
+
+
+/* --------------------------------------------------------------------------
+   Reference HTML alignment — shared baseline for every public route.
+   The uploaded FindURSCH pages are the source of truth for these values.
+   -------------------------------------------------------------------------- */
+:root {
+    --brand: #0c5a49 !important;
+    --brand-dark: #083f33 !important;
+    --brand-deep: #052a22 !important;
+    --gold: #f0b030 !important;
+    --gold-dark: #d99a1a !important;
+    --accent: #f0b030 !important;
+    --accent-dk: #d99a1a !important;
+    --display-font: 'Playfair Display', Georgia, serif !important;
+    --font-display: 'Playfair Display', Georgia, serif !important;
+    --font-body: 'Inter', system-ui, sans-serif !important;
+    --fd-brand: #0c5a49;
+    --fd-brand-dark: #083f33;
+    --fd-brand-deep: #052a22;
+    --fd-accent: #f0b030;
+    --fd-accent-dark: #d99a1a;
+    --fd-tint: #f1f6f3;
+    --fd-line: #e4e8e6;
+    --fd-ink: #1b2420;
+    --fd-muted: #5d6b65;
+    --fd-display: 'Playfair Display', Georgia, serif;
+    --fd-body: 'Inter', system-ui, sans-serif;
+}
+
+html, body {
+    font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+body,
+body.antialiased,
+body.h-full {
+    font-size: 15px !important;
+    line-height: 1.55 !important;
+    color: #1b2420 !important;
+}
+
+:where(h1, h2, h3, h4, h5, h6, .site-logo, .blogs-page h1, .news-page h1, .event-reference h1, .event-directory-reference h1, .findursch-scholarships h1, .school-directory-reference h1, .school-detail-reference h1) {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    letter-spacing: 0 !important;
+}
+
+:where(p, li, label, small, input, select, textarea, button, table, th, td) {
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+:where(.site-wrap, .wrap, .blogs-wrap, .news-wrap, .ed-shell, .ed-wrap, .resource-detail-wrap, .site-footer__inner) {
+    width: min(1280px, calc(100% - 48px)) !important;
+    max-width: 1280px !important;
+    margin-inline: auto !important;
+    box-sizing: border-box;
+}
+
+body .mx-auto.max-w-7xl {
+    width: min(1280px, calc(100% - 48px)) !important;
+    max-width: 1280px !important;
+}
+
+body .account-workspace-content > section {
+    width: min(1280px, calc(100% - 48px)) !important;
+    max-width: 1280px !important;
+}
+
+/* The shared header now follows the 32px + 64px measurements in the templates. */
+.site-topbar {
+    min-height: 32px !important;
+    background: #083f33 !important;
+    color: #fff !important;
+    font-size: 12.5px !important;
+}
+
+.site-topbar__inner {
+    min-height: 32px !important;
+    gap: 22px !important;
+    display: flex;
+    align-items: center;
+}
+
+.site-topbar__message {
+    font-size: 12.5px !important;
+    line-height: 1 !important;
+}
+
+.site-topbar__actions {
+    gap: 22px !important;
+    align-items: center;
+}
+
+.site-topbar__signin,
+.site-topbar__contact,
+.site-topbar__signup {
+    color: #fff !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    text-decoration: none;
+}
+
+.site-topbar__signup:hover,
+.site-topbar__signin:hover,
+.site-topbar__contact:hover {
+    color: #fff !important;
+    opacity: .82;
+    text-decoration: underline;
+    transform: none !important;
+}
+
+.site-header {
+    min-height: 64px !important;
+    background: #0c5a49 !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.18) !important;
+}
+
+.site-header__inner {
+    min-height: 64px !important;
+    height: 64px !important;
+    gap: 28px !important;
+}
+
+.site-header__inner > .site-logo {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    max-width: 220px;
+    font-family: 'Playfair Display', Georgia, serif !important;
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    letter-spacing: -.3px !important;
+}
+
+.site-header__inner > .site-logo img {
+    display: block;
+    max-width: 200px !important;
+    max-height: 44px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain;
+    object-position: left center;
+}
+
+.site-nav {
+    gap: 4px !important;
+    margin: 0 auto !important;
+    align-items: center;
+}
+
+.site-nav a {
+    min-height: 0 !important;
+    padding: 8px 14px !important;
+    border-radius: 8px !important;
+    color: rgba(255,255,255,.96) !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+}
+
+.site-nav a:hover,
+.site-nav a.is-active {
+    background: rgba(255,255,255,.16) !important;
+    color: #fff !important;
+}
+
+.site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.site-header__cta {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px !important;
+    padding: 0 20px !important;
+    border: 1.5px solid #fff !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: #fff !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.site-header__cta:hover {
+    border-color: #fff !important;
+    background: rgba(255,255,255,.12) !important;
+    color: #fff !important;
+    transform: none !important;
+}
+
+.site-account-link {
+    color: #fff !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+.site-menu-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px !important;
+}
+
+.site-menu-toggle svg {
+    width: 22px;
+    height: 22px;
+}
+
+.site-mobile-drawer {
+    font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+.site-mobile-drawer__links a {
+    border-radius: 8px !important;
+    font-size: 14px;
+}
+
+.site-mobile-drawer__button {
+    min-height: 42px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+}
+
+.site-footer {
+    background: var(--fd-brand-deep, #052a22) !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+.site-footer h2 {
+    font-family: 'Inter', system-ui, sans-serif !important;
+    letter-spacing: 0 !important;
+}
+
+.site-footer__brand .site-logo img {
+    max-height: 48px !important;
+    max-width: 220px !important;
+    width: auto !important;
+}
+
+.site-footer .btn-footer {
+    min-height: 36px !important;
+    padding: 0 18px !important;
+    border: 1px solid #fff !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: #fff !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}
+
+/* Exact component sizing shared by all reference pages. */
+:where(
+    .btn, .btn-primary, .btn-secondary, .btn-accent, .btn-brand, .btn-gold,
+    .btn-red, .btn-search, .blogs-btn, .news-toolbar button, .news-digest,
+    .go, .sform button
+) {
+    min-height: 42px !important;
+    height: 42px;
+    padding: 0 20px !important;
+    border-radius: 8px !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+}
+
+.findursch-home-reference .btn-red,
+.findursch-home-reference .hero .search button {
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 0 26px !important;
+    border-radius: 999px !important;
+    font-size: 14px !important;
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]), select, textarea) {
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 14px !important;
+}
+
+:where(.resource-page, .blogs-page, .news-page, .event-reference, .event-directory-reference, .findursch-scholarships, .school-directory-reference, .school-detail-reference) {
+    font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+:where(.resource-page h1, .resource-page h2, .resource-page h3, .blogs-page h1, .blogs-page h2, .news-page h1, .news-page h2, .event-reference h1, .event-reference h2, .event-directory-reference h1, .event-directory-reference h2, .findursch-scholarships h1, .findursch-scholarships h2, .school-directory-reference h1, .school-detail-reference h1) {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    letter-spacing: 0 !important;
+}
+
+:where(.crumbs, .resource-crumbs, .blogs-crumbs, .ed-crumbs) {
+    font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+:where(.prose, .prose-gray) {
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 15px !important;
+    line-height: 1.75 !important;
+}
+
+/* Legacy routes without an individual reference HTML use the same 1280px,
+   green/cream palette, Playfair headings, Inter body and restrained cards. */
+body main > .mx-auto,
+body main > section > .mx-auto,
+body main > div > .mx-auto,
+body main .max-w-6xl,
+body main .max-w-5xl {
+    max-width: 1280px;
+}
+
+body main .rounded-xl.border,
+body main .rounded-2xl.border,
+body main .rounded-lg.border {
+    border-color: #e4e8e6 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 12px rgba(6,45,35,.055);
+}
+
+body main .bg-gray-50,
+body main .bg-slate-50 {
+    background: #f1f6f3 !important;
+}
+
+body main .text-gray-500,
+body main .text-slate-500 {
+    color: #5d6b65 !important;
+}
+
+body main .text-primary,
+body main .text-emerald-700 {
+    color: #0c5a49 !important;
+}
+
+body main .bg-primary,
+body main .bg-emerald-700 {
+    background-color: #0c5a49 !important;
+}
+
+body main button,
+body main a[class*="rounded"][class*="bg-primary"] {
+    font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+
+
+/* Keep the reference's mobile header and horizontal gutters predictable. */
+@media (max-width: 1000px) {
+    .site-header__inner {
+        min-height: 64px !important;
+        height: 64px !important;
+        gap: 14px !important;
+    }
+
+    .site-header__inner > .site-logo img {
+        max-width: 184px !important;
+        max-height: 42px !important;
+    }
+
+    .site-header__cta {
+        display: none !important;
+    }
+}
+
+@media (max-width: 760px) {
+    :where(.site-wrap, .wrap, .blogs-wrap, .news-wrap, .ed-shell, .ed-wrap, .resource-detail-wrap, .site-footer__inner) {
+        width: calc(100% - 32px) !important;
+    }
+
+    body .mx-auto.max-w-7xl,
+    body .account-workspace-content > section {
+        width: calc(100% - 32px) !important;
+    }
+
+    .site-topbar__inner {
+        min-height: 32px !important;
+        width: calc(100% - 32px) !important;
+        gap: 10px !important;
+    }
+
+    .site-topbar__message {
+        max-width: 52%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .site-topbar__actions {
+        gap: 10px !important;
+    }
+
+    .site-header__inner {
+        min-height: 64px !important;
+        height: 64px !important;
+        gap: 10px !important;
+    }
+
+    .site-menu-toggle {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 420px) {
+    .site-topbar__message {
+        display: none;
+    }
+
+    .site-topbar__inner {
+        justify-content: flex-end;
+    }
+
+    .site-topbar__actions {
+        gap: 12px !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Schools-reference public header — shared across every public route.
+   -------------------------------------------------------------------------- */
+.site-topbar__inner {
+    justify-content: flex-end !important;
+    min-height: 32px !important;
+    gap: 22px !important;
+}
+.site-topbar__link {
+    display: inline-flex;
+    min-height: 32px;
+    align-items: center;
+    color: #fff !important;
+    font: 500 12.5px/1 var(--fd-body);
+    white-space: nowrap;
+    text-decoration: none;
+}
+.site-topbar__link:hover {
+    color: var(--fd-accent) !important;
+}
+
+.site-header {
+    position: relative;
+    z-index: 40;
+    min-height: 64px !important;
+    background: var(--fd-brand) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.18) !important;
+}
+.site-header__inner {
+    display: flex !important;
+    min-height: 64px !important;
+    height: 64px !important;
+    align-items: center !important;
+    gap: 28px !important;
+}
+.site-header__inner > .site-logo {
+    display: inline-flex !important;
+    flex: 0 0 auto;
+    max-width: 200px;
+    align-items: center;
+    line-height: 0;
+}
+.site-header__inner > .site-logo img {
+    display: block;
+    width: 168px !important;
+    height: auto !important;
+    max-width: 200px !important;
+    max-height: 42px !important;
+    object-fit: contain;
+    object-position: left center;
+}
+.site-header .site-nav {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 4px !important;
+    margin: 0 auto !important;
+    min-width: 0;
+}
+.site-header .site-nav a {
+    display: inline-flex;
+    min-height: 38px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    color: rgba(255,255,255,.96) !important;
+    font: 500 13.5px/1.2 var(--fd-body) !important;
+    white-space: nowrap;
+}
+.site-header .site-nav a:hover,
+.site-header .site-nav a.is-active {
+    background: rgba(255,255,255,.16) !important;
+    color: #fff !important;
+}
+.site-header__actions {
+    display: flex !important;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px !important;
+    margin-left: 0;
+}
+.site-header-icon {
+    position: relative;
+    display: inline-grid !important;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff !important;
+    color: var(--fd-brand) !important;
+    text-decoration: none !important;
+    transition: transform .16s ease, box-shadow .16s ease;
+}
+.site-header-icon:hover {
+    color: var(--fd-brand-dark) !important;
+    box-shadow: 0 2px 9px rgba(0,0,0,.16);
+    transform: translateY(-1px);
+}
+.site-header-icon__svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.site-header-icon em {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: #d23b2e;
+    color: #fff;
+    font: 700 10.5px/17px var(--fd-body);
+    text-align: center;
+    font-style: normal;
+}
+.site-header .site-menu-toggle {
+    display: none;
+    width: 40px !important;
+    height: 40px !important;
+    flex: 0 0 40px;
+    align-items: center;
+    justify-content: center;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: #fff !important;
+    cursor: pointer;
+}
+.site-header .site-menu-toggle:hover {
+    background: rgba(255,255,255,.12) !important;
+}
+.site-header .site-menu-toggle svg {
+    width: 23px;
+    height: 23px;
+}
+.site-mobile-drawer {
+    z-index: 80;
+    background: var(--fd-brand-deep) !important;
+    color: #fff !important;
+}
+.site-mobile-drawer__head {
+    display: flex;
+    min-height: 72px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px !important;
+    border-bottom: 1px solid #2a5a4d !important;
+}
+.site-mobile-drawer__head > .site-logo {
+    display: inline-flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    align-items: center;
+    color: #fff !important;
+    line-height: 0;
+}
+.site-mobile-drawer__head > .site-logo img {
+    display: block;
+    width: 168px !important;
+    max-width: 100% !important;
+    max-height: 44px !important;
+    height: auto !important;
+    object-fit: contain;
+    object-position: left center;
+}
+.site-mobile-drawer__head-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+}
+.site-header-icon--drawer {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+}
+.site-mobile-drawer__close {
+    display: inline-grid;
+    width: 40px !important;
+    height: 40px !important;
+    flex: 0 0 40px;
+    place-items: center;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: #fff !important;
+    font: 400 27px/1 var(--fd-body) !important;
+    cursor: pointer;
+}
+.site-mobile-drawer__close:hover {
+    background: #12453a !important;
+}
+.site-mobile-drawer__links {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 !important;
+}
+.site-mobile-drawer__links > a {
+    display: block;
+    padding: 16px 20px !important;
+    border-bottom: 1px solid #1d4a3f !important;
+    border-radius: 0 !important;
+    color: #fff !important;
+    font: 500 17px/1.3 var(--fd-body) !important;
+}
+.site-mobile-drawer__links > a:hover {
+    background: #0c3d33 !important;
+}
+.site-mobile-drawer__links > a.is-active {
+    background: rgba(255,255,255,.035) !important;
+    color: var(--fd-accent) !important;
+    font-weight: 700 !important;
+}
+.site-mobile-drawer__links > hr {
+    height: 6px;
+    margin: 0;
+    border: 0;
+    background: var(--fd-brand-dark);
+}
+.site-mobile-drawer__secondary a {
+    display: block;
+    padding: 14px 20px;
+    border-bottom: 1px solid #1d4a3f;
+    color: #fff;
+    font: 500 15px/1.3 var(--fd-body);
+}
+.site-mobile-drawer__secondary a:hover {
+    background: #0c3d33;
+}
+.site-mobile-overlay {
+    z-index: 70;
+    background: rgba(0,0,0,.6) !important;
+}
+.site-menu-open {
+    overflow: hidden !important;
+}
+.site-register-tab {
+    position: fixed;
+    top: 34%;
+    right: 0;
+    z-index: 50;
+    writing-mode: vertical-rl;
+    padding: 18px 9px;
+    border-radius: 10px 0 0 10px;
+    background: var(--fd-accent);
+    color: #2a1d00 !important;
+    font: 700 12px/1.2 var(--fd-body);
+    letter-spacing: .06em;
+    text-decoration: none !important;
+    box-shadow: -3px 3px 12px rgba(0,0,0,.2);
+}
+.site-register-tab:hover {
+    background: var(--fd-accent-dark);
+    color: #2a1d00 !important;
+}
+
+@media (max-width: 1120px) {
+    .site-header__inner { gap: 14px !important; }
+    .site-header .site-nav a { padding-inline: 8px !important; font-size: 12.5px !important; }
+    .site-header__inner > .site-logo img { width: 150px !important; }
+    .site-header__actions { gap: 8px !important; }
+}
+@media (max-width: 1000px) {
+    .site-header__inner {
+        min-height: 64px !important;
+        height: 64px !important;
+        gap: 10px !important;
+    }
+    .site-header .site-nav { display: none !important; }
+    .site-header__actions {
+        gap: 8px !important;
+        margin-left: auto !important;
+    }
+    .site-header .site-menu-toggle {
+        display: inline-grid !important;
+        margin-left: 0 !important;
+    }
+    .site-header-icon { width: 40px; height: 40px; flex-basis: 40px; }
+    .site-mobile-drawer { width: min(82vw, 380px) !important; }
+}
+@media (max-width: 640px) {
+    .site-topbar__inner {
+        min-height: 30px !important;
+        gap: 12px !important;
+    }
+    .site-topbar__link:nth-child(-n+2) { display: none; }
+    .site-topbar__link { font-size: 11px; }
+    .site-header__inner > .site-logo img { width: 140px !important; max-height: 36px !important; }
+    .site-mobile-drawer__head { padding: 12px 16px !important; }
+    .site-mobile-drawer__head > .site-logo img { width: 156px !important; max-height: 40px !important; }
+    .site-mobile-drawer { width: min(82vw, 380px) !important; }
+    .site-register-tab {
+        top: 40%;
+        padding: 12px 6px;
+        font-size: 9.5px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .site-header-icon { transition: none; }
+    .site-menu-toggle { transition: none; }
+}
+
+/* Match the Schools reference: keep saved-school shortcut on desktop; use
+   the account shortcut plus menu control on compact screens. */
+@media (max-width: 1000px) {
+    .site-header__actions > .site-header-icon[aria-label="Saved schools"] {
+        display: none !important;
+    }
+}
+
+
+/* Header account identity avatar: use the school's badge/logo or the signed-in name initials. */
+.site-header-account-avatar {
+    overflow: hidden;
+    border: 1px solid rgba(12, 90, 73, .16);
+    background: #fff !important;
+}
+.site-header-account-avatar__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+    border-radius: 50%;
+    object-fit: contain;
+}
+.site-header-account-avatar__initials {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    color: var(--fd-brand, #0c5a49);
+    font: 700 11px/1 var(--fd-body, Inter, sans-serif);
+    letter-spacing: .02em;
+}
+
+
+/* Named account fallback: initials plus the account holder's first and last name. */
+.site-header-icon.site-header-account-avatar--with-name {
+    display: inline-flex !important;
+    width: auto !important;
+    min-width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 0 10px;
+    border-radius: 999px;
+}
+.site-header-account-avatar--with-name .site-header-account-avatar__initials {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    border-radius: 50%;
+    background: var(--fd-brand, #0c5a49);
+    color: #fff;
+    font-size: 10px;
+}
+.site-header-account-avatar__name {
+    display: inline-block;
+    max-width: 112px;
+    overflow: hidden;
+    color: var(--fd-brand, #0c5a49);
+    font: 600 11px/1.2 var(--fd-body, Inter, sans-serif);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+@media (max-width: 760px) {
+    .site-header-account-avatar__name {
+        max-width: 88px;
+    }
+}

@@ -1,0 +1,275 @@
+.site-ad-slot {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  line-height: 0;
+}
+.site-ad-slot--top {
+  width: min(100% - 32px, 728px);
+  margin: 18px auto;
+}
+.site-ad-slot--side {
+  width: min(100%, 300px);
+  margin: 0 auto 20px;
+}
+.site-ad-slot--inlist,
+.site-ad-slot--art {
+  width: min(100%, 728px);
+  margin: 24px auto;
+}
+.site-ad-slot__link,
+.site-ad-slot__image {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 3px;
+}
+.site-ad-slot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+.site-ad-slot__label {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  z-index: 2;
+  padding: 3px 6px;
+  border-radius: 3px;
+  background: rgb(27 36 32 / 78%);
+  color: #fff;
+  font: 700 9px/1 Inter, system-ui, sans-serif;
+  letter-spacing: .05em;
+  pointer-events: none;
+}
+@media (max-width: 640px) {
+  .site-ad-slot--top {
+    width: calc(100% - 24px);
+    margin: 12px auto;
+  }
+  .site-ad-slot--side {
+    max-width: 300px;
+  }
+}
+
+.site-ad-slot__whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: #128c7e;
+  color: #fff;
+  font: 700 12px/1.2 Inter, system-ui, sans-serif;
+  text-decoration: none;
+  box-shadow: 0 2px 7px rgb(18 140 126 / 16%);
+  transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.site-ad-slot__whatsapp:hover {
+  background: #0b766b;
+  color: #fff;
+  box-shadow: 0 4px 11px rgb(18 140 126 / 22%);
+  transform: translateY(-1px);
+}
+.site-ad-slot__whatsapp:focus-visible {
+  outline: 3px solid rgb(18 140 126 / 35%);
+  outline-offset: 3px;
+}
+.site-ad-slot__whatsapp svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  flex: 0 0 16px;
+}
+
+
+/* Keep every reserved position visible until an advertiser banner is assigned. */
+.site-ad-slot--empty {
+  line-height: 1.25;
+}
+.site-ad-slot__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 76px;
+  padding: 12px 16px;
+  aspect-ratio: 728 / 90;
+  border: 1px dashed #b8cbc4;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f7faf8 0%, #eef5f1 100%);
+  color: #45635a;
+  text-align: center;
+  gap: 3px;
+}
+.site-ad-slot__placeholder-title {
+  color: #0c5a49;
+  font: 700 13px/1.2 Inter, system-ui, sans-serif;
+  letter-spacing: .02em;
+}
+.site-ad-slot__placeholder-copy {
+  font: 500 11px/1.3 Inter, system-ui, sans-serif;
+}
+.site-ad-slot__placeholder-size {
+  color: #71837c;
+  font: 500 10px/1.2 Inter, system-ui, sans-serif;
+}
+.site-ad-slot--side .site-ad-slot__placeholder {
+  min-height: 220px;
+  aspect-ratio: 6 / 5;
+}
+.site-ad-slot--foot1 .site-ad-slot__placeholder {
+  min-height: 96px;
+  aspect-ratio: 3.64 / 1;
+}
+.site-ad-slot--foot2 .site-ad-slot__placeholder {
+  min-height: 96px;
+  aspect-ratio: 2.34 / 1;
+}
+
+/* Preserve the exact 728 × 90 holder size inside the school directory heading grid. */
+.school-directory-reference .phead .site-ad-slot--top {
+  width: 100%;
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .site-ad-slot__placeholder {
+    min-height: 68px;
+    padding: 10px 12px;
+  }
+  .site-ad-slot--side .site-ad-slot__placeholder {
+    min-height: 180px;
+  }
+  .site-ad-slot--foot1 .site-ad-slot__placeholder,
+  .site-ad-slot--foot2 .site-ad-slot__placeholder {
+    min-height: 84px;
+  }
+}
+
+/* Advert placements are mounted in page templates at their reserved design positions. */
+
+
+/* Shared responsive behaviour for every reserved advertising position. */
+.site-ad-slot,
+.site-ad-slot__link,
+.site-ad-slot__image,
+.site-ad-slot__placeholder {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+.site-ad-slot {
+  flex: 0 1 auto;
+}
+.site-ad-slot__link,
+.site-ad-slot__image {
+  width: 100%;
+}
+.site-ad-slot__link img,
+.site-ad-slot__image img,
+.site-ad-slot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+.site-ad-slot--top,
+.site-ad-slot--inlist,
+.site-ad-slot--art {
+  width: min(100%, 728px);
+}
+.site-ad-slot--side {
+  width: min(100%, 300px);
+}
+.site-ad-slot--foot1,
+.site-ad-slot--foot2 {
+  width: 100%;
+}
+.site-ad-slot__whatsapp {
+  max-width: calc(100% - 8px);
+  white-space: normal;
+  line-height: 1.25;
+  text-align: center;
+  vertical-align: top;
+}
+.site-ad-slot__placeholder {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.banner[aria-label="Sponsored banners"] {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.56fr) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(12px, 2vw, 22px);
+  width: min(100% - 40px, 900px);
+  max-width: 900px;
+  margin: 36px auto;
+}
+.banner[aria-label="Sponsored banners"] > .site-ad-slot {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+.banner[aria-label="Sponsored banners"] .site-ad-slot__placeholder {
+  width: 100%;
+}
+.site-ad-slot--foot1 .site-ad-slot__placeholder {
+  aspect-ratio: 728 / 200;
+}
+.site-ad-slot--foot2 .site-ad-slot__placeholder {
+  aspect-ratio: 468 / 200;
+}
+@media (max-width: 760px) {
+  .banner[aria-label="Sponsored banners"] {
+    grid-template-columns: minmax(0, 1fr);
+    width: min(100% - 32px, 728px);
+    gap: 14px;
+    margin: 28px auto;
+  }
+  .site-ad-slot--top {
+    width: calc(100% - 24px);
+    margin: 12px auto;
+  }
+  .site-ad-slot--side {
+    width: min(100%, 300px);
+    margin: 0 auto 18px;
+  }
+  .site-ad-slot--inlist,
+  .site-ad-slot--art {
+    width: 100%;
+    margin: 18px auto;
+  }
+  .site-ad-slot__whatsapp {
+    margin-top: 7px;
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+}
+@media (max-width: 420px) {
+  .site-ad-slot--top {
+    width: calc(100% - 20px);
+  }
+  .site-ad-slot__placeholder {
+    padding: 9px 10px;
+  }
+  .site-ad-slot__placeholder-title {
+    font-size: 12px;
+  }
+  .site-ad-slot__placeholder-copy {
+    font-size: 10px;
+  }
+  .site-ad-slot--side .site-ad-slot__placeholder {
+    min-height: 170px;
+  }
+}

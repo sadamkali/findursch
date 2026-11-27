@@ -1,51 +1,42 @@
 # Supabase public API permissions
 
-The Cloudflare staging public directory reads the existing FindURSCH PostgreSQL database through the Supabase REST API using the anon/publishable key only.
+The Cloudflare public website reads the existing FindURSCH PostgreSQL project through Supabase REST using the anon key and narrowly scoped row/column security.
 
-## Applied status — 26 November 2026
+## Applied public read access
 
-The SQL in public_api_anon_policies.sql has been applied to the existing production project findursch after explicit approval.
+The following read-only Supabase migrations were applied to the existing project findursch (gpsfttpeikatxszswljo):
 
-It:
-- Grants the anon database role SELECT on a defined list of public school, taxonomy, curriculum, programme, facility, fee and media columns only.
-- Adds RLS policies allowing only active + verified school records and their associated public listing data.
-- Limits public media to image files in cover, badge and gallery collections.
-- Does not grant access to users, roles, permissions, payments, subscriptions, inquiries, school documents, imports, exports, or admin tables.
-- Does not insert, update or delete application records.
+- findursch_public_content_read_access_and_fee_privacy
+- findursch_public_article_category_policy_dependency
+- findursch_public_fallback_ad_read_access
 
-## Verification
+They expose only published public content, active categories, approved school posts and videos linked to active + verified schools, published jobs and approved fallback banners. The scripts create RLS policies and column grants only; they do not add application tables or alter business records.
 
-A transaction using SET LOCAL ROLE anon returned:
-- 3 active + verified schools.
-- 4 active regions.
-- 128 active districts.
-- 6 active school types.
-- 3 active curricula.
+## School fee privacy
 
-Privilege checks confirmed anon cannot select public.users, public.school_documents, user passwords, schools.owner_id, schools.registration_number or media.custom_properties. RLS remained enabled on each of the 11 tables covered by this change.
+Public pages can show estimated schools.fees_from and schools.fees_to values. Anonymous users cannot select itemised school_fees.amount or the schools.application_fee field. The public_api_anon_policies.sql script explicitly revokes those old fee permissions and removes the previous public itemised-fee policy.
 
-The SQL is safe to re-run because it drops and recreates only its specifically named policies; column grants are additive. Do not change or remove other application policies without a separate review.
+Do not restore public fee-table access. Exact fees belong in the protected school fees circular/document workflow.
 
-## Cloudflare Pages environment
+## Public RLS coverage
 
-The findursch-app-staging Pages project has these Production environment values configured:
+- Schools: active + verified only.
+- Regions, districts, school types and curricula: active only.
+- School curricula, programmes, facilities and media: visible only when linked to active + verified schools; media is limited to cover, badge and gallery images.
+- Articles: published, already within publication time and linked to an active category.
+- School posts and videos: approved/published and linked to active + verified schools.
+- Jobs: published, within publication time and not past deadline.
+- Ads: approved fallback banners within their scheduled display window.
 
-- SUPABASE_URL (plain text): https://gpsfttpeikatxszswljo.supabase.co
-- SUPABASE_ANON_KEY (secret): active legacy anon key.
-- PUBLIC_MEDIA_BASE_URL (plain text): https://pub-6c31260540c84b1ba11ed7196e3b29b9.r2.dev
+The public API does not query users, roles, permissions, payments, subscriptions, enquiries, private documents or moderation metadata.
 
-The key is used only by Pages Functions. It is not bundled into JavaScript or returned to visitors. The service_role key is not used.
+## Deployment
 
+The public website is currently served by Cloudflare Worker findursch at https://findursch.propipspath.workers.dev. The findursch-static Pages project is a separate static media-asset host.
 
-## Legacy Supabase login-throttle objects — superseded
+The Worker uses:
+- SUPABASE_URL (plain-text project URL)
+- SUPABASE_ANON_KEY (server-side Worker secret)
+- PUBLIC_MEDIA_BASE_URL (public R2 origin)
 
-The `findursch_login_rate_limits.sql` script was applied during an earlier migration iteration. It is now deprecated and must not be run again. The Cloudflare login route no longer calls `public.findursch_check_login_rate_limit` or reads/writes `public.findursch_login_rate_limits`.
-
-Login throttling now runs entirely on Cloudflare:
-- A Cloudflare Pages Function HMACs `CF-Connecting-IP` using the separate Cloudflare secret `LOGIN_RATE_LIMIT_HMAC_KEY`.
-- The HMAC digest selects one SQLite-backed Cloudflare Durable Object for that connecting IP.
-- The object counts attempt timestamps over a rolling 60-second window and allows 10 attempts; the next attempt receives HTTP 429 and a `Retry-After` header.
-- Expired timestamps are cleaned by a Durable Object alarm. No raw IP, credentials, account identifier or Supabase token is sent to the object.
-- Supabase is not contacted for rate-limit checks.
-
-The previously created Supabase rate-limit table and RPC are intentionally left in place for now. This code migration does not delete or modify those objects. Any database cleanup requires a separate explicit approval. The Supabase server secret remains in Cloudflare only for private legacy account/role lookups and encrypted cookie handling; it is not used for rate limiting.
+The public homepage and directory do not need SUPABASE_SECRET_KEY, a service-role key or any private account credential. Authentication and the login-rate-limit binding are separate migration work and must not be described as active until the Worker is configured and tested.

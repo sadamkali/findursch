@@ -36,75 +36,66 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Check legacy auth import script syntax
         run: node --check scripts/import-legacy-auth-users.mjs
-      - name: Build static public site
+      - name: Build Cloudflare public site
         run: npm run build:site
       - name: Type-check Worker and public site
         run: npm run typecheck
 
-  staging-api-smoke-tests:
+  deployed-public-site-smoke-tests:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Check deployed Cloudflare staging API and server-side Supabase access
+      - name: Check deployed public website and anonymous Supabase API
         env:
-          STAGING_URL: https://findursch-app-staging.pages.dev
+          WORKER_URL: https://findursch.propipspath.workers.dev
         run: |
           node --input-type=module <<'NODE'
-          const base = process.env.STAGING_URL;
-          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+          const base = process.env.WORKER_URL;
 
-          async function requestJson(path, options = {}) {
+          async function request(path) {
             const response = await fetch(new URL(path, base), {
-              ...options,
-              headers: {
-                Accept: "application/json",
-                ...(options.headers || {})
-              },
-              signal: AbortSignal.timeout(12000)
+              headers: { Accept: "application/json" },
+              signal: AbortSignal.timeout(15000)
             });
-            const body = await response.json().catch(() => null);
-            return { response, body };
+            const text = await response.text();
+            let body = null;
+            try { body = JSON.parse(text); } catch {}
+            return { response, body, text };
           }
 
-          async function getJson(path, attempts = 24) {
-            let lastError;
-            for (let attempt = 1; attempt <= attempts; attempt++) {
-              try {
-                const { response, body } = await requestJson(path);
-                if (response.ok) return body;
-                lastError = new Error(path + " returned HTTP " + response.status + ": " + JSON.stringify(body));
-              } catch (error) {
-                lastError = error;
-              }
-              if (attempt < attempts) await sleep(10000);
+          async function getJson(path) {
+            const result = await request(path);
+            if (!result.response.ok) {
+              throw new Error(path + " returned HTTP " + result.response.status + ": " + result.text.slice(0, 500));
             }
-            throw lastError || new Error(path + " did not become available");
+            if (!result.body || typeof result.body !== "object") {
+              throw new Error(path + " did not return JSON");
+            }
+            return result.body;
           }
 
-          let health;
-          for (let attempt = 1; attempt <= 24; attempt++) {
-            health = await getJson("/api/health");
-            if (health.authSecretsConfigured === true && health.sessionStrategy === "supabase-auth-encrypted-cookie" && health.loginRateLimitStrategy === "cloudflare-durable-object-sliding-window-10-per-60s") break;
-            if (attempt < 24) await sleep(10000);
+          const home = await request("/");
+          if (!home.response.ok || !home.response.headers.get("content-type")?.includes("text/html")) {
+            throw new Error("Homepage did not return an HTML document: HTTP " + home.response.status);
           }
+          for (const marker of ["site-header", "site-footer", "FindURSCH"]) {
+            if (!home.text.includes(marker)) throw new Error("Homepage HTML is missing " + marker);
+          }
+          console.log("PASS public homepage HTML and shared site shell");
 
-          if (health.status !== "ok" || health.databaseConfigured !== true || health.sessionStrategy !== "supabase-auth-encrypted-cookie") {
-            throw new Error("API health check failed: " + JSON.stringify(health));
+          const css = await fetch(new URL("/css/home-reference.css", base), { signal: AbortSignal.timeout(15000) });
+          if (!css.ok) throw new Error("The FindURSCH homepage reference stylesheet is not served (HTTP " + css.status + ")");
+          console.log("PASS original FindURSCH homepage stylesheet is served");
+
+          const health = await getJson("/api/health");
+          if (health.status !== "ok" || health.databaseConfigured !== true) {
+            throw new Error("Public API health check failed: " + JSON.stringify(health));
           }
-          if (health.authSecretsConfigured !== true) {
-            throw new Error("The server-only Supabase secret is not available in the active Cloudflare deployment.");
-          }
-          if (health.loginRateLimitConfigured !== true) {
-            throw new Error("The Cloudflare Durable Object login limiter or its HMAC secret is not configured.");
-          }
-          console.log("PASS /api/health (Supabase database and encrypted Supabase Auth cookie sessions are configured)");
+          console.log("PASS /api/health (public Supabase API is configured)");
 
           const locations = await getJson("/api/v1/locations");
-          const locationData = locations.data;
           for (const key of ["regions", "districts", "school_types", "curricula"]) {
-            if (!Array.isArray(locationData && locationData[key])) {
-              throw new Error("Locations response is missing " + key);
-            }
+            if (!Array.isArray(locations.data?.[key])) throw new Error("Locations response is missing " + key);
           }
           console.log("PASS /api/v1/locations");
 
@@ -113,9 +104,8 @@ jobs:
             throw new Error("School listing returned no public schools: " + JSON.stringify(listing));
           }
           for (const school of listing.data) {
-            if (!school.slug || !school.name) throw new Error("School listing contains an incomplete public record");
-            for (const forbidden of ["owner_id", "registration_number", "verified_by", "password"]) {
-              if (forbidden in school) throw new Error("Sensitive field " + forbidden + " leaked in school listing");
+            for (const forbidden of ["owner_id", "registration_number", "verified_by", "password", "application_fee", "fees", "school_fees"]) {
+              if (Object.hasOwn(school, forbidden)) throw new Error("Sensitive field " + forbidden + " leaked in school listing");
             }
           }
           console.log("PASS /api/v1/schools (" + listing.meta.total + " visible public records)");
@@ -126,73 +116,24 @@ jobs:
           if (!school || school.slug !== first.slug || school.id !== first.id) {
             throw new Error("School profile did not match listing record " + first.slug);
           }
-          for (const forbidden of ["owner_id", "registration_number", "verified_by", "password"]) {
-            if (forbidden in school) throw new Error("Sensitive field " + forbidden + " leaked in school profile");
+          for (const forbidden of ["owner_id", "registration_number", "verified_by", "password", "application_fee", "fees", "school_fees"]) {
+            if (Object.hasOwn(school, forbidden)) throw new Error("Sensitive field " + forbidden + " leaked in school profile");
           }
-          console.log("PASS /api/v1/schools/" + first.slug);
+          console.log("PASS /api/v1/schools/:slug (estimated ranges only; no itemised fees)");
 
-          const unauthenticatedMe = await fetch(new URL("/api/auth/me", base), {
-            headers: { Accept: "application/json" },
-            signal: AbortSignal.timeout(12000)
-          });
-          if (unauthenticatedMe.status !== 401) {
-            throw new Error("/api/auth/me should reject an anonymous visitor, got HTTP " + unauthenticatedMe.status);
+          const homepage = await getJson("/api/v1/homepage");
+          const requiredArrays = ["featured_schools", "school_types", "news_articles", "insight_articles", "upcoming_events", "latest_jobs", "videos", "ads"];
+          for (const key of requiredArrays) {
+            if (!Array.isArray(homepage.data?.[key])) throw new Error("Homepage API is missing " + key);
           }
-          console.log("PASS /api/auth/me rejects unauthenticated visitors");
-
-          // This reserved test address must never match a real account. A 422 response
-          // proves the Worker successfully queried the private users table with its
-          // server-only Supabase key; a 503 indicates a configuration or DB problem.
-          const login = await requestJson("/api/auth/login", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Origin: base
-            },
-            body: JSON.stringify({ login: "migration-smoke@example.invalid", password: "not-a-real-password" })
-          });
-          if (login.response.status !== 422 || !String(login.body?.message || "").includes("sign-in details are incorrect")) {
-            throw new Error("Server-side Supabase account lookup did not complete safely: HTTP " + login.response.status + " " + JSON.stringify(login.body));
+          if (!Number.isFinite(Number(homepage.data.scholarship_count))) {
+            throw new Error("Homepage API did not return a scholarship count");
           }
-          if (login.response.headers.get("set-cookie")?.includes("findursch_session=")) {
-            throw new Error("A smoke-test login unexpectedly created a session cookie.");
-          }
-
-          // The first reserved-identity login above is attempt 1. Nine malformed
-          // requests fill the remaining allowed slots without querying Supabase.
-          for (let attempt = 0; attempt < 9; attempt++) {
-            const malformed = await fetch(new URL("/api/auth/login", base), {
-              method: "POST",
-              headers: { "Content-Type": "application/json", Origin: base },
-              body: "{",
-              signal: AbortSignal.timeout(12000)
-            });
-            if (malformed.status !== 400) {
-              throw new Error("Expected attempt " + (attempt + 2) + " to pass the limiter before the threshold, got HTTP " + malformed.status);
+          for (const school of homepage.data.featured_schools) {
+            for (const forbidden of ["owner_id", "registration_number", "application_fee", "amount", "school_fees"]) {
+              if (Object.hasOwn(school, forbidden)) throw new Error("Homepage featured school leaked " + forbidden);
             }
           }
-          const blockedAttempt = await fetch(new URL("/api/auth/login", base), {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Origin: base },
-            body: "{",
-            signal: AbortSignal.timeout(12000)
-          });
-          const retryAfter = Number(blockedAttempt.headers.get("Retry-After"));
-          if (blockedAttempt.status !== 429 || !Number.isSafeInteger(retryAfter) || retryAfter < 1 || retryAfter > 60) {
-            throw new Error("The 11th login attempt must return HTTP 429 with a 1–60 second Retry-After header; got HTTP " + blockedAttempt.status);
-          }
-          console.log("PASS Cloudflare login limiter allows 10 attempts and blocks the 11th with Retry-After");
-          console.log("PASS /api/auth/login can query private legacy users and rejects the reserved test identity");
-
-          const logout = await fetch(new URL("/api/auth/logout", base), {
-            method: "POST",
-            headers: { Accept: "application/json", Origin: base },
-            signal: AbortSignal.timeout(12000)
-          });
-          if (!logout.ok || !(logout.headers.get("set-cookie") || "").includes("Max-Age=0")) {
-            throw new Error("/api/auth/logout did not clear the session cookie");
-          }
-          console.log("PASS /api/auth/logout clears the session cookie");
-
-          console.log("All Cloudflare staging API and Supabase secret smoke tests passed.");
+          console.log("PASS /api/v1/homepage (schools, news, events, videos, scholarships, jobs and fallback adverts)");
+          console.log("All public website smoke tests passed. Authentication and protected dashboard flows are tested separately.");
           NODE

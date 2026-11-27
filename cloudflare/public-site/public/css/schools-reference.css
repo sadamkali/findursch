@@ -1,0 +1,508 @@
+/* FindURSCH schools directory — faithful responsive conversion of findursch-schools(1).html */
+.school-directory-reference{
+  --brand:#0c5a49;--brand-dk:#083f33;--brand-xdk:#052a22;
+  --accent:#f0b030;--accent-dk:#d99a1a;--tint:#f1f6f3;--line:#e4e8e6;
+  --ink:#1b2420;--mute:#5d6b65;--serif:'Playfair Display',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;--r:10px;--gap:24px;--wrap:1280px;
+  color:var(--ink);background:#fff;font:15px/1.55 var(--sans);overflow:visible;
+}
+.school-directory-reference,.school-directory-reference *{box-sizing:border-box}
+.school-directory-reference a{color:inherit;text-decoration:none}
+.school-directory-reference button,.school-directory-reference input,.school-directory-reference select{font:inherit}
+.school-directory-reference img{display:block;width:100%;height:100%;object-fit:cover}
+.school-directory-reference .wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gap)}
+.school-directory-reference .rtab{position:fixed;right:0;top:34%;z-index:50;writing-mode:vertical-rl;background:var(--accent);color:#2a1d00;font:700 12px var(--sans);letter-spacing:.06em;padding:18px 9px;border-radius:10px 0 0 10px;box-shadow:-3px 3px 12px rgba(0,0,0,.2)}
+.school-directory-reference .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 20px;border:1.5px solid transparent;border-radius:8px;font:600 14px var(--sans);cursor:pointer;white-space:nowrap}
+.school-directory-reference .btn-brand{background:var(--brand);color:#fff}
+.school-directory-reference .btn-brand:hover{background:var(--brand-dk)}
+.school-directory-reference .btn-gold{background:var(--accent);color:#2a1d00}
+.school-directory-reference .btn-gold:hover{background:var(--accent-dk)}
+.school-directory-reference .btn-block{width:100%}
+.school-directory-reference .phead{background:var(--brand);color:#fff}
+.school-directory-reference .phead>.wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,728px);gap:32px;align-items:center;padding-top:32px;padding-bottom:32px}
+.school-directory-reference .crumbs{font-size:12px;color:rgba(255,255,255,.82);margin-bottom:10px}
+.school-directory-reference .crumbs a{color:rgba(255,255,255,.82)}
+.school-directory-reference .crumbs span{margin:0 6px}
+.school-directory-reference .phead h1{font:700 36px/1.15 var(--serif);margin:0 0 8px;color:#fff}
+.school-directory-reference .phead p{font-size:13.5px;color:rgba(255,255,255,.88);max-width:560px}
+.school-directory-reference .phead p b{color:#fff}
+.school-directory-reference .ad{border-radius:var(--r);display:grid;place-content:center;gap:7px;text-align:center;color:#fff;font:700 22px/1.2 var(--serif);padding:20px;background:linear-gradient(135deg,#a32a2a,#e05a3a)}
+.school-directory-reference .ad small{display:block;font:500 11px/1.5 var(--sans);color:#fff1ec;margin-top:2px}
+.school-directory-reference .ad.top{min-height:90px}
+.school-directory-reference .ad.side{min-height:250px}
+.school-directory-reference .sband{background:var(--brand);padding:28px 0}
+.school-directory-reference .sform{display:flex;align-items:center;gap:0;background:#fff;border-radius:999px;padding:8px 8px 8px 24px;max-width:900px;margin:0 auto;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.school-directory-reference .sform input{flex:1 1 220px;min-width:0;border:0;outline:0;font:15px var(--sans);padding:10px 0;background:none;color:var(--ink)}
+.school-directory-reference .sform select{flex:0 1 auto;max-width:160px;border:0;border-left:1px solid var(--line);padding:10px 14px;font:13.5px var(--sans);background:none;color:var(--ink)}
+.school-directory-reference .sform .go{flex:none;height:46px;padding:0 28px;border-radius:999px;background:var(--brand-xdk);color:#fff;border:0;font:600 14px var(--sans);cursor:pointer;margin-left:6px}
+.school-directory-reference .cols{display:grid;grid-template-columns:260px minmax(0,1fr);gap:var(--gap);align-items:start;padding-top:28px}
+.school-directory-reference aside{display:flex;flex-direction:column;gap:var(--gap);min-width:0}
+.school-directory-reference .card{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.school-directory-reference .box h5{background:var(--brand);color:#fff;font:700 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:11px 16px}
+.school-directory-reference .cats{padding:6px 0;list-style:none}
+.school-directory-reference .cats li{display:block;padding:0}
+.school-directory-reference .cats li button{width:100%;display:flex;align-items:center;gap:10px;padding:9px 16px;border:0;background:#fff;text-align:left;font-size:13px;color:var(--ink);cursor:pointer}
+.school-directory-reference .cats li button:hover,.school-directory-reference .cats li button.on{background:var(--tint)}
+.school-directory-reference .cats li button.on{font-weight:700}
+.school-directory-reference .cats i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+.school-directory-reference .cats em{margin-left:auto;font-style:normal;font-size:11.5px;min-width:26px;text-align:center;padding:1px 8px;border-radius:99px;background:#eef1ef;color:var(--mute)}
+.school-directory-reference .cats li button.on em{background:var(--brand);color:#fff}
+.school-directory-reference .dist{max-height:210px;overflow:auto;padding:8px 0}
+.school-directory-reference .dist label{display:flex;align-items:center;gap:9px;padding:7px 16px;font-size:12.5px;cursor:pointer}
+.school-directory-reference .dist label:hover{background:var(--tint)}
+.school-directory-reference .dist input,.school-directory-reference .fee input{accent-color:var(--brand)}
+.school-directory-reference .dist em{margin-left:auto;font-style:normal;font-size:11px;color:var(--mute)}
+.school-directory-reference .empty-note{padding:12px 16px;color:var(--mute);font-size:12px}
+.school-directory-reference .clear-filter{display:block;width:100%;padding:9px 15px;border:0;border-top:1px solid var(--line);background:#fff;color:var(--brand);font-size:11.5px;font-weight:700;text-align:left;cursor:pointer}
+.school-directory-reference .clear-filter:hover{text-decoration:underline}
+.school-directory-reference .fee{padding:16px}
+.school-directory-reference .fee input[type=range]{width:100%;accent-color:var(--brand)}
+.school-directory-reference .fee .mm{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);margin-bottom:6px}
+.school-directory-reference .fee p{text-align:center;font-size:13px;margin:8px 0 14px}
+.school-directory-reference .fee>small{display:block;margin-top:9px;color:var(--mute);font-size:10.5px;line-height:1.5}
+.school-directory-reference .promo2{background:var(--brand);color:#fff;border-radius:14px;padding:24px;position:relative;overflow:hidden}
+.school-directory-reference .promo2::before{content:"";position:absolute;right:-50px;top:-50px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.07)}
+.school-directory-reference .promo2>*{position:relative}
+.school-directory-reference .promo2 small{font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.school-directory-reference .promo2 h3{font:700 26px/1.2 var(--serif);margin:8px 0 10px;color:#fff}
+.school-directory-reference .promo2 p{font-size:13px;color:#e8f1ed;margin-bottom:12px}
+.school-directory-reference .promo2 li{font-size:12.5px;display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.school-directory-reference .promo2 li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.school-directory-reference .promo2 .btn{margin-top:12px}
+.school-directory-reference .results{min-width:0}
+.school-directory-reference .tool{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;font-size:13px;color:var(--mute)}
+.school-directory-reference .tool b{color:var(--ink)}
+.school-directory-reference .tool small{display:block;margin-top:3px;font-size:11px;color:var(--mute)}
+.school-directory-reference .tool .r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.school-directory-reference .tool select{height:36px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font:12px var(--sans);background:#fff;color:var(--ink)}
+.school-directory-reference .sort-label{display:flex;align-items:center;gap:7px}
+.school-directory-reference .view-toggle{display:flex;gap:5px}
+.school-directory-reference .view-toggle button{width:36px;height:36px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;color:var(--mute)}
+.school-directory-reference .view-toggle button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.school-directory-reference .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap)}
+.school-directory-reference .grid .span{grid-column:1/-1}
+.school-directory-reference .sc{display:flex;min-width:0;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease}
+.school-directory-reference .sc:hover{border-color:var(--brand);transform:translateY(-2px);box-shadow:0 8px 20px rgba(5,42,34,.08)}
+.school-directory-reference .sc>.ph{display:block;position:relative;overflow:hidden;height:150px;flex:none;background:linear-gradient(135deg,#9fb8ad,#d9c9a0)}
+.school-directory-reference .sc>.ph.nop{display:grid;place-items:center;background:var(--tint)}
+.school-directory-reference .sc>.ph img{position:absolute;inset:0}
+.school-directory-reference .placeholder-mark{display:grid;place-items:center;width:100%;height:100%;color:var(--brand);font:700 37px var(--serif)}
+.school-directory-reference .pop{position:absolute;left:0;top:12px;background:var(--accent);color:#2a1d00;font:700 10.5px var(--sans);letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:0 6px 6px 0}
+.school-directory-reference .in{flex:1;display:flex;min-width:0;flex-direction:column}
+.school-directory-reference .sc .b{padding:14px 16px 12px;flex:1}
+.school-directory-reference .t{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.school-directory-reference .pill{font:700 10px var(--sans);letter-spacing:.04em;text-transform:uppercase;padding:2px 9px;border-radius:99px;border:1px solid #bcd9cf;color:var(--brand)}
+.school-directory-reference .pill.g{border-color:var(--line);color:var(--mute);text-transform:none;font-weight:500;letter-spacing:0;font-size:10.5px}
+.school-directory-reference .pill.verified{border-color:#b8ddc1;background:#e3f4e8;color:#17703a}
+.school-directory-reference .sc h3{font:600 14.5px/1.3 var(--sans);margin:0 0 4px;color:var(--ink)}
+.school-directory-reference .loc{font-size:12px;color:var(--mute);display:flex;align-items:center;gap:6px}
+.school-directory-reference .loc::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--brand);flex:none}
+.school-directory-reference .tagline{margin-top:6px;color:var(--mute);font-size:11px;line-height:1.45}
+.school-directory-reference .sc .f{border-top:1px solid var(--line);padding:10px 16px 14px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 10px}
+.school-directory-reference .chips{flex:1 0 100%;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--mute)}
+.school-directory-reference .chips em{font-style:normal;font-weight:700;font-size:10.5px;padding:1px 8px;border-radius:99px;background:#fdf3d6;color:#8a5f00}
+.school-directory-reference .f>b{font-size:12.5px;color:var(--ink)}
+.school-directory-reference .vp{height:30px;padding:0 14px;display:inline-flex;align-items:center;border:1.5px solid var(--brand);color:var(--brand);border-radius:99px;font:600 12px var(--sans);margin-left:auto}
+.school-directory-reference .vp:hover{background:var(--brand);color:#fff}
+.school-directory-reference .compare{height:30px;padding:0 9px;border:1px solid var(--line);border-radius:99px;background:#fff;color:var(--mute);font-size:11px;cursor:pointer}
+.school-directory-reference .compare:hover{border-color:var(--brand);color:var(--brand)}
+.school-directory-reference .grid.list{grid-template-columns:1fr}
+.school-directory-reference .grid.list .sc{flex-direction:row}
+.school-directory-reference .grid.list .sc>.ph{width:240px;height:auto;min-height:150px}
+.school-directory-reference .grid.list .sc .in{flex:1}
+.school-directory-reference .promo{display:flex;align-items:center;justify-content:space-between;gap:20px;background:var(--brand-xdk);color:#fff;border-radius:var(--r);padding:20px 28px;max-width:100%;margin:0 auto;width:100%}
+.school-directory-reference .promo small{font:700 10.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.school-directory-reference .promo h3{font:700 21px/1.25 var(--serif);margin:2px 0;color:#fff}
+.school-directory-reference .promo p{font-size:12px;color:#e2eee9}
+.school-directory-reference .promo.alt-promo{background:var(--brand)}
+.school-directory-reference .pagination{display:flex;flex-direction:column;align-items:center;gap:12px;border-top:1px solid var(--line);margin-top:32px;padding-top:24px;color:var(--mute);font-size:11px}
+.school-directory-reference .pagination nav{display:flex;flex-wrap:wrap;gap:8px;margin:0}
+.school-directory-reference .pagination nav a,.school-directory-reference .pagination nav span{min-width:36px;height:36px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;font:600 13px var(--sans);color:var(--ink);background:#fff;padding:0 10px}
+.school-directory-reference .pagination nav span[aria-current=page]{background:var(--brand);border-color:var(--brand);color:#fff}
+.school-directory-reference .pagination nav a:hover{border-color:var(--brand)}
+.school-directory-reference .no-results{padding:55px 24px;border-radius:var(--r);background:var(--tint);text-align:center}
+.school-directory-reference .no-results>span{display:block;color:var(--brand);font-size:36px}
+.school-directory-reference .no-results h2{font:700 24px var(--serif);margin:5px 0;color:var(--ink)}
+.school-directory-reference .no-results p{margin-bottom:18px;color:var(--mute);font-size:13px}
+.school-directory-reference .is-loading{opacity:.48;pointer-events:none}
+@media(max-width:1100px){.school-directory-reference .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1000px){
+  .school-directory-reference .cols,.school-directory-reference .phead>.wrap{grid-template-columns:1fr}
+  .school-directory-reference .phead .ad{display:none}
+  .school-directory-reference .sform{flex-wrap:wrap;border-radius:20px;padding:14px;gap:0}
+  .school-directory-reference .sform input{flex:1 0 100%;padding:12px 4px}
+  .school-directory-reference .sform select{flex:1;border-left:0;border-top:1px solid var(--line);max-width:none}
+  .school-directory-reference .sform .go{flex:1 0 100%;margin:8px 0 0;border-radius:9px}
+  .school-directory-reference .tool{align-items:flex-start;flex-direction:column}
+}
+@media(max-width:640px){
+  .school-directory-reference .wrap{padding-left:16px;padding-right:16px}
+  .school-directory-reference .phead>.wrap{padding-top:25px;padding-bottom:25px}
+  .school-directory-reference .phead h1{font-size:29px}
+  .school-directory-reference .phead p{font-size:12.5px}
+  .school-directory-reference .sband{padding:18px 0}
+  .school-directory-reference .sform select{min-height:42px;flex:1 1 100%}
+  .school-directory-reference .cols{padding-top:20px;gap:22px}
+  .school-directory-reference aside{display:grid;grid-template-columns:1fr;gap:15px}
+  .school-directory-reference .grid{grid-template-columns:1fr;gap:16px}
+  .school-directory-reference .grid.list .sc{flex-direction:column}
+  .school-directory-reference .grid.list .sc>.ph{width:100%;height:170px;min-height:0}
+  .school-directory-reference .tool .r{width:100%;justify-content:space-between}
+  .school-directory-reference .promo{align-items:flex-start;flex-direction:column;padding:19px}
+  .school-directory-reference .promo .btn{width:100%}
+  .school-directory-reference .pagination{align-items:flex-start}
+  .school-directory-reference .rtab{top:38%;padding:14px 7px;font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){.school-directory-reference .sc{transition:none}.school-directory-reference .sc:hover{transform:none}}
+
+
+/* Responsive behavior follows the supplied findursch-schools.html source. */
+.school-directory-reference .fbtn,
+.school-directory-reference .mf{display:none}
+.school-directory-reference .mfb{padding:14px;display:grid;gap:12px}
+.school-directory-reference .mfb label{display:block;font:600 12px var(--sans)}
+.school-directory-reference .mfb select{width:100%;height:42px;margin-top:4px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font:14px var(--sans);background:#fff;color:var(--ink)}
+.school-directory-reference .promo{max-width:92%;padding:20px 28px}
+.school-directory-reference .big{position:relative;display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;max-width:92%;margin:0 auto;padding:44px 48px;border-radius:var(--r);overflow:hidden;background:var(--brand);color:#fff}
+.school-directory-reference .big::before{position:absolute;content:"";right:-70px;top:-80px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.07)}
+.school-directory-reference .big>*{position:relative}
+.school-directory-reference .big small{color:var(--accent);font:700 12px var(--sans);letter-spacing:.1em;text-transform:uppercase}
+.school-directory-reference .big h3{margin:8px 0 10px;color:#fff;font:700 34px/1.15 var(--serif)}
+.school-directory-reference .big p{max-width:420px;color:#e8f1ed}
+.school-directory-reference .pagination{display:flex;justify-content:center;align-items:center;gap:8px;border-top:1px solid var(--line);margin-top:32px;padding-top:24px}
+.school-directory-reference .pagination nav{display:flex;align-items:center;gap:8px;margin:0}
+.school-directory-reference .pagination nav a,
+.school-directory-reference .pagination nav span{min-width:36px;height:36px;display:grid;place-items:center;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:600 13px var(--sans)}
+.school-directory-reference .pagination nav span[aria-current=page]{border-color:var(--brand);background:var(--brand);color:#fff}
+.school-directory-reference .pagination nav a:hover{border-color:var(--brand)}
+@media(max-width:1000px){
+  .school-directory-reference .phead>.wrap{gap:16px;padding-top:20px;padding-bottom:22px}
+  .school-directory-reference .phead h1{font-size:30px}
+  .school-directory-reference .phead .ad{display:grid;min-height:70px;font-size:17px}
+  .school-directory-reference .sband{padding:16px 0}
+  .school-directory-reference .sform{flex-wrap:nowrap;max-width:none;border-radius:999px;padding:6px 6px 6px 18px}
+  .school-directory-reference .sform input{flex:1 1 auto;min-width:0;padding:10px 0;font-size:16px}
+  .school-directory-reference .sform select{display:none}
+  .school-directory-reference .sform .go{flex:none;margin:0 0 0 6px;padding:0 22px;border-radius:999px}
+  .school-directory-reference .cols{padding-top:16px;gap:16px}
+  .school-directory-reference aside{display:none}
+  .school-directory-reference aside.open{display:flex}
+  .school-directory-reference aside.open .mf{display:block}
+  .school-directory-reference .fbtn{display:inline-flex;height:36px;align-items:center;padding:0 14px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:600 13px var(--sans);cursor:pointer}
+  .school-directory-reference .fbtn[aria-expanded=true]{border-color:var(--brand);background:var(--brand);color:#fff}
+  .school-directory-reference .tool{flex-wrap:wrap;align-items:center}
+  .school-directory-reference .tool>span{flex:1 0 100%}
+  .school-directory-reference .tool .r{flex:1 0 100%;width:100%}
+  .school-directory-reference .tool select{flex:1;min-width:0}
+  .school-directory-reference .promo{max-width:100%;padding:14px 16px;gap:12px}
+  .school-directory-reference .promo p{display:none}
+  .school-directory-reference .promo h3{font-size:16px}
+  .school-directory-reference .promo .btn{height:36px;padding:0 14px;font-size:13px}
+  .school-directory-reference .big{max-width:100%;flex-direction:column;align-items:flex-start;padding:28px 24px}
+  .school-directory-reference .big h3{font-size:26px}
+}
+@media(max-width:640px){
+  .school-directory-reference .wrap{padding:0 16px}
+  .school-directory-reference .grid{grid-template-columns:1fr;gap:16px}
+  .school-directory-reference .sc>.ph{height:170px}
+  .school-directory-reference .grid.list .sc{flex-direction:column}
+  .school-directory-reference .grid.list .sc>.ph{width:100%;height:170px;min-height:0}
+  .school-directory-reference .tool .r{width:100%;justify-content:space-between}
+  .school-directory-reference .sort-label{min-width:0;flex:1}
+  .school-directory-reference .sort-label select{width:100%}
+  .school-directory-reference .pagination{justify-content:flex-start;overflow-x:auto}
+  .school-directory-reference .rtab{top:38%;padding:14px 7px;font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){.school-directory-reference .sc{transition:none}.school-directory-reference .sc:hover{transform:none}}
+
+
+/* School identity badge on directory result cards. */
+.school-directory-reference .sc>.ph .sc-badge {
+    position: absolute;
+    z-index: 3;
+    left: 12px;
+    bottom: 12px;
+    display: flex;
+    width: 54px;
+    height: 54px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 2px solid #fff;
+    border-radius: 11px;
+    background: #fff;
+    padding: 4px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.18);
+}
+.school-directory-reference .sc>.ph .sc-badge img {
+    position: static;
+    inset: auto;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.school-directory-reference .sc>.ph .sc-badge span {
+    color: #0c5a49;
+    font: 800 8px/1.2 Inter, system-ui, sans-serif;
+    letter-spacing: .06em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+
+/* Search capsule based on the supplied FindURSCH school-directory reference.
+   On narrow screens the search stays prominent and detailed filters move to
+   the existing Filters panel below the results toolbar. */
+.school-directory-reference .sband {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 12px 0 14px;
+    background: #0C5A49;
+    border-bottom: 1px solid rgba(255,255,255,.14);
+    box-shadow: 0 8px 24px rgba(5,42,34,.17);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+}
+
+.school-directory-reference .sband > .wrap {
+    width: min(100%, 1328px);
+}
+
+.school-directory-reference .sform {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 7px 8px 7px 20px;
+    border: 1px solid rgba(255,255,255,.72);
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+}
+
+.school-directory-reference .sform__query {
+    display: flex;
+    flex: 1 1 250px;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 46px;
+    padding: 0 12px 0 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.school-directory-reference .sform__query > svg {
+    width: 19px;
+    height: 19px;
+    flex: 0 0 auto;
+    fill: none;
+    stroke: #687a72;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.school-directory-reference .sform__query input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ink);
+    font: 14px var(--sans);
+    box-shadow: none;
+}
+
+.school-directory-reference .sform__query input::placeholder {
+    color: #829088;
+    opacity: 1;
+}
+
+.school-directory-reference .sform__select {
+    display: block;
+    flex: 0 1 158px;
+    min-width: 0;
+    border-left: 1px solid var(--line);
+}
+
+.school-directory-reference .sform__select select {
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    height: 42px;
+    padding: 0 26px 0 13px;
+    border: 0;
+    border-radius: 0;
+    background-color: #fff;
+    color: #34443c;
+    font: 12px var(--sans);
+    cursor: pointer;
+}
+
+.school-directory-reference .sform__query:focus-within {
+    outline: 2px solid rgba(12,90,73,.18);
+    outline-offset: 2px;
+    border-radius: 5px;
+}
+
+.school-directory-reference .sform__select select:focus-visible,
+.school-directory-reference .sform__clear:focus-visible,
+.school-directory-reference .sform .go:focus-visible {
+    outline: 3px solid rgba(12,90,73,.24);
+    outline-offset: 2px;
+}
+
+.school-directory-reference .sform .go {
+    flex: 0 0 auto;
+    min-height: 44px;
+    height: 44px;
+    margin: 0 0 0 7px;
+    padding: 0 26px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--brand-xdk);
+    color: #fff;
+    font: 700 13px var(--sans);
+    white-space: nowrap;
+}
+
+.school-directory-reference .sform .go:hover {
+    background: var(--brand-dk);
+}
+
+.school-directory-reference .sform .go:disabled {
+    opacity: .68;
+    cursor: wait;
+}
+
+.school-directory-reference .sform__clear {
+    flex: 0 0 auto;
+    min-height: 36px;
+    margin: 0 0 0 7px;
+    padding: 0 10px;
+    border: 1px solid #dbe8e1;
+    border-radius: 999px;
+    background: #f1f6f3;
+    color: var(--brand);
+    font: 700 11px var(--sans);
+    cursor: pointer;
+}
+
+.school-directory-reference .sform__clear:hover {
+    border-color: var(--brand);
+    background: #e6f0eb;
+}
+
+@media (max-width: 1000px) {
+    .school-directory-reference .sband {
+        padding: 9px 0 10px;
+    }
+
+    .school-directory-reference .sform {
+        max-width: none;
+        padding: 6px 7px 6px 16px;
+        border-radius: 15px;
+    }
+
+    .school-directory-reference .sform__query {
+        flex: 1 1 auto;
+        min-height: 44px;
+    }
+
+    .school-directory-reference .sform__select,
+    .school-directory-reference .sform__clear {
+        display: none;
+    }
+
+    .school-directory-reference .sform .go {
+        min-height: 40px;
+        height: 40px;
+        margin-left: 5px;
+        padding: 0 20px;
+        border-radius: 10px;
+    }
+}
+
+@media (max-width: 640px) {
+    .school-directory-reference .sband {
+        padding: 7px 0 8px;
+    }
+
+    .school-directory-reference .sband > .wrap {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .school-directory-reference .sform {
+        gap: 4px;
+        padding: 5px 6px 5px 12px;
+        border-radius: 12px;
+    }
+
+    .school-directory-reference .sform__query {
+        gap: 8px;
+        min-height: 42px;
+        padding-right: 3px;
+    }
+
+    .school-directory-reference .sform__query > svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .school-directory-reference .sform__query input {
+        height: 38px;
+        font-size: 16px;
+    }
+
+    .school-directory-reference .sform .go {
+        min-height: 37px;
+        height: 37px;
+        margin-left: 2px;
+        padding: 0 13px;
+        border-radius: 8px;
+        font-size: 12px;
+    }
+
+    .school-directory-reference .cols {
+        padding-top: 16px;
+    }
+}
+
+@media (max-width: 360px) {
+    .school-directory-reference .sform {
+        padding-left: 9px;
+    }
+
+    .school-directory-reference .sform .go {
+        padding: 0 10px;
+        font-size: 11px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .school-directory-reference .sform__query,
+    .school-directory-reference .sform .go {
+        transition: none;
+    }
+}
+
+/* School directory search-band layering and fixed brand color. */
+.school-directory-reference .sband {
+    z-index: 20 !important;
+    background-color: #0C5A49 !important;
+}
+
+.school-directory-reference .rtab {
+    z-index: 1000 !important;
+}
